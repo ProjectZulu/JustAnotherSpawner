@@ -1,0 +1,7 @@
+*
+!*/
+!*.launch
+!.project
+!.classpath
+!.gitignore
+!formatter_settings.xml
