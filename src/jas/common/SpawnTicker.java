@@ -7,8 +7,8 @@ import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
-public class SpawnTicker implements ITickHandler{
-    
+public class SpawnTicker implements ITickHandler {
+
     @Override
     public EnumSet<TickType> ticks() {
         return EnumSet.of(TickType.WORLD);
@@ -18,7 +18,7 @@ public class SpawnTicker implements ITickHandler{
     public String getLabel() {
         return "spawner";
     }
-    
+
     @Override
     public void tickStart(EnumSet<TickType> type, Object... tickData) {
         WorldServer world = (WorldServer) tickData[0];

@@ -1,14 +1,19 @@
 package jas.common;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
+
+import java.util.Collection;
+import java.util.HashMap;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.BlockStep;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 
@@ -17,7 +22,8 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean needSky;
     public final Material spawnMedium;
-
+    public final HashMap<String, Collection<LivingHandler>> biomeSpawnLists = new HashMap<String, Collection<LivingHandler>>();
+    
     public CreatureType(int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
@@ -32,9 +38,11 @@ public class CreatureType {
      * @param zCoord Random zCoordinate nearby to Where Creature will spawn
      * @return Creature to Spawn
      */
-    //TODO: Incomplete
-    public SpawnListEntry getSpawnListEntry(int xCoord, int yCoord, int zCoord) {
-        return null;
+    //TODO: Change SpawnListEntry to LivingHandler
+    public SpawnListEntry getSpawnListEntry(World world, int xCoord, int yCoord, int zCoord) {
+        BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
+        return biomegenbase != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
+                biomeSpawnLists.get(biomegenbase.biomeName)) : null;
     }
     
     /**
@@ -64,38 +72,38 @@ public class CreatureType {
     
     /**
      * Called by CustomSpawner to determine if the Chunk Postion to be spawned at is a valid Type
-     * @param worldServer
+     * @param world
      * @param xCoord
      * @param yCoord
      * @param zCoord
      * @return
      */
-    public boolean isValidMedium(WorldServer worldServer, int xCoord, int yCoord, int zCoord){
-        return !worldServer.isBlockNormalCube(xCoord, yCoord, zCoord) && worldServer.getBlockMaterial(xCoord, yCoord, zCoord) == spawnMedium;
+    public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord){
+        return !world.isBlockNormalCube(xCoord, yCoord, zCoord) && world.getBlockMaterial(xCoord, yCoord, zCoord) == spawnMedium;
     }
     
     /**
      * Called by CustomSpawner the location is valid for determining if the Chunk Postion is a valid location to spawn
-     * @param worldServer
+     * @param world
      * @param xCoord
      * @param yCoord
      * @param zCoord
      * @return
      */
-    public boolean canSpawnAtLocation(WorldServer worldServer, int xCoord, int yCoord, int zCoord) {
+    public boolean canSpawnAtLocation(World world, int xCoord, int yCoord, int zCoord) {
         if (spawnMedium == Material.water) {
-            return worldServer.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                    && worldServer.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
-                    && !worldServer.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
-        } else if (!worldServer.doesBlockHaveSolidTopSurface(xCoord, yCoord - 1, zCoord)) {
+            return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
+                    && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
+                    && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+        } else if (!world.doesBlockHaveSolidTopSurface(xCoord, yCoord - 1, zCoord)) {
             return false;
         } else {
-            int l = worldServer.getBlockId(xCoord, yCoord - 1, zCoord);
-            boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], worldServer,
+            int l = world.getBlockId(xCoord, yCoord - 1, zCoord);
+            boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world,
                     xCoord, yCoord - 1, zCoord));
-            return spawnBlock && l != Block.bedrock.blockID && !worldServer.isBlockNormalCube(xCoord, yCoord, zCoord)
-                    && !worldServer.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                    && !worldServer.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+            return spawnBlock && l != Block.bedrock.blockID && !world.isBlockNormalCube(xCoord, yCoord, zCoord)
+                    && !world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
+                    && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
         }
     }
 

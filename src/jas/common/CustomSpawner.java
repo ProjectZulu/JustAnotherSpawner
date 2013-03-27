@@ -114,7 +114,7 @@ public class CustomSpawner {
 
                                                 if (f6 >= 576.0F) {
                                                     if (spawnlistentry == null) {
-                                                        spawnlistentry = creatureType.getSpawnListEntry(l2, i3, j3);
+                                                        spawnlistentry = creatureType.getSpawnListEntry(worldServer, l2, i3, j3);
                                                         if (spawnlistentry == null) {
                                                             break labelInside; //TODO: Coulnd't This be Continue?
                                                         }
