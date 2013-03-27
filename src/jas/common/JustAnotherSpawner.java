@@ -11,11 +11,13 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
 @NetworkMod(clientSideRequired = true, serverSideRequired = false)
 public class JustAnotherSpawner {
-
+    
     @Instance(DefaultProps.MODID)
     public static JustAnotherSpawner modInstance;
 
@@ -25,6 +27,7 @@ public class JustAnotherSpawner {
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
         JASLog.configureLogging();
+        TickRegistry.registerTickHandler(new SpawnTicker(), Side.SERVER);
     }
 
     @Init
