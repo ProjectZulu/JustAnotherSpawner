@@ -24,7 +24,7 @@ public class JustAnotherSpawner {
     
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
-        
+        JASLog.configureLogging();
     }
 
     @Init
