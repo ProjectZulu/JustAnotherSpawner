@@ -1,4 +1,4 @@
-# Just Another Spawner (JAS) is a Minecraft Mod that aimed at providing an alternative entity spawning system for Minecraft.
+Just Another Spawner (JAS) is a Minecraft Mod that aimed at providing an alternative entity spawning system for Minecraft.
 
 License / Legal Stuff
 Copyright 2012 Tarion
