@@ -27,7 +27,7 @@ public class SpawnTicker implements ITickHandler {
         } else {
             JASLog.info("Client Ticking");
         }
-
+        //TODO: Add Check such that Chunks are only populated if at least one CreatureType can be spawning
         CustomSpawner.determineChunksForSpawnering(world, true, true,
                 world.getWorldInfo().getWorldTotalTime() % 400L == 0L);
         if (world.getGameRules().getGameRuleBooleanValue("doMobSpawning")) {

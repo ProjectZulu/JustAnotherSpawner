@@ -1,20 +1,34 @@
 package jas.common;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 
 public class LivingHandler {
     public final Class<? extends EntityLiving> entityClass;
-    public final int packSize;
+    public final CreatureType creatureType;
     public final boolean useModLocationCheck;
-
-    public LivingHandler(Class<? extends EntityLiving> entityClass, int packSize, boolean useModLocationCheck) {
+    public final boolean shouldSpawn;
+    
+    public LivingHandler(Class<? extends EntityLiving> entityClass, CreatureType creatureType, boolean useModLocationCheck, boolean shouldSpawn) {
         this.entityClass = entityClass;
-        this.packSize = packSize;
         this.useModLocationCheck = useModLocationCheck;
+        this.creatureType = creatureType;
+        this.shouldSpawn = shouldSpawn;
     }
-
+    
     /**
-     * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override
+     * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific 
+     * @param entity
+     * @param creatureType
+     * @return
+     */
+    public boolean isEntityOfType(Entity entity, CreatureType creatureType) {
+        return creatureType.equals(creatureType);
+    }
+    
+    /**
+     * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
+     * allows a Modder handler to be written independently of the modded creature.
      * 
      * @return True if location is valid For entity to spawn, false otherwise
      */

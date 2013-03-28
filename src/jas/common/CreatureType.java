@@ -14,7 +14,6 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 
 public class CreatureType {
@@ -22,7 +21,7 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean needSky;
     public final Material spawnMedium;
-    public final HashMap<String, Collection<LivingHandler>> biomeSpawnLists = new HashMap<String, Collection<LivingHandler>>();
+    public final HashMap<String, Collection<SpawnListEntry>> biomeSpawnLists = new HashMap<String, Collection<SpawnListEntry>>();
     
     public CreatureType(int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
         this.maxNumberOfCreature = maxNumberOfCreature;
@@ -41,8 +40,12 @@ public class CreatureType {
     //TODO: Change SpawnListEntry to LivingHandler
     public SpawnListEntry getSpawnListEntry(World world, int xCoord, int yCoord, int zCoord) {
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
-        return biomegenbase != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
-                biomeSpawnLists.get(biomegenbase.biomeName)) : null;
+        if(biomegenbase != null){
+            Collection<SpawnListEntry> spawnEntryList = biomeSpawnLists.get(biomegenbase.biomeName);
+            return spawnEntryList != null ? (SpawnListEntry)WeightedRandom.getRandomItem(world.rand, spawnEntryList) : null;
+        }
+        
+        return null;
     }
     
     /**
@@ -65,9 +68,9 @@ public class CreatureType {
      * @param entity Entity that is being Checked
      * @return
      */
-    //TODO: Incomplete
     public boolean isEntityOfType(Entity entity){
-        return true;
+        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getEntityName());
+        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
     }
     
     /**
@@ -108,8 +111,8 @@ public class CreatureType {
     }
 
     /*
-     * TODO: Does not Belong Here. Possible Block Helper. Mods should be able to Register a Block. Similar to Proposed
-     * Entity Registry. How will end-users fix issue?
+     * TODO: Does not Belong Here. Possible Block Helper Class. Mods should be able to Register a Block. Similar to Proposed
+     * Entity Registry. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.

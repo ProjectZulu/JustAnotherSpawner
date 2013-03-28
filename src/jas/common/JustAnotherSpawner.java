@@ -38,8 +38,9 @@ public class JustAnotherSpawner {
 
     @Init
     public void load(FMLInitializationEvent event) {
-        CreatureHandlerRegistry.INSTANCE.findValidEntities();
-        CreatureHandlerRegistry.INSTANCE.generateHandlers(modConfigDirectoryFile);
+//        CreatureHandlerRegistry.INSTANCE.findValidEntities();
+//        CreatureHandlerRegistry.INSTANCE.generateHandlers(modConfigDirectoryFile);
+//        CreatureHandlerRegistry.INSTANCE.generateSpawnLists(modConfigDirectoryFile);
     }
 
     @PostInit

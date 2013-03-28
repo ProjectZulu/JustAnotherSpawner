@@ -16,7 +16,7 @@ public enum CreatureTypeRegistry {
 
     public void addSpawnCategory(String categoryKey, CreatureType creatureType) {
         if (types.containsKey(categoryKey)) {
-            throw new IllegalArgumentException("Creature Type " + categoryKey + " is already exists");
+            throw new IllegalArgumentException("Creature Type " + categoryKey + " already exists. Brace for crash Landing!");
         }
         types.put(categoryKey, creatureType);
     }

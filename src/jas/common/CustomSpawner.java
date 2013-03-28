@@ -15,7 +15,6 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -88,7 +87,7 @@ public class CustomSpawner {
                     if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
                         int j2 = 0;
                         int k2 = 0;
-                        while (k2 < 3) { //TODO: This Screams For Loop
+                        while (k2 < 3) { //TODO: This Screams For Loop Cream
                             int l2 = k1;
                             int i3 = l1;
                             int j3 = i2;
@@ -96,7 +95,7 @@ public class CustomSpawner {
                             SpawnListEntry spawnlistentry = null;
                             int k3 = 0;
                             while (true) {
-                                if (k3 < 4) { //TODO: This Screams For Loop
+                                if (k3 < 4) { //TODO: This Screams For Loop Cream
                                     labelInside: {
                                         l2 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
                                         i3 += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
@@ -123,7 +122,7 @@ public class CustomSpawner {
                                                     EntityLiving entityliving;
 
                                                     try {
-                                                        entityliving = (EntityLiving) spawnlistentry.entityClass
+                                                        entityliving = spawnlistentry.getLivingHandler().entityClass
                                                                 .getConstructor(new Class[] { World.class })
                                                                 .newInstance(new Object[] { worldServer });
                                                     } catch (Exception exception) {
@@ -143,7 +142,7 @@ public class CustomSpawner {
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
 
-                                                        if (j2 >= entityliving.getMaxSpawnedInChunk()) {
+                                                        if (j2 >= spawnlistentry.packSize) {
                                                             continue labelChunkStart;
                                                         }
                                                     }
