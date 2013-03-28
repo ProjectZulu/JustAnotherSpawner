@@ -9,10 +9,12 @@ import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.Mod.PostInit;
 import cpw.mods.fml.common.Mod.PreInit;
+import cpw.mods.fml.common.Mod.ServerStarting;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -38,12 +40,17 @@ public class JustAnotherSpawner {
 
     @Init
     public void load(FMLInitializationEvent event) {
-        CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile);
-        CreatureHandlerRegistry.INSTANCE.generateSpawnLists(modConfigDirectoryFile);
     }
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
 
+    }
+    
+    @ServerStarting
+    public void serverStart(FMLServerStartingEvent event){
+        CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
+        JASLog.info("World Name is %s", event.getServer().worldServers[0].getWorldInfo().getWorldName());        
+        JASLog.info("World Name 2.0 is %s", event.getServer().getWorldName());        
     }
 }
