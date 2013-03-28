@@ -17,13 +17,15 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 
 public class CreatureType {
+    public final String typeID;
     public final int spawnRate;
     public final int maxNumberOfCreature;
     public final boolean needSky;
     public final Material spawnMedium;
     public final HashMap<String, Collection<SpawnListEntry>> biomeSpawnLists = new HashMap<String, Collection<SpawnListEntry>>();
     
-    public CreatureType(int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
+    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
+        this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
         this.needSky = needSky;
@@ -69,7 +71,7 @@ public class CreatureType {
      * @return
      */
     public boolean isEntityOfType(Entity entity){
-        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getEntityName());
+        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
         return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
     }
     

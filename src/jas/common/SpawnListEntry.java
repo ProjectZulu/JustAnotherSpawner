@@ -1,18 +1,19 @@
 package jas.common;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandomItem;
 
 public class SpawnListEntry extends WeightedRandomItem{
-    public final String livingHandlerID;
+    public final Class<? extends EntityLiving> livingClass;
     public final int packSize;
 
-    public SpawnListEntry(String livingHandlerID, int weight, int packSize) {
+    public SpawnListEntry(Class<? extends EntityLiving> livingClass, int weight, int packSize) {
         super(weight);
-        this.livingHandlerID = livingHandlerID;
+        this.livingClass = livingClass;
         this.packSize = packSize;
     }
     
     public LivingHandler getLivingHandler(){
-        return CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingHandlerID);
+        return CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass);
     }
 }

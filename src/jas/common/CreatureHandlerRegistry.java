@@ -6,29 +6,40 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraftforge.common.Configuration;
 
 public enum CreatureHandlerRegistry {
     INSTANCE;
-    private final HashMap<String, LivingHandler> livingHandlers = new HashMap<String, LivingHandler>(); //TODO: EntityName or Class?
+    private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
+    private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();//TODO: This should probably be local?
 
     /**
-     * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers. These are later customized via Configuration files.
+     * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers. These are later
+     * customized via Configuration files.
+     * 
      * @param configDirectory
      */
+    // TODO: When Doing World Specific Folders if a Master is wanted this will need to run 'twice' once to Load
+    // masterLivingHandlers, then again to Change them to Default
     public void findProcessEntitesForHandlers(File configDirectory) {
+        modConfigCache.clear();
         findValidEntities();
         generateHandlersFromConfig(configDirectory);
+        
+        /* Save All Configs that were accessed Configs */
+        for (Configuration config : modConfigCache.values()) {
+            config.save();
+        }
     }
-    
+
     /**
-     * Search FML/Minecraft for Valid Creature Entities
+     * Search EntityList for Valid Creature Entities
      */
     @SuppressWarnings("unchecked")
-    // TODO: This Should Probably Clear the EntityList, such that It could be called Multiple Times To 'Catch' Entities
-    // that may be declared in weird places i.e. Mo'Creatures on ServerStart
     private void findValidEntities() {
         entityList.clear();
         Iterator<?> entityIterator = EntityList.stringToClassMapping.keySet().iterator();
@@ -40,22 +51,39 @@ public enum CreatureHandlerRegistry {
             }
         }
     }
-    
+
     /**
      * Will Naturally Generate Handlers using Config Settings for all Found Entities
      * 
      * @param configDirectory
      */
-    // TODO: Not Implemented
     public void generateHandlersFromConfig(File configDirectory) {
         for (Class<? extends EntityLiving> livingClass : entityList) {
-            if(livingHandlers.containsKey(livingClass)){
+            if (livingHandlers.containsKey(livingClass)) {
                 continue;
             }
-            EntityLiving entityLiving = LivingHelper.createCreature(livingClass);
-            if(entityLiving != null){
-                
+            String modID;
+            String fullMobName = (String) EntityList.classToStringMapping.get(livingClass);
+            String[] mobNameParts = fullMobName.split("\\.");
+            if (mobNameParts.length == 2) {
+                modID = mobNameParts[1];
+            } else {
+                modID = "Vanilla";
             }
+
+            // EntityLiving entityLiving = LivingHelper.createCreature(livingClass);
+            Configuration config;
+            if (modConfigCache.get(modID) == null) {
+                config = new Configuration(new File(configDirectory, DefaultProps.MODDIR + DefaultProps.ENTITYSUBDIR
+                        + modID + ".cfg"));
+                config.load();
+                CreatureHandlerConfiguration.setupCategories(config);
+                modConfigCache.put(modID, config);
+            } else {
+                config = modConfigCache.get(modID);
+            }
+            livingHandlers.put(livingClass,
+                    CreatureHandlerConfiguration.getLivingHandlerSettings(config, livingClass, fullMobName));
         }
     }
 
@@ -67,26 +95,9 @@ public enum CreatureHandlerRegistry {
      */
     // TODO: Not Implemented
     public void generateSpawnLists(File configDirectory) {
-        
-    }
-    
-    /**
-     * Registers a Living Handler. Will Replace a previously generated handler
-     * 
-     * @param handlerID
-     * @param handler
-     * @return Returns True if Handler was Registered without needing to replace an already registered handler
-     */
-    private boolean forceRegisterHandler(String handlerID, LivingHandler handler) {
-        livingHandlers.put(handlerID, handler);
 
-        boolean keyPresent = false;
-        if (livingHandlers.containsKey(handlerID)) {
-            keyPresent = true;
-        }
-        return keyPresent;
     }
-    
+
     /**
      * Registers a Living Handler. Will Not Replace
      * 
@@ -94,7 +105,9 @@ public enum CreatureHandlerRegistry {
      * @param handler
      * @return Returns True if Handler is registered after Natural Handler Generation
      */
-    public boolean registerHandler(String handlerID, LivingHandler handler) {
+    // TODO: Change to Accept Class<? extends LivingHandler> instead of Instance of LivingHandler. Then we Manually
+    // initialize it with the naturally generated values.
+    public boolean registerHandler(Class<? extends EntityLiving> handlerID, LivingHandler handler) {
         if (!livingHandlers.containsKey(handlerID)) {
             JASLog.warning(
                     "LivingHandler %s added before natural generation. It will not take config generated settings into account.",
@@ -105,13 +118,14 @@ public enum CreatureHandlerRegistry {
             return true;
         }
     }
-    
+
     /**
      * Gets the Appropriate LivingHandler from the Provided Key
+     * 
      * @param handlerID
      * @return
      */
-    public LivingHandler getLivingHandler(String handlerID) {
-        return livingHandlers.get(handlerID);
+    public LivingHandler getLivingHandler(Class<? extends Entity> entityClass) {
+        return livingHandlers.get(entityClass);
     }
 }

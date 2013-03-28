@@ -5,14 +5,13 @@ import net.minecraft.entity.EntityLiving;
 
 public class LivingHandler {
     public final Class<? extends EntityLiving> entityClass;
-    public final CreatureType creatureType;
+    public final String creatureTypeID;
     public final boolean useModLocationCheck;
     public final boolean shouldSpawn;
-    
-    public LivingHandler(Class<? extends EntityLiving> entityClass, CreatureType creatureType, boolean useModLocationCheck, boolean shouldSpawn) {
+    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck, boolean shouldSpawn) {
         this.entityClass = entityClass;
         this.useModLocationCheck = useModLocationCheck;
-        this.creatureType = creatureType;
+        this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
     }
     
@@ -23,7 +22,8 @@ public class LivingHandler {
      * @return
      */
     public boolean isEntityOfType(Entity entity, CreatureType creatureType) {
-        return creatureType.equals(creatureType);
+        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
+                .getCreatureType(creatureTypeID).equals(creatureType);
     }
     
     /**

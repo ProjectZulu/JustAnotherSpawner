@@ -22,11 +22,6 @@ public class SpawnTicker implements ITickHandler {
     @Override
     public void tickStart(EnumSet<TickType> type, Object... tickData) {
         WorldServer world = (WorldServer) tickData[0];
-        if (!world.isRemote) {
-            JASLog.info("Server Ticking");
-        } else {
-            JASLog.info("Client Ticking");
-        }
         //TODO: Add Check such that Chunks are only populated if at least one CreatureType can be spawning
         CustomSpawner.determineChunksForSpawnering(world, true, true,
                 world.getWorldInfo().getWorldTotalTime() % 400L == 0L);
