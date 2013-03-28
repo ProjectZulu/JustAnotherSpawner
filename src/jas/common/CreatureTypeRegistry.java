@@ -8,7 +8,6 @@ import net.minecraft.block.material.Material;
 public enum CreatureTypeRegistry {
     INSTANCE;
     private final HashMap<String, CreatureType> types = new HashMap<String, CreatureType>();
-    private final HashMap<CreatureType, String> typeIDs = new HashMap<CreatureType, String>();
 
     /** Default Category Keys */
     public static final String CREATURE = "CREATURE";
