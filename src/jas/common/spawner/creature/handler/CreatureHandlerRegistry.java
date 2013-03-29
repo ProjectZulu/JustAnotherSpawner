@@ -3,8 +3,8 @@ package jas.common.spawner.creature.handler;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
-import jas.common.spawner.creature.CreatureType;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;

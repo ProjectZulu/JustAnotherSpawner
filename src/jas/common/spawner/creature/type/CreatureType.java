@@ -1,4 +1,4 @@
-package jas.common.spawner.creature;
+package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
 

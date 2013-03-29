@@ -1,8 +1,8 @@
 package jas.common.spawner;
 
 import jas.common.JASLog;
-import jas.common.spawner.creature.CreatureType;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
 import java.util.Collections;
