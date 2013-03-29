@@ -4,10 +4,10 @@ import java.util.EnumSet;
 import java.util.Iterator;
 
 import net.minecraft.world.WorldServer;
-import cpw.mods.fml.common.ITickHandler;
+import cpw.mods.fml.common.IScheduledTickHandler;
 import cpw.mods.fml.common.TickType;
 
-public class SpawnTicker implements ITickHandler { //TODO: Implement IScheduledTickHandler and Expose NextTickRate to Config
+public class SpawnTicker implements IScheduledTickHandler {
 
     @Override
     public EnumSet<TickType> ticks() {
@@ -39,5 +39,10 @@ public class SpawnTicker implements ITickHandler { //TODO: Implement IScheduledT
     @Override
     public void tickEnd(EnumSet<TickType> type, Object... tickData) {
 
+    }
+
+    @Override
+    public int nextTickSpacing() {
+        return Properties.spawnerTickSpacing;
     }
 }

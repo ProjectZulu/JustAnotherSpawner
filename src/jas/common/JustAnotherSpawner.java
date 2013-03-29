@@ -33,8 +33,9 @@ public class JustAnotherSpawner {
 
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
-        JASLog.configureLogging(true);
         modConfigDirectoryFile = event.getModConfigurationDirectory();
+        Properties.loadProperties(modConfigDirectoryFile);
+        JASLog.configureLogging(Properties.debugMode);
         TickRegistry.registerTickHandler(new SpawnTicker(), Side.SERVER);
     }
 
