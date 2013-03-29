@@ -1,5 +1,6 @@
-package jas.common;
+package jas.common.spawner.creature.handler;
 
+import jas.common.JASLog;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 

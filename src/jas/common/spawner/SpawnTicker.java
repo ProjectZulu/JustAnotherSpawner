@@ -1,4 +1,8 @@
-package jas.common;
+package jas.common.spawner;
+
+import jas.common.Properties;
+import jas.common.spawner.creature.CreatureType;
+import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.EnumSet;
 import java.util.Iterator;

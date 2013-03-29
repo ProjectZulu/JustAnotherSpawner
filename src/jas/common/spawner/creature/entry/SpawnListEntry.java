@@ -1,5 +1,7 @@
-package jas.common;
+package jas.common.spawner.creature.entry;
 
+import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandler;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandomItem;
 

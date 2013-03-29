@@ -1,4 +1,8 @@
-package jas.common;
+package jas.common.spawner.creature.type;
+
+import jas.common.DefaultProps;
+import jas.common.JASLog;
+import jas.common.spawner.creature.CreatureType;
 
 import java.io.File;
 import java.util.HashMap;

@@ -1,5 +1,7 @@
-package jas.common;
+package jas.common.spawner.creature.handler;
 
+import jas.common.spawner.creature.CreatureType;
+import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 

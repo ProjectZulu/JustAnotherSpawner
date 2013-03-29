@@ -1,4 +1,7 @@
-package jas.common;
+package jas.common.spawner.creature.handler;
+
+import jas.common.JASLog;
+import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 public class LivingRegsitryHelper {
 

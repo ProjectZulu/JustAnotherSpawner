@@ -1,10 +1,15 @@
-package jas.common;
+package jas.common.spawner.creature;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
+
+import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandler;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
@@ -32,7 +37,7 @@ public class CreatureType {
         this.needSky = needSky;
         this.spawnRate = spawnRate;
     }
-    
+
     /**
      * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
      * 
@@ -52,7 +57,7 @@ public class CreatureType {
     public void resetSpawns() {
         biomeNameToSpawnEntry.clear();
     }
-    
+
     /**
      * Called by CustomSpawner to get a creature dependent on the world type
      * 
@@ -121,6 +126,10 @@ public class CreatureType {
      * @return
      */
     public boolean canSpawnAtLocation(World world, int xCoord, int yCoord, int zCoord) {
+        if (needSky && !world.canBlockSeeTheSky(xCoord, yCoord, zCoord)) {
+            return false;
+        }
+
         if (spawnMedium == Material.water) {
             return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
                     && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
