@@ -34,8 +34,9 @@ public enum CreatureHandlerRegistry {
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();//TODO: This should probably be local?
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
     public static final String delimeter = "-";
-    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType.UseModLocationCheck.ShouldSpawn";
-    public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize.SpawnWeight";
+    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
+            + "UseModLocationCheck" + delimeter + "ShouldSpawn";
+    public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize" + delimeter + "SpawnWeight";
 
     /**
      * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers and SpawnList
@@ -126,8 +127,8 @@ public enum CreatureHandlerRegistry {
 
         Configuration config;
         if (modConfigCache.get(worldName + modID) == null) {
-            config = new Configuration(new File(configDirectory, DefaultProps.MODDIR + DefaultProps.ENTITYSUBDIR
-                    + worldName + "/" + modID + ".cfg"));
+            config = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldName + "/"
+                    + DefaultProps.ENTITYSUBDIR + modID + ".cfg"));
             config.load();
             setupCategories(config);
             modConfigCache.put(worldName + modID, config);

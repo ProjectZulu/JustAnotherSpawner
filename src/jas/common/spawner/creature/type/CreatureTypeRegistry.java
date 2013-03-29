@@ -51,10 +51,10 @@ public enum CreatureTypeRegistry {
     }
 
     public void initializeFromConfig(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.MODDIR
-                + DefaultProps.ENTITYTYPESUBDIR + "Master" + ".cfg"));
-        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.MODDIR
-                + DefaultProps.ENTITYTYPESUBDIR + minecraftServer.getWorldName() + ".cfg"));
+        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "Master/" + "CreatureType_Master" + ".cfg"));
+        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + minecraftServer.getWorldName() + "/" + "CreatureType_" + minecraftServer.getWorldName() + ".cfg"));
         masterConfig.load();
         worldConfig.load();
         for (String typeID : types.keySet()) {
