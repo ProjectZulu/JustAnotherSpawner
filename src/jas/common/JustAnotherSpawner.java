@@ -7,7 +7,6 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
 
-
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -56,6 +55,5 @@ public class JustAnotherSpawner {
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
-        
     }
 }

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -34,7 +33,7 @@ public enum CreatureHandlerRegistry {
     
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();//TODO: This should probably be local?
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
-    public static final String delimeter = ".";
+    public static final String delimeter = "-";
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType.UseModLocationCheck.ShouldSpawn";
     public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize.SpawnWeight";
 

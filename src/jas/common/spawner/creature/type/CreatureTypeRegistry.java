@@ -17,8 +17,8 @@ public enum CreatureTypeRegistry {
     private final HashMap<String, CreatureType> types = new HashMap<String, CreatureType>();
 
     /**
-     * Default Category Keys. Note that 'NONE' is not a Type but the absence of, i.e. null. This is placed inside the
-     * types Hashmap which should not contain null entries
+     * Default Category Keys. Note that 'NONE' is not a Type but the absence of, i.e. null. This is NOT placed inside
+     * the types Hashmap which should not contain null entries
      */
     public static final String NONE = "NONE";
     public static final String CREATURE = "CREATURE";
