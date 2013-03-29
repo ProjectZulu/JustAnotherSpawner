@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -54,17 +55,16 @@ public enum CreatureHandlerRegistry {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
             Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
             Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.getWorldName(), mobName);
-            
+
             LivingHandler livingHandler = generateHandlerFromConfig(
                     worldConfig,
                     livingClass,
                     mobName,
                     minecraftServer.worldServers[0],
-                    generateHandlerFromConfig(masterConfig, livingClass, mobName,
-                            minecraftServer.worldServers[0], null));
-            //TODO: Replace LivingHandler with Custom Handler From "handlersToAdd"
+                    generateHandlerFromConfig(masterConfig, livingClass, mobName, minecraftServer.worldServers[0], null));
+            // TODO: Replace LivingHandler with Custom Handler From "handlersToAdd"
             livingHandlers.put(livingClass, livingHandler);
-            
+
             if (livingHandler.shouldSpawn && !livingHandler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGenBase biomeGenBase : biomeList) {
                     SpawnListEntry spawnListEntry = generateSpawnListEntry(
@@ -76,18 +76,21 @@ public enum CreatureHandlerRegistry {
                             generateSpawnListEntry(masterConfig, livingClass, biomeGenBase, mobName,
                                     minecraftServer.worldServers[0], null));
                     if (spawnListEntry.itemWeight > 0) {
-                        JASLog.info("Adding %s Spawn of type %s to Biome %s",
-                                spawnListEntry.getClass().getSimpleName(),
-                                spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.biomeName);
+                        JASLog.info("Adding %s SpawnListEntry of LH %s to Biome %s", spawnListEntry.getClass()
+                                .getSimpleName(), spawnListEntry.getLivingHandler().creatureTypeID,
+                                spawnListEntry.biomeName);
                         CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
                                 .addSpawn(spawnListEntry);
-                    }else{
-//                        JASLog.info("Rejecting SpawnListEntry of %s ItemWeight: %s", mobName, spawnListEntry.itemWeight);
+                    } else {
+                        JASLog.debug(Level.INFO,
+                                "Not adding Generated SpawnListEntry of %s due to Weight. Biomes: %s, ItemWeight: %s",
+                                mobName, biomeGenBase.biomeName, spawnListEntry.itemWeight);
                     }
                 }
-            }else{
-//                JASLog.info("Rejecting Living Handler of %s ShouldSpawn: %s, CreatureTypeID: %s", mobName,
-//                        livingHandler.shouldSpawn, livingHandler.creatureTypeID);
+            } else {
+                JASLog.debug(Level.INFO,
+                        "Not Generating SpawnList entries for %s. ShouldSpawn: %s, CreatureTypeID: %s", mobName,
+                        livingHandler.shouldSpawn, livingHandler.creatureTypeID);
             }
         }
 
