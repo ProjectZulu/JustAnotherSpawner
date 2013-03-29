@@ -37,7 +37,7 @@ public enum CreatureHandlerRegistry {
      * @param configDirectory
      */
     public void findProcessEntitesForHandlers(File configDirectory, MinecraftServer minecraftServer) {
-        /* Clear Various Lists As Ingame whenever we Swith Worlds they may already be initialized */
+        /* Clear Various Lists As ingame whenever we switch Worlds they may already be initialized */
         modConfigCache.clear();
         livingHandlers.clear();
         Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();

@@ -49,7 +49,8 @@ public class JustAnotherSpawner {
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
-        //TODO: Expose CreatureType To Config
+        CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
+        
     }
 }
