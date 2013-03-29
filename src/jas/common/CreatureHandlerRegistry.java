@@ -206,7 +206,7 @@ public enum CreatureHandlerRegistry {
         int spawnWeight = defaultSettings != null ? defaultSettings.itemWeight : 0;
 
         String defaultValue = Integer.toString(packSize) + delimeter + Integer.toString(spawnWeight);
-        boolean sortByBiome = true;
+        boolean sortByBiome = Properties.sortCreatureByBiome;
 
         Property resultValue;
         String categoryKey;
