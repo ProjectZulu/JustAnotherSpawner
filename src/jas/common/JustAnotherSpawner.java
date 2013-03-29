@@ -33,7 +33,7 @@ public class JustAnotherSpawner {
 
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
-        JASLog.configureLogging();
+        JASLog.configureLogging(true);
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         TickRegistry.registerTickHandler(new SpawnTicker(), Side.SERVER);
     }
@@ -49,6 +49,7 @@ public class JustAnotherSpawner {
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
+        //TODO: Expose CreatureType To Config
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
     }
 }

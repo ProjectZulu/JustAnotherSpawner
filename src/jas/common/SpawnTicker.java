@@ -7,7 +7,7 @@ import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.ITickHandler;
 import cpw.mods.fml.common.TickType;
 
-public class SpawnTicker implements ITickHandler {
+public class SpawnTicker implements ITickHandler { //TODO: Implement IScheduledTickHandler and Expose NextTickRate to Config
 
     @Override
     public EnumSet<TickType> ticks() {

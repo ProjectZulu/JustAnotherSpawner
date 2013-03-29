@@ -32,7 +32,7 @@ public class CreatureType {
         this.needSky = needSky;
         this.spawnRate = spawnRate;
     }
-
+    
     /**
      * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
      * 
