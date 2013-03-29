@@ -132,16 +132,17 @@ public class CustomSpawner {
 
                                                     entityliving.setLocationAndAngles(f, f1, f2,
                                                             worldServer.rand.nextFloat() * 360.0F, 0.0F);
-
                                                     Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving,
                                                             worldServer, f, f1, f2);
                                                     if (canSpawn == Result.ALLOW
                                                             || (canSpawn == Result.DEFAULT && entityliving
                                                                     .getCanSpawnHere())) {
                                                         ++j2;
+                                                        JASLog.info("Spawning Creature %s at %s, %s, %s ",
+                                                                entityliving.getEntityName(), entityliving.posX,
+                                                                entityliving.posY, entityliving.posZ);
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
-
                                                         if (j2 >= spawnlistentry.packSize) {
                                                             continue labelChunkStart;
                                                         }

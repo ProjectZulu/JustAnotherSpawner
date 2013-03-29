@@ -30,15 +30,22 @@ public enum CreatureHandlerRegistry {
     public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize.SpawnWeight";
 
     /**
-     * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers. These are later
-     * customized via Configuration files.
+     * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers and SpawnList
+     * Entries. Will Populate the Spawnlists in corresponding CreatureTypes.
      * 
      * @param configDirectory
      */
     public void findProcessEntitesForHandlers(File configDirectory, MinecraftServer minecraftServer) {
+        /* Clear Various Lists As Ingame whenever we Swith Worlds they may already be initialized */
         modConfigCache.clear();
-        findValidEntities();
-        findValidBiomes();
+        livingHandlers.clear();
+        Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
+        while (iterator.hasNext()) {
+            CreatureType type = iterator.next();
+            type.resetSpawns();
+        }
+        populateEntityList();
+        populateBiomeList();
 
         for (Class<? extends EntityLiving> livingClass : entityList) {
             if (livingHandlers.containsKey(livingClass)) {
@@ -47,26 +54,40 @@ public enum CreatureHandlerRegistry {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
             Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
             Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.getWorldName(), mobName);
-
-            livingHandlers.put(
+            
+            LivingHandler livingHandler = generateHandlerFromConfig(
+                    worldConfig,
                     livingClass,
-                    generateHandlerFromConfig(
+                    mobName,
+                    minecraftServer.worldServers[0],
+                    generateHandlerFromConfig(masterConfig, livingClass, mobName,
+                            minecraftServer.worldServers[0], null));
+            //TODO: Replace LivingHandler with Custom Handler From "handlersToAdd"
+            livingHandlers.put(livingClass, livingHandler);
+            
+            if (livingHandler.shouldSpawn && !livingHandler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
+                for (BiomeGenBase biomeGenBase : biomeList) {
+                    SpawnListEntry spawnListEntry = generateSpawnListEntry(
                             worldConfig,
                             livingClass,
+                            biomeGenBase,
                             mobName,
                             minecraftServer.worldServers[0],
-                            generateHandlerFromConfig(masterConfig, livingClass, mobName,
-                                    minecraftServer.worldServers[0], null)));
-            
-            for (BiomeGenBase biomeGenBase : biomeList) {
-                generateSpawnListEntry(
-                        worldConfig,
-                        livingClass,
-                        biomeGenBase,
-                        mobName,
-                        minecraftServer.worldServers[0],
-                        generateSpawnListEntry(masterConfig, livingClass, biomeGenBase, mobName,
-                                minecraftServer.worldServers[0], null));
+                            generateSpawnListEntry(masterConfig, livingClass, biomeGenBase, mobName,
+                                    minecraftServer.worldServers[0], null));
+                    if (spawnListEntry.itemWeight > 0) {
+                        JASLog.info("Adding %s Spawn of type %s to Biome %s",
+                                spawnListEntry.getClass().getSimpleName(),
+                                spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.biomeName);
+                        CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
+                                .addSpawn(spawnListEntry);
+                    }else{
+//                        JASLog.info("Rejecting SpawnListEntry of %s ItemWeight: %s", mobName, spawnListEntry.itemWeight);
+                    }
+                }
+            }else{
+//                JASLog.info("Rejecting Living Handler of %s ShouldSpawn: %s, CreatureTypeID: %s", mobName,
+//                        livingHandler.shouldSpawn, livingHandler.creatureTypeID);
             }
         }
 
@@ -86,26 +107,22 @@ public enum CreatureHandlerRegistry {
      */
     private Configuration getConfigurationFile(File configDirectory, String worldName, String fullMobName) {
         String modID;
-        String[] mobNameParts = fullMobName.split("\\"+delimeter);
+        String[] mobNameParts = fullMobName.split("\\" + delimeter);
         if (mobNameParts.length == 2) {
             modID = mobNameParts[1];
         } else {
             modID = "Vanilla";
         }
-        
+
         Configuration config;
-        if (modConfigCache.get(worldName+modID) == null) {
+        if (modConfigCache.get(worldName + modID) == null) {
             config = new Configuration(new File(configDirectory, DefaultProps.MODDIR + DefaultProps.ENTITYSUBDIR
                     + worldName + "/" + modID + ".cfg"));
             config.load();
             setupCategories(config);
-            modConfigCache.put(worldName+modID, config);
-            JASLog.info("Creating Config File for %s at %s", fullMobName, DefaultProps.MODDIR
-                    + DefaultProps.ENTITYSUBDIR + modID + ".cfg");
-        } else {
-            JASLog.info("Grabbing Cache of Config File for %s", fullMobName);
+            modConfigCache.put(worldName + modID, config);
         }
-        return modConfigCache.get(worldName+modID);
+        return modConfigCache.get(worldName + modID);
     }
 
     private void setupCategories(Configuration config) {
@@ -120,7 +137,7 @@ public enum CreatureHandlerRegistry {
      * Search EntityList for Valid Creature Entities
      */
     @SuppressWarnings("unchecked")
-    private void findValidEntities() {
+    private void populateEntityList() {
         entityList.clear();
         Iterator<?> entityIterator = EntityList.stringToClassMapping.keySet().iterator();
         while (entityIterator.hasNext()) {
@@ -132,7 +149,10 @@ public enum CreatureHandlerRegistry {
         }
     }
     
-    private void findValidBiomes() {
+    /**
+     * Search BiomeGenBase for Valid Biomes to Spawn In
+     */
+    private void populateBiomeList() {
         biomeList.clear();
         for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
             if (BiomeGenBase.biomeList[i] != null) {
@@ -140,7 +160,6 @@ public enum CreatureHandlerRegistry {
             }
         }
     }
-
 
     /**
      * Will Naturally Generate Handlers using Config Settings for all Found Entities

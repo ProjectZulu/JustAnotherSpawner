@@ -46,11 +46,9 @@ public class JustAnotherSpawner {
     public void postInit(FMLPostInitializationEvent event) {
 
     }
-    
+
     @ServerStarting
-    public void serverStart(FMLServerStartingEvent event){
+    public void serverStart(FMLServerStartingEvent event) {
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
-        JASLog.info("World Name is %s", event.getServer().worldServers[0].getWorldInfo().getWorldName());        
-        JASLog.info("World Name 2.0 is %s", event.getServer().getWorldName());        
     }
 }

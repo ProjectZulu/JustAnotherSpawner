@@ -9,11 +9,13 @@ public enum CreatureTypeRegistry {
     INSTANCE;
     private final HashMap<String, CreatureType> types = new HashMap<String, CreatureType>();
 
-    /** Default Category Keys */
+    /**
+     * Default Category Keys. Note that 'NONE' is not a Type but the absence of, i.e. null
+     */
+    public static final String NONE = "NONE";
     public static final String CREATURE = "CREATURE";
     public static final String MONSTER = "MONSTER";
     public static final String AMBIENT = "AMBIENT";
-    public static final String NONE = "NONE"; 
 
     public void addSpawnCategory(String categoryKey, CreatureType creatureType) {
         if (types.containsKey(categoryKey.toUpperCase())) {
@@ -31,8 +33,8 @@ public enum CreatureTypeRegistry {
     }
     
     private CreatureTypeRegistry() {
-        addSpawnCategory(CREATURE, new CreatureType(CREATURE, 10, Material.air, 40, true));
-        addSpawnCategory(MONSTER, new CreatureType(MONSTER, 70, Material.air, 10, true));
-        addSpawnCategory(AMBIENT, new CreatureType(NONE, 15, Material.air, 20, true));
+        addSpawnCategory(CREATURE, new CreatureType(CREATURE, 10, Material.air, 1400, true));
+        addSpawnCategory(MONSTER, new CreatureType(MONSTER, 70, Material.air, 1, true));
+//        addSpawnCategory(AMBIENT, new CreatureType(NONE, 15, Material.air, 10, true));
     }
 }

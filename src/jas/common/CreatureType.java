@@ -2,6 +2,7 @@ package jas.common;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -22,7 +23,7 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean needSky;
     public final Material spawnMedium;
-    public final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
+    private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
         this.typeID = typeID;
@@ -32,6 +33,26 @@ public class CreatureType {
         this.spawnRate = spawnRate;
     }
 
+    /**
+     * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
+     * 
+     * @param biomeName
+     * @param spawnListEntry
+     */
+    public void addSpawn(SpawnListEntry spawnListEntry) {
+        if (biomeNameToSpawnEntry.get(spawnListEntry.biomeName) == null) {
+            biomeNameToSpawnEntry.put(spawnListEntry.biomeName, new ArrayList<SpawnListEntry>());
+        }
+        biomeNameToSpawnEntry.get(spawnListEntry.biomeName).add(spawnListEntry);
+    }
+
+    /**
+     * Resets All Spawn Lists. This is used on World Change
+     */
+    public void resetSpawns() {
+        biomeNameToSpawnEntry.clear();
+    }
+    
     /**
      * Called by CustomSpawner to get a creature dependent on the world type
      * 
@@ -117,8 +138,8 @@ public class CreatureType {
     }
 
     /*
-     * TODO: Does not Belong Here. Possible Block Helper Class. Mods should be able to Register a Block. Similar to
-     * Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
+     * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
+     * to Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.

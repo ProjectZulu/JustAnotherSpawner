@@ -8,15 +8,19 @@ public class LivingHandler {
     public final String creatureTypeID;
     public final boolean useModLocationCheck;
     public final boolean shouldSpawn;
-    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck, boolean shouldSpawn) {
+
+    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck,
+            boolean shouldSpawn) {
         this.entityClass = entityClass;
         this.useModLocationCheck = useModLocationCheck;
-        this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID : CreatureTypeRegistry.NONE;
+        this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID
+                : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
     }
-    
+
     /**
-     * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific 
+     * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific
+     * 
      * @param entity
      * @param creatureType
      * @return
@@ -25,19 +29,31 @@ public class LivingHandler {
         return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
                 .getCreatureType(creatureTypeID).equals(creatureType);
     }
-    
+
     /**
      * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
-     * allows a Modder handler to be written independently of the modded creature.
+     * both ensures that a Modder can implement their own logic indepenently of the modded creature and that end users
+     * are allowed to customize their experience
      * 
      * @return True if location is valid For entity to spawn, false otherwise
      */
     public final boolean getCanSpawnHere(EntityLiving entity, CreatureType spawnType) {
         if (useModLocationCheck) {
-            return entity.getCanSpawnHere();
+            return isValidLocation(entity, spawnType);
         } else {
             return isValidLocation(entity);
         }
+    }
+
+    /**
+     * Represents the 'Modders Choice' for Creature SpawnLocation. 
+     * 
+     * @param entity
+     * @param spawnType
+     * @return
+     */
+    protected boolean isValidLocation(EntityLiving entity, CreatureType spawnType) {
+        return entity.getCanSpawnHere();
     }
 
     /**
@@ -47,7 +63,7 @@ public class LivingHandler {
      * @param entity
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    protected boolean isValidLocation(EntityLiving entity) {
+    private final boolean isValidLocation(EntityLiving entity) {
         return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
                 && !entity.worldObj.isAnyLiquid(entity.boundingBox);
