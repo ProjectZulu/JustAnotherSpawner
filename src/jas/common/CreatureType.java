@@ -22,8 +22,8 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean needSky;
     public final Material spawnMedium;
-    public final HashMap<String, Collection<SpawnListEntry>> biomeSpawnLists = new HashMap<String, Collection<SpawnListEntry>>();
-    
+    public final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
+
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
@@ -31,28 +31,29 @@ public class CreatureType {
         this.needSky = needSky;
         this.spawnRate = spawnRate;
     }
-    
+
     /**
      * Called by CustomSpawner to get a creature dependent on the world type
+     * 
      * @param xCoord Random xCoordinate nearby to Where Creature will spawn
      * @param yCoord Random yCoordinate nearby to Where Creature will spawn
      * @param zCoord Random zCoordinate nearby to Where Creature will spawn
      * @return Creature to Spawn
      */
-    //TODO: Change SpawnListEntry to LivingHandler
     public SpawnListEntry getSpawnListEntry(World world, int xCoord, int yCoord, int zCoord) {
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
-        if(biomegenbase != null){
-            Collection<SpawnListEntry> spawnEntryList = biomeSpawnLists.get(biomegenbase.biomeName);
-            return spawnEntryList != null ? (SpawnListEntry)WeightedRandom.getRandomItem(world.rand, spawnEntryList) : null;
+        if (biomegenbase != null) {
+            Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomegenbase.biomeName);
+            return spawnEntryList != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
+                    : null;
         }
-        
         return null;
     }
-    
+
     /**
      * Called by CustomSpawner to get the base coordinate to spawn an Entity
-     * @param world 
+     * 
+     * @param world
      * @param xCoord
      * @param zCoord
      * @return
@@ -64,31 +65,34 @@ public class CreatureType {
         int yCoord = world.rand.nextInt(chunk == null ? world.getActualHeight() : chunk.getTopFilledSegment() + 16 - 1);
         return new ChunkPosition(xCoord, yCoord, zCoord);
     }
-    
+
     /**
      * 
      * @param entity Entity that is being Checked
      * @return
      */
-    public boolean isEntityOfType(Entity entity){
+    public boolean isEntityOfType(Entity entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
         return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
     }
-    
+
     /**
      * Called by CustomSpawner to determine if the Chunk Postion to be spawned at is a valid Type
+     * 
      * @param world
      * @param xCoord
      * @param yCoord
      * @param zCoord
      * @return
      */
-    public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord){
-        return !world.isBlockNormalCube(xCoord, yCoord, zCoord) && world.getBlockMaterial(xCoord, yCoord, zCoord) == spawnMedium;
+    public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord) {
+        return !world.isBlockNormalCube(xCoord, yCoord, zCoord)
+                && world.getBlockMaterial(xCoord, yCoord, zCoord) == spawnMedium;
     }
-    
+
     /**
      * Called by CustomSpawner the location is valid for determining if the Chunk Postion is a valid location to spawn
+     * 
      * @param world
      * @param xCoord
      * @param yCoord
@@ -104,8 +108,8 @@ public class CreatureType {
             return false;
         } else {
             int l = world.getBlockId(xCoord, yCoord - 1, zCoord);
-            boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world,
-                    xCoord, yCoord - 1, zCoord));
+            boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world, xCoord,
+                    yCoord - 1, zCoord));
             return spawnBlock && l != Block.bedrock.blockID && !world.isBlockNormalCube(xCoord, yCoord, zCoord)
                     && !world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
                     && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
@@ -113,11 +117,12 @@ public class CreatureType {
     }
 
     /*
-     * TODO: Does not Belong Here. Possible Block Helper Class. Mods should be able to Register a Block. Similar to Proposed
-     * Entity Registry. How will end-users fix issue? Does End User Need to?
+     * TODO: Does not Belong Here. Possible Block Helper Class. Mods should be able to Register a Block. Similar to
+     * Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.
+     * 
      * @param block
      * @param world
      * @param xCoord

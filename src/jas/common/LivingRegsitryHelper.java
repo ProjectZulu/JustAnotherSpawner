@@ -1,9 +1,33 @@
 package jas.common;
 
-public class CreatureHandlerHelper {
+public class LivingRegsitryHelper {
 
     /**
-     * Attempt to Parse Boolean
+     * Attempt to Parse an Integer
+     * 
+     * @param value String to be Parsed
+     * @param fallBack Default value if value cannot be parsed
+     * @param fieldName FieldName that is being parsed for error reporting. Null will omit it.
+     * @return
+     */
+    public static int parseInteger(String value, int fallBack, String fieldName) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            if (fieldName != null) {
+                JASLog.warning(
+                        "Error Parsing %s for an integer. %s was unreadable. The Default value of %s will be used.",
+                        value, fieldName, fallBack);
+            } else {
+                JASLog.warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
+                        fallBack);
+            }
+            return fallBack;
+        }
+    }
+    
+    /**
+     * Attempt to Parse an Boolean
      * 
      * @param value String to be Parsed
      * @param fallBack Default value if value cannot be parsed

@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
@@ -19,8 +20,14 @@ import net.minecraftforge.common.Property;
 public enum CreatureHandlerRegistry {
     INSTANCE;
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
-    private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
+    private final HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>> handlersToAdd = new HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>>();
+    private List<BiomeGenBase> biomeList = new ArrayList<BiomeGenBase>();
+    
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();//TODO: This should probably be local?
+    private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
+    public static final String delimeter = ".";
+    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType.UseModLocationCheck.ShouldSpawn";
+    public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize.SpawnWeight";
 
     /**
      * Searhes and Process Entities it can Find in EntityList to create default the LivingHandlers. These are later
@@ -28,11 +35,11 @@ public enum CreatureHandlerRegistry {
      * 
      * @param configDirectory
      */
-    // TODO: When Doing World Specific Folders if a Master is wanted this will need to run 'twice' once to Load
-    // masterLivingHandlers, then again to Change them to World-Specific
     public void findProcessEntitesForHandlers(File configDirectory, MinecraftServer minecraftServer) {
         modConfigCache.clear();
         findValidEntities();
+        findValidBiomes();
+
         for (Class<? extends EntityLiving> livingClass : entityList) {
             if (livingHandlers.containsKey(livingClass)) {
                 continue;
@@ -40,11 +47,27 @@ public enum CreatureHandlerRegistry {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
             Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
             Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.getWorldName(), mobName);
+
+            livingHandlers.put(
+                    livingClass,
+                    generateHandlerFromConfig(
+                            worldConfig,
+                            livingClass,
+                            mobName,
+                            minecraftServer.worldServers[0],
+                            generateHandlerFromConfig(masterConfig, livingClass, mobName,
+                                    minecraftServer.worldServers[0], null)));
             
-            LivingHandler masterHandler = generateHandlerFromConfig(masterConfig, livingClass, mobName, minecraftServer.worldServers[0], null);
-            livingHandlers.put(livingClass, generateHandlerFromConfig(worldConfig, livingClass, mobName, minecraftServer.worldServers[0], masterHandler));
-            
-            generateSpawnListEntry(worldConfig, livingClass, mobName, minecraftServer.worldServers[0]);
+            for (BiomeGenBase biomeGenBase : biomeList) {
+                generateSpawnListEntry(
+                        worldConfig,
+                        livingClass,
+                        biomeGenBase,
+                        mobName,
+                        minecraftServer.worldServers[0],
+                        generateSpawnListEntry(masterConfig, livingClass, biomeGenBase, mobName,
+                                minecraftServer.worldServers[0], null));
+            }
         }
 
         for (Configuration config : modConfigCache.values()) {
@@ -63,31 +86,34 @@ public enum CreatureHandlerRegistry {
      */
     private Configuration getConfigurationFile(File configDirectory, String worldName, String fullMobName) {
         String modID;
-        String[] mobNameParts = fullMobName.split("\\.");
+        String[] mobNameParts = fullMobName.split("\\"+delimeter);
         if (mobNameParts.length == 2) {
             modID = mobNameParts[1];
         } else {
             modID = "Vanilla";
         }
-
+        
         Configuration config;
-        if (modConfigCache.get(modID) == null) {
+        if (modConfigCache.get(worldName+modID) == null) {
             config = new Configuration(new File(configDirectory, DefaultProps.MODDIR + DefaultProps.ENTITYSUBDIR
                     + worldName + "/" + modID + ".cfg"));
             config.load();
             setupCategories(config);
-            modConfigCache.put(modID, config);
+            modConfigCache.put(worldName+modID, config);
             JASLog.info("Creating Config File for %s at %s", fullMobName, DefaultProps.MODDIR
                     + DefaultProps.ENTITYSUBDIR + modID + ".cfg");
         } else {
             JASLog.info("Grabbing Cache of Config File for %s", fullMobName);
         }
-        return modConfigCache.get(modID);
+        return modConfigCache.get(worldName+modID);
     }
 
     private void setupCategories(Configuration config) {
         ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
-        category.setComment("Editable Format: CreatureType.UseModLocationCheck.ShouldSpawn");
+        category.setComment(LivingHandlerCategoryComment);
+        
+        category = config.getCategory("CreatureSettings.SpawnListEntry".toLowerCase(Locale.ENGLISH));
+        category.setComment(SpawnListCategoryComment);
     }
     
     /**
@@ -105,6 +131,16 @@ public enum CreatureHandlerRegistry {
             }
         }
     }
+    
+    private void findValidBiomes() {
+        biomeList.clear();
+        for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
+            if (BiomeGenBase.biomeList[i] != null) {
+                biomeList.add(BiomeGenBase.biomeList[i]);
+            }
+        }
+    }
+
 
     /**
      * Will Naturally Generate Handlers using Config Settings for all Found Entities
@@ -113,21 +149,20 @@ public enum CreatureHandlerRegistry {
      */
     private LivingHandler generateHandlerFromConfig(Configuration config, Class<? extends EntityLiving> livingClass,
             String mobName, WorldServer worldServer, LivingHandler defaultSettings) {
-        /* Default Values */
         String creatureTypeID = defaultSettings != null ? defaultSettings.creatureTypeID : CreatureTypeRegistry.NONE;
         boolean useModLocationCheck = defaultSettings != null ? defaultSettings.useModLocationCheck : true;
         boolean shouldSpawn = defaultSettings != null ? defaultSettings.shouldSpawn : false;
 
-        String handlerString = creatureTypeID + "." + Boolean.toString(useModLocationCheck) + "."
+        String defaultValue = creatureTypeID + delimeter + Boolean.toString(useModLocationCheck) + delimeter
                 + Boolean.toString(shouldSpawn);
-        Property handleProperty = config.get("CreatureSettings.LivingHandler", mobName, handlerString);
-        String[] resultParts = handleProperty.getString().split("\\.");
+        Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
+        String[] resultParts = resultValue.getString().split("\\"+delimeter);
         if (resultParts.length == 3) {
-            String resultCreatureType = CreatureHandlerHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
+            String resultCreatureType = LivingRegsitryHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
-            boolean resultLocationCheck = CreatureHandlerHelper.parseBoolean(resultParts[1], useModLocationCheck,
+            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[1], useModLocationCheck,
                     "LocationCheck");
-            boolean resultShouldSpawn = CreatureHandlerHelper.parseBoolean(resultParts[2], shouldSpawn, "ShouldSpawn");
+            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[2], shouldSpawn, "ShouldSpawn");
             return new LivingHandler(livingClass, resultCreatureType, resultLocationCheck, resultShouldSpawn);
         } else {
             JASLog.severe(
@@ -143,31 +178,56 @@ public enum CreatureHandlerRegistry {
      * 
      * @param configDirectory
      */
-    // TODO: Not Implemented
-    public void generateSpawnListEntry(Configuration config, Class<? extends EntityLiving> livingClass, String mobName, WorldServer worldServer) {
-        
+    public SpawnListEntry generateSpawnListEntry(Configuration config, Class<? extends EntityLiving> livingClass,
+            BiomeGenBase biomeGenBase, String mobName, WorldServer worldServer, SpawnListEntry defaultSettings) {
+        int packSize = defaultSettings != null ? defaultSettings.packSize : 4;
+        int spawnWeight = defaultSettings != null ? defaultSettings.itemWeight : 0;
+
+        String defaultValue = Integer.toString(packSize) + delimeter + Integer.toString(spawnWeight);
+        boolean sortByBiome = true;
+
+        Property resultValue;
+        String categoryKey;
+        if (sortByBiome) {
+            categoryKey = "CreatureSettings.SpawnListEntry." + biomeGenBase.biomeName;
+            resultValue = config.get(categoryKey, mobName, defaultValue);
+        } else {
+            categoryKey = "CreatureSettings.SpawnListEntry." + mobName;
+            resultValue = config.get(categoryKey, biomeGenBase.biomeName, defaultValue);
+        }
+        ConfigCategory category = config.getCategory(categoryKey.toLowerCase(Locale.ENGLISH));
+        category.setComment(SpawnListCategoryComment);
+
+        String[] resultParts = resultValue.getString().split("\\" + delimeter);
+        if (resultParts.length == 2) {
+            int resultPackSize = LivingRegsitryHelper.parseInteger(resultParts[0], packSize, "packSize");
+            int resultSpawnWeight = LivingRegsitryHelper.parseInteger(resultParts[1], packSize, "spawnWeight");
+            return new SpawnListEntry(livingClass, biomeGenBase.biomeName, resultSpawnWeight, resultPackSize);
+        } else {
+            JASLog.severe(
+                    "SpawnListEntry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
+                    mobName, packSize, spawnWeight);
+            return new SpawnListEntry(livingClass, biomeGenBase.biomeName, spawnWeight, packSize);
+        }
     }
 
     /**
-     * Registers a Living Handler. Will Not Replace
+     * Registers a Living Handler to be initialized by the System.
      * 
      * @param handlerID
      * @param handler
-     * @return Returns True if Handler is registered after Natural Handler Generation
+     * @return Returns False if Handler is replaced during registration
      */
-    // TODO: Change to Accept Class<? extends LivingHandler> instead of Instance of LivingHandler. Then we Manually
-    // initialize it with the naturally generated values.
-    //TODO: ONce a CLass is aCcepted. We Can hold off on Initializing UNtil ServerStarted so that we know the world Name
-    public boolean registerHandler(Class<? extends EntityLiving> handlerID, LivingHandler handler) {
-        if (!livingHandlers.containsKey(handlerID)) {
-            JASLog.warning(
-                    "LivingHandler %s added before natural generation. It will not take config generated settings into account.",
-                    handler);
-            return false;
-        } else {
-            livingHandlers.put(handlerID, handler);
-            return true;
+    public boolean registerHandler(Class<? extends EntityLiving> livingEntity,
+            Class<? extends LivingHandler> livingHandler) {
+        boolean isReplaced = false;
+        if (!handlersToAdd.containsKey(livingEntity)) {
+            JASLog.warning("Custom Living Handler %s which was to be registered will be replaced with %s",
+                    handlersToAdd.containsKey(livingEntity), livingHandler);
+            isReplaced = true;
         }
+        handlersToAdd.put(livingEntity, livingHandler);
+        return !isReplaced;
     }
 
     /**
