@@ -8,6 +8,7 @@ import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,7 +19,9 @@ import java.util.logging.Level;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ConfigCategory;
@@ -153,7 +156,8 @@ public enum CreatureHandlerRegistry {
         Iterator<?> entityIterator = EntityList.stringToClassMapping.keySet().iterator();
         while (entityIterator.hasNext()) {
             Object classKey = entityIterator.next();
-            if (EntityLiving.class.isAssignableFrom((Class<?>) EntityList.stringToClassMapping.get(classKey))) {
+            if (EntityLiving.class.isAssignableFrom((Class<?>) EntityList.stringToClassMapping.get(classKey))
+                    && !Modifier.isAbstract(((Class<?>) EntityList.stringToClassMapping.get(classKey)).getModifiers())) {
                 JASLog.info("Found Entity %s", classKey);
                 entityList.add((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(classKey));
             }
@@ -179,7 +183,7 @@ public enum CreatureHandlerRegistry {
      */
     private LivingHandler generateHandlerFromConfig(Configuration config, Class<? extends EntityLiving> livingClass,
             String mobName, WorldServer worldServer, LivingHandler defaultSettings) {
-        String creatureTypeID = defaultSettings != null ? defaultSettings.creatureTypeID : CreatureTypeRegistry.NONE;
+        String creatureTypeID = defaultSettings != null ? defaultSettings.creatureTypeID : enumCreatureTypeToLivingType(livingClass, worldServer);
         boolean useModLocationCheck = defaultSettings != null ? defaultSettings.useModLocationCheck : true;
         boolean shouldSpawn = defaultSettings != null ? defaultSettings.shouldSpawn : false;
 
@@ -200,6 +204,22 @@ public enum CreatureHandlerRegistry {
                     mobName, creatureTypeID, useModLocationCheck, shouldSpawn);
             return new LivingHandler(livingClass, creatureTypeID, useModLocationCheck, shouldSpawn);
         }
+    }
+    
+    /**
+     * Determines the Default JAS Living Type from the Vanilla EnumCreatureType
+     * @param livingClass
+     * @return
+     */
+    private String enumCreatureTypeToLivingType(Class<? extends EntityLiving> livingClass, World world){
+       EntityLiving creature = LivingHelper.createCreature(livingClass, world);
+       for (EnumCreatureType type : EnumCreatureType.values()) {
+           boolean isType =  creature != null ? creature.isCreatureType(type, true) : type.getClass().isAssignableFrom(livingClass);
+           if(isType && CreatureTypeRegistry.INSTANCE.getCreatureType(type.toString()) != null){
+               return type.toString();
+           }
+       }
+       return CreatureTypeRegistry.NONE;
     }
     
     /**
