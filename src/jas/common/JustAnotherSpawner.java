@@ -8,6 +8,7 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
 
+import net.minecraft.world.GameRules;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
@@ -47,7 +48,7 @@ public class JustAnotherSpawner {
 
     @Init
     public void load(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new Despawner());
+        MinecraftForge.EVENT_BUS.register(new EntityDespawner());
     }
 
     @PostInit
@@ -59,5 +60,13 @@ public class JustAnotherSpawner {
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
+
+        GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
+        /* Add Does Campfire Burn GameRule: Only if not Present */
+        String ruleName = "doCustomMobSpawning";
+        if (gameRule.hasRule(ruleName)) {
+        } else {
+            gameRule.addGameRule(ruleName, "true");
+        }
     }
 }

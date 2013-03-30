@@ -28,7 +28,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
         WorldServer world = (WorldServer) tickData[0];
         // TODO: Add Check such that Chunks are only populated if at least one CreatureType can be spawning
         CustomSpawner.determineChunksForSpawnering(world);
-        if (world.getGameRules().getGameRuleBooleanValue("doMobSpawning")) {
+        if (world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             Iterator<CreatureType> typeIterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
             while (typeIterator.hasNext()) {
                 CreatureType creatureType = typeIterator.next();

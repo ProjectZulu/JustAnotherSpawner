@@ -15,7 +15,8 @@ public class ChunkSpawner {
 
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
         JASLog.info("performChunkSpawning");
-        if (event.type == PopulateChunkEvent.Populate.EventType.ICE) {
+        if (event.type == PopulateChunkEvent.Populate.EventType.ICE
+                && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             JASLog.info("PopulateChunkEvent.Populate.EventType.ICE");
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
