@@ -19,23 +19,43 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+
 //TODO: Large Constructor could probably use Factory
 public class CreatureType {
     public final String typeID;
     public final int spawnRate;
     public final int maxNumberOfCreature;
+    // TODO: needSky Could be Taken Care of With Subclass and make Constructor Simpler. BUt then Wouldn't be toggleable via
+    // config
     public final boolean needSky;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
 
-    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean chunkSpawning, boolean needSky) {
+    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+            boolean chunkSpawning, boolean needSky) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
         this.needSky = needSky;
         this.spawnRate = spawnRate;
         this.chunkSpawning = chunkSpawning;
+    }
+
+    /**
+     * Create a new Instance of CreatureType. Used to Allow subclasses to Include their own Logic
+     * 
+     * @param typeID
+     * @param maxNumberOfCreature
+     * @param spawnMedium
+     * @param spawnRate
+     * @param chunkSpawning
+     * @param needSky
+     */
+    // TODO: Should This be moved into a Factory of Sorts?
+    protected CreatureType create(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+            boolean chunkSpawning, boolean needSky) {
+        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, needSky);
     }
 
     /**
@@ -76,7 +96,7 @@ public class CreatureType {
         }
         return null;
     }
-    
+
     /**
      * Called by CustomSpawner to get a creature dependent on the World Biome
      * 
