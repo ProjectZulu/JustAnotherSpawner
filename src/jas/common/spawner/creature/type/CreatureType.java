@@ -1,7 +1,6 @@
 package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
-
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
@@ -9,7 +8,6 @@ import jas.common.spawner.creature.handler.LivingHandler;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
@@ -21,21 +19,23 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-
+//TODO: Large Constructor could probably use Factory
 public class CreatureType {
     public final String typeID;
     public final int spawnRate;
     public final int maxNumberOfCreature;
     public final boolean needSky;
+    public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
 
-    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean needSky) {
+    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate, boolean chunkSpawning, boolean needSky) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
         this.needSky = needSky;
         this.spawnRate = spawnRate;
+        this.chunkSpawning = chunkSpawning;
     }
 
     /**
@@ -59,8 +59,9 @@ public class CreatureType {
     }
 
     /**
-     * Called by CustomSpawner to get a creature dependent on the world type
+     * Called by CustomSpawner to get a creature dependent on the World Location
      * 
+     * @param world
      * @param xCoord Random xCoordinate nearby to Where Creature will spawn
      * @param yCoord Random yCoordinate nearby to Where Creature will spawn
      * @param zCoord Random zCoordinate nearby to Where Creature will spawn
@@ -74,6 +75,18 @@ public class CreatureType {
                     : null;
         }
         return null;
+    }
+    
+    /**
+     * Called by CustomSpawner to get a creature dependent on the World Biome
+     * 
+     * @param biomeName Name of Biome SpawnList to get CreatureType From
+     * @return
+     */
+    public SpawnListEntry getSpawnListEntry(World world, String biomeName) {
+        Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomeName);
+        return spawnEntryList != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
+                : null;
     }
 
     /**

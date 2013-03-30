@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Random;
+import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -19,6 +21,7 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -35,13 +38,12 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final void determineChunksForSpawnering(WorldServer par0WorldServer, boolean par1, boolean par2,
-            boolean par3) {
+    public static final void determineChunksForSpawnering(WorldServer worldServer) {
         eligibleChunksForSpawning.clear();
         int i;
         int j;
-        for (i = 0; i < par0WorldServer.playerEntities.size(); ++i) {
-            EntityPlayer entityplayer = (EntityPlayer) par0WorldServer.playerEntities.get(i);
+        for (i = 0; i < worldServer.playerEntities.size(); ++i) {
+            EntityPlayer entityplayer = (EntityPlayer) worldServer.playerEntities.get(i);
             int k = MathHelper.floor_double(entityplayer.posX / 16.0D);
             j = MathHelper.floor_double(entityplayer.posZ / 16.0D);
             byte b0 = 8;
@@ -67,7 +69,7 @@ public class CustomSpawner {
      * 
      * @param creatureType CreatureType spawnList that is being Spawned
      */
-    //TODO: Why does this return integer? Debugging? What is the value?
+    //TODO: Why does this return integer? Debugging? What is the value? It is definetly Not required to Function.
     public static final int spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
         int i = 0;
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
@@ -194,5 +196,65 @@ public class CustomSpawner {
             return;
         }
         entityLiving.initCreature();
+    }
+    
+    /**
+     * Called during chunk generation to spawn initial creatures.
+     */
+    public static void performWorldGenSpawning(World world, CreatureType creatureType, BiomeGenBase biome, int par2,
+            int par3, int par4, int par5, Random random) {
+        while (random.nextFloat() < biome.getSpawningChance()) {
+            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntry(world, biome.biomeName);
+            if (spawnListEntry == null) {
+                JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
+                return;
+            }else{
+                JASLog.debug(Level.INFO, "Evaluating if We Should spawn %s", spawnListEntry.livingClass.getSimpleName());
+            }
+            int i1 = spawnListEntry.minChunkPack
+                    + random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
+            int j1 = par2 + random.nextInt(par4);
+            int k1 = par3 + random.nextInt(par5);
+            int l1 = j1;
+            int i2 = k1;
+            for (int j2 = 0; j2 < i1; ++j2) {
+                boolean flag = false;
+
+                for (int k2 = 0; !flag && k2 < 4; ++k2) {
+                    int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
+
+                    if (creatureType.canSpawnAtLocation(world, j1, l2, k1)) {
+                        float f = j1 + 0.5F;
+                        float f1 = l2;
+                        float f2 = k1 + 0.5F;
+                        EntityLiving entityliving;
+
+                        try {
+                            entityliving = spawnListEntry.getLivingHandler().entityClass.getConstructor(
+                                    new Class[] { World.class }).newInstance(new Object[] { world });
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                            continue;
+                        }
+
+                        entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
+                        JASLog.info("Chunk Spawned %s at %s, %s, %s ", entityliving.getEntityName(), entityliving.posX,
+                                entityliving.posY, entityliving.posZ);
+                        world.spawnEntityInWorld(entityliving);
+                        creatureSpecificInit(entityliving, world, f, f1, f2);
+                        flag = true;
+                    }else{
+                        JASLog.debug(Level.INFO, "Entity not Spawned due to invalid creatureType location", creatureType.typeID);
+                    }
+
+                    j1 += random.nextInt(5) - random.nextInt(5);
+
+                    for (k1 += random.nextInt(5) - random.nextInt(5); j1 < par2 || j1 >= par2 + par4 || k1 < par3
+                            || k1 >= par3 + par4; k1 = i2 + random.nextInt(5) - random.nextInt(5)) {
+                        j1 = l1 + random.nextInt(5) - random.nextInt(5);
+                    }
+                }
+            }
+        }
     }
 }

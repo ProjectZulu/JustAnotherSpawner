@@ -1,12 +1,14 @@
 package jas.common;
 
 import jas.common.proxy.CommonProxy;
-import jas.common.spawner.SpawnTicker;
+import jas.common.spawner.ChunkSpawner;
+import jas.common.spawner.SpawnerTicker;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
 
+import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -39,7 +41,8 @@ public class JustAnotherSpawner {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         Properties.loadProperties(modConfigDirectoryFile);
         JASLog.configureLogging(Properties.debugMode);
-        TickRegistry.registerTickHandler(new SpawnTicker(), Side.SERVER);
+        TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
+        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
     }
 
     @Init

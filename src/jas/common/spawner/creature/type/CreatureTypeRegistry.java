@@ -44,17 +44,17 @@ public enum CreatureTypeRegistry {
     }
 
     private CreatureTypeRegistry() {
-        addSpawnCategory(new CreatureType(CREATURE, 10, Material.air, 1400, true));
-        addSpawnCategory(new CreatureType(MONSTER, 70, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false));
+        addSpawnCategory(new CreatureType(CREATURE, 10, Material.air, 400, true, true));
+        addSpawnCategory(new CreatureType(MONSTER, 70, Material.air, 1, false, false));
+        addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false, false));
+        addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false, false));
     }
 
     public void initializeFromConfig(File configDirectory, MinecraftServer minecraftServer) {
         Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "CreatureType_Master" + ".cfg"));
+                + "Master/" + "CreatureType" + ".cfg"));
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.getWorldName() + "/" + "CreatureType_" + minecraftServer.getWorldName() + ".cfg"));
+                + minecraftServer.getWorldName() + "/" + "CreatureType" + ".cfg"));
         masterConfig.load();
         worldConfig.load();
         for (String typeID : types.keySet()) {
@@ -70,8 +70,11 @@ public enum CreatureTypeRegistry {
         int spawnRate = config.get("LivingType." + typeID, "Spawn Rate", defaultSettings.spawnRate).getInt();
         int maxNumberOfCreature = config.get("LivingType." + typeID, "Creature Spawn Cap",
                 defaultSettings.maxNumberOfCreature).getInt();
+        boolean chunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", defaultSettings.chunkSpawning)
+                .getBoolean(defaultSettings.chunkSpawning);
         boolean needSky = config.get("LivingType." + typeID, "Spawns Require Sky LOS", defaultSettings.needSky)
                 .getBoolean(defaultSettings.needSky);
-        return new CreatureType(typeID, maxNumberOfCreature, defaultSettings.spawnMedium, spawnRate, needSky);
+        return new CreatureType(typeID, maxNumberOfCreature, defaultSettings.spawnMedium, spawnRate, chunkSpawning,
+                needSky);
     }
 }
