@@ -33,13 +33,13 @@ public enum CreatureHandlerRegistry {
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
     private final HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>> handlersToAdd = new HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>>();
     private List<BiomeGenBase> biomeList = new ArrayList<BiomeGenBase>();
-    
+
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
     public static final String delimeter = "-";
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
-            + "UseModLocationCheck" + delimeter + "ShouldSpawn";
-    public static final String SpawnListCategoryComment = "Editable Format: SpawnPackSize" + delimeter + "SpawnWeight"
+            + "ShouldSpawn" + delimeter + "ForceDespawn" + delimeter + "UseModLocationCheck";
+    public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
             + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
 
     /**
@@ -185,25 +185,29 @@ public enum CreatureHandlerRegistry {
             String mobName, WorldServer worldServer, LivingHandler defaultSettings) {
         String creatureTypeID = defaultSettings != null ? defaultSettings.creatureTypeID
                 : enumCreatureTypeToLivingType(livingClass, worldServer);
-        boolean useModLocationCheck = defaultSettings != null ? defaultSettings.useModLocationCheck : true;
         boolean shouldSpawn = defaultSettings != null ? defaultSettings.shouldSpawn : false;
+        boolean forceDespawn = defaultSettings != null ? defaultSettings.forceDespawn : false;
+        boolean useModLocationCheck = defaultSettings != null ? defaultSettings.useModLocationCheck : true;
 
-        String defaultValue = creatureTypeID + delimeter + Boolean.toString(useModLocationCheck) + delimeter
-                + Boolean.toString(shouldSpawn);
+        String defaultValue = creatureTypeID + delimeter + Boolean.toString(shouldSpawn) + delimeter
+                + Boolean.toString(forceDespawn) + delimeter + Boolean.toString(useModLocationCheck);
         Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
         String[] resultParts = resultValue.getString().split("\\" + delimeter);
-        if (resultParts.length == 3) {
+        if (resultParts.length == 4) {
             String resultCreatureType = LivingRegsitryHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
-            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[1], useModLocationCheck,
+            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
+            boolean resultForceDespawn = LivingRegsitryHelper
+                    .parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
+            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[3], useModLocationCheck,
                     "LocationCheck");
-            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[2], shouldSpawn, "ShouldSpawn");
-            return new LivingHandler(livingClass, resultCreatureType, resultLocationCheck, resultShouldSpawn);
+            return new LivingHandler(livingClass, resultCreatureType, resultLocationCheck, resultShouldSpawn,
+                    resultForceDespawn);
         } else {
             JASLog.severe(
-                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s",
-                    mobName, creatureTypeID, useModLocationCheck, shouldSpawn);
-            return new LivingHandler(livingClass, creatureTypeID, useModLocationCheck, shouldSpawn);
+                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",
+                    mobName, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+            return new LivingHandler(livingClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
         }
     }
 
@@ -233,12 +237,12 @@ public enum CreatureHandlerRegistry {
      */
     public SpawnListEntry generateSpawnListEntry(Configuration config, Class<? extends EntityLiving> livingClass,
             BiomeGenBase biomeGenBase, String mobName, WorldServer worldServer, SpawnListEntry defaultSettings) {
-        int packSize = defaultSettings != null ? defaultSettings.packSize : 4;
         int spawnWeight = defaultSettings != null ? defaultSettings.itemWeight : 0;
+        int packSize = defaultSettings != null ? defaultSettings.packSize : 4;
         int minChunkPack = defaultSettings != null ? defaultSettings.minChunkPack : 0;
         int maxChunkPack = defaultSettings != null ? defaultSettings.maxChunkPack : 4;
 
-        String defaultValue = Integer.toString(packSize) + delimeter + Integer.toString(spawnWeight) + delimeter
+        String defaultValue = Integer.toString(spawnWeight) + delimeter + Integer.toString(packSize) + delimeter
                 + Integer.toString(minChunkPack) + delimeter + Integer.toString(maxChunkPack);
         boolean sortByBiome = Properties.sortCreatureByBiome;
 
@@ -256,8 +260,8 @@ public enum CreatureHandlerRegistry {
 
         String[] resultParts = resultValue.getString().split("\\" + delimeter);
         if (resultParts.length == 4) {
-            int resultPackSize = LivingRegsitryHelper.parseInteger(resultParts[0], packSize, "packSize");
-            int resultSpawnWeight = LivingRegsitryHelper.parseInteger(resultParts[1], packSize, "spawnWeight");
+            int resultSpawnWeight = LivingRegsitryHelper.parseInteger(resultParts[0], packSize, "spawnWeight");
+            int resultPackSize = LivingRegsitryHelper.parseInteger(resultParts[1], packSize, "packSize");
             int resultMinChunkPack = LivingRegsitryHelper.parseInteger(resultParts[2], packSize, "minChunkPack");
             int resultMaxChunkPack = LivingRegsitryHelper.parseInteger(resultParts[3], packSize, "maxChunkPack");
             return new SpawnListEntry(livingClass, biomeGenBase.biomeName, resultSpawnWeight, resultPackSize,

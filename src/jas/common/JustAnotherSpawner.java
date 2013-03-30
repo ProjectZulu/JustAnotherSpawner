@@ -47,6 +47,7 @@ public class JustAnotherSpawner {
 
     @Init
     public void load(FMLInitializationEvent event) {
+        MinecraftForge.EVENT_BUS.register(new Despawner());
     }
 
     @PostInit
