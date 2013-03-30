@@ -233,6 +233,25 @@ public enum CreatureHandlerRegistry {
     }
 
     /**
+     * Determines the Vanilla EnumCreatureType from the equivalent JAS living Type
+     * 
+     * @return
+     */
+    private EnumCreatureType livingTypeToEnumCreatureType(String creatureTypeID) {
+        if (creatureTypeID.equals(CreatureTypeRegistry.MONSTER)) {
+            return EnumCreatureType.monster;
+        } else if (creatureTypeID.equals(CreatureTypeRegistry.AMBIENT)) {
+            return EnumCreatureType.ambient;
+        } else if (creatureTypeID.equals(CreatureTypeRegistry.CREATURE)) {
+            return EnumCreatureType.creature;
+        } else if (creatureTypeID.equals(CreatureTypeRegistry.WATERCREATURE)) {
+            return EnumCreatureType.waterCreature;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Will use already generated livingHandlers to generate Biome Specific SpawnList Entries to Populate the each
      * CreatureType biomeSpawnLists.
      * 
@@ -245,6 +264,20 @@ public enum CreatureHandlerRegistry {
         int minChunkPack = defaultSettings != null ? defaultSettings.minChunkPack : 0;
         int maxChunkPack = defaultSettings != null ? defaultSettings.maxChunkPack : 4;
 
+        EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
+        if (defaultSettings != null && creatureType != null) {
+            @SuppressWarnings("unchecked")
+            List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biomeGenBase
+                    .getSpawnableList(creatureType);
+            for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                if (spawnListEntry.entityClass.equals(livingClass)) {
+                    spawnWeight = spawnListEntry.itemWeight;
+                    minChunkPack = spawnListEntry.minGroupCount;
+                    maxChunkPack = spawnListEntry.maxGroupCount;
+                }
+            }
+        }
+        
         String defaultValue = Integer.toString(spawnWeight) + delimeter + Integer.toString(packSize) + delimeter
                 + Integer.toString(minChunkPack) + delimeter + Integer.toString(maxChunkPack);
         boolean sortByBiome = Properties.sortCreatureByBiome;
@@ -277,6 +310,8 @@ public enum CreatureHandlerRegistry {
                     maxChunkPack);
         }
     }
+    
+    
 
     /**
      * Registers a Living Handler to be initialized by the System.
