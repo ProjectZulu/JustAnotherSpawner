@@ -28,6 +28,8 @@ import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
+import com.google.common.base.CharMatcher;
+
 public enum CreatureHandlerRegistry {
     INSTANCE;
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
@@ -121,9 +123,10 @@ public enum CreatureHandlerRegistry {
      */
     private Configuration getConfigurationFile(File configDirectory, String worldName, String fullMobName) {
         String modID;
-        String[] mobNameParts = fullMobName.split("\\" + delimeter);
+        String[] mobNameParts = fullMobName.split("\\.");
         if (mobNameParts.length == 2) {
-            modID = mobNameParts[1];
+            String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
+            modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);
         } else {
             modID = "Vanilla";
         }
