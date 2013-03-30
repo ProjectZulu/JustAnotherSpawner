@@ -27,17 +27,15 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     // TODO: needSky Could be Taken Care of With Subclass and make Constructor Simpler. BUt then Wouldn't be toggleable via
     // config
-    public final boolean needSky;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning, boolean needSky) {
+            boolean chunkSpawning) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
-        this.needSky = needSky;
         this.spawnRate = spawnRate;
         this.chunkSpawning = chunkSpawning;
     }
@@ -54,8 +52,8 @@ public class CreatureType {
      */
     // TODO: Should This be moved into a Factory of Sorts?
     protected CreatureType create(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning, boolean needSky) {
-        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, needSky);
+            boolean chunkSpawning) {
+        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
     /**
@@ -159,10 +157,6 @@ public class CreatureType {
      * @return
      */
     public boolean canSpawnAtLocation(World world, int xCoord, int yCoord, int zCoord) {
-        if (needSky && !world.canBlockSeeTheSky(xCoord, yCoord, zCoord)) {
-            return false;
-        }
-
         if (spawnMedium == Material.water) {
             return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
                     && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
