@@ -26,7 +26,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
-@NetworkMod(clientSideRequired = true, serverSideRequired = false)
+@NetworkMod(clientSideRequired = false, serverSideRequired = false)
 public class JustAnotherSpawner {
 
     @Instance(DefaultProps.MODID)
@@ -62,7 +62,6 @@ public class JustAnotherSpawner {
         CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
 
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
-        /* Add Does Campfire Burn GameRule: Only if not Present */
         String ruleName = "doCustomMobSpawning";
         if (gameRule.hasRule(ruleName)) {
         } else {
