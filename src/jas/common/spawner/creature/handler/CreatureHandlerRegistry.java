@@ -68,7 +68,7 @@ public enum CreatureHandlerRegistry {
             }
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
             Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
-            Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.getWorldName(), mobName);
+            Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.worldServers[0].getWorldInfo().getWorldName(), mobName);
 
             LivingHandler livingHandler = generateHandlerFromConfig(
                     worldConfig,
