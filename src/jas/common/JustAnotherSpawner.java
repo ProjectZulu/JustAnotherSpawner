@@ -1,6 +1,7 @@
 package jas.common;
 
 import jas.common.gui.GuiHandler;
+import jas.common.gui.GuiKeyBinding;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
@@ -12,6 +13,7 @@ import java.io.File;
 
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.MinecraftForge;
+import cpw.mods.fml.client.registry.KeyBindingRegistry;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -47,6 +49,7 @@ public class JustAnotherSpawner {
         JASLog.configureLogging(Properties.debugMode);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
+        KeyBindingRegistry.registerKeyBinding(new GuiKeyBinding());
     }
 
     @Init
@@ -57,7 +60,6 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
-
     }
 
     @ServerStarting
