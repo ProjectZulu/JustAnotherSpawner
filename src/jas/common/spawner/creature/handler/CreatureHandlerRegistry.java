@@ -2,7 +2,6 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -22,11 +21,9 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
 
 import com.google.common.base.CharMatcher;
 
@@ -38,7 +35,7 @@ public enum CreatureHandlerRegistry {
 
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
-    public static final String delimeter = "-";
+    public static final String delimeter = DefaultProps.DELIMETER;
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
             + "ShouldSpawn" + delimeter + "ForceDespawn" + delimeter + "UseModLocationCheck";
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
@@ -69,26 +66,18 @@ public enum CreatureHandlerRegistry {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
             Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
             Configuration worldConfig = getConfigurationFile(configDirectory, minecraftServer.worldServers[0].getWorldInfo().getWorldName(), mobName);
-
-            LivingHandler livingHandler = generateHandlerFromConfig(
-                    worldConfig,
-                    livingClass,
-                    mobName,
-                    minecraftServer.worldServers[0],
-                    generateHandlerFromConfig(masterConfig, livingClass, mobName, minecraftServer.worldServers[0], null));
-            // TODO: Replace LivingHandler with Custom Handler From "handlersToAdd"
+            
+            LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
+                    minecraftServer.worldServers[0]), true, false, false).createFromConfig(masterConfig)
+                    .createFromConfig(worldConfig);
             livingHandlers.put(livingClass, livingHandler);
 
             if (livingHandler.shouldSpawn && !livingHandler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGenBase biomeGenBase : biomeList) {
-                    SpawnListEntry spawnListEntry = generateSpawnListEntry(
-                            worldConfig,
-                            livingClass,
-                            biomeGenBase,
-                            mobName,
-                            minecraftServer.worldServers[0],
-                            generateSpawnListEntry(masterConfig, livingClass, biomeGenBase, mobName,
-                                    minecraftServer.worldServers[0], null));
+
+                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(biomeGenBase, livingClass)
+                            .createFromConfig(masterConfig).createFromConfig(worldConfig);
+
                     if (spawnListEntry.itemWeight > 0) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to Biome %s", mobName,
                                 spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.biomeName);
@@ -111,7 +100,7 @@ public enum CreatureHandlerRegistry {
             config.save();
         }
     }
-
+    
     /**
      * Caches and Retrieves Configration Files for Individual modIDs. The ModID is inferred from the entity name in the
      * form ModID:EntityName
@@ -141,7 +130,7 @@ public enum CreatureHandlerRegistry {
         }
         return modConfigCache.get(worldName + modID);
     }
-
+    
     private void setupCategories(Configuration config) {
         ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
         category.setComment(LivingHandlerCategoryComment);
@@ -180,40 +169,27 @@ public enum CreatureHandlerRegistry {
     }
 
     /**
-     * Will Naturally Generate Handlers using Config Settings for all Found Entities
+     * Searches For a Vanilla SpawnListEntry. Generates using defaults values (spawn rate == 0) if one doesn't exist.
      * 
-     * @param configDirectory
+     * @param biome
+     * @param livingClass
+     * @return
      */
-    private LivingHandler generateHandlerFromConfig(Configuration config, Class<? extends EntityLiving> livingClass,
-            String mobName, WorldServer worldServer, LivingHandler defaultSettings) {
-        String creatureTypeID = defaultSettings != null ? defaultSettings.creatureTypeID
-                : enumCreatureTypeToLivingType(livingClass, worldServer);
-        boolean shouldSpawn = defaultSettings != null ? defaultSettings.shouldSpawn : false;
-        boolean forceDespawn = defaultSettings != null ? defaultSettings.forceDespawn : false;
-        boolean useModLocationCheck = defaultSettings != null ? defaultSettings.useModLocationCheck : true;
-
-        String defaultValue = creatureTypeID + delimeter + Boolean.toString(shouldSpawn) + delimeter
-                + Boolean.toString(forceDespawn) + delimeter + Boolean.toString(useModLocationCheck);
-        Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
-        String[] resultParts = resultValue.getString().split("\\" + delimeter);
-        if (resultParts.length == 4) {
-            String resultCreatureType = LivingRegsitryHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
-                    "creatureTypeID");
-            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
-            boolean resultForceDespawn = LivingRegsitryHelper
-                    .parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
-            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[3], useModLocationCheck,
-                    "LocationCheck");
-            return new LivingHandler(livingClass, resultCreatureType, resultLocationCheck, resultShouldSpawn,
-                    resultForceDespawn);
-        } else {
-            JASLog.severe(
-                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",
-                    mobName, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
-            return new LivingHandler(livingClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    public SpawnListEntry findVanillaSpawnListEntry(BiomeGenBase biome, Class<? extends EntityLiving> livingClass) {
+        EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
+        if (creatureType != null) {
+            @SuppressWarnings("unchecked")
+            List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biome.getSpawnableList(creatureType);
+            for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                if (spawnListEntry.entityClass.equals(livingClass)) {
+                    return new SpawnListEntry(livingClass, biome.biomeName, spawnListEntry.itemWeight, 4,
+                            spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
+                }
+            }
         }
+        return new SpawnListEntry(livingClass, biome.biomeName, 0, 4, 0, 4);
     }
-
+    
     /**
      * Determines the Default JAS Living Type from the Vanilla EnumCreatureType
      * 
@@ -250,68 +226,6 @@ public enum CreatureHandlerRegistry {
             return null;
         }
     }
-
-    /**
-     * Will use already generated livingHandlers to generate Biome Specific SpawnList Entries to Populate the each
-     * CreatureType biomeSpawnLists.
-     * 
-     * @param configDirectory
-     */
-    public SpawnListEntry generateSpawnListEntry(Configuration config, Class<? extends EntityLiving> livingClass,
-            BiomeGenBase biomeGenBase, String mobName, WorldServer worldServer, SpawnListEntry defaultSettings) {
-        int spawnWeight = defaultSettings != null ? defaultSettings.itemWeight : 0;
-        int packSize = defaultSettings != null ? defaultSettings.packSize : 4;
-        int minChunkPack = defaultSettings != null ? defaultSettings.minChunkPack : 0;
-        int maxChunkPack = defaultSettings != null ? defaultSettings.maxChunkPack : 4;
-
-        EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
-        if (defaultSettings != null && creatureType != null) {
-            @SuppressWarnings("unchecked")
-            List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biomeGenBase
-                    .getSpawnableList(creatureType);
-            for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
-                if (spawnListEntry.entityClass.equals(livingClass)) {
-                    spawnWeight = spawnListEntry.itemWeight;
-                    minChunkPack = spawnListEntry.minGroupCount;
-                    maxChunkPack = spawnListEntry.maxGroupCount;
-                }
-            }
-        }
-        
-        String defaultValue = Integer.toString(spawnWeight) + delimeter + Integer.toString(packSize) + delimeter
-                + Integer.toString(minChunkPack) + delimeter + Integer.toString(maxChunkPack);
-        boolean sortByBiome = Properties.sortCreatureByBiome;
-
-        Property resultValue;
-        String categoryKey;
-        if (sortByBiome) {
-            categoryKey = "CreatureSettings.SpawnListEntry." + biomeGenBase.biomeName;
-            resultValue = config.get(categoryKey, mobName, defaultValue);
-        } else {
-            categoryKey = "CreatureSettings.SpawnListEntry." + mobName;
-            resultValue = config.get(categoryKey, biomeGenBase.biomeName, defaultValue);
-        }
-        ConfigCategory category = config.getCategory(categoryKey.toLowerCase(Locale.ENGLISH));
-        category.setComment(SpawnListCategoryComment);
-
-        String[] resultParts = resultValue.getString().split("\\" + delimeter);
-        if (resultParts.length == 4) {
-            int resultSpawnWeight = LivingRegsitryHelper.parseInteger(resultParts[0], packSize, "spawnWeight");
-            int resultPackSize = LivingRegsitryHelper.parseInteger(resultParts[1], packSize, "packSize");
-            int resultMinChunkPack = LivingRegsitryHelper.parseInteger(resultParts[2], packSize, "minChunkPack");
-            int resultMaxChunkPack = LivingRegsitryHelper.parseInteger(resultParts[3], packSize, "maxChunkPack");
-            return new SpawnListEntry(livingClass, biomeGenBase.biomeName, resultSpawnWeight, resultPackSize,
-                    resultMinChunkPack, resultMaxChunkPack);
-        } else {
-            JASLog.severe(
-                    "SpawnListEntry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
-                    mobName, packSize, spawnWeight);
-            return new SpawnListEntry(livingClass, biomeGenBase.biomeName, spawnWeight, packSize, minChunkPack,
-                    maxChunkPack);
-        }
-    }
-    
-    
 
     /**
      * Registers a Living Handler to be initialized by the System.

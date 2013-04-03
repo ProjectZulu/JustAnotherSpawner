@@ -1,10 +1,15 @@
 package jas.common.spawner.creature.handler;
 
+import jas.common.DefaultProps;
+import jas.common.JASLog;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.Property;
 
 public class LivingHandler {
     public final Class<? extends EntityLiving> entityClass;
@@ -22,7 +27,21 @@ public class LivingHandler {
         this.shouldSpawn = shouldSpawn;
         this.forceDespawn = forceDespawn;
     }
-
+    
+    /**
+     * Create a new Instance of this LivingHandler. Used to Allow subclasses to Include their own Logic
+     * @param entityClass
+     * @param creatureTypeID
+     * @param useModLocationCheck
+     * @param shouldSpawn
+     * @param forceDespawn
+     * @return
+     */
+    protected LivingHandler create(Class<? extends EntityLiving> entityClass, String creatureTypeID,
+            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
+        return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    }
+    
     /**
      * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific
      * 
@@ -96,5 +115,40 @@ public class LivingHandler {
         return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
                 && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+    }
+    
+    /**
+     * Creates a new instance of this from configuration using itself as the default
+     * @param config
+     * @return
+     */
+    protected LivingHandler createFromConfig(Configuration config) {
+        String mobName = (String) EntityList.classToStringMapping.get(entityClass);
+
+        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
+                + DefaultProps.DELIMETER + Boolean.toString(forceDespawn) + DefaultProps.DELIMETER
+                + Boolean.toString(useModLocationCheck);
+
+        Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
+
+        String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
+
+        if (resultParts.length == 4) {
+            String resultCreatureType = LivingRegsitryHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
+                    "creatureTypeID");
+            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
+            boolean resultForceDespawn = LivingRegsitryHelper
+                    .parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
+            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[3], useModLocationCheck,
+                    "LocationCheck");
+            return new LivingHandler(entityClass, resultCreatureType, resultLocationCheck, resultShouldSpawn,
+                    resultForceDespawn);
+        } else {
+            JASLog.severe(
+                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",
+                    mobName, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+            resultValue.set(defaultValue);
+            return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+        }
     }
 }
