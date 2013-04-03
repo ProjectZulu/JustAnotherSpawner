@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
@@ -23,6 +24,7 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
@@ -50,6 +52,7 @@ public class JustAnotherSpawner {
     @Init
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
+        NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
     }
 
     @PostInit
