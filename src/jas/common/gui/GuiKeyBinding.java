@@ -1,10 +1,12 @@
 package jas.common.gui;
 
-import jas.common.JASLog;
+import jas.common.JustAnotherSpawner;
 
 import java.util.EnumSet;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.player.EntityPlayer;
 
 import org.lwjgl.input.Keyboard;
 
@@ -32,13 +34,15 @@ public class GuiKeyBinding extends KeyHandler {
 
     @Override
     public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
-        if (tickEnd) {
-            JASLog.info("Open GUI");
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        if (tickEnd && Minecraft.getMinecraft().currentScreen == null && player != null) {
+            player.openGui(JustAnotherSpawner.modInstance, GuiID.Spawner.iD, Minecraft.getMinecraft().theWorld,
+                    (int) player.posX, (int) player.posY, (int) player.posZ);
         }
     }
 
     @Override
     public EnumSet<TickType> ticks() {
-        return EnumSet.allOf(TickType.class);
+        return EnumSet.of(TickType.CLIENT);
     }
 }

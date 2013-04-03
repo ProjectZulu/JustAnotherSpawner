@@ -1,6 +1,8 @@
 package jas.common.gui;
 
+
 public enum GuiID {
+    Spawner(0),
     Unknown(-1);
 
     int iD;
