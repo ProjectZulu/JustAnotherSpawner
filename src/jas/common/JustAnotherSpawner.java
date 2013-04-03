@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
@@ -26,7 +27,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
-@NetworkMod(clientSideRequired = false, serverSideRequired = false)
+@NetworkMod(clientSideRequired = false, serverSideRequired = false, packetHandler = PacketHandler.class)
 public class JustAnotherSpawner {
 
     @Instance(DefaultProps.MODID)

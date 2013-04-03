@@ -28,8 +28,10 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
+    // TODO: Change to ListMultiMap from Guava: private final ListMultimap<String, SpawnListEntry> biomeNameToSpawnEntry
+    // = ArrayListMultimap.create();
     private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
-
+    
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
         this.typeID = typeID;
