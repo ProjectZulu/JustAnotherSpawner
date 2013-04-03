@@ -14,7 +14,6 @@ public class ChunkSpawner {
     public void performChunkSpawning(PopulateChunkEvent.Populate event) {
 
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
-        JASLog.info("performChunkSpawning");
         if (event.type == PopulateChunkEvent.Populate.EventType.ICE
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             JASLog.info("PopulateChunkEvent.Populate.EventType.ICE");

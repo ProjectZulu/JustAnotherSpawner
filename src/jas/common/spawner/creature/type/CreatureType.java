@@ -19,14 +19,13 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.Configuration;
 
 //TODO: Large Constructor could probably use Factory
 public class CreatureType {
     public final String typeID;
     public final int spawnRate;
     public final int maxNumberOfCreature;
-    // TODO: needSky Could be Taken Care of With Subclass and make Constructor Simpler. BUt then Wouldn't be toggleable via
-    // config
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
@@ -173,6 +172,20 @@ public class CreatureType {
         }
     }
 
+    /**
+     * Creates a new instance of creature types from configuration using itself as the default
+     * @param config
+     * @return
+     */
+    public CreatureType createFromConfig(Configuration config) {
+        int resultSpawnRate = config.get("LivingType." + typeID, "Spawn Rate", spawnRate).getInt();
+        int resultMaxNumberOfCreature = config.get("LivingType." + typeID, "Creature Spawn Cap", maxNumberOfCreature)
+                .getInt();
+        boolean resultChunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", chunkSpawning)
+                .getBoolean(chunkSpawning);
+        return this.create(typeID, resultMaxNumberOfCreature, spawnMedium, resultSpawnRate, resultChunkSpawning);
+    }
+    
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
      * to Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
