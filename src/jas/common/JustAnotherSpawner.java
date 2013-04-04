@@ -65,7 +65,7 @@ public class JustAnotherSpawner {
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
-        CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
+        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
 
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
         String ruleName = "doCustomMobSpawning";
