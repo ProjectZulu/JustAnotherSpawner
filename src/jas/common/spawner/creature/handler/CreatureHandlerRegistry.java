@@ -26,6 +26,9 @@ import net.minecraftforge.common.Configuration;
 
 import com.google.common.base.CharMatcher;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+
 public enum CreatureHandlerRegistry {
     INSTANCE;
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
@@ -39,10 +42,17 @@ public enum CreatureHandlerRegistry {
             + "ShouldSpawn" + delimeter + "ForceDespawn" + delimeter + "UseModLocationCheck";
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
             + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
-    
-    
-    public void clientStartup() {
-        initializeLivingHandlers(null);
+
+    /* Boolean Used by Client to know if setup has been run */
+    @SideOnly(Side.CLIENT)
+    public static boolean isSetup = false;
+
+    @SideOnly(Side.CLIENT)
+    public void clientStartup(World world) {
+        if (!isSetup) {
+            initializeLivingHandlers(world);
+            isSetup = true;
+        }
     }
 
     public void serverStartup(File configDirectory, World world) {
@@ -60,13 +70,13 @@ public enum CreatureHandlerRegistry {
         }
     }
 
-    public void saveAndCloseConfigs(){
+    public void saveAndCloseConfigs() {
         for (Configuration config : modConfigCache.values()) {
             config.save();
         }
         modConfigCache.clear();
     }
-    
+
     /**
      * Default Setup of LivingHandlers Inferring from Vanilla Entities
      */
@@ -134,7 +144,7 @@ public enum CreatureHandlerRegistry {
             }
         }
     }
-    
+
     /**
      * Caches and Retrieves Configration Files for Individual modIDs. The ModID is inferred from the entity name in the
      * form ModID:EntityName
@@ -288,6 +298,15 @@ public enum CreatureHandlerRegistry {
      */
     public LivingHandler getLivingHandler(Class<? extends Entity> entityClass) {
         return livingHandlers.get(entityClass);
+    }
+
+    /**
+     * Creates a new LivingHandler at the provided key with
+     */
+    public void updateLivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID,
+            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
+        livingHandlers.put(entityClass,
+                livingHandlers.get(entityClass).create(creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn));
     }
 
     public Iterator<Class<? extends EntityLiving>> getLivingKeys() {

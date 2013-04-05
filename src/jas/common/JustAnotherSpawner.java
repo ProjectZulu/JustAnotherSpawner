@@ -31,7 +31,7 @@ import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
-@NetworkMod(clientSideRequired = false, serverSideRequired = false, packetHandler = PacketHandler.class)
+@NetworkMod(clientSideRequired = false, serverSideRequired = false, channels = { DefaultProps.defaultChannel }, packetHandler = PacketHandler.class)
 public class JustAnotherSpawner {
 
     @Instance(DefaultProps.MODID)
@@ -66,12 +66,12 @@ public class JustAnotherSpawner {
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
-
+        
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
         String ruleName = "doCustomMobSpawning";
         if (gameRule.hasRule(ruleName)) {
         } else {
             gameRule.addGameRule(ruleName, "true");
         }
-    }
+    }    
 }

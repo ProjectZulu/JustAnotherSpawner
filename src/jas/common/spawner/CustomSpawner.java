@@ -204,7 +204,7 @@ public class CustomSpawner {
     public static void performWorldGenSpawning(World world, CreatureType creatureType, BiomeGenBase biome, int par2,
             int par3, int par4, int par5, Random random) {
         while (random.nextFloat() < biome.getSpawningChance()) {
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntry(world, biome.biomeName);
+            SpawnListEntry spawnListEntry = creatureType.getRandomSpawnListEntry(world, biome.biomeName);
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;

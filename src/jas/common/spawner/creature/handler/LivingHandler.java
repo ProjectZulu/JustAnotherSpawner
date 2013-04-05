@@ -37,8 +37,8 @@ public class LivingHandler {
      * @param forceDespawn
      * @return
      */
-    protected LivingHandler create(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
+    protected LivingHandler create(String creatureTypeID, boolean useModLocationCheck, boolean shouldSpawn,
+            boolean forceDespawn) {
         return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
     }
     

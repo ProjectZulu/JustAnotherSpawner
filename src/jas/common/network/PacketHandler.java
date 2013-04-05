@@ -16,12 +16,14 @@ public class PacketHandler implements IPacketHandler {
     @Override
     public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
         if (packet.channel.equals(DefaultProps.defaultChannel)) {
+            JASLog.info("Received Pack");
             DataInputStream data = new DataInputStream(new ByteArrayInputStream(packet.data));
             PacketID packetID;
             try {
                 packetID = PacketID.getPacketIDbyIndex(data.readInt());
+                JASLog.info("PacketID %s", packetID);
                 PacketManager packetManager = packetID.createPacketManager();
-                if (!packetManager.processPacket(new DataInputStream(new ByteArrayInputStream(packet.data)), player)) {
+                if (!packetManager.processPacket(data, player)) {
                     // TODO: Add Return Type Error for Specific Troubleshooting
                     JASLog.warning("Failed to Process Packet %s", packetManager.getClass().getSimpleName());
                 }

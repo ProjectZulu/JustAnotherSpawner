@@ -46,11 +46,13 @@ public abstract class PacketManager{
         return packet;
     }
     
-    /* Write Custom Data into Packet */
+    /** Write Custom Data into Packet */
     protected abstract void writePacketData(DataOutputStream dataStream) throws IOException;
 
     
-    /* Processing of Packet, Return True if Succesful*/
+    /**
+     * Processing of Packet, Return True if succesful. Note: PacketID has already been read
+     */
     public abstract boolean processPacket(DataInputStream dataStream, Player player);
     
     /**

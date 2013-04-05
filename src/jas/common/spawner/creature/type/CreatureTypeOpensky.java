@@ -11,8 +11,7 @@ public class CreatureTypeOpensky extends CreatureType{
     }
     
     @Override
-    protected CreatureType create(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning) {
+    protected CreatureType create(int maxNumberOfCreature, int spawnRate, boolean chunkSpawning) {
         return new CreatureTypeOpensky(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
     

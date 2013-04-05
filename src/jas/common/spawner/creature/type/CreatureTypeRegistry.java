@@ -45,6 +45,11 @@ public enum CreatureTypeRegistry {
         return types.get(typeID.toUpperCase());
     }
 
+    public void updateCreatureType(String typeID, int spawnRate, int maxNumberOfCreature, boolean chunkSpawning) {
+        CreatureType creatureType = types.get(typeID);
+        types.put(typeID, creatureType.create(maxNumberOfCreature, spawnRate, chunkSpawning));
+    }
+
     private CreatureTypeRegistry() {
         addSpawnCategory(new CreatureTypeOpensky(CREATURE, 10, Material.air, 400, true));
         addSpawnCategory(new CreatureType(MONSTER, 70, Material.air, 1, false));

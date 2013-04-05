@@ -30,6 +30,14 @@ public class GuiSpawner extends GuiPanel {
         Keyboard.enableRepeatEvents(true);
         super.drawScreen(mouseX, mouseY, par3);
     }
+    
+    /**
+     * This Should Return False until Fully Synced i.e. Until Server Tells Client Its Okay to Start
+     */
+    @Override
+    public boolean doesGuiPauseGame() {
+        return false;
+    }
 
     @Override
     @SuppressWarnings("incomplete-switch")
