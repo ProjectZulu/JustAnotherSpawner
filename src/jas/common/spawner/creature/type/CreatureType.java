@@ -33,7 +33,7 @@ public class CreatureType {
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final ListMultimap<String, SpawnListEntry> biomeNameToSpawnEntry = ArrayListMultimap.create();
-    
+
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
         this.typeID = typeID;
@@ -43,26 +43,35 @@ public class CreatureType {
         this.chunkSpawning = chunkSpawning;
     }
 
+    public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+    }
+
+    public final CreatureType spawnRateTo(int spawnRate) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+    }
+
+    public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+    }
+
     /**
-     * Create a new Instance of CreatureType. Used to Allow subclasses to Include their own Logic
+     * Used internally to create a new Instance of CreatureType. MUST be Overriden by Subclasses so that they are not
+     * replaced with Parent. Used to Allow subclasses to Include their own Logic, but maintain same data structure.
+     * 
+     * Should create a new instance of class using parameters provided in the constructor.
      * 
      * @param typeID
      * @param maxNumberOfCreature
      * @param spawnMedium
      * @param spawnRate
      * @param chunkSpawning
-     * @param needSky
      */
-    // TODO: Should This be moved into a Factory of Sorts?
-    // TODO: Create Individual MEthods for each property that return the new object instance. I.e. CreatureType
-    // changeSpawnrate(int spawnRateNew)
-    protected CreatureType create(int maxNumberOfCreature, int spawnRate, boolean chunkSpawning) {
+    protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
+            int spawnRate, boolean chunkSpawning) {
         return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
-    public Collection<SpawnListEntry> getAllSpawns(){
-        return biomeNameToSpawnEntry.values();
-    }
     /**
      * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
      * 
@@ -91,9 +100,19 @@ public class CreatureType {
         }
         return false;
     }
+
+    /**
+     * Get All Spawns For all Biomes that are of Type CreatureType
+     * 
+     * @return
+     */
+    public Collection<SpawnListEntry> getAllSpawns() {
+        return biomeNameToSpawnEntry.values();
+    }
     
     /**
      * Performs Remove and Add Spawn operation
+     * 
      * @param biomeName
      * @param livingClass
      */
@@ -217,6 +236,7 @@ public class CreatureType {
 
     /**
      * Creates a new instance of creature types from configuration using itself as the default
+     * 
      * @param config
      * @return
      */
@@ -226,9 +246,10 @@ public class CreatureType {
                 .getInt();
         boolean resultChunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", chunkSpawning)
                 .getBoolean(chunkSpawning);
-        return this.create(resultMaxNumberOfCreature, resultSpawnRate, resultChunkSpawning);
+        return this.maxNumberOfCreatureTo(resultMaxNumberOfCreature).spawnRateTo(resultSpawnRate)
+                .chunkSpawningTo(resultChunkSpawning);
     }
-    
+
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
      * to Proposed Entity Registry. How will end-users fix issue? Does End User Need to?

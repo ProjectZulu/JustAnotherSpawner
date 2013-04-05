@@ -11,7 +11,8 @@ public class CreatureTypeUnderground extends CreatureType {
     }
 
     @Override
-    protected CreatureType create(int maxNumberOfCreature, int spawnRate, boolean chunkSpawning) {
+    protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
+            int spawnRate, boolean chunkSpawning) {
         return new CreatureTypeUnderground(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 

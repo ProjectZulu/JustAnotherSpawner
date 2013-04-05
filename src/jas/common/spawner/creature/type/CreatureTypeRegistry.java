@@ -47,7 +47,8 @@ public enum CreatureTypeRegistry {
 
     public void updateCreatureType(String typeID, int spawnRate, int maxNumberOfCreature, boolean chunkSpawning) {
         CreatureType creatureType = types.get(typeID);
-        types.put(typeID, creatureType.create(maxNumberOfCreature, spawnRate, chunkSpawning));
+        types.put(typeID, creatureType.maxNumberOfCreatureTo(maxNumberOfCreature).spawnRateTo(spawnRate)
+                .chunkSpawningTo(chunkSpawning));
     }
 
     private CreatureTypeRegistry() {
