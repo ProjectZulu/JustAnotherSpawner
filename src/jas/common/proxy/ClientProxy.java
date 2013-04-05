@@ -1,5 +1,12 @@
 package jas.common.proxy;
 
-public class ClientProxy extends CommonProxy {
+import jas.common.gui.GuiKeyBinding;
+import cpw.mods.fml.client.registry.KeyBindingRegistry;
 
+public class ClientProxy extends CommonProxy {
+    
+    @Override
+    public void registerKeyBinding() {
+        KeyBindingRegistry.registerKeyBinding(new GuiKeyBinding());
+    }
 }

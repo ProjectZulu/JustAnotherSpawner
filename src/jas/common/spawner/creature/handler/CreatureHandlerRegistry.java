@@ -45,7 +45,7 @@ public enum CreatureHandlerRegistry {
 
     /* Boolean Used by Client to know if setup has been run */
     @SideOnly(Side.CLIENT)
-    public static boolean isSetup = false;
+    public static boolean isSetup;
 
     @SideOnly(Side.CLIENT)
     public void clientStartup(World world) {
