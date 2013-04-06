@@ -305,8 +305,8 @@ public enum CreatureHandlerRegistry {
      */
     public void updateLivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID,
             boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
-        livingHandlers.put(entityClass,
-                livingHandlers.get(entityClass).create(creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn));
+        livingHandlers.put(entityClass, livingHandlers.get(entityClass).toCreatureTypeID(creatureTypeID)
+                .toUseModLocationCheck(useModLocationCheck).toShouldSpawn(shouldSpawn).toForceDespawn(forceDespawn));
     }
 
     public Iterator<Class<? extends EntityLiving>> getLivingKeys() {

@@ -17,9 +17,10 @@ import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 /**
- * Functionally Every SpawnListEntry is assumed Unique for a EntityLivingClass given biome Spawn. It should be noted
- * that Technically, f(Class, Biome, CreatureType) --> SpawnList, but since f(Class) --> CreatureType then f(Class,
- * Biome) --> SpawnList
+ * Every SpawnListEntry is assumed Unique for a EntityLivingClass given biome Spawn.
+ * 
+ * It should be noted that Technically, f(Class, Biome, CreatureType) --> SpawnList, but since f(Class) --> CreatureType
+ * then f(Class, Biome) --> SpawnList
  */
 // TODO: Large Constructor could probably use Factory / Or Split packSize into Its Own Immutable Class
 public class SpawnListEntry extends WeightedRandomItem {
@@ -84,7 +85,7 @@ public class SpawnListEntry extends WeightedRandomItem {
             return new SpawnListEntry(livingClass, biomeName, itemWeight, packSize, minChunkPack, maxChunkPack);
         }
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
