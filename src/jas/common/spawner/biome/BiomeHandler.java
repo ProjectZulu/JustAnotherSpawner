@@ -1,5 +1,6 @@
 package jas.common.spawner.biome;
 
+import jas.api.BiomeInterpreter;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
@@ -7,6 +8,8 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -22,7 +25,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
 public class BiomeHandler {
-    public final BiomeInterpreter interpreter;
+    private final BiomeInterpreter interpreter;
 
     private final List<String> structureKeys = new ArrayList<String>();
     private final ListMultimap<String, jas.common.spawner.creature.entry.SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap
@@ -35,11 +38,31 @@ public class BiomeHandler {
             structureKeys.add(structureKey);
         }
     }
-
-    public ArrayList<Class<? extends EntityLiving>> getStructureSpawn() {
-        return null;
+    
+    /**
+     * Gets the SpawnList For the Worlds Biome Coords Provided.
+     * 
+     * @return Collection of JAS SpawnListEntries that should be spawn. Return Empty list if none.
+     */
+    public Collection<jas.common.spawner.creature.entry.SpawnListEntry> getStructureSpawnList(World world, int xCoord,
+            int yCoord, int zCoord) {
+        String structureKey = interpreter.areCoordsStructure(world, xCoord, yCoord, zCoord);
+        if (structureKey != null) {
+            return structureKeysToSpawnList.get(structureKey);
+        }
+        return Collections.emptyList();
     }
-
+    
+    public boolean doesHandlerApply(World world, int xCoord, int yCoord, int zCoord) {
+        return interpreter.isValidBiome(world.getBiomeGenForCoords(xCoord, zCoord));
+    }
+    
+    /**
+     * Allow user Customization of the Interpreter Input by Filtering it Through the Configuration Files
+     * 
+     * @param configDirectory
+     * @param world
+     */
     public final void readFromConfig(File configDirectory, World world) {
         Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "Master/" + "StructureSpawns" + ".cfg"));

@@ -1,7 +1,10 @@
 package jas.common.spawner.biome;
 
+import jas.api.BiomeInterpreter;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import net.minecraft.world.WorldServer;
 
@@ -13,6 +16,7 @@ public enum BiomeHandlerRegistry {
 
     BiomeHandlerRegistry() {
         biomeInterpreters.add(new BiomeInterpreterSwamp());
+        biomeInterpreters.add(new BiomeInterpreterNether());
     }
 
     public void registerInterpreter(BiomeInterpreter biomeInterpreter) {
@@ -27,5 +31,9 @@ public enum BiomeHandlerRegistry {
         for (BiomeHandler biomeHandler : biomeHandlers) {
             biomeHandler.readFromConfig(configDir, worldServer);
         }
+    }
+
+    public Iterator<BiomeHandler> getHandlers() {
+        return biomeHandlers.iterator();
     }
 }

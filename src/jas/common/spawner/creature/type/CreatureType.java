@@ -1,13 +1,18 @@
 package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
+import jas.common.JASLog;
+import jas.common.spawner.biome.BiomeHandler;
+import jas.common.spawner.biome.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.logging.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
@@ -25,7 +30,7 @@ import net.minecraftforge.common.Configuration;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-//TODO: Large Constructor could probably use Factory
+//TODO: Large Constructor could probably use Factory OR String optionalParameters to consolidate unused properties
 public class CreatureType {
     public final String typeID;
     public final int spawnRate;
@@ -109,7 +114,7 @@ public class CreatureType {
     public Collection<SpawnListEntry> getAllSpawns() {
         return biomeNameToSpawnEntry.values();
     }
-    
+
     /**
      * Performs Remove and Add Spawn operation
      * 
@@ -137,7 +142,7 @@ public class CreatureType {
     }
 
     /**
-     * Called by CustomSpawner to get a creature dependent on the World Location
+     * Called by CustomSpawner for a Passive Spawn Entity
      * 
      * @param world
      * @param xCoord Random xCoordinate nearby to Where Creature will spawn
@@ -145,7 +150,15 @@ public class CreatureType {
      * @param zCoord Random zCoordinate nearby to Where Creature will spawn
      * @return Creature to Spawn
      */
-    public SpawnListEntry getSpawnListEntry(World world, int xCoord, int yCoord, int zCoord) {
+    public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
+        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
+        if (!structureSpawnList.isEmpty()) {
+            JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
+                    zCoord);
+            SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
+                    structureSpawnList);
+            return isEntityOfType(spawnListEntry.livingClass) ? spawnListEntry : null;
+        }
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
         if (biomegenbase != null) {
             Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomegenbase.biomeName);
@@ -156,16 +169,38 @@ public class CreatureType {
     }
 
     /**
-     * Called by CustomSpawner to get a creature dependent on the World Biome
+     * Called by CustomSpawner for a Chunk Spawn Entity
      * 
      * @param biomeName Name of Biome SpawnList to get CreatureType From
      * @return
      */
-    // TODO: World world should Just be an Instance of Random
-    public SpawnListEntry getRandomSpawnListEntry(World world, String biomeName) {
+    public SpawnListEntry getSpawnListEntryToSpawn(World world, String biomeName, int xCoord, int yCoord, int zCoord) {
+        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
+        if (!structureSpawnList.isEmpty()) {
+            JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
+                    zCoord);
+            SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
+                    structureSpawnList);
+            return isEntityOfType(spawnListEntry.livingClass) ? spawnListEntry : null;
+        }
         Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomeName);
         return !spawnEntryList.isEmpty() ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
                 : null;
+    }
+
+    private Collection<SpawnListEntry> getStructureSpawnList(World world, int xCoord, int yCoord, int zCoord) {
+        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+        while (iterator.hasNext()) {
+            BiomeHandler handler = iterator.next();
+            if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
+                Collection<SpawnListEntry> spawnEntryList = handler
+                        .getStructureSpawnList(world, xCoord, yCoord, zCoord);
+                if (!spawnEntryList.isEmpty()) {
+                    return spawnEntryList;
+                }
+            }
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -185,12 +220,24 @@ public class CreatureType {
     }
 
     /**
+     * Entity Bases Type Check. Used to Evalue Type of Entity if it exists in the World
      * 
      * @param entity Entity that is being Checked
      * @return
      */
     public boolean isEntityOfType(Entity entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
+    }
+
+    /**
+     * Class Bases Type Check. Used to Evalue Type of Entity before it exists in the World
+     * 
+     * @param entity
+     * @return
+     */
+    public boolean isEntityOfType(Class<? extends EntityLiving> entity) {
+        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity);
         return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
     }
 
@@ -252,7 +299,7 @@ public class CreatureType {
 
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
-     * to Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
+     * to Proposed Entity Registry or BiomeInterpreter. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.

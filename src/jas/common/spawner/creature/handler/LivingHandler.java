@@ -72,6 +72,11 @@ public class LivingHandler {
         return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
                 .getCreatureType(creatureTypeID).equals(creatureType);
     }
+    
+    public boolean isEntityOfType(Class<? extends EntityLiving> entity, CreatureType creatureType) {
+        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
+                .getCreatureType(creatureTypeID).equals(creatureType);
+    }    
 
     /**
      * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This

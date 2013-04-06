@@ -1,4 +1,4 @@
-package jas.common.spawner.biome;
+package jas.api;
 
 import java.util.Collection;
 

@@ -1,5 +1,6 @@
 package jas.common.spawner.biome;
 
+import jas.api.BiomeInterpreter;
 import jas.common.spawner.creature.handler.ReflectionHelper;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenSwamp;
 import net.minecraft.world.biome.SpawnListEntry;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.feature.MapGenScatteredFeature;
 
@@ -36,24 +36,27 @@ public class BiomeInterpreterSwamp implements BiomeInterpreter {
     // TODO: Compile List of Fields we could make public for Coremod
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
         BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-        IChunkProvider chunkprovider = world.getChunkProvider();
-        if (biome instanceof BiomeGenSwamp && chunkprovider instanceof ChunkProviderGenerate) {
-            ChunkProviderGenerate chunkProviderGenerate = (ChunkProviderGenerate) world.getChunkProvider();
-            if (ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate")) {
-                MapGenScatteredFeature mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection(
-                        "MapGenScatteredFeature", chunkProviderGenerate, MapGenScatteredFeature.class);
-                if (mapGenScatteredFeature != null) {
+        ChunkProviderGenerate chunkProviderGenerate = BiomeInterpreterHelper.getInnerChunkProvider(world,
+                ChunkProviderGenerate.class);
 
-                }
+        if (biome instanceof BiomeGenSwamp && chunkProviderGenerate != null) {
+            MapGenScatteredFeature mapGenScatteredFeature;
+            if (ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate")) {
+                mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("scatteredFeatureGenerator",
+                        chunkProviderGenerate, MapGenScatteredFeature.class);
+            } else {
+                mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("field_73233_x",
+                        chunkProviderGenerate, MapGenScatteredFeature.class);
             }
-            // chunkProviderGenerate.scatteredFeatureGenerator
-            return "WitchHut";
+            if (mapGenScatteredFeature != null && mapGenScatteredFeature.hasStructureAt(xCoord, yCoord, zCoord)) {
+                return "WitchHut";
+            }
         }
         return null;
     }
 
     @Override
     public boolean isValidBiome(BiomeGenBase biomeGenBase) {
-        return biomeGenBase.equals(BiomeGenBase.swampland);
+        return biomeGenBase.biomeName.equals(BiomeGenBase.swampland.biomeName);
     }
 }
