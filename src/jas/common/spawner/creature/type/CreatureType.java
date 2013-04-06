@@ -44,15 +44,15 @@ public class CreatureType {
     }
 
     public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
     public final CreatureType spawnRateTo(int spawnRate) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
     public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, maxNumberOfCreature, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
     /**
