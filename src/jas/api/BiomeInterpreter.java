@@ -42,11 +42,11 @@ public interface BiomeInterpreter {
     public abstract String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord);
 
     /**
-     * Checks if This Interpreter should apply to the Provided Biome. Run on ServerStart to assign Interpreter to
-     * appropriate biomes.
+     * Checks if This Interpreter should apply to the Provided World-Biome. Called to determine if areCoordsStrucutre
+     * should be called.
      * 
      * @param biomeGenBase Biome to Check
      * @return True if Interpreter should apply to biome
      */
-    public abstract boolean isValidBiome(BiomeGenBase biomeGenBase);
+    public abstract boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase);
 }

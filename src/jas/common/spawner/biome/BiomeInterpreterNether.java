@@ -64,7 +64,7 @@ public class BiomeInterpreterNether implements BiomeInterpreter {
     }
 
     @Override
-    public boolean isValidBiome(BiomeGenBase biomeGenBase) {
+    public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
         if (biomeGenBase.biomeName.equals(BiomeGenBase.hell.biomeName)) {
             return true;
         }

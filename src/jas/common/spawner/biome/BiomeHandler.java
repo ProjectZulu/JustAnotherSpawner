@@ -54,7 +54,7 @@ public class BiomeHandler {
     }
     
     public boolean doesHandlerApply(World world, int xCoord, int yCoord, int zCoord) {
-        return interpreter.isValidBiome(world.getBiomeGenForCoords(xCoord, zCoord));
+        return interpreter.shouldUseHandler(world, world.getBiomeGenForCoords(xCoord, zCoord));
     }
     
     /**

@@ -56,7 +56,7 @@ public class BiomeInterpreterSwamp implements BiomeInterpreter {
     }
 
     @Override
-    public boolean isValidBiome(BiomeGenBase biomeGenBase) {
+    public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
         return biomeGenBase.biomeName.equals(BiomeGenBase.swampland.biomeName);
     }
 }

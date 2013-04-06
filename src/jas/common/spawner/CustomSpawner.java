@@ -141,8 +141,8 @@ public class CustomSpawner {
                                                     Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving,
                                                             worldServer, f, f1, f2);
                                                     if (canSpawn == Result.ALLOW
-                                                            || (canSpawn == Result.DEFAULT && entityliving
-                                                                    .getCanSpawnHere())) {
+                                                            || (canSpawn == Result.DEFAULT && spawnlistentry
+                                                                    .getLivingHandler().getCanSpawnHere(entityliving))) {
                                                         ++j2;
                                                         JASLog.info("Spawning Creature %s at %s, %s, %s ",
                                                                 entityliving.getEntityName(), entityliving.posX,

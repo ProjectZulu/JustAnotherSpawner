@@ -17,6 +17,7 @@ public enum BiomeHandlerRegistry {
     BiomeHandlerRegistry() {
         biomeInterpreters.add(new BiomeInterpreterSwamp());
         biomeInterpreters.add(new BiomeInterpreterNether());
+        biomeInterpreters.add(new BiomeInterpreterOverworldStructures());
     }
 
     public void registerInterpreter(BiomeInterpreter biomeInterpreter) {
