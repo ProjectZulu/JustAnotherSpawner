@@ -72,6 +72,11 @@ public class LivingHandler {
         return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
                 .getCreatureType(creatureTypeID).equals(creatureType);
     }
+    
+    public boolean isEntityOfType(Class<? extends EntityLiving> entity, CreatureType creatureType) {
+        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
+                .getCreatureType(creatureTypeID).equals(creatureType);
+    }    
 
     /**
      * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
@@ -80,9 +85,9 @@ public class LivingHandler {
      * 
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    public final boolean getCanSpawnHere(EntityLiving entity, CreatureType spawnType) {
+    public final boolean getCanSpawnHere(EntityLiving entity) {
         if (useModLocationCheck) {
-            return isValidLocation(entity, spawnType);
+            return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
         } else {
             return isValidLocation(entity);
         }

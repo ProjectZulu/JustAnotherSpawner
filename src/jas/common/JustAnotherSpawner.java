@@ -5,6 +5,7 @@ import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
+import jas.common.spawner.biome.BiomeHandlerRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -64,7 +65,7 @@ public class JustAnotherSpawner {
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
-        
+        BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
         String ruleName = "doCustomMobSpawning";
         if (gameRule.hasRule(ruleName)) {
