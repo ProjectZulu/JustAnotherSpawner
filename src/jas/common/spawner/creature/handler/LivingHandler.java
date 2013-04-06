@@ -27,21 +27,40 @@ public class LivingHandler {
         this.shouldSpawn = shouldSpawn;
         this.forceDespawn = forceDespawn;
     }
-    
+
+    public final LivingHandler toCreatureTypeID(String creatureTypeID) {
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    }
+
+    public final LivingHandler toUseModLocationCheck(boolean useModLocationCheck) {
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    }
+
+    public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    }
+
+    public final LivingHandler toForceDespawn(boolean forceDespawn) {
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+    }
+
     /**
-     * Create a new Instance of this LivingHandler. Used to Allow subclasses to Include their own Logic
-     * @param entityClass
-     * @param creatureTypeID
-     * @param useModLocationCheck
-     * @param shouldSpawn
-     * @param forceDespawn
-     * @return
+     * Used internally to create a new Instance of LivingHandler. MUST be Overriden by Subclasses so that they are not
+     * replaced with Parent. Used to Allow subclasses to Include their own Logic, but maintain same data structure.
+     * 
+     * Should create a new instance of class using parameters provided in the constructor.
+     * 
+     * @param typeID
+     * @param maxNumberOfCreature
+     * @param spawnMedium
+     * @param spawnRate
+     * @param chunkSpawning
      */
-    protected LivingHandler create(Class<? extends EntityLiving> entityClass, String creatureTypeID,
+    protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
             boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
         return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
     }
-    
+
     /**
      * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific
      * 
@@ -71,6 +90,7 @@ public class LivingHandler {
 
     /**
      * Called by Despawn to Manually Attempt to Despawn Entity
+     * 
      * @param entity
      */
     public final void despawnEntity(EntityLiving entity) {
@@ -92,9 +112,9 @@ public class LivingHandler {
             }
         }
     }
-    
+
     /**
-     * Represents the 'Modders Choice' for Creature SpawnLocation. 
+     * Represents the 'Modders Choice' for Creature SpawnLocation.
      * 
      * @param entity
      * @param spawnType
@@ -116,9 +136,10 @@ public class LivingHandler {
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
                 && !entity.worldObj.isAnyLiquid(entity.boundingBox);
     }
-    
+
     /**
      * Creates a new instance of this from configuration using itself as the default
+     * 
      * @param config
      * @return
      */
@@ -141,8 +162,8 @@ public class LivingHandler {
                     .parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
             boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[3], useModLocationCheck,
                     "LocationCheck");
-            return new LivingHandler(entityClass, resultCreatureType, resultLocationCheck, resultShouldSpawn,
-                    resultForceDespawn);
+            return this.toCreatureTypeID(resultCreatureType).toUseModLocationCheck(resultLocationCheck)
+                    .toShouldSpawn(resultShouldSpawn).toForceDespawn(resultForceDespawn);
         } else {
             JASLog.severe(
                     "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",

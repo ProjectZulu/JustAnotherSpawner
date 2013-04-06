@@ -5,21 +5,25 @@ import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.BlockStep;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.Configuration;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 //TODO: Large Constructor could probably use Factory
 public class CreatureType {
@@ -28,7 +32,7 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
-    private final HashMap<String, Collection<SpawnListEntry>> biomeNameToSpawnEntry = new HashMap<String, Collection<SpawnListEntry>>();
+    private final ListMultimap<String, SpawnListEntry> biomeNameToSpawnEntry = ArrayListMultimap.create();
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
@@ -39,19 +43,32 @@ public class CreatureType {
         this.chunkSpawning = chunkSpawning;
     }
 
+    public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+
+    public final CreatureType spawnRateTo(int spawnRate) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+
+    public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+
     /**
-     * Create a new Instance of CreatureType. Used to Allow subclasses to Include their own Logic
+     * Used internally to create a new Instance of CreatureType. MUST be Overriden by Subclasses so that they are not
+     * replaced with Parent. Used to Allow subclasses to Include their own Logic, but maintain same data structure.
+     * 
+     * Should create a new instance of class using parameters provided in the constructor.
      * 
      * @param typeID
      * @param maxNumberOfCreature
      * @param spawnMedium
      * @param spawnRate
      * @param chunkSpawning
-     * @param needSky
      */
-    // TODO: Should This be moved into a Factory of Sorts?
-    protected CreatureType create(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning) {
+    protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
+            int spawnRate, boolean chunkSpawning) {
         return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
     }
 
@@ -62,10 +79,54 @@ public class CreatureType {
      * @param spawnListEntry
      */
     public void addSpawn(SpawnListEntry spawnListEntry) {
-        if (biomeNameToSpawnEntry.get(spawnListEntry.biomeName) == null) {
-            biomeNameToSpawnEntry.put(spawnListEntry.biomeName, new ArrayList<SpawnListEntry>());
-        }
         biomeNameToSpawnEntry.get(spawnListEntry.biomeName).add(spawnListEntry);
+    }
+
+    /**
+     * Removes the SpawnListEntry defined by biomeName and LivingClass from the CreatureType.
+     * 
+     * @param biomeName
+     * @param livingClass
+     * @return
+     */
+    public boolean removeSpawn(String biomeName, Class<? extends EntityLiving> livingClass) {
+        Iterator<SpawnListEntry> iterator = biomeNameToSpawnEntry.get(biomeName).iterator();
+        while (iterator.hasNext()) {
+            SpawnListEntry spawnListEntry = iterator.next();
+            if (livingClass.equals(spawnListEntry.livingClass) && spawnListEntry.biomeName.equals(biomeName)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get All Spawns For all Biomes that are of Type CreatureType
+     * 
+     * @return
+     */
+    public Collection<SpawnListEntry> getAllSpawns() {
+        return biomeNameToSpawnEntry.values();
+    }
+    
+    /**
+     * Performs Remove and Add Spawn operation
+     * 
+     * @param biomeName
+     * @param livingClass
+     */
+    public void updateOrAddSpawn(SpawnListEntry spawnListEntry) {
+        ListIterator<SpawnListEntry> iterator = biomeNameToSpawnEntry.get(spawnListEntry.biomeName).listIterator();
+        while (iterator.hasNext()) {
+            SpawnListEntry listEntry = iterator.next();
+            if (listEntry.livingClass.equals(spawnListEntry.livingClass)
+                    && listEntry.biomeName.equals(spawnListEntry.biomeName)) {
+                iterator.set(spawnListEntry);
+                return;
+            }
+        }
+        addSpawn(spawnListEntry);
     }
 
     /**
@@ -88,8 +149,8 @@ public class CreatureType {
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
         if (biomegenbase != null) {
             Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomegenbase.biomeName);
-            return spawnEntryList != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
-                    : null;
+            return !spawnEntryList.isEmpty() ? (SpawnListEntry) WeightedRandom
+                    .getRandomItem(world.rand, spawnEntryList) : null;
         }
         return null;
     }
@@ -100,9 +161,10 @@ public class CreatureType {
      * @param biomeName Name of Biome SpawnList to get CreatureType From
      * @return
      */
-    public SpawnListEntry getSpawnListEntry(World world, String biomeName) {
+    // TODO: World world should Just be an Instance of Random
+    public SpawnListEntry getRandomSpawnListEntry(World world, String biomeName) {
         Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomeName);
-        return spawnEntryList != null ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
+        return !spawnEntryList.isEmpty() ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
                 : null;
     }
 
@@ -174,6 +236,7 @@ public class CreatureType {
 
     /**
      * Creates a new instance of creature types from configuration using itself as the default
+     * 
      * @param config
      * @return
      */
@@ -183,9 +246,10 @@ public class CreatureType {
                 .getInt();
         boolean resultChunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", chunkSpawning)
                 .getBoolean(chunkSpawning);
-        return this.create(typeID, resultMaxNumberOfCreature, spawnMedium, resultSpawnRate, resultChunkSpawning);
+        return this.maxNumberOfCreatureTo(resultMaxNumberOfCreature).spawnRateTo(resultSpawnRate)
+                .chunkSpawningTo(resultChunkSpawning);
     }
-    
+
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
      * to Proposed Entity Registry. How will end-users fix issue? Does End User Need to?
