@@ -35,21 +35,15 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
         ChunkProviderGenerate chunkProviderGenerate = BiomeInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderGenerate.class);
         if (chunkProviderGenerate != null) {
-            MapGenStructure strongholdGen = getStructureGen(
-                    MapGenStronghold.class,
-                    chunkProviderGenerate,
-                    ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate") ? "strongholdGenerator"
-                            : "field_73225_u");
+            MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, chunkProviderGenerate,
+                    "strongholdGenerator", "field_73225_u");
             String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
             if (stronghold != null) {
                 return stronghold;
             }
 
-            MapGenStructure mineshaftGen = getStructureGen(
-                    MapGenMineshaft.class,
-                    chunkProviderGenerate,
-                    ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate") ? "mineshaftGenerator"
-                            : "field_73223_w");
+            MapGenStructure mineshaftGen = getStructureGen(MapGenMineshaft.class, chunkProviderGenerate,
+                    "mineshaftGenerator", "field_73223_w");
             String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
             if (mineshaft != null) {
                 return mineshaft;
@@ -59,8 +53,13 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
     }
 
     private MapGenStructure getStructureGen(Class<? extends MapGenStructure> fieldClass, Object containerInstance,
-            String fieldName) {
-        MapGenStructure structure = ReflectionHelper.getFieldFromReflection(fieldName, containerInstance, fieldClass);
+            String fieldName, String obfName) {
+        MapGenStructure structure;
+        try {
+            structure = ReflectionHelper.getCatchableFieldFromReflection(obfName, containerInstance, fieldClass);
+        } catch (NoSuchFieldException e) {
+            structure = ReflectionHelper.getFieldFromReflection(fieldName, containerInstance, fieldClass);
+        }
         return structure;
     }
 

@@ -43,11 +43,11 @@ public class BiomeInterpreterSwamp implements BiomeInterpreter {
 
         if (biome instanceof BiomeGenSwamp && chunkProviderGenerate != null) {
             MapGenScatteredFeature mapGenScatteredFeature;
-            if (ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate")) {
-                mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("scatteredFeatureGenerator",
+            try {
+                mapGenScatteredFeature = ReflectionHelper.getCatchableFieldFromReflection("field_73233_x",
                         chunkProviderGenerate, MapGenScatteredFeature.class);
-            } else {
-                mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("field_73233_x",
+            } catch (NoSuchFieldException e) {
+                mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("scatteredFeatureGenerator",
                         chunkProviderGenerate, MapGenScatteredFeature.class);
             }
             if (mapGenScatteredFeature != null && mapGenScatteredFeature.hasStructureAt(xCoord, yCoord, zCoord)) {

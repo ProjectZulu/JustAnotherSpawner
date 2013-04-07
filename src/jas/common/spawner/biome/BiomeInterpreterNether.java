@@ -15,7 +15,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.biome.SpawnListEntry;
-import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 
@@ -49,11 +48,11 @@ public class BiomeInterpreterNether implements BiomeInterpreter {
                 ChunkProviderHell.class);
         if (biome instanceof BiomeGenHell && chunkProviderHell != null) {
             MapGenNetherBridge genNetherBridge;
-            if (ReflectionHelper.isUnObfuscated(ChunkProviderGenerate.class, "ChunkProviderGenerate")) {
-                genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
+            try {
+                genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c", chunkProviderHell,
                         MapGenNetherBridge.class);
-            } else {
-                genNetherBridge = ReflectionHelper.getFieldFromReflection("field_73172_c", chunkProviderHell,
+            } catch (NoSuchFieldException e) {
+                genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
                         MapGenNetherBridge.class);
             }
             if (genNetherBridge != null && genNetherBridge.hasStructureAt(xCoord, yCoord, zCoord)) {
