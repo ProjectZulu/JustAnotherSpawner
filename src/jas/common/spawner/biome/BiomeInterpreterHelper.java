@@ -11,11 +11,11 @@ public class BiomeInterpreterHelper {
     public static <T> T getInnerChunkProvider(World world, Class<T> chunkClass) {
         ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
         IChunkProvider currentChunkProvider;
-        if (ReflectionHelper.isUnObfuscated(ChunkProviderServer.class, "ChunkProviderServer")) {
-            currentChunkProvider = ReflectionHelper.getFieldFromReflection("currentChunkProvider", chunkprovider,
+        try {
+            currentChunkProvider = ReflectionHelper.getCatchableFieldFromReflection("field_73246_d", chunkprovider,
                     IChunkProvider.class);
-        } else {
-            currentChunkProvider = ReflectionHelper.getFieldFromReflection("field_73059_b", chunkprovider,
+        } catch (NoSuchFieldException e) {
+            currentChunkProvider = ReflectionHelper.getFieldFromReflection("currentChunkProvider", chunkprovider,
                     IChunkProvider.class);
         }
         return chunkClass.isAssignableFrom(currentChunkProvider.getClass()) ? (T) currentChunkProvider : null;
