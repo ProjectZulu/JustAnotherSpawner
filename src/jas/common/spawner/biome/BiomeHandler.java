@@ -98,7 +98,6 @@ public class BiomeHandler {
              */
             for (Class<? extends EntityLiving> livingClass : classList) {
                 String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-                JASLog.info("XXX: Adding Spawnlist for %s", mobName);
                 if (CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).shouldSpawn
                         && !CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).creatureTypeID
                                 .equals(CreatureTypeRegistry.NONE)) {
@@ -155,6 +154,9 @@ public class BiomeHandler {
         ArrayList<Class<? extends EntityLiving>> classList = new ArrayList<>();
         String[] parts = mobNames.split("\\,");
         for (String mobName : parts) {
+            if(mobName.equals("")){
+                continue;
+            }
             Object object = EntityList.stringToClassMapping.get(mobName);
             if (object != null && EntityLiving.class.isAssignableFrom((Class<?>) object)) {
                 classList.add((Class<? extends EntityLiving>) object);
