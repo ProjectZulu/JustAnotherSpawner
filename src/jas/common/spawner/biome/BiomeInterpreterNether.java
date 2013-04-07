@@ -22,15 +22,17 @@ import net.minecraft.world.gen.structure.MapGenNetherBridge;
 public class BiomeInterpreterNether implements BiomeInterpreter {
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Collection<String> getStructureKeys() {
-        Collection<String> collection = new ArrayList<>();
+        Collection<String> collection = new ArrayList();
         collection.add("NetherBridge");
         return collection;
     }
 
     @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Collection<SpawnListEntry> getStructureSpawnList(String structureKey) {
-        Collection<SpawnListEntry> collection = new ArrayList<>();
+        Collection<SpawnListEntry> collection = new ArrayList();
         if (structureKey.equals("NetherBridge")) {
             collection.add(new SpawnListEntry(EntityBlaze.class, 10, 2, 3));
             collection.add(new SpawnListEntry(EntityPigZombie.class, 5, 4, 4));

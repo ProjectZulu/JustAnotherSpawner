@@ -17,15 +17,17 @@ import net.minecraft.world.gen.feature.MapGenScatteredFeature;
 public class BiomeInterpreterSwamp implements BiomeInterpreter {
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Collection<String> getStructureKeys() {
-        Collection<String> collection = new ArrayList<>();
+        Collection<String> collection = new ArrayList();
         collection.add("WitchHut");
         return collection;
     }
 
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Collection<SpawnListEntry> getStructureSpawnList(String structureKey) {
-        Collection<SpawnListEntry> collection = new ArrayList<>();
+        Collection<SpawnListEntry> collection = new ArrayList();
         if (structureKey.equals("WitchHut")) {
             collection.add(new SpawnListEntry(EntityWitch.class, 1, 1, 1));
         }

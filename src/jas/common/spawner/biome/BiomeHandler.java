@@ -149,9 +149,9 @@ public class BiomeHandler {
         return new jas.common.spawner.creature.entry.SpawnListEntry(livingClass, structureKey, 0, 4, 0, 4);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private ArrayList<Class<? extends EntityLiving>> mobNamesToMobClasses(String mobNames) {
-        ArrayList<Class<? extends EntityLiving>> classList = new ArrayList<>();
+        ArrayList<Class<? extends EntityLiving>> classList = new ArrayList();
         String[] parts = mobNames.split("\\,");
         for (String mobName : parts) {
             if(mobName.equals("")){
