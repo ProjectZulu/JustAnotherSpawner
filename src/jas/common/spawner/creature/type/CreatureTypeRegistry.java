@@ -45,12 +45,18 @@ public enum CreatureTypeRegistry {
         return types.get(typeID.toUpperCase());
     }
 
+    public void updateCreatureType(String typeID, int spawnRate, int maxNumberOfCreature, boolean chunkSpawning) {
+        CreatureType creatureType = types.get(typeID);
+        types.put(typeID, creatureType.maxNumberOfCreatureTo(maxNumberOfCreature).spawnRateTo(spawnRate)
+                .chunkSpawningTo(chunkSpawning));
+    }
+
     private CreatureTypeRegistry() {
         addSpawnCategory(new CreatureTypeOpensky(CREATURE, 10, Material.air, 400, true));
         addSpawnCategory(new CreatureType(MONSTER, 70, Material.air, 1, false));
         addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false));
         addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false));
-        
+
         addSpawnCategory(new CreatureTypeUnderground(UNDERGROUND, 10, Material.air, 1, false));
         addSpawnCategory(new CreatureTypeOpensky(OPENSKY, 10, Material.air, 1, false));
     }
@@ -63,21 +69,10 @@ public enum CreatureTypeRegistry {
         masterConfig.load();
         worldConfig.load();
         for (String typeID : types.keySet()) {
-            CreatureType creatureType = getTypeFromConfig(worldConfig, typeID,
-                    getTypeFromConfig(masterConfig, typeID, types.get(typeID)));
+            CreatureType creatureType = types.get(typeID).createFromConfig(masterConfig).createFromConfig(worldConfig);
             types.put(typeID, creatureType);
         }
         masterConfig.save();
         worldConfig.save();
-    }
-
-    private CreatureType getTypeFromConfig(Configuration config, String typeID, CreatureType defaultSettings) {
-        int spawnRate = config.get("LivingType." + typeID, "Spawn Rate", defaultSettings.spawnRate).getInt();
-        int maxNumberOfCreature = config.get("LivingType." + typeID, "Creature Spawn Cap",
-                defaultSettings.maxNumberOfCreature).getInt();
-        boolean chunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", defaultSettings.chunkSpawning)
-                .getBoolean(defaultSettings.chunkSpawning);
-        return defaultSettings.create(typeID, maxNumberOfCreature, defaultSettings.spawnMedium, spawnRate,
-                chunkSpawning);
     }
 }

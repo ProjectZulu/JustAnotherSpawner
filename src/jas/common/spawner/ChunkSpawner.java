@@ -1,6 +1,5 @@
 package jas.common.spawner;
 
-import jas.common.JASLog;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -14,10 +13,8 @@ public class ChunkSpawner {
     public void performChunkSpawning(PopulateChunkEvent.Populate event) {
 
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
-        JASLog.info("performChunkSpawning");
         if (event.type == PopulateChunkEvent.Populate.EventType.ICE
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
-            JASLog.info("PopulateChunkEvent.Populate.EventType.ICE");
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
             Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();

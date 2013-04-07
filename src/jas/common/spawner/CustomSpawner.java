@@ -119,7 +119,7 @@ public class CustomSpawner {
 
                                                 if (f6 >= 576.0F) {
                                                     if (spawnlistentry == null) {
-                                                        spawnlistentry = creatureType.getSpawnListEntry(worldServer, l2, i3, j3);
+                                                        spawnlistentry = creatureType.getSpawnListEntryToSpawn(worldServer, l2, i3, j3);
                                                         if (spawnlistentry == null) {
                                                             break labelInside; //TODO: Coulnd't This be Continue?
                                                         }
@@ -141,8 +141,8 @@ public class CustomSpawner {
                                                     Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving,
                                                             worldServer, f, f1, f2);
                                                     if (canSpawn == Result.ALLOW
-                                                            || (canSpawn == Result.DEFAULT && entityliving
-                                                                    .getCanSpawnHere())) {
+                                                            || (canSpawn == Result.DEFAULT && spawnlistentry
+                                                                    .getLivingHandler().getCanSpawnHere(entityliving))) {
                                                         ++j2;
                                                         JASLog.info("Spawning Creature %s at %s, %s, %s ",
                                                                 entityliving.getEntityName(), entityliving.posX,
@@ -204,7 +204,12 @@ public class CustomSpawner {
     public static void performWorldGenSpawning(World world, CreatureType creatureType, BiomeGenBase biome, int par2,
             int par3, int par4, int par5, Random random) {
         while (random.nextFloat() < biome.getSpawningChance()) {
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntry(world, biome.biomeName);
+            int j1 = par2 + random.nextInt(par4);
+            int k1 = par3 + random.nextInt(par5);
+            int l1 = j1;
+            int i2 = k1;
+            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world, biome.biomeName, j1,
+                    world.getTopSolidOrLiquidBlock(j1, k1), k1);
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
@@ -213,10 +218,6 @@ public class CustomSpawner {
             }
             int i1 = spawnListEntry.minChunkPack
                     + random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
-            int j1 = par2 + random.nextInt(par4);
-            int k1 = par3 + random.nextInt(par5);
-            int l1 = j1;
-            int i2 = k1;
             for (int j2 = 0; j2 < i1; ++j2) {
                 boolean flag = false;
 

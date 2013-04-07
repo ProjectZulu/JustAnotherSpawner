@@ -1,8 +1,11 @@
 package jas.common;
 
+import jas.common.gui.GuiHandler;
+import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
+import jas.common.spawner.biome.BiomeHandlerRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -22,11 +25,12 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
-@NetworkMod(clientSideRequired = false, serverSideRequired = false)
+@NetworkMod(clientSideRequired = false, serverSideRequired = false, channels = { DefaultProps.defaultChannel }, packetHandler = PacketHandler.class)
 public class JustAnotherSpawner {
 
     @Instance(DefaultProps.MODID)
@@ -44,28 +48,29 @@ public class JustAnotherSpawner {
         JASLog.configureLogging(Properties.debugMode);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
+//        proxy.registerKeyBinding();
     }
 
     @Init
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
+        NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
     }
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
-
     }
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
-        CreatureHandlerRegistry.INSTANCE.findProcessEntitesForHandlers(modConfigDirectoryFile, event.getServer());
-
+        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
         String ruleName = "doCustomMobSpawning";
         if (gameRule.hasRule(ruleName)) {
         } else {
             gameRule.addGameRule(ruleName, "true");
         }
-    }
+    }    
 }
