@@ -85,7 +85,7 @@ public enum CreatureHandlerRegistry {
         populateBiomeList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), true, false, false);
+                    world), true, false, false, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }

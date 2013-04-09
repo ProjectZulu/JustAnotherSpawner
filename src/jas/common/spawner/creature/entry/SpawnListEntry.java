@@ -5,7 +5,7 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
-import jas.common.spawner.creature.handler.LivingRegsitryHelper;
+import jas.common.spawner.creature.handler.ParsingHelper;
 
 import java.util.Locale;
 
@@ -71,10 +71,10 @@ public class SpawnListEntry extends WeightedRandomItem {
 
         String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
         if (resultParts.length == 4) {
-            int resultSpawnWeight = LivingRegsitryHelper.parseInteger(resultParts[0], packSize, "spawnWeight");
-            int resultPackSize = LivingRegsitryHelper.parseInteger(resultParts[1], packSize, "packSize");
-            int resultMinChunkPack = LivingRegsitryHelper.parseInteger(resultParts[2], packSize, "minChunkPack");
-            int resultMaxChunkPack = LivingRegsitryHelper.parseInteger(resultParts[3], packSize, "maxChunkPack");
+            int resultSpawnWeight = ParsingHelper.parseInteger(resultParts[0], packSize, "spawnWeight");
+            int resultPackSize = ParsingHelper.parseInteger(resultParts[1], packSize, "packSize");
+            int resultMinChunkPack = ParsingHelper.parseInteger(resultParts[2], packSize, "minChunkPack");
+            int resultMaxChunkPack = ParsingHelper.parseInteger(resultParts[3], packSize, "maxChunkPack");
             return new SpawnListEntry(livingClass, biomeName, resultSpawnWeight, resultPackSize, resultMinChunkPack,
                     resultMaxChunkPack);
         } else {

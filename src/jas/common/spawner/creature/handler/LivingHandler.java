@@ -8,40 +8,62 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 public class LivingHandler {
     public final Class<? extends EntityLiving> entityClass;
     public final String creatureTypeID;
+    @Deprecated
     public final boolean useModLocationCheck;
     public final boolean shouldSpawn;
     public final boolean forceDespawn;
 
+    public final String optionalParameters;
+    protected OptionalSettingsSpawning spawning;
+
     public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck,
-            boolean shouldSpawn, boolean forceDespawn) {
+            boolean shouldSpawn, boolean forceDespawn, String optionalParameters) {
         this.entityClass = entityClass;
         this.useModLocationCheck = useModLocationCheck;
         this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID
                 : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
         this.forceDespawn = forceDespawn;
+        this.optionalParameters = optionalParameters;
+        
+        for (String string : optionalParameters.split("\\}")) {
+            if(string.contains("spawn")){
+                spawning = new OptionalSettingsSpawning(optionalParameters);
+            }
+        }
     }
 
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
     }
 
     public final LivingHandler toUseModLocationCheck(boolean useModLocationCheck) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
     }
 
     public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
     }
 
     public final LivingHandler toForceDespawn(boolean forceDespawn) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
+    }
+
+    public final LivingHandler toOptionalParameters(String optionalParameters) {
+        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
     }
 
     /**
@@ -57,8 +79,9 @@ public class LivingHandler {
      * @param chunkSpawning
      */
     protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
-        return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn, String optionalParameters) {
+        return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
+                optionalParameters);
     }
 
     /**
@@ -72,11 +95,11 @@ public class LivingHandler {
         return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
                 .getCreatureType(creatureTypeID).equals(creatureType);
     }
-    
+
     public boolean isEntityOfType(Class<? extends EntityLiving> entity, CreatureType creatureType) {
         return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
                 .getCreatureType(creatureTypeID).equals(creatureType);
-    }    
+    }
 
     /**
      * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
@@ -86,7 +109,7 @@ public class LivingHandler {
      * @return True if location is valid For entity to spawn, false otherwise
      */
     public final boolean getCanSpawnHere(EntityLiving entity) {
-        if (useModLocationCheck) {
+        if (!spawning.overrideLocationCheck()) {
             return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
         } else {
             return isValidLocation(entity);
@@ -137,9 +160,21 @@ public class LivingHandler {
      * @return True if location is valid For entity to spawn, false otherwise
      */
     private final boolean isValidLocation(EntityLiving entity) {
-        return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
-                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
-                && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+        int xCoord = MathHelper.floor_double(entity.posX);
+        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+        int zCoord = MathHelper.floor_double(entity.posZ);
+
+        if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
+                entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
+            return false;
+        } else if (!spawning.isValidLightLevel(entity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, xCoord, yCoord,
+                zCoord))) {
+            return false;
+        } else {
+            return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
+                    && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
+                    && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+        }
     }
 
     /**
@@ -157,24 +192,27 @@ public class LivingHandler {
 
         Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
 
-        String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
+        String[] resultMasterParts = resultValue.getString().split("\\{", 2);
+        String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
 
         if (resultParts.length == 4) {
-            String resultCreatureType = LivingRegsitryHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
+            String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
-            boolean resultShouldSpawn = LivingRegsitryHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
-            boolean resultForceDespawn = LivingRegsitryHelper
-                    .parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
-            boolean resultLocationCheck = LivingRegsitryHelper.parseBoolean(resultParts[3], useModLocationCheck,
+            boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
+            boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
+            boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], useModLocationCheck,
                     "LocationCheck");
-            return this.toCreatureTypeID(resultCreatureType).toUseModLocationCheck(resultLocationCheck)
-                    .toShouldSpawn(resultShouldSpawn).toForceDespawn(resultForceDespawn);
+            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType)
+                    .toUseModLocationCheck(resultLocationCheck).toShouldSpawn(resultShouldSpawn)
+                    .toForceDespawn(resultForceDespawn);
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters(resultMasterParts[1])
+                    : resultHandler;
         } else {
             JASLog.severe(
                     "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",
                     mobName, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
             resultValue.set(defaultValue);
-            return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+            return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn, "");
         }
     }
 }
