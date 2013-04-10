@@ -23,5 +23,6 @@
 	<classpathentry kind="lib" path="lib/asm-debug-all-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-debug-jdk15on-148.jar"/>
 	<classpathentry kind="lib" path="lib/guava-14.0-rc3.jar"/>
+	<classpathentry kind="lib" path="D:/Minecraft Modding/Project Zulu 2.0/Minecraft 15pr/TwilightForest/TwilightForestSource.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
