@@ -3,70 +3,59 @@ package jas.common.spawner.creature.handler;
 import jas.common.JASLog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 
 import net.minecraft.world.World;
 
-public class OptionalSettingsDespawning {
-
-    public final String parseableString;
-    private boolean stringParsed = false;
-
-    /* Internal Cache to Store Values */
-    private HashMap<String, Object> valueCache = new HashMap<String, Object>();
-
-    public static final String enabledKey = "overrideDespawn";
-    public static final String minLightLevelKey = "minLightLevel";
-    public static final String maxLightLevelKey = "maxLightLevel";
-    public static final String spawnRateKey = "spawnRate";
-
-    public static final String blockRangeKey = "blockRange";
-    public static final String blockRangeXKey = "blockRangeXKey";
-    public static final String blockRangeYKey = "blockRangeYKey";
-    public static final String blockRangeZKey = "blockRangeZKey";
-    public static final String blocksKey = "blocksKey";
-    public static final String metaKey = "metasKey";
-
+public class OptionalSettingsDespawning extends OptionalSettings {
     public OptionalSettingsDespawning(String parseableString) {
-        this.parseableString = parseableString.replace("}", "");
+        super(parseableString.replace("}", ""));
     }
 
-    private void parseString() {
+    @Override
+    protected final void parseString() {
         if (stringParsed) {
             return;
         }
         stringParsed = true;
         /* Set default Paramters that are assumed to be Present */
-        valueCache.put(minLightLevelKey, -1);
-        valueCache.put(maxLightLevelKey, -1);
-        valueCache.put(blocksKey, new ArrayList<Integer>());
-        valueCache.put(metaKey, new ArrayList<Integer>());
-        valueCache.put(spawnRateKey, 40);
-        valueCache.put(blockRangeXKey, 3);
-        valueCache.put(blockRangeYKey, 3);
-        valueCache.put(blockRangeZKey, 3);
+        valueCache.put(Key.minLightLevel.key, -1);
+        valueCache.put(Key.maxLightLevel.key, -1);
+        valueCache.put(Key.blockList.key, new ArrayList<Integer>());
+        valueCache.put(Key.metaList.key, new ArrayList<Integer>());
+        valueCache.put(Key.spawnRate.key, 40);
+        valueCache.put(Key.blockRangeX.key, 3);
+        valueCache.put(Key.blockRangeY.key, 3);
+        valueCache.put(Key.blockRangeZ.key, 3);
 
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
-                if (masterParts[i].equalsIgnoreCase("despawn")) {
-                    valueCache.put(enabledKey, Boolean.TRUE);
+                if (masterParts[i].equalsIgnoreCase(Key.despawn.key)) {
+                    valueCache.put(Key.enabled.key, Boolean.TRUE);
                 } else {
-                    JASLog.severe("Optional Settings Error expected deSpawn from within %s", masterParts[i]);
+                    JASLog.severe("Optional Settings Error expected %s from within %s", Key.despawn.key, masterParts[i]);
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
-                if (childParts[0].equalsIgnoreCase("light")) {
+                
+                switch (Key.getKeybyString(childParts[0])) {
+                case light:
                     if (childParts.length == 3) {
-                        valueCache.put(minLightLevelKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(minLightLevelKey), "minLightLevel"));
-                        valueCache.put(maxLightLevelKey, ParsingHelper.parseInteger(childParts[2],
-                                (Integer) valueCache.get(maxLightLevelKey), "maxLightLevel"));
+                        valueCache.put(
+                                Key.minLightLevel.key,
+                                ParsingHelper.parseInteger(childParts[1],
+                                        (Integer) valueCache.get(Key.minLightLevel.key), Key.minLightLevel.key));
+                        valueCache.put(
+                                Key.maxLightLevel.key,
+                                ParsingHelper.parseInteger(childParts[2],
+                                        (Integer) valueCache.get(Key.maxLightLevel.key), Key.maxLightLevel.key));
                     } else {
                         JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Length");
                     }
-                } else if (childParts[0].equalsIgnoreCase("block")) {
+                    break;
+
+                case block:
                     ArrayList<Integer> blockList = new ArrayList<Integer>();
                     ArrayList<Integer> metaList = new ArrayList<Integer>();
                     for (int j = 1; j < childParts.length; j++) {
@@ -117,50 +106,54 @@ public class OptionalSettingsDespawning {
                             }
                         }
                     }
-                    valueCache.put(blocksKey, blockList);
-                    valueCache.put(metaKey, metaList);
-                } else if (childParts[0].equalsIgnoreCase(blockRangeKey)) {
+                    valueCache.put(Key.blockList.key, blockList);
+                    valueCache.put(Key.metaList.key, metaList);
+                    break;
+
+                case blockRange:
                     if (childParts.length == 4) {
-                        valueCache.put(blockRangeXKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(blockRangeXKey), "blockRangeX"));
-                        valueCache.put(blockRangeYKey, ParsingHelper.parseInteger(childParts[2],
-                                (Integer) valueCache.get(blockRangeYKey), "blockRangeY"));
-                        valueCache.put(blockRangeZKey, ParsingHelper.parseInteger(childParts[3],
-                                (Integer) valueCache.get(blockRangeZKey), "blockRangeZ"));
+                        valueCache.put(Key.blockRangeX.key, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
+                        valueCache.put(Key.blockRangeY.key, ParsingHelper.parseInteger(childParts[2],
+                                (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
+                        valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseInteger(childParts[3],
+                                (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
                     } else if (childParts.length == 2) {
-                        valueCache.put(blockRangeXKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(blockRangeXKey), "blockRangeX"));
-                        valueCache.put(blockRangeYKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(blockRangeYKey), "blockRangeY"));
-                        valueCache.put(blockRangeZKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(blockRangeZKey), "blockRangeZ"));
+                        valueCache.put(Key.blockRangeX.key, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
+                        valueCache.put(Key.blockRangeY.key, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
+                        valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
                     } else {
                         JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Length");
                     }
-                    JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
-                } else if (childParts[0].equalsIgnoreCase(spawnRateKey)) {
+                    break;
+                case spawnRate:
                     if (childParts.length == 2) {
-                        valueCache.put(spawnRateKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(spawnRateKey), "spawnRateKey"));
+                        valueCache.put(Key.spawnRate.key, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(Key.spawnRate.key), Key.spawnRate.key));
                     } else {
                         JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Length");
                     }
-                    JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
-                } else {
-                    JASLog.warning("Did Not Recognize any valid deSpawn properties from %s.", masterParts[i]);
+                    break;
+                default:
+                    JASLog.warning("Did Not Recognize a valid deSpawn properties from %s.", masterParts[i]);
+                    break;
                 }
             }
         }
     }
 
+    @Override
     public boolean isOptionalEnabled() {
         parseString();
-        return valueCache.get(enabledKey) != null;
+        return valueCache.get(Key.enabled.key) != null;
     }
 
     public int getRate() {
         parseString();
-        return (Integer) valueCache.get(spawnRateKey);
+        return (Integer) valueCache.get(Key.spawnRate.key);
     }
 
     /**
@@ -171,8 +164,8 @@ public class OptionalSettingsDespawning {
     public boolean isValidLightLevel(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
         int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
-        return lightLevel > (Integer) valueCache.get(maxLightLevelKey)
-                || lightLevel < (Integer) valueCache.get(minLightLevelKey);
+        return lightLevel > (Integer) valueCache.get(Key.maxLightLevel.key)
+                || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
     }
 
     /**
@@ -183,15 +176,15 @@ public class OptionalSettingsDespawning {
     @SuppressWarnings("unchecked")
     public boolean isValidBlock(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
-        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(blocksKey);
-        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(metaKey);
+        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(Key.blockList.key);
+        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(Key.metaList.key);
         if (blockIDlist.isEmpty()) {
             return true;
         }
 
-        int xRange = (Integer) valueCache.get(blockRangeXKey);
-        int yRange = (Integer) valueCache.get(blockRangeYKey);
-        int zRange = (Integer) valueCache.get(blockRangeZKey);
+        int xRange = (Integer) valueCache.get(Key.blockRangeX.key);
+        int yRange = (Integer) valueCache.get(Key.blockRangeY.key);
+        int zRange = (Integer) valueCache.get(Key.blockRangeZ.key);
         for (int i = -xRange; i <= xRange; i++) {
             for (int k = -zRange; k <= zRange; k++) {
                 for (int j = -yRange; j <= yRange; j++) {

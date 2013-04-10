@@ -3,59 +3,54 @@ package jas.common.spawner.creature.handler;
 import jas.common.JASLog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.logging.Level;
 
-public class OptionalSettingsSpawning {
-
-    public final String parseableString;
-    private boolean stringParsed = false;
-
-    /* Internal Cache to Store Values */
-    private HashMap<String, Object> valueCache = new HashMap<String, Object>();
-
-    public static final String overrideSpawnKey = "overrideSpawn";
-    public static final String minLightLevelKey = "minLightLevel";
-    public static final String maxLightLevelKey = "maxLightLevel";
-    public static final String blocksKey = "blocksKey";
-    public static final String metaKey = "metasKey";
-
+public class OptionalSettingsSpawning extends OptionalSettings {
     public OptionalSettingsSpawning(String parseableString) {
-        this.parseableString = parseableString.replace("}", "");
+        super(parseableString.replace("}", ""));
     }
 
-    private void parseString() {
+    @Override
+    protected final void parseString() {
         if (stringParsed) {
             return;
         }
         stringParsed = true;
 
         /* Set default Paramters that are assumed to be Present */
-        valueCache.put(minLightLevelKey, 0);
-        valueCache.put(maxLightLevelKey, 15);
-        valueCache.put(blocksKey, new ArrayList<Integer>());
-        valueCache.put(metaKey, new ArrayList<Integer>());
+        valueCache.put(Key.minLightLevel.key, 0);
+        valueCache.put(Key.maxLightLevel.key, 15);
+        valueCache.put(Key.blockList.key, new ArrayList<Integer>());
+        valueCache.put(Key.metaList.key, new ArrayList<Integer>());
 
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
-                if (masterParts[i].equalsIgnoreCase("spawn")) {
-                    valueCache.put(overrideSpawnKey, Boolean.TRUE);
+                if (masterParts[i].equalsIgnoreCase(Key.spawn.key)) {
+                    valueCache.put(Key.enabled.key, Boolean.TRUE);
                 } else {
                     JASLog.severe("Optional Settings Error expected spawn from %s", masterParts[i]);
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
-                if (childParts[0].equalsIgnoreCase("light")) {
+
+                switch (Key.getKeybyString(childParts[0])) {
+                case light:
                     if (childParts.length == 3) {
-                        valueCache.put(minLightLevelKey, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(minLightLevelKey), "minLightLevel"));
-                        valueCache.put(maxLightLevelKey, ParsingHelper.parseInteger(childParts[2],
-                                (Integer) valueCache.get(maxLightLevelKey), "maxLightLevel"));
+                        valueCache.put(
+                                Key.minLightLevel.key,
+                                ParsingHelper.parseInteger(childParts[1],
+                                        (Integer) valueCache.get(Key.minLightLevel.key), Key.minLightLevel.key));
+                        valueCache.put(
+                                Key.maxLightLevel.key,
+                                ParsingHelper.parseInteger(childParts[2],
+                                        (Integer) valueCache.get(Key.maxLightLevel.key), Key.maxLightLevel.key));
                     } else {
                         JASLog.severe("Error Parsing Spawn Light Parameter. Invalid Length");
                     }
-                } else if (childParts[0].equalsIgnoreCase("block")) {
+                    break;
+
+                case block:
                     ArrayList<Integer> blockList = new ArrayList<Integer>();
                     ArrayList<Integer> metaList = new ArrayList<Integer>();
                     for (int j = 1; j < childParts.length; j++) {
@@ -106,33 +101,39 @@ public class OptionalSettingsSpawning {
                             }
                         }
                     }
-                    valueCache.put(blocksKey, blockList);
-                    valueCache.put(metaKey, metaList);
-                } else if (childParts[0].equalsIgnoreCase("material")) {
+                    valueCache.put(Key.blockList.key, blockList);
+                    valueCache.put(Key.metaList.key, metaList);
+                    break;
+
+                case material:
                     JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
-                } else {
+                    break;
+
+                default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
+                    break;
                 }
             }
         }
     }
 
-    public boolean overrideLocationCheck() {
+    @Override
+    public boolean isOptionalEnabled() {
         parseString();
-        return valueCache.get(overrideSpawnKey) != null;
+        return valueCache.get(Key.enabled.key) != null;
     }
 
     public boolean isValidLightLevel(int lightLevel) {
         parseString();
-        return lightLevel > (Integer) valueCache.get(maxLightLevelKey)
-                || lightLevel < (Integer) valueCache.get(minLightLevelKey);
+        return lightLevel > (Integer) valueCache.get(Key.maxLightLevel.key)
+                || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
     }
 
     @SuppressWarnings("unchecked")
     public boolean isValidBlock(int blockID, int meta) {
         parseString();
-        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(blocksKey);
-        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(metaKey);
+        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(Key.blockList.key);
+        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(Key.metaList.key);
 
         for (int i = 0; i < blockIDlist.size(); i++) {
             if (blockID == blockIDlist.get(i) && meta == metaIDList.get(i)) {

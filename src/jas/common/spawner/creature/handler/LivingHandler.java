@@ -120,7 +120,7 @@ public class LivingHandler {
      * @return True if location is valid For entity to spawn, false otherwise
      */
     public final boolean getCanSpawnHere(EntityLiving entity) {
-        if (!spawning.overrideLocationCheck()) {
+        if (!spawning.isOptionalEnabled()) {
             return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
         } else {
             return isValidLocation(entity);
