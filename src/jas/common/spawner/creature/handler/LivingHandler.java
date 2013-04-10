@@ -43,6 +43,8 @@ public class LivingHandler {
                 despawning = new OptionalSettingsDespawning(string);
             }
         }
+        spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
+        despawning = despawning == null ? new OptionalSettingsDespawning("") : despawning;
     }
 
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {

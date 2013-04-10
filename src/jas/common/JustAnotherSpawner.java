@@ -12,7 +12,9 @@ import jas.compatability.tf.BiomeInterpreterTwilightForest;
 
 import java.io.File;
 
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
@@ -49,7 +51,7 @@ public class JustAnotherSpawner {
         JASLog.configureLogging(Properties.debugMode);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
-//        proxy.registerKeyBinding();
+        // proxy.registerKeyBinding();
     }
 
     @Init
@@ -68,11 +70,27 @@ public class JustAnotherSpawner {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
+
+        if (Properties.emptyVanillaSpawnLists) {
+            for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+                if (biome == null) {
+                    continue;
+                }
+                for (EnumCreatureType type : EnumCreatureType.values()) {
+                    biome.getSpawnableList(type).clear();
+                }
+            }
+        }
+        
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
+        if (Properties.turnGameruleSpawningOff) {
+            gameRule.setOrCreateGameRule("doMobSpawning", "false");
+        }
+
         String ruleName = "doCustomMobSpawning";
         if (gameRule.hasRule(ruleName)) {
         } else {
             gameRule.addGameRule(ruleName, "true");
         }
-    }    
+    }
 }

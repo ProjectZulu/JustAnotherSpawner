@@ -1,7 +1,6 @@
 package jas.compatability.tf;
 
 import jas.api.BiomeInterpreter;
-import jas.common.JASLog;
 import jas.common.spawner.biome.BiomeInterpreterHelper;
 import jas.common.spawner.creature.handler.ParsingHelper;
 import jas.common.spawner.creature.handler.ReflectionHelper;
@@ -36,7 +35,6 @@ public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
             List spawnableMonsterList = ReflectionHelper.getFieldFromReflection("spawnableMonsterLists",
                     TFFeature.featureList[i], List.class);
             if (spawnableMonsterList != null) {
-                JASLog.info("Feature name %s index %s", TFFeature.featureList[i].name, spawnableMonsterList.size());
                 for (int j = 0; j < spawnableMonsterList.size(); j++) {
                     featureNameToID.put(TFFeature.featureList[i].name, i);
                     collection.add(TFFeature.featureList[i].name + "_" + j);

@@ -1,6 +1,5 @@
 package jas.common;
 
-
 import java.io.File;
 
 import net.minecraftforge.common.Configuration;
@@ -11,11 +10,19 @@ public class Properties {
     public static int spawnerTickSpacing = 0;
     public static boolean sortCreatureByBiome = true;
 
+    public static boolean turnGameruleSpawningOff = false;
+    public static boolean emptyVanillaSpawnLists = false;
+
     public static void loadProperties(File configDirectory) {
         Configuration config = new Configuration(
                 new File(configDirectory, DefaultProps.MODDIR + "GlobalProperties.cfg"));
         config.load();
         debugMode = config.get("Properties.Logging", "Debug Mode", debugMode).getBoolean(debugMode);
+        turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
+                turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
+        emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start",
+                emptyVanillaSpawnLists).getBoolean(emptyVanillaSpawnLists);
+
         sortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome", sortCreatureByBiome)
                 .getBoolean(sortCreatureByBiome);
         Property resultTickSpacing = config.get("Properties.Spawning", "Spawner Tick Spacing", spawnerTickSpacing);
