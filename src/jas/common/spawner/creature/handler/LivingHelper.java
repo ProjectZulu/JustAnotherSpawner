@@ -5,7 +5,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 public class LivingHelper {
-    
+
     /**
      * Create Instance of Creature Class
      * 
@@ -21,5 +21,37 @@ public class LivingHelper {
                     livingClass.getSimpleName());
         }
         return null;
+    }
+
+    /**
+     * Set Persistence Required of the instance of Entity Provided
+     * 
+     * @param livingClass Class of Desired Creature
+     * @param worldServer Instance of World
+     * @return
+     */
+    public static void setPersistenceRequired(EntityLiving entity, boolean value) {
+        try {
+            ReflectionHelper
+                    .setCatchableFieldUsingReflection("field_82179_bU", EntityLiving.class, entity, true, value);
+        } catch (NoSuchFieldException e) {
+            ReflectionHelper.setFieldUsingReflection("persistenceRequired", EntityLiving.class, entity, true, value);
+        }
+    }
+
+    /**
+     * Set Persistence Required of the instance of Entity Provided
+     * 
+     * @param livingClass Class of Desired Creature
+     * @param worldServer Instance of World
+     * @return
+     */
+    public static void setAge(EntityLiving entity, int value) {
+        try {
+            ReflectionHelper
+                    .setCatchableFieldUsingReflection("field_82179_bU", EntityLiving.class, entity, true, value);
+        } catch (NoSuchFieldException e) {
+            ReflectionHelper.setFieldUsingReflection("entityAge", EntityLiving.class, entity, true, value);
+        }
     }
 }

@@ -39,7 +39,7 @@ public enum CreatureHandlerRegistry {
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
     public static final String delimeter = DefaultProps.DELIMETER;
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
-            + "ShouldSpawn" + delimeter + "ForceDespawn" + delimeter + "UseModLocationCheck";
+            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
             + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
 
@@ -85,7 +85,7 @@ public enum CreatureHandlerRegistry {
         populateBiomeList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), true, false, false);
+                    world), false, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }
@@ -304,9 +304,9 @@ public enum CreatureHandlerRegistry {
      * Creates a new LivingHandler at the provided key with
      */
     public void updateLivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
-        livingHandlers.put(entityClass, livingHandlers.get(entityClass).toCreatureTypeID(creatureTypeID)
-                .toUseModLocationCheck(useModLocationCheck).toShouldSpawn(shouldSpawn).toForceDespawn(forceDespawn));
+            boolean shouldSpawn) {
+        livingHandlers.put(entityClass,
+                livingHandlers.get(entityClass).toCreatureTypeID(creatureTypeID).toShouldSpawn(shouldSpawn));
     }
 
     public Iterator<Class<? extends EntityLiving>> getLivingKeys() {
