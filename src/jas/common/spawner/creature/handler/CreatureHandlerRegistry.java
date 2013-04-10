@@ -85,7 +85,7 @@ public enum CreatureHandlerRegistry {
         populateBiomeList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), true, false, false, "");
+                    world), false, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }
@@ -304,9 +304,9 @@ public enum CreatureHandlerRegistry {
      * Creates a new LivingHandler at the provided key with
      */
     public void updateLivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn) {
-        livingHandlers.put(entityClass, livingHandlers.get(entityClass).toCreatureTypeID(creatureTypeID)
-                .toUseModLocationCheck(useModLocationCheck).toShouldSpawn(shouldSpawn).toForceDespawn(forceDespawn));
+            boolean shouldSpawn) {
+        livingHandlers.put(entityClass,
+                livingHandlers.get(entityClass).toCreatureTypeID(creatureTypeID).toShouldSpawn(shouldSpawn));
     }
 
     public Iterator<Class<? extends EntityLiving>> getLivingKeys() {

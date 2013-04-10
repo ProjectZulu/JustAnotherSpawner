@@ -13,12 +13,11 @@ import net.minecraft.entity.EntityLiving;
 import cpw.mods.fml.common.network.Player;
 
 //TODO: Each Packet LIke this needs 3 types; Add, Update, Remove. Well, most. Creature Type and LivingHandler cannot be removed. Not added either? Not yet.
+//TODO: add OptionalParameter
 public class PacketManagerUpdateLivingHandler extends PacketManager {
     String entityName;
     String creatureTypeID;
-    boolean useModLocationCheck;
     boolean shouldSpawn;
-    boolean forceDespawn;
 
     public PacketManagerUpdateLivingHandler(int packetID) {
         super(packetID);
@@ -27,18 +26,14 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
     public void setPacketData(LivingHandler livingHandler) {
         entityName = (String) EntityList.classToStringMapping.get(livingHandler.entityClass);
         creatureTypeID = livingHandler.creatureTypeID;
-        useModLocationCheck = livingHandler.useModLocationCheck;
         shouldSpawn = livingHandler.shouldSpawn;
-        forceDespawn = livingHandler.forceDespawn;
     }
 
     @Override
     protected void writePacketData(DataOutputStream dataStream) throws IOException {
         dataStream.writeUTF(entityName);
         dataStream.writeUTF(creatureTypeID);
-        dataStream.writeBoolean(useModLocationCheck);
         dataStream.writeBoolean(shouldSpawn);
-        dataStream.writeBoolean(forceDespawn);
     }
 
     @Override
@@ -47,12 +42,10 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
         try {
             entityName = dataStream.readUTF();
             creatureTypeID = dataStream.readUTF();
-            useModLocationCheck = dataStream.readBoolean();
             shouldSpawn = dataStream.readBoolean();
-            forceDespawn = dataStream.readBoolean();
             CreatureHandlerRegistry.INSTANCE.updateLivingHandler(
                     (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName), creatureTypeID,
-                    useModLocationCheck, shouldSpawn, forceDespawn);
+                    shouldSpawn);
             return true;
         } catch (IOException e) {
             e.printStackTrace();

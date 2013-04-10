@@ -19,12 +19,7 @@ import net.minecraftforge.common.Property;
 public class LivingHandler {
     public final Class<? extends EntityLiving> entityClass;
     public final String creatureTypeID;
-    @Deprecated
-    public final boolean useModLocationCheck;
     public final boolean shouldSpawn;
-    @Deprecated
-    public final boolean forceDespawn;
-
     public final String optionalParameters;
     protected OptionalSettingsSpawning spawning;
     protected OptionalSettingsDespawning despawning;
@@ -33,14 +28,12 @@ public class LivingHandler {
         return despawning;
     }
 
-    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck,
-            boolean shouldSpawn, boolean forceDespawn, String optionalParameters) {
+    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean shouldSpawn,
+            String optionalParameters) {
         this.entityClass = entityClass;
-        this.useModLocationCheck = useModLocationCheck;
         this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID
                 : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
-        this.forceDespawn = forceDespawn;
         this.optionalParameters = optionalParameters;
 
         for (String string : optionalParameters.split("\\{")) {
@@ -53,28 +46,15 @@ public class LivingHandler {
     }
 
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
-    }
-
-    public final LivingHandler toUseModLocationCheck(boolean useModLocationCheck) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
+        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
-    }
-
-    public final LivingHandler toForceDespawn(boolean forceDespawn) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
+        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final LivingHandler toOptionalParameters(String optionalParameters) {
-        return constructInstance(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
+        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     /**
@@ -90,9 +70,8 @@ public class LivingHandler {
      * @param chunkSpawning
      */
     protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean useModLocationCheck, boolean shouldSpawn, boolean forceDespawn, String optionalParameters) {
-        return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn,
-                optionalParameters);
+            boolean shouldSpawn, String optionalParameters) {
+        return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     /**
@@ -153,8 +132,8 @@ public class LivingHandler {
 
             if (canDespawn && entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
                     && d3 >= 1024.0D) {
-                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(), entity.getAge(),
-                        despawning.getRate());
+                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+                        entity.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (d3 < 1024.0D) {
                 LivingHelper.setAge(entityplayer, 0);
@@ -207,9 +186,7 @@ public class LivingHandler {
     protected LivingHandler createFromConfig(Configuration config) {
         String mobName = (String) EntityList.classToStringMapping.get(entityClass);
 
-        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
-                + DefaultProps.DELIMETER + Boolean.toString(forceDespawn) + DefaultProps.DELIMETER
-                + Boolean.toString(useModLocationCheck);
+        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn);
 
         Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
 
@@ -220,9 +197,8 @@ public class LivingHandler {
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
-            boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
-            boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], useModLocationCheck,
-                    "LocationCheck");
+            boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], false, "forceDespawn");
+            boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], true, "LocationCheck");
 
             String resultString = resultCreatureType + "-" + resultShouldSpawn;
             if (resultLocationCheck == false) {
@@ -244,10 +220,10 @@ public class LivingHandler {
                     : resultHandler;
         } else {
             JASLog.severe(
-                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s, %s, %s",
-                    mobName, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn);
+                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
+                    mobName, creatureTypeID, shouldSpawn);
             resultValue.set(defaultValue);
-            return new LivingHandler(entityClass, creatureTypeID, useModLocationCheck, shouldSpawn, forceDespawn, "");
+            return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, "");
         }
     }
 }
