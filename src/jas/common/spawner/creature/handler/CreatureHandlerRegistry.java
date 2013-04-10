@@ -39,7 +39,7 @@ public enum CreatureHandlerRegistry {
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
     public static final String delimeter = DefaultProps.DELIMETER;
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
-            + "ShouldSpawn" + delimeter + "ForceDespawn" + delimeter + "UseModLocationCheck";
+            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
             + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
 

@@ -223,9 +223,23 @@ public class LivingHandler {
             boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], forceDespawn, "forceDespawn");
             boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], useModLocationCheck,
                     "LocationCheck");
-            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType)
-                    .toUseModLocationCheck(resultLocationCheck).toShouldSpawn(resultShouldSpawn)
-                    .toForceDespawn(resultForceDespawn);
+
+            String resultString = resultCreatureType + "-" + resultShouldSpawn;
+            if (resultLocationCheck == false) {
+                resultString = resultString.concat("{spawn}");
+            }
+            if (resultForceDespawn == true) {
+                resultString = resultString.concat("{despawn}");
+            }
+            resultValue.set(resultString);
+            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters(resultValue.getString().split(
+                    "\\{", 2)[1]) : resultHandler;
+        } else if (resultParts.length == 2) {
+            String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
+                    "creatureTypeID");
+            boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
+            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
             return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters(resultMasterParts[1])
                     : resultHandler;
         } else {
