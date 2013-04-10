@@ -8,7 +8,7 @@ import jas.common.spawner.SpawnerTicker;
 import jas.common.spawner.biome.BiomeHandlerRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import jas.compatability.tf.BiomeInterpreterTwilightForest;
+import jas.compatability.CompatabilityManager;
 
 import java.io.File;
 
@@ -58,7 +58,7 @@ public class JustAnotherSpawner {
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
         NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
-        BiomeHandlerRegistry.INSTANCE.registerInterpreter(new BiomeInterpreterTwilightForest());
+        CompatabilityManager.addCompatabilityResources();
     }
 
     @PostInit
