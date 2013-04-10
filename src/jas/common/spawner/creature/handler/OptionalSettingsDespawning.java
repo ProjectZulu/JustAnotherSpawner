@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 
-public class OptionalSettingsSpawning {
+import net.minecraft.world.World;
+
+public class OptionalSettingsDespawning {
 
     public final String parseableString;
     private boolean stringParsed = false;
@@ -14,13 +16,19 @@ public class OptionalSettingsSpawning {
     /* Internal Cache to Store Values */
     private HashMap<String, Object> valueCache = new HashMap<String, Object>();
 
-    public static final String overrideSpawnKey = "overrideSpawn";
+    public static final String enabledKey = "overrideDespawn";
     public static final String minLightLevelKey = "minLightLevel";
     public static final String maxLightLevelKey = "maxLightLevel";
+    public static final String spawnRateKey = "spawnRate";
+
+    public static final String blockRangeKey = "blockRange";
+    public static final String blockRangeXKey = "blockRangeXKey";
+    public static final String blockRangeYKey = "blockRangeYKey";
+    public static final String blockRangeZKey = "blockRangeZKey";
     public static final String blocksKey = "blocksKey";
     public static final String metaKey = "metasKey";
 
-    public OptionalSettingsSpawning(String parseableString) {
+    public OptionalSettingsDespawning(String parseableString) {
         this.parseableString = parseableString.replace("}", "");
     }
 
@@ -29,20 +37,23 @@ public class OptionalSettingsSpawning {
             return;
         }
         stringParsed = true;
-
         /* Set default Paramters that are assumed to be Present */
-        valueCache.put(minLightLevelKey, 0);
-        valueCache.put(maxLightLevelKey, 15);
+        valueCache.put(minLightLevelKey, -1);
+        valueCache.put(maxLightLevelKey, -1);
         valueCache.put(blocksKey, new ArrayList<Integer>());
         valueCache.put(metaKey, new ArrayList<Integer>());
+        valueCache.put(spawnRateKey, 40);
+        valueCache.put(blockRangeXKey, 3);
+        valueCache.put(blockRangeYKey, 3);
+        valueCache.put(blockRangeZKey, 3);
 
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
-                if (masterParts[i].equalsIgnoreCase("spawn")) {
-                    valueCache.put(overrideSpawnKey, Boolean.TRUE);
+                if (masterParts[i].equalsIgnoreCase("despawn")) {
+                    valueCache.put(enabledKey, Boolean.TRUE);
                 } else {
-                    JASLog.severe("Optional Settings Error expected spawn from %s", masterParts[i]);
+                    JASLog.severe("Optional Settings Error expected deSpawn from within %s", masterParts[i]);
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
@@ -53,7 +64,7 @@ public class OptionalSettingsSpawning {
                         valueCache.put(maxLightLevelKey, ParsingHelper.parseInteger(childParts[2],
                                 (Integer) valueCache.get(maxLightLevelKey), "maxLightLevel"));
                     } else {
-                        JASLog.severe("Error Parsing Spawn Light Parameter. Invalid Length");
+                        JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Length");
                     }
                 } else if (childParts[0].equalsIgnoreCase("block")) {
                     ArrayList<Integer> blockList = new ArrayList<Integer>();
@@ -108,42 +119,92 @@ public class OptionalSettingsSpawning {
                     }
                     valueCache.put(blocksKey, blockList);
                     valueCache.put(metaKey, metaList);
-                } else if (childParts[0].equalsIgnoreCase("material")) {
+                } else if (childParts[0].equalsIgnoreCase(blockRangeKey)) {
+                    if (childParts.length == 4) {
+                        valueCache.put(blockRangeXKey, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(blockRangeXKey), "blockRangeX"));
+                        valueCache.put(blockRangeYKey, ParsingHelper.parseInteger(childParts[2],
+                                (Integer) valueCache.get(blockRangeYKey), "blockRangeY"));
+                        valueCache.put(blockRangeZKey, ParsingHelper.parseInteger(childParts[3],
+                                (Integer) valueCache.get(blockRangeZKey), "blockRangeZ"));
+                    } else if (childParts.length == 2) {
+                        valueCache.put(blockRangeXKey, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(blockRangeXKey), "blockRangeX"));
+                        valueCache.put(blockRangeYKey, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(blockRangeYKey), "blockRangeY"));
+                        valueCache.put(blockRangeZKey, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(blockRangeZKey), "blockRangeZ"));
+                    } else {
+                        JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Length");
+                    }
+                    JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
+                } else if (childParts[0].equalsIgnoreCase(spawnRateKey)) {
+                    if (childParts.length == 2) {
+                        valueCache.put(spawnRateKey, ParsingHelper.parseInteger(childParts[1],
+                                (Integer) valueCache.get(spawnRateKey), "spawnRateKey"));
+                    } else {
+                        JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Length");
+                    }
                     JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
                 } else {
-                    JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
+                    JASLog.warning("Did Not Recognize any valid deSpawn properties from %s.", masterParts[i]);
                 }
             }
         }
     }
 
-    public boolean overrideLocationCheck() {
+    public boolean isOptionalEnabled() {
         parseString();
-        return valueCache.get(overrideSpawnKey) != null;
+        return valueCache.get(enabledKey) != null;
     }
 
-    public boolean isValidLightLevel(int lightLevel) {
+    public int getRate() {
         parseString();
+        return (Integer) valueCache.get(spawnRateKey);
+    }
+
+    /**
+     * Represents Restriction on LightLevel.
+     * 
+     * @return True if Operation should continue as normal, False if it should be disallowed
+     */
+    public boolean isValidLightLevel(World world, int xCoord, int yCoord, int zCoord) {
+        parseString();
+        int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
         return lightLevel > (Integer) valueCache.get(maxLightLevelKey)
                 || lightLevel < (Integer) valueCache.get(minLightLevelKey);
     }
 
+    /**
+     * Represents Restriction on isValidBlock.
+     * 
+     * @return True if Operation should continue as normal, False if it should be disallowed
+     */
     @SuppressWarnings("unchecked")
-    public boolean isValidBlock(int blockID, int meta) {
+    public boolean isValidBlock(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
         ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(blocksKey);
         ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(metaKey);
+        if (blockIDlist.isEmpty()) {
+            return true;
+        }
 
-        for (int i = 0; i < blockIDlist.size(); i++) {
-            if (blockID == blockIDlist.get(i) && meta == metaIDList.get(i)) {
-                return false;
+        int xRange = (Integer) valueCache.get(blockRangeXKey);
+        int yRange = (Integer) valueCache.get(blockRangeYKey);
+        int zRange = (Integer) valueCache.get(blockRangeZKey);
+        for (int i = -xRange; i <= xRange; i++) {
+            for (int k = -zRange; k <= zRange; k++) {
+                for (int j = -yRange; j <= yRange; j++) {
+                    for (int m = 0; m < blockIDlist.size(); m++) {
+                        int blockID = world.getBlockId(xCoord + i, yCoord + j, zCoord + k);
+                        int meta = world.getBlockMetadata(xCoord + i, yCoord + j, zCoord + k);
+                        if (blockID == blockIDlist.get(m) && meta == metaIDList.get(m)) {
+                            return false;
+                        }
+                    }
+                }
             }
         }
         return true;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

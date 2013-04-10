@@ -4,6 +4,9 @@ import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
+
+import java.util.logging.Level;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -19,10 +22,16 @@ public class LivingHandler {
     @Deprecated
     public final boolean useModLocationCheck;
     public final boolean shouldSpawn;
+    @Deprecated
     public final boolean forceDespawn;
 
     public final String optionalParameters;
     protected OptionalSettingsSpawning spawning;
+    protected OptionalSettingsDespawning despawning;
+
+    public OptionalSettingsDespawning getDespawning() {
+        return despawning;
+    }
 
     public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean useModLocationCheck,
             boolean shouldSpawn, boolean forceDespawn, String optionalParameters) {
@@ -33,10 +42,12 @@ public class LivingHandler {
         this.shouldSpawn = shouldSpawn;
         this.forceDespawn = forceDespawn;
         this.optionalParameters = optionalParameters;
-        
-        for (String string : optionalParameters.split("\\}")) {
-            if(string.contains("spawn")){
-                spawning = new OptionalSettingsSpawning(optionalParameters);
+
+        for (String string : optionalParameters.split("\\{")) {
+            if (string.replace("}", "").split("\\:", 2)[0].equalsIgnoreCase("spawn")) {
+                spawning = new OptionalSettingsSpawning(string);
+            } else if (string.replace("}", "").split("\\:", 2)[0].equalsIgnoreCase("despawn")) {
+                despawning = new OptionalSettingsDespawning(string);
             }
         }
     }
@@ -123,20 +134,30 @@ public class LivingHandler {
      */
     public final void despawnEntity(EntityLiving entity) {
         EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
+        int xCoord = MathHelper.floor_double(entity.posX);
+        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+        int zCoord = MathHelper.floor_double(entity.posZ);
 
+        LivingHelper.setPersistenceRequired(entity, true);
         if (entityplayer != null) {
             double d0 = entityplayer.posX - entity.posX;
             double d1 = entityplayer.posY - entity.posY;
             double d2 = entityplayer.posZ - entity.posZ;
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-            if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(800 / 50) == 0 && d3 > 1024.0D) {
+
+            boolean canDespawn = true;
+            if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
+                    || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
+                canDespawn = false;
+            }
+
+            if (canDespawn && entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
+                    && d3 >= 1024.0D) {
+                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(), entity.getAge(),
+                        despawning.getRate());
                 entity.setDead();
             } else if (d3 < 1024.0D) {
-                if (ReflectionHelper.isUnObfuscated(EntityLiving.class, "EntityLiving")) {
-                    ReflectionHelper.setFieldUsingReflection("entityAge", EntityLiving.class, entity, true, 0);
-                } else {
-                    ReflectionHelper.setFieldUsingReflection("field_70708_bq", EntityLiving.class, entity, true, 0);
-                }
+                LivingHelper.setAge(entityplayer, 0);
             }
         }
     }
