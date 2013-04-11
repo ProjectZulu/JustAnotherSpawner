@@ -119,28 +119,29 @@ public enum CreatureHandlerRegistry {
             Configuration worldConfig = getConfigurationFile(configDirectory, world.getWorldInfo().getWorldName(),
                     mobName);
 
-            if (livingHandlers.get(livingClass).shouldSpawn
-                    && !livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
+            if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGenBase biomeGenBase : biomeList) {
 
                     SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(biomeGenBase, livingClass)
                             .createFromConfig(masterConfig).createFromConfig(worldConfig);
 
-                    if (spawnListEntry.itemWeight > 0) {
+                    if (spawnListEntry.itemWeight > 0 && livingHandlers.get(livingClass).shouldSpawn) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to Biome %s", mobName,
                                 spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.biomeName);
                         CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
                                 .addSpawn(spawnListEntry);
                     } else {
-                        JASLog.debug(Level.INFO,
-                                "Not adding Generated SpawnListEntry of %s due to Weight. Biomes: %s, ItemWeight: %s",
-                                mobName, biomeGenBase.biomeName, spawnListEntry.itemWeight);
+                        JASLog.debug(
+                                Level.INFO,
+                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, Biomes: %s, ItemWeight: %s",
+                                mobName, spawnListEntry.itemWeight, livingHandlers.get(livingClass).shouldSpawn,
+                                biomeGenBase.biomeName);
                     }
                 }
             } else {
                 JASLog.debug(Level.INFO,
-                        "Not Generating SpawnList entries for %s. ShouldSpawn: %s, CreatureTypeID: %s", mobName,
-                        livingHandlers.get(livingClass).shouldSpawn, livingHandlers.get(livingClass).creatureTypeID);
+                        "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
+                        mobName, livingHandlers.get(livingClass).creatureTypeID);
             }
         }
     }
