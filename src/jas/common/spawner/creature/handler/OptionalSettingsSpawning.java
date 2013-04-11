@@ -18,8 +18,8 @@ public class OptionalSettingsSpawning extends OptionalSettings {
         stringParsed = true;
 
         /* Set default Paramters that are assumed to be Present */
-        valueCache.put(Key.minLightLevel.key, 0);
-        valueCache.put(Key.maxLightLevel.key, 15);
+        valueCache.put(Key.minLightLevel.key, 16); // Light < Min means Spawn
+        valueCache.put(Key.maxLightLevel.key, -1); // Light > Max means Spawn
         valueCache.put(Key.blockList.key, new ArrayList<Integer>());
         valueCache.put(Key.metaList.key, new ArrayList<Integer>());
 
