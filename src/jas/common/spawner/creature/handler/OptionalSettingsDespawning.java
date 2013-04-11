@@ -28,6 +28,10 @@ public class OptionalSettingsDespawning extends OptionalSettings {
         valueCache.put(Key.blockRangeY.key, 3);
         valueCache.put(Key.blockRangeZ.key, 3);
 
+        if (parseableString.equals("")) {
+            return;
+        }
+
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
@@ -35,10 +39,11 @@ public class OptionalSettingsDespawning extends OptionalSettings {
                     valueCache.put(Key.enabled.key, Boolean.TRUE);
                 } else {
                     JASLog.severe("Optional Settings Error expected %s from within %s", Key.despawn.key, masterParts[i]);
+                    break;
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
-                
+
                 switch (Key.getKeybyString(childParts[0])) {
                 case light:
                     if (childParts.length == 3) {

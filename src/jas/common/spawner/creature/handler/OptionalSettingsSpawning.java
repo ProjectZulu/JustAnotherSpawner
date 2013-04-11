@@ -23,6 +23,10 @@ public class OptionalSettingsSpawning extends OptionalSettings {
         valueCache.put(Key.blockList.key, new ArrayList<Integer>());
         valueCache.put(Key.metaList.key, new ArrayList<Integer>());
 
+        if (parseableString.equals("")) {
+            return;
+        }
+        
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
@@ -30,6 +34,7 @@ public class OptionalSettingsSpawning extends OptionalSettings {
                     valueCache.put(Key.enabled.key, Boolean.TRUE);
                 } else {
                     JASLog.severe("Optional Settings Error expected spawn from %s", masterParts[i]);
+                    break;
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
