@@ -1,6 +1,6 @@
 package jas.compatability;
 
-import jas.common.spawner.biome.BiomeHandlerRegistry;
+import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.compatability.tf.BiomeInterpreterTwilightForest;
 import cpw.mods.fml.common.Loader;
 

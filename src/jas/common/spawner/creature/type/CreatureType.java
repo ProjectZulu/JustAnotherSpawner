@@ -2,8 +2,8 @@ package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.JASLog;
-import jas.common.spawner.biome.BiomeHandler;
-import jas.common.spawner.biome.BiomeHandlerRegistry;
+import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;

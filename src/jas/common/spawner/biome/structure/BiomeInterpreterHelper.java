@@ -1,4 +1,4 @@
-package jas.common.spawner.biome;
+package jas.common.spawner.biome.structure;
 
 import jas.common.spawner.creature.handler.ReflectionHelper;
 import net.minecraft.world.World;
