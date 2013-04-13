@@ -135,8 +135,6 @@ public enum BiomeGroupRegistry {
             /* Get Default BiomeNameList */
             if (groupIDToBiomeID.get(biomeGroup.groupID) != null) {
                 for (Integer biomeID : groupIDToBiomeID.get(biomeGroup.groupID)) {
-                    JASLog.info("Registering BiomeKey %s to Group %s ",
-                            BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]), biomeGroup.groupID);
                     biomeGroup.pckgNames.add(BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]));
                 }
             }

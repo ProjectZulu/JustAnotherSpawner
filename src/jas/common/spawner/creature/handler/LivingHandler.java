@@ -5,9 +5,6 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-
-import java.util.logging.Level;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -126,13 +123,11 @@ public class LivingHandler {
             double d2 = entityplayer.posZ - entity.posZ;
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-//            boolean canDespawn = true;
             boolean canDespawn = !despawning.isInverted();
-
             if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
-                canDespawn = !canDespawn;
+                canDespawn = despawning.isInverted();
             }
 
             if (canDespawn == false) {
@@ -146,7 +141,7 @@ public class LivingHandler {
                 entity.setDead();
             } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
                     && validDistance) {
-                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+                JASLog.info("Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (!validDistance) {
@@ -180,11 +175,11 @@ public class LivingHandler {
         boolean canSpawn = !spawning.isInverted();
         if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
                 entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
-            canSpawn = !canSpawn;
+            canSpawn = spawning.isInverted();
         } else if (!spawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)) {
-            canSpawn = !canSpawn;
+            canSpawn = spawning.isInverted();
         } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
-            canSpawn = !canSpawn;
+            canSpawn = spawning.isInverted();
         }
         return canSpawn && entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
