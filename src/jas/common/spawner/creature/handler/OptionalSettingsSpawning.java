@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
+import jas.common.Properties;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -26,7 +27,7 @@ public class OptionalSettingsSpawning extends OptionalSettings {
         if (parseableString.equals("")) {
             return;
         }
-        
+
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
@@ -51,7 +52,7 @@ public class OptionalSettingsSpawning extends OptionalSettings {
                                 ParsingHelper.parseInteger(childParts[2],
                                         (Integer) valueCache.get(Key.maxLightLevel.key), Key.maxLightLevel.key));
                     } else {
-                        JASLog.severe("Error Parsing Spawn Light Parameter. Invalid Length");
+                        JASLog.severe("Error Parsing Spawn Light Parameter. Invalid Argument Length");
                     }
                     break;
 
@@ -110,10 +111,18 @@ public class OptionalSettingsSpawning extends OptionalSettings {
                     valueCache.put(Key.metaList.key, metaList);
                     break;
 
+                case spawnRange:
+                    if (childParts.length == 1) {
+                        valueCache.put(Key.spawnRange.key, ParsingHelper.parseInteger(childParts[1],
+                                Properties.despawnDist, Key.minLightLevel.key));
+                    } else {
+                        JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length");
+                    }
+                    break;
                 case material:
+                    //TODO: Add Material Tag ? Air or Water? What is the point?
                     JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
                     break;
-
                 default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
                     break;
@@ -146,6 +155,18 @@ public class OptionalSettingsSpawning extends OptionalSettings {
             }
         }
         return true;
+    }
+    
+    /**
+     * Checks if the Distance to
+     * 
+     * @param playerDistance Distance Squared to Nearest Player
+     * @return True to Continue as Normal, False to Interrupt, Null Use Global Check
+     */
+    public Boolean isValidDistance(int playerDistance) {
+        parseString();
+        Integer distanceToPlayer = (Integer) valueCache.get(Key.spawnRange);
+        return distanceToPlayer != null ? playerDistance > distanceToPlayer * distanceToPlayer : null;
     }
 
     @Override

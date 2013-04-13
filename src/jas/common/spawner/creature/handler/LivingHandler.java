@@ -2,6 +2,7 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -131,17 +132,22 @@ public class LivingHandler {
                     || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
                 canDespawn = false;
             }
-            
+
+            if (!canDespawn) {
+                LivingHelper.setAge(entityplayer, 0);
+                return;
+            }
+
+            Boolean validDistance = despawning.isValidDistance((int) d3);
+            validDistance = validDistance == null ? (int) d3 > Properties.despawnDist : validDistance;
             if (d3 > 16384.0D) {
                 entity.setDead();
-            }
-            
-            if (canDespawn && entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
-                    && d3 >= 1024.0D) {
+            } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
+                    && validDistance) {
                 JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
-            } else if (d3 < 1024.0D) {
+            } else if (!validDistance) {
                 LivingHelper.setAge(entityplayer, 0);
             }
         }

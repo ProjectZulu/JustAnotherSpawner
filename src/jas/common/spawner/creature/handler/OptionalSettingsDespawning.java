@@ -205,4 +205,16 @@ public class OptionalSettingsDespawning extends OptionalSettings {
         }
         return true;
     }
+    
+    /**
+     * Checks if the Distance to
+     * 
+     * @param playerDistance Distance Squared to Nearest Player
+     * @return True to Continue as Normal, False to Interrupt, Null Use Global Check
+     */
+    public Boolean isValidDistance(int playerDistance) {
+        parseString();
+        Integer distanceToPlayer = (Integer) valueCache.get(Key.spawnRange);
+        return distanceToPlayer != null ? playerDistance > distanceToPlayer * distanceToPlayer : null;
+    }    
 }
