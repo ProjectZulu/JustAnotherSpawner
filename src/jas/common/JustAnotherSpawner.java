@@ -69,6 +69,7 @@ public class JustAnotherSpawner {
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
+        Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
         BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile, event.getServer());
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
