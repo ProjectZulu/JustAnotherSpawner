@@ -3,11 +3,13 @@ package jas.common.spawner.creature.handler;
 import jas.common.JASLog;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 import net.minecraft.world.World;
 
-public class OptionalSettingsDespawning extends OptionalSettings {
+/**
+ * For style see {@link OptionalSettings}
+ */
+public class OptionalSettingsDespawning extends OptionalSettingsBase {
     public OptionalSettingsDespawning(String parseableString) {
         super(parseableString.replace("}", ""));
     }
@@ -37,113 +39,36 @@ public class OptionalSettingsDespawning extends OptionalSettings {
             if (i == 0) {
                 if (masterParts[i].equalsIgnoreCase(Key.despawn.key)) {
                     valueCache.put(Key.enabled.key, Boolean.TRUE);
+                } else if (masterParts[i].equalsIgnoreCase(Key.notDespawn.key)) {
+                    valueCache.put(Key.enabled.key, Boolean.FALSE);
                 } else {
                     JASLog.severe("Optional Settings Error expected %s from within %s", Key.despawn.key, masterParts[i]);
                     break;
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
-
                 switch (Key.getKeybyString(childParts[0])) {
                 case light:
-                    if (childParts.length == 3) {
-                        valueCache.put(
-                                Key.minLightLevel.key,
-                                ParsingHelper.parseInteger(childParts[1],
-                                        (Integer) valueCache.get(Key.minLightLevel.key), Key.minLightLevel.key));
-                        valueCache.put(
-                                Key.maxLightLevel.key,
-                                ParsingHelper.parseInteger(childParts[2],
-                                        (Integer) valueCache.get(Key.maxLightLevel.key), Key.maxLightLevel.key));
-                    } else {
-                        JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Length");
-                    }
+                    OptionalParser.parseLight(childParts, valueCache);
                     break;
-
                 case block:
-                    ArrayList<Integer> blockList = new ArrayList<Integer>();
-                    ArrayList<Integer> metaList = new ArrayList<Integer>();
-                    for (int j = 1; j < childParts.length; j++) {
-                        int minID = -1;
-                        int maxID = -1;
-                        int minMeta = 0;
-                        int maxMeta = 0;
-                        /* Parse Scenario: 2>4-1>2 ADDS (Block,Meta)(2,1)(2,2)(3,1)(3,2)(4,1)(4,2) */
-                        String[] idMetaParts = childParts[j].split("-");
-                        for (int k = 0; k < idMetaParts.length; k++) {
-                            String[] rangeParts = idMetaParts[k].split(">");
-                            if (k == 0) {
-                                for (int l = 0; l < rangeParts.length; l++) {
-                                    if (l == 0) {
-                                        minID = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinBlockID");
-                                    } else if (l == 1) {
-                                        maxID = ParsingHelper.parseInteger(rangeParts[l], maxID, "parseMaxBlockID");
-                                    } else {
-                                        JASLog.warning("Block entry %s contains too many > elements.", childParts[j]);
-                                    }
-                                }
-                            } else if (k == 1) {
-                                for (int l = 0; l < rangeParts.length; l++) {
-                                    if (l == 0) {
-                                        minMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinMetaID");
-                                    } else if (l == 1) {
-                                        maxMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMaxMetaID");
-                                    } else {
-                                        JASLog.warning("Block entry %s contains too many > elements.", childParts[j]);
-                                    }
-                                }
-                            } else {
-                                JASLog.warning("Block entry %s contains too many - elements.", childParts[j]);
-                            }
-                        }
-
-                        /* Gaurantee Max > Min. Auxillary Purpose: Gaurantees max is not -1 if only min is Set */
-                        maxID = minID > maxID ? minID : maxID;
-                        maxMeta = minMeta > maxMeta ? minMeta : maxMeta;
-
-                        for (int id = minID; id <= maxID; id++) {
-                            for (int meta = minMeta; meta <= maxMeta; meta++) {
-                                if (id != -1) {
-                                    JASLog.debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
-                                    blockList.add(id);
-                                    metaList.add(meta);
-                                }
-                            }
-                        }
-                    }
-                    valueCache.put(Key.blockList.key, blockList);
-                    valueCache.put(Key.metaList.key, metaList);
+                    OptionalParser.parseBlock(childParts, valueCache);
                     break;
-
                 case blockRange:
-                    if (childParts.length == 4) {
-                        valueCache.put(Key.blockRangeX.key, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
-                        valueCache.put(Key.blockRangeY.key, ParsingHelper.parseInteger(childParts[2],
-                                (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
-                        valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseInteger(childParts[3],
-                                (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
-                    } else if (childParts.length == 2) {
-                        valueCache.put(Key.blockRangeX.key, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
-                        valueCache.put(Key.blockRangeY.key, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
-                        valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
-                    } else {
-                        JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Length");
-                    }
+                    OptionalParser.parseBlockRange(childParts, valueCache);
+                    break;
+                case spawnRange:
+                    OptionalParser.parseSpawnRange(childParts, valueCache);
                     break;
                 case spawnRate:
-                    if (childParts.length == 2) {
-                        valueCache.put(Key.spawnRate.key, ParsingHelper.parseInteger(childParts[1],
-                                (Integer) valueCache.get(Key.spawnRate.key), Key.spawnRate.key));
-                    } else {
-                        JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Length");
-                    }
+                    OptionalParser.parseSpawnRate(childParts, valueCache);
+                    break;
+                case sky:
+                case noSky:
+                    OptionalParser.parseSky(childParts, valueCache);
                     break;
                 default:
-                    JASLog.warning("Did Not Recognize a valid deSpawn properties from %s.", masterParts[i]);
+                    JASLog.warning("Did Not Recognize a valid Despawn properties from %s.", masterParts[i]);
                     break;
                 }
             }
@@ -159,18 +84,6 @@ public class OptionalSettingsDespawning extends OptionalSettings {
     public int getRate() {
         parseString();
         return (Integer) valueCache.get(Key.spawnRate.key);
-    }
-
-    /**
-     * Represents Restriction on LightLevel.
-     * 
-     * @return True if Operation should continue as normal, False if it should be disallowed
-     */
-    public boolean isValidLightLevel(World world, int xCoord, int yCoord, int zCoord) {
-        parseString();
-        int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
-        return lightLevel > (Integer) valueCache.get(Key.maxLightLevel.key)
-                || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
     }
 
     /**

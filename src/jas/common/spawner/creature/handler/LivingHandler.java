@@ -2,17 +2,14 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-
-import java.util.logging.Level;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
@@ -126,18 +123,28 @@ public class LivingHandler {
             double d2 = entityplayer.posZ - entity.posZ;
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-            boolean canDespawn = true;
+            boolean canDespawn = !despawning.isInverted();
             if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
+                    || !despawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
-                canDespawn = false;
+                canDespawn = despawning.isInverted();
             }
 
-            if (canDespawn && entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
-                    && d3 >= 1024.0D) {
-                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+            if (canDespawn == false) {
+                LivingHelper.setAge(entityplayer, 0);
+                return;
+            }
+
+            Boolean validDistance = despawning.isValidDistance((int) d3);
+            validDistance = validDistance == null ? (int) d3 > Properties.despawnDist : validDistance;
+            if (d3 > 16384.0D) {
+                entity.setDead();
+            } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
+                    && validDistance) {
+                JASLog.info("Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
-            } else if (d3 < 1024.0D) {
+            } else if (!validDistance) {
                 LivingHelper.setAge(entityplayer, 0);
             }
         }
@@ -165,18 +172,18 @@ public class LivingHandler {
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
-
+        boolean canSpawn = !spawning.isInverted();
         if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
                 entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
-            return false;
-        } else if (!spawning.isValidLightLevel(entity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, xCoord, yCoord,
-                zCoord))) {
-            return false;
-        } else {
-            return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
-                    && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
-                    && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+            canSpawn = spawning.isInverted();
+        } else if (!spawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)) {
+            canSpawn = spawning.isInverted();
+        } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
+            canSpawn = spawning.isInverted();
         }
+        return canSpawn && entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
+                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
+                && !entity.worldObj.isAnyLiquid(entity.boundingBox);
     }
 
     /**

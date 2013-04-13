@@ -5,7 +5,8 @@ import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
-import jas.common.spawner.biome.BiomeHandlerRegistry;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import jas.compatability.CompatabilityManager;
@@ -63,10 +64,13 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
+        
     }
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
+        Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
+        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile, event.getServer());
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);

@@ -3,14 +3,20 @@ package jas.common.spawner.creature.handler;
 import java.util.EnumSet;
 import java.util.HashMap;
 
+/**
+ * Represent the readable Tags for OptionalSettings
+ */
 public enum Key {
     /* Category Tags */
-    spawn("spawn"), despawn("despawn"), block("block"), light("light"),
+    spawn("spawn"), despawn("despawn"), notSpawn("!spawn"), notDespawn("!despawn"),
 
     /* Properties */
-    enabled("enabled"), minLightLevel("minLightLevel"), maxLightLevel("maxLightLevel"), spawnRate("spawnRate"), blockRange(
-            "blockRange"), blockRangeX("blockRangeX"), blockRangeY("blockRangeY"), blockRangeZ("blockRangeZ"), blockList(
-            "blocks"), metaList("meta"), material("material"), UNKNOWN("");
+    enabled("enabled"), sky("sky"), noSky("!sky"), block("block"), light("light"), spawnRange("spawnRange"), minLightLevel(
+            "minLightLevel"), maxLightLevel("maxLightLevel"), spawnRate("spawnRate"), blockRange("blockRange"), blockRangeX(
+            "blockRangeX"), blockRangeY("blockRangeY"), blockRangeZ("blockRangeZ"), blockList("blocks"), metaList(
+            "meta"), material("material"),
+    /**/
+    UNKNOWN("");
 
     public final String key;
     private static final HashMap<String, Key> lookupEnum = new HashMap<String, Key>();

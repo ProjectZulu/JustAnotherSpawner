@@ -1,6 +1,7 @@
 package jas.common.spawner;
 
 import jas.common.JASLog;
+import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -69,12 +70,13 @@ public class CustomSpawner {
      * 
      * @param creatureType CreatureType spawnList that is being Spawned
      */
-    //TODO: Why does this return integer? Debugging? What is the value? It is definetly Not required to Function.
+    // TODO: Why does this return integer? Debugging? What is the value? It is definetly Not required to Function.
     public static final int spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
         int i = 0;
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
-        if (countCreatureType(worldServer, creatureType) <= creatureType.maxNumberOfCreature
-                * eligibleChunksForSpawning.size() / 256) {
+        int entityCount = countCreatureType(worldServer, creatureType);
+        int entityCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
+        if (entityCount <= entityCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -93,7 +95,7 @@ public class CustomSpawner {
                     if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
                         int j2 = 0;
                         int k2 = 0;
-                        while (k2 < 3) { //TODO: This Screams For Loop Cream
+                        while (k2 < 3) { // TODO: This Screams For Loop Cream
                             int l2 = k1;
                             int i3 = l1;
                             int j3 = i2;
@@ -101,7 +103,7 @@ public class CustomSpawner {
                             SpawnListEntry spawnlistentry = null;
                             int k3 = 0;
                             while (true) {
-                                if (k3 < 4) { //TODO: This Screams For Loop Cream
+                                if (k3 < 4) { // TODO: This Screams For Loop Cream
                                     labelInside: {
                                         l2 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
                                         i3 += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
@@ -119,9 +121,10 @@ public class CustomSpawner {
 
                                                 if (f6 >= 576.0F) {
                                                     if (spawnlistentry == null) {
-                                                        spawnlistentry = creatureType.getSpawnListEntryToSpawn(worldServer, l2, i3, j3);
+                                                        spawnlistentry = creatureType.getSpawnListEntryToSpawn(
+                                                                worldServer, l2, i3, j3);
                                                         if (spawnlistentry == null) {
-                                                            break labelInside; //TODO: Coulnd't This be Continue?
+                                                            break labelInside; // TODO: Coulnd't This be Continue?
                                                         }
                                                     }
 
@@ -149,6 +152,10 @@ public class CustomSpawner {
                                                                 entityliving.posY, entityliving.posZ);
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
+                                                        entityCount++;
+                                                        if (entityCount > entityCap) {
+                                                            return 0;
+                                                        }
                                                         if (j2 >= spawnlistentry.packSize) {
                                                             continue labelChunkStart;
                                                         }
@@ -173,14 +180,14 @@ public class CustomSpawner {
         }
         return i;
     }
-    
-    private static final int countCreatureType(WorldServer worldServer, CreatureType creatureType){
+
+    private static final int countCreatureType(WorldServer worldServer, CreatureType creatureType) {
         int count = 0;
         @SuppressWarnings("unchecked")
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            if(creatureType.isEntityOfType(entity)){
+            if (creatureType.isEntityOfType(entity)) {
                 count++;
             }
         }
@@ -197,7 +204,7 @@ public class CustomSpawner {
         }
         entityLiving.initCreature();
     }
-    
+
     /**
      * Called during chunk generation to spawn initial creatures.
      */
@@ -208,12 +215,12 @@ public class CustomSpawner {
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;
             int i2 = k1;
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world, biome.biomeName, j1,
-                    world.getTopSolidOrLiquidBlock(j1, k1), k1);
+            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world,
+                    BiomeHelper.getPackageName(biome), j1, world.getTopSolidOrLiquidBlock(j1, k1), k1);
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
-            }else{
+            } else {
                 JASLog.debug(Level.INFO, "Evaluating if We Should spawn %s", spawnListEntry.livingClass.getSimpleName());
             }
             int i1 = spawnListEntry.minChunkPack
@@ -244,8 +251,9 @@ public class CustomSpawner {
                         world.spawnEntityInWorld(entityliving);
                         creatureSpecificInit(entityliving, world, f, f1, f2);
                         flag = true;
-                    }else{
-                        JASLog.debug(Level.INFO, "Entity not Spawned due to invalid creatureType location", creatureType.typeID);
+                    } else {
+                        JASLog.debug(Level.INFO, "Entity not Spawned due to invalid creatureType location",
+                                creatureType.typeID);
                     }
 
                     j1 += random.nextInt(5) - random.nextInt(5);

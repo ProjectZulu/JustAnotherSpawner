@@ -2,6 +2,8 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -33,8 +35,7 @@ public enum CreatureHandlerRegistry {
     INSTANCE;
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
     private final HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>> handlersToAdd = new HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>>();
-    private List<BiomeGenBase> biomeList = new ArrayList<BiomeGenBase>();
-
+    
     private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
     public static final String delimeter = DefaultProps.DELIMETER;
@@ -82,7 +83,6 @@ public enum CreatureHandlerRegistry {
      */
     public void initializeLivingHandlers(World world) {
         populateEntityList();
-        populateBiomeList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
                     world), false, "");
@@ -120,22 +120,22 @@ public enum CreatureHandlerRegistry {
                     mobName);
 
             if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
-                for (BiomeGenBase biomeGenBase : biomeList) {
+                for (BiomeGroup group : BiomeGroupRegistry.INSTANCE.getBiomeGroups()) {
 
-                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(biomeGenBase, livingClass)
-                            .createFromConfig(masterConfig).createFromConfig(worldConfig);
+                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass).createFromConfig(
+                            masterConfig).createFromConfig(worldConfig);
 
                     if (spawnListEntry.itemWeight > 0 && livingHandlers.get(livingClass).shouldSpawn) {
-                        JASLog.info("Adding SpawnListEntry %s of type %s to Biome %s", mobName,
-                                spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.biomeName);
+                        JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", mobName,
+                                spawnListEntry.getLivingHandler().creatureTypeID, spawnListEntry.pckgName);
                         CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
                                 .addSpawn(spawnListEntry);
                     } else {
                         JASLog.debug(
                                 Level.INFO,
-                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, Biomes: %s, ItemWeight: %s",
+                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s, ItemWeight: %s",
                                 mobName, spawnListEntry.itemWeight, livingHandlers.get(livingClass).shouldSpawn,
-                                biomeGenBase.biomeName);
+                                group.groupID);
                     }
                 }
             } else {
@@ -202,37 +202,32 @@ public enum CreatureHandlerRegistry {
     }
 
     /**
-     * Search BiomeGenBase for Valid Biomes to Spawn In
-     */
-    private void populateBiomeList() {
-        biomeList.clear();
-        for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
-            if (BiomeGenBase.biomeList[i] != null) {
-                biomeList.add(BiomeGenBase.biomeList[i]);
-            }
-        }
-    }
-
-    /**
      * Searches For a Vanilla SpawnListEntry. Generates using defaults values (spawn rate == 0) if one doesn't exist.
      * 
      * @param biome
      * @param livingClass
      * @return
      */
-    public SpawnListEntry findVanillaSpawnListEntry(BiomeGenBase biome, Class<? extends EntityLiving> livingClass) {
-        EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
-        if (creatureType != null) {
-            @SuppressWarnings("unchecked")
-            List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biome.getSpawnableList(creatureType);
-            for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
-                if (spawnListEntry.entityClass.equals(livingClass)) {
-                    return new SpawnListEntry(livingClass, biome.biomeName, spawnListEntry.itemWeight, 4,
-                            spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
+    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass) {
+        for (String pckgNames : group.getBiomeNames()) {
+            for (Integer biomeID : BiomeGroupRegistry.INSTANCE.pckgNameToBiomeID.get(pckgNames)) {
+                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
+                EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
+                if (creatureType != null) {
+                    @SuppressWarnings("unchecked")
+                    List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biome
+                            .getSpawnableList(creatureType);
+                    for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                        if (spawnListEntry.entityClass.equals(livingClass)) {
+                            return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
+                                    spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
+                        }
+                    }
                 }
+
             }
         }
-        return new SpawnListEntry(livingClass, biome.biomeName, 0, 4, 0, 4);
+        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4);
     }
 
     /**

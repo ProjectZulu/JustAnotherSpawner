@@ -2,8 +2,10 @@ package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.JASLog;
-import jas.common.spawner.biome.BiomeHandler;
-import jas.common.spawner.biome.BiomeHandlerRegistry;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.spawner.biome.group.BiomeHelper;
+import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
@@ -12,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Random;
 import java.util.logging.Level;
 
 import net.minecraft.block.Block;
@@ -28,6 +31,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.Configuration;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ListMultimap;
 
 //TODO: Large Constructor could probably use Factory OR String optionalParameters to consolidate unused properties
@@ -37,7 +41,7 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
-    private final ListMultimap<String, SpawnListEntry> biomeNameToSpawnEntry = ArrayListMultimap.create();
+    private final ListMultimap<String, SpawnListEntry> groupNameToSpawnEntry = ArrayListMultimap.create();
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
@@ -80,25 +84,25 @@ public class CreatureType {
     /**
      * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
      * 
-     * @param biomeName
+     * @param pckgName
      * @param spawnListEntry
      */
     public void addSpawn(SpawnListEntry spawnListEntry) {
-        biomeNameToSpawnEntry.get(spawnListEntry.biomeName).add(spawnListEntry);
+        groupNameToSpawnEntry.get(spawnListEntry.pckgName).add(spawnListEntry);
     }
 
     /**
      * Removes the SpawnListEntry defined by biomeName and LivingClass from the CreatureType.
      * 
-     * @param biomeName
+     * @param pckgName
      * @param livingClass
      * @return
      */
-    public boolean removeSpawn(String biomeName, Class<? extends EntityLiving> livingClass) {
-        Iterator<SpawnListEntry> iterator = biomeNameToSpawnEntry.get(biomeName).iterator();
+    public boolean removeSpawn(String groupName, Class<? extends EntityLiving> livingClass) {
+        Iterator<SpawnListEntry> iterator = groupNameToSpawnEntry.get(groupName).iterator();
         while (iterator.hasNext()) {
             SpawnListEntry spawnListEntry = iterator.next();
-            if (livingClass.equals(spawnListEntry.livingClass) && spawnListEntry.biomeName.equals(biomeName)) {
+            if (livingClass.equals(spawnListEntry.livingClass) && spawnListEntry.pckgName.equals(groupName)) {
                 iterator.remove();
                 return true;
             }
@@ -112,21 +116,21 @@ public class CreatureType {
      * @return
      */
     public Collection<SpawnListEntry> getAllSpawns() {
-        return biomeNameToSpawnEntry.values();
+        return groupNameToSpawnEntry.values();
     }
 
     /**
      * Performs Remove and Add Spawn operation
      * 
-     * @param biomeName
+     * @param pckgName
      * @param livingClass
      */
     public void updateOrAddSpawn(SpawnListEntry spawnListEntry) {
-        ListIterator<SpawnListEntry> iterator = biomeNameToSpawnEntry.get(spawnListEntry.biomeName).listIterator();
+        ListIterator<SpawnListEntry> iterator = groupNameToSpawnEntry.get(spawnListEntry.pckgName).listIterator();
         while (iterator.hasNext()) {
             SpawnListEntry listEntry = iterator.next();
             if (listEntry.livingClass.equals(spawnListEntry.livingClass)
-                    && listEntry.biomeName.equals(spawnListEntry.biomeName)) {
+                    && listEntry.pckgName.equals(spawnListEntry.pckgName)) {
                 iterator.set(spawnListEntry);
                 return;
             }
@@ -138,7 +142,7 @@ public class CreatureType {
      * Resets All Spawn Lists. This is used on World Change
      */
     public void resetSpawns() {
-        biomeNameToSpawnEntry.clear();
+        groupNameToSpawnEntry.clear();
     }
 
     /**
@@ -150,6 +154,7 @@ public class CreatureType {
      * @param zCoord Random zCoordinate nearby to Where Creature will spawn
      * @return Creature to Spawn
      */
+    @SuppressWarnings("unchecked")
     public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
         Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
@@ -161,9 +166,9 @@ public class CreatureType {
         }
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
         if (biomegenbase != null) {
-            Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomegenbase.biomeName);
-            return !spawnEntryList.isEmpty() ? (SpawnListEntry) WeightedRandom
-                    .getRandomItem(world.rand, spawnEntryList) : null;
+            ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+                    BiomeHelper.getPackageName(biomegenbase));
+            return getRandomEntry(world.rand, groupIDList);
         }
         return null;
     }
@@ -171,10 +176,10 @@ public class CreatureType {
     /**
      * Called by CustomSpawner for a Chunk Spawn Entity
      * 
-     * @param biomeName Name of Biome SpawnList to get CreatureType From
+     * @param pckgName Name of Biome SpawnList to get CreatureType From
      * @return
      */
-    public SpawnListEntry getSpawnListEntryToSpawn(World world, String biomeName, int xCoord, int yCoord, int zCoord) {
+    public SpawnListEntry getSpawnListEntryToSpawn(World world, String packgName, int xCoord, int yCoord, int zCoord) {
         Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
@@ -183,9 +188,14 @@ public class CreatureType {
                     structureSpawnList);
             return isEntityOfType(spawnListEntry.livingClass) ? spawnListEntry : null;
         }
-        Collection<SpawnListEntry> spawnEntryList = biomeNameToSpawnEntry.get(biomeName);
-        return !spawnEntryList.isEmpty() ? (SpawnListEntry) WeightedRandom.getRandomItem(world.rand, spawnEntryList)
-                : null;
+
+        BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
+        if (biomegenbase != null) {
+            ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+                    BiomeHelper.getPackageName(biomegenbase));
+            return getRandomEntry(world.rand, groupIDList);
+        }
+        return null;
     }
 
     private Collection<SpawnListEntry> getStructureSpawnList(World world, int xCoord, int yCoord, int zCoord) {
@@ -201,6 +211,41 @@ public class CreatureType {
             }
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Equivalent to WeightedRandom.getRandomItem but implemented for List of Lists
+     * 
+     * @param random
+     * @param spawnList
+     * @param weightList
+     * @return
+     */
+    private SpawnListEntry getRandomEntry(Random random, ImmutableCollection<String> groupIDList) {
+        int totalWeight = 0;
+        for (String groupID : groupIDList) {
+            for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
+                totalWeight += spawnListEntry.itemWeight;
+            }
+        }
+
+        if (totalWeight <= 0) {
+            return null;
+        } else {
+            int selectedWeight = random.nextInt(totalWeight);
+            SpawnListEntry resultEntry = null;
+
+            for (String groupID : groupIDList) {
+                for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
+                    resultEntry = spawnListEntry;
+                    selectedWeight -= spawnListEntry.itemWeight;
+                    if (selectedWeight <= 0) {
+                        return resultEntry;
+                    }
+                }
+            }
+            return resultEntry;
+        }
     }
 
     /**

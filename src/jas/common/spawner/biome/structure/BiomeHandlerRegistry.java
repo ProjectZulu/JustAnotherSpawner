@@ -1,4 +1,4 @@
-package jas.common.spawner.biome;
+package jas.common.spawner.biome.structure;
 
 import jas.api.BiomeInterpreter;
 
@@ -13,7 +13,7 @@ public enum BiomeHandlerRegistry {
 
     private final ArrayList<BiomeInterpreter> biomeInterpreters = new ArrayList<BiomeInterpreter>();
     private final ArrayList<BiomeHandler> biomeHandlers = new ArrayList<BiomeHandler>();
-
+    
     BiomeHandlerRegistry() {
         biomeInterpreters.add(new BiomeInterpreterSwamp());
         biomeInterpreters.add(new BiomeInterpreterNether());
