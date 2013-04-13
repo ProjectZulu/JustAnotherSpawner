@@ -13,7 +13,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
@@ -180,8 +179,7 @@ public class LivingHandler {
         if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
                 entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
             return false;
-        } else if (!spawning.isValidLightLevel(entity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, xCoord, yCoord,
-                zCoord))) {
+        } else if (!spawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)) {
             return false;
         } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
             return false;

@@ -4,9 +4,7 @@ import jas.common.JASLog;
 
 import java.util.ArrayList;
 
-import net.minecraft.world.World;
-
-public class OptionalSettingsSpawning extends OptionalSettings {
+public class OptionalSettingsSpawning extends OptionalSettingsBase {
     public OptionalSettingsSpawning(String parseableString) {
         super(parseableString.replace("}", ""));
     }
@@ -66,18 +64,6 @@ public class OptionalSettingsSpawning extends OptionalSettings {
         }
     }
 
-    @Override
-    public boolean isOptionalEnabled() {
-        parseString();
-        return valueCache.get(Key.enabled.key) != null;
-    }
-
-    public boolean isValidLightLevel(int lightLevel) {
-        parseString();
-        return lightLevel > (Integer) valueCache.get(Key.maxLightLevel.key)
-                || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
-    }
-
     @SuppressWarnings("unchecked")
     public boolean isValidBlock(int blockID, int meta) {
         parseString();
@@ -90,32 +76,5 @@ public class OptionalSettingsSpawning extends OptionalSettings {
             }
         }
         return true;
-    }
-
-    /**
-     * Checks if the Distance to Player is valid
-     * 
-     * @param playerDistance Distance Squared to Nearest Player
-     * @return True to Continue as Normal, False to Interrupt, Null Use Global Check
-     */
-    public Boolean isValidDistance(int playerDistance) {
-        parseString();
-        Integer distanceToPlayer = (Integer) valueCache.get(Key.spawnRange);
-        return distanceToPlayer != null ? playerDistance > distanceToPlayer * distanceToPlayer : null;
-    }
-
-    public Boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
-        if (valueCache.get(Key.sky.key) == null) {
-            return true;
-        } else if ((Boolean) valueCache.get(Key.sky.key)) {
-            return !world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
-        } else {
-            return world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }
