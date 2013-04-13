@@ -4,6 +4,9 @@ import jas.common.JASLog;
 
 import java.util.ArrayList;
 
+/**
+ * For style see {@link OptionalSettings}
+ */
 public class OptionalSettingsSpawning extends OptionalSettingsBase {
     public OptionalSettingsSpawning(String parseableString) {
         super(parseableString.replace("}", ""));
@@ -31,6 +34,8 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
             if (i == 0) {
                 if (masterParts[i].equalsIgnoreCase(Key.spawn.key)) {
                     valueCache.put(Key.enabled.key, Boolean.TRUE);
+                } else if (masterParts[i].equalsIgnoreCase(Key.notSpawn.key)) {
+                    valueCache.put(Key.enabled.key, Boolean.FALSE);
                 } else {
                     JASLog.severe("Optional Settings Error expected spawn from %s", masterParts[i]);
                     break;

@@ -126,14 +126,16 @@ public class LivingHandler {
             double d2 = entityplayer.posZ - entity.posZ;
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-            boolean canDespawn = true;
+//            boolean canDespawn = true;
+            boolean canDespawn = !despawning.isInverted();
+
             if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
-                canDespawn = false;
+                canDespawn = !canDespawn;
             }
 
-            if (!canDespawn) {
+            if (canDespawn == false) {
                 LivingHelper.setAge(entityplayer, 0);
                 return;
             }
@@ -175,19 +177,18 @@ public class LivingHandler {
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
-
+        boolean canSpawn = !spawning.isInverted();
         if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
                 entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
-            return false;
+            canSpawn = !canSpawn;
         } else if (!spawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)) {
-            return false;
+            canSpawn = !canSpawn;
         } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
-            return false;
-        } else {
-            return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
-                    && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
-                    && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+            canSpawn = !canSpawn;
         }
+        return canSpawn && entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
+                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
+                && !entity.worldObj.isAnyLiquid(entity.boundingBox);
     }
 
     /**

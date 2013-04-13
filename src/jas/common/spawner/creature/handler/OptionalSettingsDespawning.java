@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 import net.minecraft.world.World;
 
+/**
+ * For style see {@link OptionalSettings}
+ */
 public class OptionalSettingsDespawning extends OptionalSettingsBase {
     public OptionalSettingsDespawning(String parseableString) {
         super(parseableString.replace("}", ""));
@@ -36,6 +39,8 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
             if (i == 0) {
                 if (masterParts[i].equalsIgnoreCase(Key.despawn.key)) {
                     valueCache.put(Key.enabled.key, Boolean.TRUE);
+                } else if (masterParts[i].equalsIgnoreCase(Key.notDespawn.key)) {
+                    valueCache.put(Key.enabled.key, Boolean.FALSE);
                 } else {
                     JASLog.severe("Optional Settings Error expected %s from within %s", Key.despawn.key, masterParts[i]);
                     break;

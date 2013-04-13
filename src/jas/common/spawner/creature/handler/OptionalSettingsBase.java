@@ -2,6 +2,9 @@ package jas.common.spawner.creature.handler;
 
 import net.minecraft.world.World;
 
+/**
+ * For style see {@link OptionalSettings}
+ */
 public abstract class OptionalSettingsBase extends OptionalSettings {
 
     public OptionalSettingsBase(String parseableString) {
@@ -13,7 +16,13 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
         parseString();
         return valueCache.get(Key.enabled.key) != null;
     }
-    
+
+    @Override
+    public boolean isInverted() {
+        parseString();
+        return !(Boolean) valueCache.get(Key.enabled.key);
+    }
+
     /**
      * Represents Restriction on LightLevel.
      * 
@@ -26,7 +35,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                 || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
     }
 
-    public Boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
+    public boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
         if (valueCache.get(Key.sky.key) == null) {
             return true;
