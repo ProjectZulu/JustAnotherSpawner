@@ -27,7 +27,7 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
     }
 
     public void setPacketData(String creatureType, SpawnListEntry spawnListEntry) {
-        setPacketData(spawnListEntry.livingClass, creatureType, spawnListEntry.biomeName, spawnListEntry.itemWeight,
+        setPacketData(spawnListEntry.livingClass, creatureType, spawnListEntry.pckgName, spawnListEntry.itemWeight,
                 spawnListEntry.packSize, spawnListEntry.minChunkPack, spawnListEntry.maxChunkPack);
     }
 

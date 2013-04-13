@@ -1,4 +1,4 @@
-package jas.common.spawner.biome;
+package jas.common.spawner.biome.structure;
 
 import jas.api.BiomeInterpreter;
 import jas.common.JASLog;
