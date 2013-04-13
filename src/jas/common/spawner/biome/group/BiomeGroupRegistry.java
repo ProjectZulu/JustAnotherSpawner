@@ -98,6 +98,13 @@ public enum BiomeGroupRegistry {
     }
 
     public void createBiomeGroups(File configDirectory, MinecraftServer minecraftServer) {
+        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "Master/" + "BiomeGroups" + ".cfg"));
+        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "BiomeGroups" + ".cfg"));
+        masterConfig.load();
+        worldConfig.load();
+
         /*
          * By Default Every Biome is a Group. CategoryBiomeName to biomeID. This is used instead of looping through
          * biomList multiple times to tell if a category is a default biomeCategory which would require adding the
@@ -112,15 +119,9 @@ public enum BiomeGroupRegistry {
             }
             groupIDToBiomeID.put(biome.biomeName.toLowerCase(), biome.biomeID);
             pckgNameToBiomeID.put(BiomeHelper.getPackageName(biome), biome.biomeID);
+            masterConfig.get("BiomeGroups.ReferenceBiomes", biome.biomeName, BiomeHelper.getPackageName(biome));
+            worldConfig.get("BiomeGroups.ReferenceBiomes", biome.biomeName, BiomeHelper.getPackageName(biome));
         }
-
-        /* Filter Through Config to Get Actual list */
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "BiomeGroups" + ".cfg"));
-        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "BiomeGroups" + ".cfg"));
-        masterConfig.load();
-        worldConfig.load();
         Set<String> groupNames = getBiomeGroups(worldConfig, getBiomeGroups(masterConfig, groupIDToBiomeID.keySet()));
 
         /* Create BiomeGroups */
@@ -165,7 +166,8 @@ public enum BiomeGroupRegistry {
                 defautlGroupString = defautlGroupString.concat(",");
             }
         }
-        Property resultProp = config.get("BiomeGroups.AllBiomes", "BiomeGroups", defautlGroupString);
+        Property resultProp = config.get("BiomeGroups.AllGroups", "BiomeGroups", defautlGroupString,
+                "All Group Names. Seperated by Commas. Edit this to add/remove groups.");
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
         Set<String> biomeGroups = new HashSet<String>();
@@ -198,9 +200,7 @@ public enum BiomeGroupRegistry {
                 defautlGroupString = defautlGroupString.concat(",");
             }
         }
-        JASLog.info("BiomeGroup %s preConfig String %s", group.groupID, defautlGroupString);
         Property resultProp = config.get("BiomeGroups.BiomeLists." + group.groupID, "BiomeList", defautlGroupString);
-        JASLog.info("BiomeGroup %s pastConfig String %s", group.groupID, resultProp.getString());
 
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
