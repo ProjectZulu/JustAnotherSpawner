@@ -4,6 +4,8 @@ import jas.common.JASLog;
 
 import java.util.ArrayList;
 
+import net.minecraft.world.World;
+
 public class OptionalSettingsSpawning extends OptionalSettings {
     public OptionalSettingsSpawning(String parseableString) {
         super(parseableString.replace("}", ""));
@@ -48,6 +50,10 @@ public class OptionalSettingsSpawning extends OptionalSettings {
                 case spawnRange:
                     OptionalParser.parseSpawnRange(childParts, valueCache);
                     break;
+                case sky:
+                case noSky:
+                    OptionalParser.parseSky(childParts, valueCache);
+                    break;
                 case material:
                     // TODO: Add Material Tag ? Air or Water? What is the point?
                     JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
@@ -87,7 +93,7 @@ public class OptionalSettingsSpawning extends OptionalSettings {
     }
 
     /**
-     * Checks if the Distance to
+     * Checks if the Distance to Player is valid
      * 
      * @param playerDistance Distance Squared to Nearest Player
      * @return True to Continue as Normal, False to Interrupt, Null Use Global Check
@@ -96,6 +102,16 @@ public class OptionalSettingsSpawning extends OptionalSettings {
         parseString();
         Integer distanceToPlayer = (Integer) valueCache.get(Key.spawnRange);
         return distanceToPlayer != null ? playerDistance > distanceToPlayer * distanceToPlayer : null;
+    }
+
+    public Boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
+        if (valueCache.get(Key.sky.key) == null) {
+            return true;
+        } else if ((Boolean) valueCache.get(Key.sky.key)) {
+            return !world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
+        } else {
+            return world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
+        }
     }
 
     @Override

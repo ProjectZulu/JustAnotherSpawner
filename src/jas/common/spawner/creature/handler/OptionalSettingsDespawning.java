@@ -58,6 +58,10 @@ public class OptionalSettingsDespawning extends OptionalSettings {
                 case spawnRate:
                     OptionalParser.parseSpawnRate(childParts, valueCache);
                     break;
+                case sky:
+                case noSky:
+                    OptionalParser.parseSky(childParts, valueCache);
+                    break;
                 default:
                     JASLog.warning("Did Not Recognize a valid Despawn properties from %s.", masterParts[i]);
                     break;
@@ -120,6 +124,16 @@ public class OptionalSettingsDespawning extends OptionalSettings {
             }
         }
         return true;
+    }
+    
+    public Boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
+        if (valueCache.get(Key.sky.key) == null) {
+            return true;
+        } else if ((Boolean) valueCache.get(Key.sky.key)) {
+            return !world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
+        } else {
+            return world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
+        }
     }
 
     /**

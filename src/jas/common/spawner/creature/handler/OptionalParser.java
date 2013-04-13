@@ -144,11 +144,23 @@ public class OptionalParser {
      * @param valueCache Cache used by OptionalSettings to hold values
      */
     public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
-        if (values.length == 1) {
+        if (values.length == 2) {
             valueCache.put(Key.spawnRange.key,
-                    ParsingHelper.parseInteger(values[1], Properties.despawnDist, Key.minLightLevel.key));
+                    ParsingHelper.parseInteger(values[1], Properties.despawnDist, Key.spawnRange.key));
         } else {
             JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
+        }
+    }
+
+    public static void parseSky(String[] values, HashMap<String, Object> valueCache) {
+        if (values.length == 1) {
+            if (Key.sky.key.equalsIgnoreCase(values[0])) {
+                valueCache.put(Key.sky.key, Boolean.TRUE);
+            } else {
+                valueCache.put(Key.sky.key, Boolean.FALSE);
+            }
+        } else {
+            JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
         }
     }
 }

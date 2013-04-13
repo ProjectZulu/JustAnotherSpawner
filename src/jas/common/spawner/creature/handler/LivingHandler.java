@@ -129,6 +129,7 @@ public class LivingHandler {
 
             boolean canDespawn = true;
             if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
+                    || !despawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)
                     || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
                 canDespawn = false;
             }
@@ -181,6 +182,8 @@ public class LivingHandler {
             return false;
         } else if (!spawning.isValidLightLevel(entity.worldObj.getSavedLightValue(EnumSkyBlock.Sky, xCoord, yCoord,
                 zCoord))) {
+            return false;
+        } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
             return false;
         } else {
             return entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
