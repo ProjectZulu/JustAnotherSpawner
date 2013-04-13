@@ -34,10 +34,11 @@ public class LivingHandler {
         this.optionalParameters = optionalParameters;
 
         for (String string : optionalParameters.split("\\{")) {
-            if (string.replace("}", "").split("\\:", 2)[0].equalsIgnoreCase("spawn")) {
-                spawning = new OptionalSettingsSpawning(string);
-            } else if (string.replace("}", "").split("\\:", 2)[0].equalsIgnoreCase("despawn")) {
-                despawning = new OptionalSettingsDespawning(string);
+            String parsed = string.replace("}", "");
+            if (parsed.split("\\:", 2)[0].equalsIgnoreCase("spawn")) {
+                spawning = new OptionalSettingsSpawning(parsed);
+            } else if (parsed.split("\\:", 2)[0].equalsIgnoreCase("despawn")) {
+                despawning = new OptionalSettingsDespawning(parsed);
             }
         }
         spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
@@ -195,7 +196,8 @@ public class LivingHandler {
     protected LivingHandler createFromConfig(Configuration config) {
         String mobName = (String) EntityList.classToStringMapping.get(entityClass);
 
-        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn);
+        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
+                + optionalParameters;
 
         Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
 
@@ -218,14 +220,14 @@ public class LivingHandler {
             }
             resultValue.set(resultString);
             LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters(resultValue.getString().split(
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultValue.getString().split(
                     "\\{", 2)[1]) : resultHandler;
         } else if (resultParts.length == 2) {
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
             LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters(resultMasterParts[1])
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultMasterParts[1])
                     : resultHandler;
         } else {
             JASLog.severe(
