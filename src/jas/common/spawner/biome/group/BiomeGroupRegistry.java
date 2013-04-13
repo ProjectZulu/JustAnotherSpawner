@@ -5,6 +5,8 @@ import jas.common.JASLog;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,13 +19,21 @@ import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 
 public enum BiomeGroupRegistry {
     INSTANCE;
 
     private final HashMap<String, BiomeGroup> iDToGroup = new HashMap<String, BiomeGroup>();
-    private final ListMultimap<String, String> biomeNameToGroupIDList = ArrayListMultimap.create();
+    private final ListMultimap<String, String> packgNameToGroupIDList = ArrayListMultimap.create();
+
+    /*
+     * Reverse Lookup Used to Filter Used to get a biome without needed to run through entire array. Primary use is to
+     * filter submitted BiomeNames to Ensure they correspond to actual Biomes.
+     */
+    public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
 
     /**
      * Should Only Be Used to Register BiomeGroups with their finished
@@ -31,15 +41,46 @@ public enum BiomeGroupRegistry {
     public void registerGroup(BiomeGroup group) {
         JASLog.info("Registering BiomeGroup %s", group.groupID);
         iDToGroup.put(group.groupID, group);
-        biomeNameToGroupIDList.get(group.groupID).addAll(group.biomeNames);
+        for (String biomeName : group.pckgNames) {
+            JASLog.info("BiomeGroup %s contains PckgBiome %s", group.groupID, biomeName);
+        }
+        for (String pckgName : group.pckgNames) {
+            packgNameToGroupIDList.get(pckgName).add(group.groupID);
+        }
+    }
+
+    public BiomeGroup getBiomeGroup(String groupID) {
+        return iDToGroup.get(groupID);
+    }
+
+    /**
+     * Return Immutable List of all BiomeGroups
+     * 
+     * @param groupID
+     * @return
+     */
+    public Collection<BiomeGroup> getBiomeGroups() {
+        return Collections.unmodifiableCollection(iDToGroup.values());
+    }
+
+    /**
+     * 
+     * @return
+     */
+    public ImmutableMultimap<String, String> getPackgNameToGroupIDList() {
+        return ImmutableMultimap.copyOf(packgNameToGroupIDList);
     }
 
     public static class BiomeGroup {
-        private final String groupID;
-        private final List<String> biomeNames = new ArrayList<String>();
+        public final String groupID;
+        private final List<String> pckgNames = new ArrayList<String>();
 
         public BiomeGroup(String groupID) {
             this.groupID = groupID.toLowerCase();
+        }
+
+        public ImmutableList<String> getBiomeNames() {
+            return ImmutableList.copyOf(pckgNames);
         }
 
         @Override
@@ -57,7 +98,6 @@ public enum BiomeGroupRegistry {
     }
 
     public void createBiomeGroups(File configDirectory, MinecraftServer minecraftServer) {
-
         /*
          * By Default Every Biome is a Group. CategoryBiomeName to biomeID. This is used instead of looping through
          * biomList multiple times to tell if a category is a default biomeCategory which would require adding the
@@ -66,8 +106,6 @@ public enum BiomeGroupRegistry {
          * Multimap is used to Accomodate Biomes with IdenticalNames
          */
         ListMultimap<String, Integer> groupIDToBiomeID = ArrayListMultimap.create();
-        /* Reverse Loopup Used to Filter User Submitted BiomeNames to Ensure they correspond to actual Biomes */
-        ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
             if (biome == null) {
                 continue;
@@ -88,7 +126,6 @@ public enum BiomeGroupRegistry {
         /* Create BiomeGroups */
         ArrayList<BiomeGroup> biomeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
         for (String groupName : groupNames) {
-            JASLog.info("Group Created %s", groupName);
             biomeGroups.add(new BiomeGroup(groupName));
         }
 
@@ -99,7 +136,7 @@ public enum BiomeGroupRegistry {
                 for (Integer biomeID : groupIDToBiomeID.get(biomeGroup.groupID)) {
                     JASLog.info("Registering BiomeKey %s to Group %s ",
                             BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]), biomeGroup.groupID);
-                    biomeGroup.biomeNames.add(BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]));
+                    biomeGroup.pckgNames.add(BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]));
                 }
             }
             /* Filter List Through Configuration */
@@ -153,7 +190,7 @@ public enum BiomeGroupRegistry {
     private BiomeGroup getGroupSpawnList(Configuration config, BiomeGroup group,
             ListMultimap<String, Integer> pckgNameToBiomeID) {
         String defautlGroupString = "";
-        Iterator<String> iterator = group.biomeNames.iterator();
+        Iterator<String> iterator = group.pckgNames.iterator();
         while (iterator.hasNext()) {
             String string = iterator.next();
             defautlGroupString = defautlGroupString.concat(string);
@@ -161,7 +198,9 @@ public enum BiomeGroupRegistry {
                 defautlGroupString = defautlGroupString.concat(",");
             }
         }
+        JASLog.info("BiomeGroup %s preConfig String %s", group.groupID, defautlGroupString);
         Property resultProp = config.get("BiomeGroups.BiomeLists." + group.groupID, "BiomeList", defautlGroupString);
+        JASLog.info("BiomeGroup %s pastConfig String %s", group.groupID, resultProp.getString());
 
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
@@ -172,8 +211,8 @@ public enum BiomeGroupRegistry {
             }
             biomeNames.add(name);
         }
-        group.biomeNames.clear();
-        group.biomeNames.addAll(biomeNames);
+        group.pckgNames.clear();
+        group.pckgNames.addAll(biomeNames);
         return group;
     }
 }

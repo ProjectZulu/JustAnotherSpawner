@@ -1,6 +1,7 @@
 package jas.common.spawner;
 
 import jas.common.JASLog;
+import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -208,8 +209,8 @@ public class CustomSpawner {
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;
             int i2 = k1;
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world, biome.biomeName, j1,
-                    world.getTopSolidOrLiquidBlock(j1, k1), k1);
+            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world,
+                    BiomeHelper.getPackageName(biome), j1, world.getTopSolidOrLiquidBlock(j1, k1), k1);
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
