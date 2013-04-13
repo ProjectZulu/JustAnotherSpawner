@@ -132,6 +132,10 @@ public class LivingHandler {
                 canDespawn = false;
             }
             
+            if (d3 > 16384.0D) {
+                entity.setDead();
+            }
+            
             if (canDespawn && entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
                     && d3 >= 1024.0D) {
                 JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
