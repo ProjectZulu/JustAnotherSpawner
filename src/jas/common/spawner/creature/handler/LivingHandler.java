@@ -35,9 +35,10 @@ public class LivingHandler {
 
         for (String string : optionalParameters.split("\\{")) {
             String parsed = string.replace("}", "");
-            if (parsed.split("\\:", 2)[0].equalsIgnoreCase("spawn")) {
+            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+            if (titletag.equals(Key.spawn.key) || titletag.equals(Key.notSpawn.key)) {
                 spawning = new OptionalSettingsSpawning(parsed);
-            } else if (parsed.split("\\:", 2)[0].equalsIgnoreCase("despawn")) {
+            } else if (titletag.equals(Key.despawn.key) || titletag.equals(Key.notDespawn.key)) {
                 despawning = new OptionalSettingsDespawning(parsed);
             }
         }
