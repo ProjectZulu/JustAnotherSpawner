@@ -100,7 +100,7 @@ public class CustomSpawner {
             LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
             if (livingHandler != null) {
                 incrementOrPutIfAbsent(livingHandler.creatureTypeID, creatureTypeCount, 1);
-                incrementOrPutIfAbsent(entity.getEntityName(), creatureCount, 1);
+                incrementOrPutIfAbsent(entity.getClass().getSimpleName(), creatureCount, 1);
             }
         }
     }
@@ -204,6 +204,8 @@ public class CustomSpawner {
                             int k3 = 0;
                             while (true) {
                                 if (k3 < 4) { // TODO: This Screams For Loop Cream
+                                    CountableInt creatureCount = null;
+                                    int creatureCap = 0;
                                     labelInside: {
                                         l2 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
                                         i3 += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
@@ -224,6 +226,16 @@ public class CustomSpawner {
                                                         spawnlistentry = creatureType.getSpawnListEntryToSpawn(
                                                                 worldServer, l2, i3, j3);
                                                         if (spawnlistentry == null) {
+                                                            break labelInside; // TODO: Coulnd't This be Continue?
+                                                        }
+                                                        creatureCount = incrementOrPutIfAbsent(
+                                                                spawnlistentry.livingClass.getSimpleName(),
+                                                                CustomSpawner.creatureCount, 1);
+                                                        creatureCap = CreatureHandlerRegistry.INSTANCE
+                                                                .getLivingHandler(spawnlistentry.livingClass)
+                                                                .getCreatureCap();
+                                                        if (creatureCap > 0 && creatureCount.get() > creatureCap) {
+                                                            spawnlistentry = null;
                                                             break labelInside; // TODO: Coulnd't This be Continue?
                                                         }
                                                     }
@@ -253,10 +265,12 @@ public class CustomSpawner {
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
                                                         typeCount.increment();
+                                                        creatureCount.increment();                                  
                                                         if (typeCount.get() > entityCap) {
                                                             return 0;
                                                         }
-                                                        if (j2 >= spawnlistentry.packSize) {
+                                                        if (j2 >= spawnlistentry.packSize
+                                                                || (creatureCap > 0 && creatureCount.get() > creatureCap)) {
                                                             continue labelChunkStart;
                                                         }
                                                     }

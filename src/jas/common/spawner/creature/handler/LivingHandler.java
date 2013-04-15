@@ -73,6 +73,10 @@ public class LivingHandler {
             boolean shouldSpawn, String optionalParameters) {
         return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
+    
+    public final int getCreatureCap(){
+        return 0;
+    }
 
     /**
      * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
