@@ -36,8 +36,11 @@ public class CustomSpawner {
     private static ConcurrentHashMap<String, CountableInt> creatureCount = new ConcurrentHashMap<String, CountableInt>();
 
     private static class CountableInt {
-        /* note that we start at 1 since we're counting */
         int value = 1;
+
+        CountableInt(int startValue) {
+            value = startValue;
+        }
 
         public void increment() {
             ++value;
@@ -87,7 +90,7 @@ public class CustomSpawner {
      * 
      * @param worldServer
      */
-    public void countCreatureInChunks(WorldServer worldServer) {
+    public static void countCreatureInChunks(WorldServer worldServer) {
         creatureTypeCount.clear();
         creatureCount.clear();
         @SuppressWarnings("unchecked")
@@ -96,18 +99,8 @@ public class CustomSpawner {
             Entity entity = creatureIterator.next();
             LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
             if (livingHandler != null) {
-                CountableInt typeCount = creatureTypeCount.get(livingHandler.creatureTypeID);
-                if (typeCount == null) {
-                    creatureTypeCount.put(livingHandler.creatureTypeID, new CountableInt());
-                } else {
-                    typeCount.increment();
-                }
-                CountableInt entityCount = creatureCount.get(livingHandler.creatureTypeID);
-                if (typeCount == null) {
-                    creatureCount.put(entity.getEntityName(), new CountableInt());
-                } else {
-                    entityCount.increment();
-                }
+                incrementOrPutIfAbsent(livingHandler.creatureTypeID, creatureTypeCount, 1);
+                incrementOrPutIfAbsent(entity.getEntityName(), creatureCount, 1);
             }
         }
     }
@@ -119,7 +112,7 @@ public class CustomSpawner {
      * 
      * @param worldServer
      */
-    public void countOnlyTypesInChunk(WorldServer worldServer) {
+    public static void countOnlyTypesInChunk(WorldServer worldServer) {
         creatureTypeCount.clear();
         @SuppressWarnings("unchecked")
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
@@ -127,14 +120,47 @@ public class CustomSpawner {
             Entity entity = creatureIterator.next();
             LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
             if (livingHandler != null) {
-                CountableInt typeCount = creatureTypeCount.get(livingHandler.creatureTypeID);
-                if (typeCount == null) {
-                    creatureTypeCount.put(livingHandler.creatureTypeID, new CountableInt());
-                } else {
-                    typeCount.increment();
-                }
+                incrementOrPutIfAbsent(livingHandler.creatureTypeID, creatureTypeCount, 1);
             }
         }
+    }
+
+    /**
+     * Gets or Puts if absent a CountableInt from the provided Map.
+     * 
+     * @param key Key for Value inside the hash we want to get
+     * @param countingHash Hash that is being used for Counting
+     * @param defaultValue Default Value CountableInt is initialized to
+     * @return CountableInt that has not been iterated
+     */
+    private static CountableInt getOrPutIfAbsent(String key, ConcurrentHashMap<String, CountableInt> countingHash,
+            int defaultValue) {
+        CountableInt count = creatureTypeCount.get(key);
+        if (count == null) {
+            count = new CountableInt(defaultValue);
+            countingHash.put(key, count);
+        }
+        return count;
+    }
+
+    /**
+     * Gets or Puts if absent a CountableInt from the provided Map.
+     * 
+     * @param key Key for Value inside the hash we want to iterate
+     * @param countingHash Hash that is being used for Counting
+     * @param defaultValue Default Value CountableInt is initialized to
+     * @return CountableInt that has been iterated
+     */
+    private static CountableInt incrementOrPutIfAbsent(String key,
+            ConcurrentHashMap<String, CountableInt> countingHash, int defaultValue) {
+        CountableInt count = creatureTypeCount.get(key);
+        if (count == null) {
+            count = new CountableInt(defaultValue);
+            countingHash.put(key, count);
+        } else {
+            count.increment();
+        }
+        return count;
     }
 
     /**
@@ -147,9 +173,10 @@ public class CustomSpawner {
     public static final int spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
         int i = 0;
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
-        int entityCount = countCreatureType(worldServer, creatureType);
+
+        CountableInt typeCount = getOrPutIfAbsent(creatureType.typeID, creatureTypeCount, 0);
         int entityCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-        if (entityCount <= entityCap) {
+        if (typeCount.get() <= entityCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -225,8 +252,8 @@ public class CustomSpawner {
                                                                 entityliving.posY, entityliving.posZ);
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
-                                                        entityCount++;
-                                                        if (entityCount > entityCap) {
+                                                        typeCount.increment();
+                                                        if (typeCount.get() > entityCap) {
                                                             return 0;
                                                         }
                                                         if (j2 >= spawnlistentry.packSize) {
