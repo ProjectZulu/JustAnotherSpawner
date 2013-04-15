@@ -163,4 +163,12 @@ public class OptionalParser {
             JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
         }
     }
+    
+    public static void parseEntityCap(String[] values, HashMap<String, Object> valueCache) {
+        if (values.length == 2) {
+            valueCache.put(Key.entityCap.key, ParsingHelper.parseInteger(values[1], 0, Key.entityCap.key));
+        } else {
+            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+        }
+    }
 }

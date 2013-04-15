@@ -74,8 +74,9 @@ public class LivingHandler {
         return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
     
-    public final int getCreatureCap(){
-        return 0;
+    public final int getLivingCap() {
+        Integer cap = spawning.getEntityCap();
+        return cap != null ? cap : 0;
     }
 
     /**

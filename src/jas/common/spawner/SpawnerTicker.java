@@ -29,7 +29,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
         // TODO: Add Check such that Chunks are only populated if at least one CreatureType can be spawning
         CustomSpawner.determineChunksForSpawnering(world);
         if (world.getWorldInfo().getWorldTime() % 60 == 0) {
-            CustomSpawner.countCreatureInChunks(world);
+            CustomSpawner.countEntityInChunks(world);
         }
         if (world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             Iterator<CreatureType> typeIterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
