@@ -3,13 +3,15 @@ package jas.common.spawner;
 import jas.common.JASLog;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
@@ -28,7 +30,23 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class CustomSpawner {
     /** The 17x17 area around the player where mobs can spawn */
-    private static HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
+    private static ConcurrentHashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new ConcurrentHashMap<ChunkCoordIntPair, Boolean>();
+
+    private static ConcurrentHashMap<String, CountableInt> creatureTypeCount = new ConcurrentHashMap<String, CountableInt>();
+    private static ConcurrentHashMap<String, CountableInt> creatureCount = new ConcurrentHashMap<String, CountableInt>();
+
+    private static class CountableInt {
+        /* note that we start at 1 since we're counting */
+        int value = 1;
+
+        public void increment() {
+            ++value;
+        }
+
+        public int get() {
+            return value;
+        }
+    }
 
     /**
      * Populates eligibleChunksForSpawning with All Valid Chunks. Unlike its vanilla counterpart
@@ -59,6 +77,61 @@ public class CustomSpawner {
                     } else if (!eligibleChunksForSpawning.containsKey(chunkcoordintpair)) {
                         eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(true));
                     }
+                }
+            }
+        }
+    }
+
+    /**
+     * Count and Cache the Amount of Loaded Entities
+     * 
+     * @param worldServer
+     */
+    public void countCreatureInChunks(WorldServer worldServer) {
+        creatureTypeCount.clear();
+        creatureCount.clear();
+        @SuppressWarnings("unchecked")
+        Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
+        while (creatureIterator.hasNext()) {
+            Entity entity = creatureIterator.next();
+            LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            if (livingHandler != null) {
+                CountableInt typeCount = creatureTypeCount.get(livingHandler.creatureTypeID);
+                if (typeCount == null) {
+                    creatureTypeCount.put(livingHandler.creatureTypeID, new CountableInt());
+                } else {
+                    typeCount.increment();
+                }
+                CountableInt entityCount = creatureCount.get(livingHandler.creatureTypeID);
+                if (typeCount == null) {
+                    creatureCount.put(entity.getEntityName(), new CountableInt());
+                } else {
+                    entityCount.increment();
+                }
+            }
+        }
+    }
+
+    /**
+     * Count and Cache only the creature types of loaded entities
+     * 
+     * Meant as a alternative to counting both entitties and type to boost performance
+     * 
+     * @param worldServer
+     */
+    public void countOnlyTypesInChunk(WorldServer worldServer) {
+        creatureTypeCount.clear();
+        @SuppressWarnings("unchecked")
+        Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
+        while (creatureIterator.hasNext()) {
+            Entity entity = creatureIterator.next();
+            LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            if (livingHandler != null) {
+                CountableInt typeCount = creatureTypeCount.get(livingHandler.creatureTypeID);
+                if (typeCount == null) {
+                    creatureTypeCount.put(livingHandler.creatureTypeID, new CountableInt());
+                } else {
+                    typeCount.increment();
                 }
             }
         }
