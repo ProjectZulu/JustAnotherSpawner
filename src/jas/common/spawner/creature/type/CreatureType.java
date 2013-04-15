@@ -272,7 +272,7 @@ public class CreatureType {
      */
     public boolean isEntityOfType(Entity entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
-        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
+        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**
@@ -283,7 +283,7 @@ public class CreatureType {
      */
     public boolean isEntityOfType(Class<? extends EntityLiving> entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity);
-        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
+        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**

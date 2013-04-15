@@ -5,7 +5,6 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
@@ -73,23 +72,6 @@ public class LivingHandler {
     protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
             boolean shouldSpawn, String optionalParameters) {
         return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
-    }
-
-    /**
-     * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific
-     * 
-     * @param entity
-     * @param creatureType
-     * @return
-     */
-    public boolean isEntityOfType(Entity entity, CreatureType creatureType) {
-        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
-                .getCreatureType(creatureTypeID).equals(creatureType);
-    }
-
-    public boolean isEntityOfType(Class<? extends EntityLiving> entity, CreatureType creatureType) {
-        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
-                .getCreatureType(creatureTypeID).equals(creatureType);
     }
 
     /**
