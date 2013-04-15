@@ -175,8 +175,8 @@ public class CustomSpawner {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
 
         CountableInt typeCount = getOrPutIfAbsent(creatureType.typeID, creatureTypeCount, 0);
-        int entityCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-        if (typeCount.get() <= entityCap) {
+        int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
+        if (typeCount.get() <= entityTypeCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -204,8 +204,8 @@ public class CustomSpawner {
                             int k3 = 0;
                             while (true) {
                                 if (k3 < 4) { // TODO: This Screams For Loop Cream
-                                    CountableInt creatureCount = null;
-                                    int creatureCap = 0;
+                                    CountableInt livingCount = null;
+                                    int livingCap = 0;
                                     labelInside: {
                                         l2 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
                                         i3 += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
@@ -228,13 +228,13 @@ public class CustomSpawner {
                                                         if (spawnlistentry == null) {
                                                             break labelInside; // TODO: Coulnd't This be Continue?
                                                         }
-                                                        creatureCount = incrementOrPutIfAbsent(
+                                                        livingCount = incrementOrPutIfAbsent(
                                                                 spawnlistentry.livingClass.getSimpleName(),
                                                                 CustomSpawner.creatureCount, 1);
-                                                        creatureCap = CreatureHandlerRegistry.INSTANCE
+                                                        livingCap = CreatureHandlerRegistry.INSTANCE
                                                                 .getLivingHandler(spawnlistentry.livingClass)
                                                                 .getCreatureCap();
-                                                        if (creatureCap > 0 && creatureCount.get() > creatureCap) {
+                                                        if (livingCap > 0 && livingCount.get() > livingCap) {
                                                             spawnlistentry = null;
                                                             break labelInside; // TODO: Coulnd't This be Continue?
                                                         }
@@ -265,12 +265,12 @@ public class CustomSpawner {
                                                         worldServer.spawnEntityInWorld(entityliving);
                                                         creatureSpecificInit(entityliving, worldServer, f, f1, f2);
                                                         typeCount.increment();
-                                                        creatureCount.increment();                                  
-                                                        if (typeCount.get() > entityCap) {
+                                                        livingCount.increment();                                  
+                                                        if (typeCount.get() > entityTypeCap) {
                                                             return 0;
                                                         }
                                                         if (j2 >= spawnlistentry.packSize
-                                                                || (creatureCap > 0 && creatureCount.get() > creatureCap)) {
+                                                                || (livingCap > 0 && livingCount.get() > livingCap)) {
                                                             continue labelChunkStart;
                                                         }
                                                     }
