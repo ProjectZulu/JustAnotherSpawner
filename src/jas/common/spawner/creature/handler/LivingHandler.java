@@ -5,6 +5,9 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
+
+import java.util.logging.Level;
+
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
@@ -130,7 +133,7 @@ public class LivingHandler {
                 entity.setDead();
             } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
                     && validDistance) {
-                JASLog.info("Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (!validDistance) {

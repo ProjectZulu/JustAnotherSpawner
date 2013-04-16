@@ -42,8 +42,8 @@ public class CustomSpawner {
             value = startValue;
         }
 
-        public void increment() {
-            ++value;
+        public int increment() {
+            return ++value;
         }
 
         public int get() {
@@ -115,7 +115,7 @@ public class CustomSpawner {
      */
     private static CountableInt getOrPutIfAbsent(String key, ConcurrentHashMap<String, CountableInt> countingHash,
             int defaultValue) {
-        CountableInt count = creatureTypeCount.get(key);
+        CountableInt count = countingHash.get(key);
         if (count == null) {
             count = new CountableInt(defaultValue);
             countingHash.put(key, count);
@@ -133,7 +133,7 @@ public class CustomSpawner {
      */
     private static CountableInt incrementOrPutIfAbsent(String key,
             ConcurrentHashMap<String, CountableInt> countingHash, int defaultValue) {
-        CountableInt count = creatureTypeCount.get(key);
+        CountableInt count = countingHash.get(key);
         if (count == null) {
             count = new CountableInt(defaultValue);
             countingHash.put(key, count);
@@ -208,7 +208,7 @@ public class CustomSpawner {
                                                         if (spawnlistentry == null) {
                                                             break labelInside; // TODO: Coulnd't This be Continue?
                                                         }
-                                                        livingCount = incrementOrPutIfAbsent(
+                                                        livingCount = getOrPutIfAbsent(
                                                                 spawnlistentry.livingClass.getSimpleName(),
                                                                 CustomSpawner.creatureCount, 1);
                                                         livingCap = CreatureHandlerRegistry.INSTANCE.getLivingHandler(
@@ -248,8 +248,8 @@ public class CustomSpawner {
                                                         if (typeCount.get() > entityTypeCap) {
                                                             return 0;
                                                         }
-                                                        if (j2 >= spawnlistentry.packSize
-                                                                || (livingCap > 0 && livingCount.get() > livingCap)) {
+                                                        if (livingCount.get() > livingCap
+                                                                || j2 >= spawnlistentry.packSize) {
                                                             continue labelChunkStart;
                                                         }
                                                     }
