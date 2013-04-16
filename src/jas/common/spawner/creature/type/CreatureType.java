@@ -163,6 +163,7 @@ public class CreatureType {
     public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
         Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
+            
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
@@ -228,6 +229,7 @@ public class CreatureType {
      */
     private SpawnListEntry getRandomEntry(Random random, ImmutableCollection<String> groupIDList) {
         int totalWeight = 0;
+        
         for (String groupID : groupIDList) {
             for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
                 totalWeight += spawnListEntry.itemWeight;

@@ -63,7 +63,7 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
                     break;
                 case entityCap:
                     OptionalParser.parseEntityCap(childParts, valueCache);
-
+                    break;
                 default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
                     break;
