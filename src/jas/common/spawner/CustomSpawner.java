@@ -210,11 +210,15 @@ public class CustomSpawner {
                                                     CustomSpawner.creatureCount, 0);
                                             livingCap = CreatureHandlerRegistry.INSTANCE.getLivingHandler(
                                                     spawnlistentry.livingClass).getLivingCap();
-                                        }
 
-                                        if (livingCap > 0 && livingCount.get() >= livingCap) {
-                                            spawnlistentry = null;
-                                            continue;
+                                            if (typeCount.get() > entityTypeCap) {
+                                                return;
+                                            }
+
+                                            if (livingCap > 0 && livingCount.get() >= livingCap) {
+                                                spawnlistentry = null;
+                                                continue;
+                                            }
                                         }
 
                                         EntityLiving entityliving;
@@ -244,11 +248,8 @@ public class CustomSpawner {
                                             creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
                                             typeCount.increment();
                                             livingCount.increment();
-                                            if (typeCount.get() > entityTypeCap) {
-                                                return;
-                                            }
-                                            if ((livingCap > 0 && livingCount.get() > livingCap)
-                                                    || j2 >= spawnlistentry.packSize) {
+
+                                            if (j2 >= spawnlistentry.packSize) {
                                                 continue labelChunkStart;
                                             }
                                         }
