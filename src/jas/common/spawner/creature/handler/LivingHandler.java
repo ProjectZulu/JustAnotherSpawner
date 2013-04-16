@@ -76,7 +76,7 @@ public class LivingHandler {
             boolean shouldSpawn, String optionalParameters) {
         return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
-    
+
     public final int getLivingCap() {
         Integer cap = spawning.getEntityCap();
         return cap != null ? cap : 0;
@@ -127,12 +127,13 @@ public class LivingHandler {
                 return;
             }
 
-            Boolean validDistance = despawning.isValidDistance((int) d3);
-            validDistance = validDistance == null ? (int) d3 > Properties.despawnDist : validDistance;
-            if (d3 > 16384.0D) {
+            boolean validDistance = despawning.isMidDistance((int) d3, Properties.despawnDist);
+            boolean isOfAge = despawning.isValidAge(entity.getAge(), Properties.minDespawnTime);
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, Properties.maxDespawnDist);
+
+            if (instantDespawn) {
                 entity.setDead();
-            } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
-                    && validDistance) {
+            } else if (isOfAge && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0 && validDistance) {
                 JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
@@ -211,8 +212,8 @@ public class LivingHandler {
             }
             resultValue.set(resultString);
             LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultValue.getString().split(
-                    "\\{", 2)[1]) : resultHandler;
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{"
+                    + resultValue.getString().split("\\{", 2)[1]) : resultHandler;
         } else if (resultParts.length == 2) {
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");

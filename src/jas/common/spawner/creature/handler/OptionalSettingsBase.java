@@ -49,12 +49,14 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
     /**
      * Checks if the Distance to
      * 
-     * @param playerDistance Distance Squared to Nearest Player
-     * @return True to Continue as Normal, False to Interrupt, Null Use Global Check
+     * @param playerDistance Distance to the playe rin [m^2]
+     * @param defaultCutoff Default Range in [m]
+     * @return True to Continue as Normal, False to Interrupt
      */
-    public Boolean isValidDistance(int playerDistance) {
+    public boolean isMidDistance(int playerDistance, int defaultCutoff) {
         parseString();
-        Integer distanceToPlayer = (Integer) valueCache.get(Key.spawnRange);
-        return distanceToPlayer != null ? playerDistance > distanceToPlayer * distanceToPlayer : null;
+        Integer tempCutoff = (Integer) valueCache.get(Key.spawnRange);
+        defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
+        return playerDistance > defaultCutoff * defaultCutoff;
     }
 }
