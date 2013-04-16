@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.Configuration;
@@ -62,6 +63,10 @@ public class CreatureType {
 
     public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
         return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+    
+    public boolean isReady(WorldServer world) {
+        return world.getWorldInfo().getWorldTotalTime() % spawnRate == 0L;
     }
 
     /**

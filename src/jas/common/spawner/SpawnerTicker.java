@@ -33,7 +33,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
             Iterator<CreatureType> typeIterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
             while (typeIterator.hasNext()) {
                 CreatureType creatureType = typeIterator.next();
-                if (world.getWorldInfo().getWorldTotalTime() % creatureType.spawnRate == 0L) {
+                if (creatureType.isReady(world)) {
                     CustomSpawner.spawnCreaturesInChunks(world, creatureType);
                 }
             }

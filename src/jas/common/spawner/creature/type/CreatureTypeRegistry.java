@@ -53,7 +53,7 @@ public enum CreatureTypeRegistry {
 
     private CreatureTypeRegistry() {
         addSpawnCategory(new CreatureTypeOpensky(CREATURE, 10, Material.air, 400, true));
-        addSpawnCategory(new CreatureType(MONSTER, 70, Material.air, 1, false));
+        addSpawnCategory(new CreatureTypeMonster(MONSTER, 70, Material.air, 1, false));
         addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false));
         addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false));
 
