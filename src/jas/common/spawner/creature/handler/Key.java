@@ -11,7 +11,8 @@ public enum Key {
     spawn("spawn"), despawn("despawn"), notSpawn("!spawn"), notDespawn("!despawn"),
 
     /* Properties */
-    enabled("enabled"), sky("sky"), noSky("!sky"), block("block"), light("light"), spawnRange("spawnRange"), minLightLevel(
+    enabled("enabled"), sky("sky"), noSky("!sky"), block("block"), light("light"), entityCap("cap"), spawnRange(
+            "spawnRange"), maxSpawnRange("maxSpawnRange"), despawnAge("despawnAge"), minLightLevel(
             "minLightLevel"), maxLightLevel("maxLightLevel"), spawnRate("spawnRate"), blockRange("blockRange"), blockRangeX(
             "blockRangeX"), blockRangeY("blockRangeY"), blockRangeZ("blockRangeZ"), blockList("blocks"), metaList(
             "meta"), material("material"),

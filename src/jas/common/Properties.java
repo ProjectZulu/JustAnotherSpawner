@@ -15,6 +15,8 @@ public class Properties {
     public static boolean emptyVanillaSpawnLists = false;
 
     public static int despawnDist = 32;
+    public static int maxDespawnDist = 128;
+    public static int minDespawnTime = 600;
 
     /**
      * Load Global Properties

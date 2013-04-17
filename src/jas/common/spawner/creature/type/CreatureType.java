@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.Configuration;
@@ -62,6 +63,10 @@ public class CreatureType {
 
     public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
         return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+    
+    public boolean isReady(WorldServer world) {
+        return world.getWorldInfo().getWorldTotalTime() % spawnRate == 0L;
     }
 
     /**
@@ -158,6 +163,7 @@ public class CreatureType {
     public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
         Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
+            
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
@@ -223,6 +229,7 @@ public class CreatureType {
      */
     private SpawnListEntry getRandomEntry(Random random, ImmutableCollection<String> groupIDList) {
         int totalWeight = 0;
+        
         for (String groupID : groupIDList) {
             for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
                 totalWeight += spawnListEntry.itemWeight;
@@ -272,7 +279,7 @@ public class CreatureType {
      */
     public boolean isEntityOfType(Entity entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
-        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
+        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**
@@ -283,7 +290,7 @@ public class CreatureType {
      */
     public boolean isEntityOfType(Class<? extends EntityLiving> entity) {
         LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity);
-        return livingHandler != null ? livingHandler.isEntityOfType(entity, this) : false;
+        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**

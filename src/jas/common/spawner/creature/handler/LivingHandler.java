@@ -5,7 +5,9 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import net.minecraft.entity.Entity;
+
+import java.util.logging.Level;
+
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
@@ -75,21 +77,9 @@ public class LivingHandler {
         return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
-    /**
-     * Replacement Method for EntitySpecific isCreatureType. Allows Handler specific
-     * 
-     * @param entity
-     * @param creatureType
-     * @return
-     */
-    public boolean isEntityOfType(Entity entity, CreatureType creatureType) {
-        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
-                .getCreatureType(creatureTypeID).equals(creatureType);
-    }
-
-    public boolean isEntityOfType(Class<? extends EntityLiving> entity, CreatureType creatureType) {
-        return creatureTypeID.equals(CreatureTypeRegistry.NONE) ? false : CreatureTypeRegistry.INSTANCE
-                .getCreatureType(creatureTypeID).equals(creatureType);
+    public final int getLivingCap() {
+        Integer cap = spawning.getEntityCap();
+        return cap != null ? cap : 0;
     }
 
     /**
@@ -137,13 +127,14 @@ public class LivingHandler {
                 return;
             }
 
-            Boolean validDistance = despawning.isValidDistance((int) d3);
-            validDistance = validDistance == null ? (int) d3 > Properties.despawnDist : validDistance;
-            if (d3 > 16384.0D) {
+            boolean validDistance = despawning.isMidDistance((int) d3, Properties.despawnDist);
+            boolean isOfAge = despawning.isValidAge(entity.getAge(), Properties.minDespawnTime);
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, Properties.maxDespawnDist);
+
+            if (instantDespawn) {
                 entity.setDead();
-            } else if (entity.getAge() > 600 && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0
-                    && validDistance) {
-                JASLog.info("Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+            } else if (isOfAge && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0 && validDistance) {
+                JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
                         entity.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (!validDistance) {
@@ -221,8 +212,8 @@ public class LivingHandler {
             }
             resultValue.set(resultString);
             LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultValue.getString().split(
-                    "\\{", 2)[1]) : resultHandler;
+            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{"
+                    + resultValue.getString().split("\\{", 2)[1]) : resultHandler;
         } else if (resultParts.length == 2) {
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");

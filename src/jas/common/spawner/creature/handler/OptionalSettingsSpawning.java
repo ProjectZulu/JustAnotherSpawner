@@ -61,12 +61,19 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
                     // TODO: Add Material Tag ? Air or Water? What is the point?
                     JASLog.info("Material Tag is not implemented yet. Have some %s", Math.PI);
                     break;
+                case entityCap:
+                    OptionalParser.parseEntityCap(childParts, valueCache);
+                    break;
                 default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
                     break;
                 }
             }
         }
+    }
+
+    public Integer getEntityCap() {
+        return (Integer) valueCache.get(Key.entityCap.key);
     }
 
     @SuppressWarnings("unchecked")
@@ -82,4 +89,5 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
         }
         return true;
     }
+
 }

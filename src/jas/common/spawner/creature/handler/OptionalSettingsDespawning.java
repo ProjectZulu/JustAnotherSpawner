@@ -67,6 +67,12 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                 case noSky:
                     OptionalParser.parseSky(childParts, valueCache);
                     break;
+                case despawnAge:
+                    OptionalParser.parseDespawnAge(childParts, valueCache);
+                    break;
+                case maxSpawnRange:
+                    OptionalParser.parseMaxSpawnRange(childParts, valueCache);
+                    break;
                 default:
                     JASLog.warning("Did Not Recognize a valid Despawn properties from %s.", masterParts[i]);
                     break;
@@ -117,5 +123,25 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
             }
         }
         return true;
+    }
+
+    public boolean isValidAge(int currentAge, int defaultCutoff) {
+        parseString();
+        Integer tempCutoff = (Integer) valueCache.get(Key.despawnAge);
+        defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
+        return currentAge > defaultCutoff;
+    }
+
+    /**
+     * 
+     * @param playerDistance Distance to the playe rin [m^2]
+     * @param defaultCutoff Default Range in [m]
+     * @return
+     */
+    public boolean isMaxDistance(int playerDistance, int defaultCutoff) {
+        parseString();
+        Integer tempCutoff = (Integer) valueCache.get(Key.maxSpawnRange);
+        defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
+        return playerDistance > defaultCutoff * defaultCutoff;
     }
 }

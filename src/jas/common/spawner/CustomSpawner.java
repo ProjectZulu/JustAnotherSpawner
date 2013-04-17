@@ -3,13 +3,15 @@ package jas.common.spawner;
 import jas.common.JASLog;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
@@ -28,7 +30,26 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class CustomSpawner {
     /** The 17x17 area around the player where mobs can spawn */
-    private static HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
+    private static ConcurrentHashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new ConcurrentHashMap<ChunkCoordIntPair, Boolean>();
+
+    private static ConcurrentHashMap<String, CountableInt> creatureTypeCount = new ConcurrentHashMap<String, CountableInt>();
+    private static ConcurrentHashMap<String, CountableInt> creatureCount = new ConcurrentHashMap<String, CountableInt>();
+
+    private static class CountableInt {
+        int value = 1;
+
+        CountableInt(int startValue) {
+            value = startValue;
+        }
+
+        public int increment() {
+            return ++value;
+        }
+
+        public int get() {
+            return value;
+        }
+    }
 
     /**
      * Populates eligibleChunksForSpawning with All Valid Chunks. Unlike its vanilla counterpart
@@ -65,18 +86,75 @@ public class CustomSpawner {
     }
 
     /**
+     * Count and Cache the Amount of Loaded Entities
+     * 
+     * @param worldServer
+     */
+    public static void countEntityInChunks(WorldServer worldServer) {
+        creatureTypeCount.clear();
+        creatureCount.clear();
+        @SuppressWarnings("unchecked")
+        Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
+        while (creatureIterator.hasNext()) {
+            Entity entity = creatureIterator.next();
+            LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            if (livingHandler != null) {
+                incrementOrPutIfAbsent(livingHandler.creatureTypeID, creatureTypeCount, 1);
+                incrementOrPutIfAbsent(entity.getClass().getSimpleName(), creatureCount, 1);
+            }
+        }
+    }
+
+    /**
+     * Gets or Puts if absent a CountableInt from the provided Map.
+     * 
+     * @param key Key for Value inside the hash we want to get
+     * @param countingHash Hash that is being used for Counting
+     * @param defaultValue Default Value CountableInt is initialized to
+     * @return CountableInt that has not been iterated
+     */
+    private static CountableInt getOrPutIfAbsent(String key, ConcurrentHashMap<String, CountableInt> countingHash,
+            int defaultValue) {
+        CountableInt count = countingHash.get(key);
+        if (count == null) {
+            count = new CountableInt(defaultValue);
+            countingHash.put(key, count);
+        }
+        return count;
+    }
+
+    /**
+     * Gets or Puts if absent a CountableInt from the provided Map.
+     * 
+     * @param key Key for Value inside the hash we want to iterate
+     * @param countingHash Hash that is being used for Counting
+     * @param defaultValue Default Value CountableInt is initialized to
+     * @return CountableInt that has been iterated
+     */
+    private static CountableInt incrementOrPutIfAbsent(String key,
+            ConcurrentHashMap<String, CountableInt> countingHash, int defaultValue) {
+        CountableInt count = countingHash.get(key);
+        if (count == null) {
+            count = new CountableInt(defaultValue);
+            countingHash.put(key, count);
+        } else {
+            count.increment();
+        }
+        return count;
+    }
+
+    /**
      * Performs Actual Creature Spawning inside eligibleChunks. {@link determineChunksForSpawnering} needs to be run to
      * populate eligibleChunksForSpawning with spawnable chunks
      * 
      * @param creatureType CreatureType spawnList that is being Spawned
      */
-    // TODO: Why does this return integer? Debugging? What is the value? It is definetly Not required to Function.
-    public static final int spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
-        int i = 0;
+    public static final void spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
-        int entityCount = countCreatureType(worldServer, creatureType);
-        int entityCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-        if (entityCount <= entityCap) {
+
+        CountableInt typeCount = getOrPutIfAbsent(creatureType.typeID, creatureTypeCount, 0);
+        int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
+        if (typeCount.get() <= entityTypeCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -94,91 +172,95 @@ public class CustomSpawner {
 
                     if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
                         int j2 = 0;
-                        int k2 = 0;
-                        while (k2 < 3) { // TODO: This Screams For Loop Cream
-                            int l2 = k1;
-                            int i3 = l1;
-                            int j3 = i2;
-                            byte b1 = 6;
+                        for (int k2 = 0; k2 < 3; ++k2) {
+                            int blockSpawnX = k1;
+                            int blockSpawnY = l1;
+                            int blockSpawnZ = i2;
+                            byte variance = 6;
                             SpawnListEntry spawnlistentry = null;
-                            int k3 = 0;
-                            while (true) {
-                                if (k3 < 4) { // TODO: This Screams For Loop Cream
-                                    labelInside: {
-                                        l2 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
-                                        i3 += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
-                                        j3 += worldServer.rand.nextInt(b1) - worldServer.rand.nextInt(b1);
-                                        if (creatureType.canSpawnAtLocation(worldServer, l2, i3, j3)) {
-                                            float f = l2 + 0.5F;
-                                            float f1 = i3;
-                                            float f2 = j3 + 0.5F;
+                            CountableInt livingCount = null;
+                            int livingCap = 0;
+                            for (int k3 = 0; k3 < 4; ++k3) {
+                                blockSpawnX += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
+                                blockSpawnY += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
+                                blockSpawnZ += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
+                                if (creatureType.canSpawnAtLocation(worldServer, blockSpawnX, blockSpawnY, blockSpawnZ)) {
+                                    /* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
+                                    float spawnX = blockSpawnX + 0.5F;
+                                    float spawnY = blockSpawnY;
+                                    float spawnZ = blockSpawnZ + 0.5F;
 
-                                            if (worldServer.getClosestPlayer(f, f1, f2, 24.0D) == null) {
-                                                float f3 = f - chunkcoordinates.posX;
-                                                float f4 = f1 - chunkcoordinates.posY;
-                                                float f5 = f2 - chunkcoordinates.posZ;
-                                                float f6 = f3 * f3 + f4 * f4 + f5 * f5;
+                                    if (worldServer.getClosestPlayer(spawnX, spawnY, spawnZ, 24.0D) == null) {
+                                        float xOffset = spawnX - chunkcoordinates.posX;
+                                        float yOffset = spawnY - chunkcoordinates.posY;
+                                        float zOffset = spawnZ - chunkcoordinates.posZ;
+                                        float sqOffset = xOffset * xOffset + yOffset * yOffset + zOffset * zOffset;
 
-                                                if (f6 >= 576.0F) {
-                                                    if (spawnlistentry == null) {
-                                                        spawnlistentry = creatureType.getSpawnListEntryToSpawn(
-                                                                worldServer, l2, i3, j3);
-                                                        if (spawnlistentry == null) {
-                                                            break labelInside; // TODO: Coulnd't This be Continue?
-                                                        }
-                                                    }
+                                        if (sqOffset < 576.0F) {
+                                            continue;
+                                        }
 
-                                                    EntityLiving entityliving;
+                                        if (spawnlistentry == null) {
+                                            spawnlistentry = creatureType.getSpawnListEntryToSpawn(worldServer,
+                                                    blockSpawnX, blockSpawnY, blockSpawnZ);
+                                            if (spawnlistentry == null) {
+                                                continue;
+                                            }
+                                            livingCount = getOrPutIfAbsent(spawnlistentry.livingClass.getSimpleName(),
+                                                    CustomSpawner.creatureCount, 0);
+                                            livingCap = CreatureHandlerRegistry.INSTANCE.getLivingHandler(
+                                                    spawnlistentry.livingClass).getLivingCap();
 
-                                                    try {
-                                                        entityliving = spawnlistentry.getLivingHandler().entityClass
-                                                                .getConstructor(new Class[] { World.class })
-                                                                .newInstance(new Object[] { worldServer });
-                                                    } catch (Exception exception) {
-                                                        exception.printStackTrace();
-                                                        return i;
-                                                    }
+                                            if (typeCount.get() > entityTypeCap) {
+                                                return;
+                                            }
 
-                                                    entityliving.setLocationAndAngles(f, f1, f2,
-                                                            worldServer.rand.nextFloat() * 360.0F, 0.0F);
-                                                    Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving,
-                                                            worldServer, f, f1, f2);
-                                                    if (canSpawn == Result.ALLOW
-                                                            || (canSpawn == Result.DEFAULT && spawnlistentry
-                                                                    .getLivingHandler().getCanSpawnHere(entityliving))) {
-                                                        ++j2;
-                                                        JASLog.info("Spawning Creature %s at %s, %s, %s ",
-                                                                entityliving.getEntityName(), entityliving.posX,
-                                                                entityliving.posY, entityliving.posZ);
-                                                        worldServer.spawnEntityInWorld(entityliving);
-                                                        creatureSpecificInit(entityliving, worldServer, f, f1, f2);
-                                                        entityCount++;
-                                                        if (entityCount > entityCap) {
-                                                            return 0;
-                                                        }
-                                                        if (j2 >= spawnlistentry.packSize) {
-                                                            continue labelChunkStart;
-                                                        }
-                                                    }
-
-                                                    i += j2;
-
-                                                }
+                                            if (livingCap > 0 && livingCount.get() >= livingCap) {
+                                                spawnlistentry = null;
+                                                continue;
                                             }
                                         }
-                                        ++k3;
-                                        continue;
+
+                                        EntityLiving entityliving;
+                                        try {
+                                            entityliving = spawnlistentry.getLivingHandler().entityClass
+                                                    .getConstructor(new Class[] { World.class }).newInstance(
+                                                            new Object[] { worldServer });
+                                        } catch (Exception exception) {
+                                            exception.printStackTrace();
+                                            return;
+                                        }
+
+                                        entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ,
+                                                worldServer.rand.nextFloat() * 360.0F, 0.0F);
+
+                                        Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer,
+                                                spawnX, spawnY, spawnZ);
+                                        JASLog.info("Can Spawn %s", canSpawn);
+                                        if (canSpawn == Result.ALLOW
+                                                || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
+                                                        .getCanSpawnHere(entityliving))) {
+                                            ++j2;
+                                            JASLog.info("Spawning Creature %s at %s, %s, %s ",
+                                                    entityliving.getEntityName(), entityliving.posX, entityliving.posY,
+                                                    entityliving.posZ);
+                                            worldServer.spawnEntityInWorld(entityliving);
+                                            creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
+                                            typeCount.increment();
+                                            livingCount.increment();
+
+                                            if (j2 >= spawnlistentry.packSize) {
+                                                continue labelChunkStart;
+                                            }
+                                        }
                                     }
                                 }
-                                ++k2;
-                                break;
                             }
                         }
                     }
                 }
             }
         }
-        return i;
     }
 
     private static final int countCreatureType(WorldServer worldServer, CreatureType creatureType) {
