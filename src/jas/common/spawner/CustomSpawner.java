@@ -236,7 +236,6 @@ public class CustomSpawner {
 
                                         Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer,
                                                 spawnX, spawnY, spawnZ);
-                                        JASLog.info("Can Spawn %s", canSpawn);
                                         if (canSpawn == Result.ALLOW
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
                                                         .getCanSpawnHere(entityliving))) {
@@ -334,7 +333,8 @@ public class CustomSpawner {
                         creatureSpecificInit(entityliving, world, f, f1, f2);
                         flag = true;
                     } else {
-                        JASLog.debug(Level.INFO, "Entity not Spawned due to invalid creatureType location",
+                        JASLog.debug(Level.INFO,
+                                "Entity not Spawned due to invalid creatureType location. Creature Type was %s",
                                 creatureType.typeID);
                     }
 

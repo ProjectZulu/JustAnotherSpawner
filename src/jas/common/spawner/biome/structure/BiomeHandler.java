@@ -117,8 +117,8 @@ public class BiomeHandler {
                     }
                 } else {
                     JASLog.debug(Level.INFO,
-                            "Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", mobName,
-                            CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).creatureTypeID);
+                            "Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", structureKey,
+                            mobName, CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).creatureTypeID);
                 }
             }
         }

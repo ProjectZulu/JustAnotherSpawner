@@ -64,7 +64,9 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
-        
+        if (Properties.emptyVanillaSpawnLists) {
+            clearVanillaSpawnLists();
+        }
     }
 
     @ServerStarting
@@ -76,6 +78,25 @@ public class JustAnotherSpawner {
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
 
         if (Properties.emptyVanillaSpawnLists) {
+            clearVanillaSpawnLists();
+        }
+
+        GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
+        if (Properties.turnGameruleSpawningOff) {
+            JASLog.info("Setting GameRule doMobSpawning to false");
+            gameRule.setOrCreateGameRule("doMobSpawning", "false");
+        }
+
+        String ruleName = "doCustomMobSpawning";
+        if (gameRule.hasRule(ruleName)) {
+        } else {
+            gameRule.addGameRule(ruleName, "true");
+        }
+    }
+
+    private void clearVanillaSpawnLists() {
+        JASLog.info("Emptying Vanilla Spawn Lists.");
+        if (BiomeGenBase.biomeList != null) {
             for (BiomeGenBase biome : BiomeGenBase.biomeList) {
                 if (biome == null) {
                     continue;
@@ -84,17 +105,6 @@ public class JustAnotherSpawner {
                     biome.getSpawnableList(type).clear();
                 }
             }
-        }
-        
-        GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
-        if (Properties.turnGameruleSpawningOff) {
-            gameRule.setOrCreateGameRule("doMobSpawning", "false");
-        }
-
-        String ruleName = "doCustomMobSpawning";
-        if (gameRule.hasRule(ruleName)) {
-        } else {
-            gameRule.addGameRule(ruleName, "true");
         }
     }
 }

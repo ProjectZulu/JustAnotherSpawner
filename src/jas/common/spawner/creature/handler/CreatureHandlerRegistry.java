@@ -133,7 +133,7 @@ public enum CreatureHandlerRegistry {
                     } else {
                         JASLog.debug(
                                 Level.INFO,
-                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s, ItemWeight: %s",
+                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
                                 mobName, spawnListEntry.itemWeight, livingHandlers.get(livingClass).shouldSpawn,
                                 group.groupID);
                     }
