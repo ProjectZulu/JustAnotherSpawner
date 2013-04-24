@@ -333,7 +333,8 @@ public class CustomSpawner {
                         creatureSpecificInit(entityliving, world, f, f1, f2);
                         flag = true;
                     } else {
-                        JASLog.debug(Level.INFO, "Entity not Spawned due to invalid creatureType location",
+                        JASLog.debug(Level.INFO,
+                                "Entity not Spawned due to invalid creatureType location. Creature Type was %s",
                                 creatureType.typeID);
                     }
 
