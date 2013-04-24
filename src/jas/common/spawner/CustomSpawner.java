@@ -236,7 +236,6 @@ public class CustomSpawner {
 
                                         Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer,
                                                 spawnX, spawnY, spawnZ);
-                                        JASLog.info("Can Spawn %s", canSpawn);
                                         if (canSpawn == Result.ALLOW
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
                                                         .getCanSpawnHere(entityliving))) {

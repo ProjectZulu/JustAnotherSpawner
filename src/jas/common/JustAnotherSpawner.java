@@ -76,6 +76,7 @@ public class JustAnotherSpawner {
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
 
         if (Properties.emptyVanillaSpawnLists) {
+            JASLog.info("Emptying Vanilla Spawn Lists.");
             for (BiomeGenBase biome : BiomeGenBase.biomeList) {
                 if (biome == null) {
                     continue;
@@ -88,6 +89,7 @@ public class JustAnotherSpawner {
         
         GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
         if (Properties.turnGameruleSpawningOff) {
+            JASLog.info("Setting GameRule doMobSpawning to false");
             gameRule.setOrCreateGameRule("doMobSpawning", "false");
         }
 
