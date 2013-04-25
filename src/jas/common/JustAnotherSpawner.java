@@ -96,12 +96,12 @@ public class JustAnotherSpawner {
 
     private void clearVanillaSpawnLists() {
         JASLog.info("Emptying Vanilla Spawn Lists.");
-        if (BiomeGenBase.biomeList != null) {
-            for (BiomeGenBase biome : BiomeGenBase.biomeList) {
-                if (biome == null) {
-                    continue;
-                }
-                for (EnumCreatureType type : EnumCreatureType.values()) {
+        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+            if (biome == null) {
+                continue;
+            }
+            for (EnumCreatureType type : EnumCreatureType.values()) {
+                if (biome.getSpawnableList(type) != null) {
                     biome.getSpawnableList(type).clear();
                 }
             }
