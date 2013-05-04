@@ -165,15 +165,13 @@ public class LivingHandler {
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
+
         boolean canSpawn = !spawning.isInverted();
-        if (!spawning.isValidBlock(entity.worldObj.getBlockId(xCoord, yCoord - 1, zCoord),
-                entity.worldObj.getBlockMetadata(xCoord, yCoord - 1, zCoord))) {
-            canSpawn = spawning.isInverted();
-        } else if (!spawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)) {
-            canSpawn = spawning.isInverted();
-        } else if (!spawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)) {
+
+        if (!spawning.isValidLocation(entity.worldObj, xCoord, yCoord, zCoord)) {
             canSpawn = spawning.isInverted();
         }
+
         return canSpawn && entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
                 && !entity.worldObj.isAnyLiquid(entity.boundingBox);
