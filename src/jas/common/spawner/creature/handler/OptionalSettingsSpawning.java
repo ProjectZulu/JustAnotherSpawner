@@ -69,6 +69,12 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
                 case entityCap:
                     OptionalParser.parseEntityCap(childParts, valueCache);
                     break;
+                case minSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMinSpawnHeight(childParts)), operand);
+                    break;
+                case maxSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMaxSpawnHeight(childParts)), operand);
+                    break;
                 default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
                     break;
@@ -118,6 +124,14 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
                 boolean sky = (Boolean) typeValuePair.getValue();
                 boolean canSeeSky = world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
                 outcome = sky ? !canSeeSky : canSeeSky;
+                break;
+            case minSpawnHeight:
+                Integer minSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord < minSpawnHeight ? true : false;
+                break;
+            case maxSpawnHeight:
+                Integer maxSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord > maxSpawnHeight ? true : false;
                 break;
             default:
                 break;

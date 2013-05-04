@@ -272,4 +272,22 @@ public class OptionalParser {
             JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
     }
+
+    public static Integer parseMinSpawnHeight(String[] values) {
+        if (values.length == 2) {
+            return ParsingHelper.parseInteger(values[1], 256, Key.minSpawnHeight.key);
+        } else {
+            JASLog.severe("Error Parsing Min Spawn Height parameter. Invalid Argument Length.");
+            return null;
+        }
+    }
+
+    public static Integer parseMaxSpawnHeight(String[] values) {
+        if (values.length == 2) {
+            return ParsingHelper.parseInteger(values[1], -1, Key.maxSpawnHeight.key);
+        } else {
+            JASLog.severe("Error Parsing Max Spawn Height parameter. Invalid Argument Length.");
+            return null;
+        }
+    }
 }

@@ -22,7 +22,7 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
             return;
         }
         stringParsed = true;
-        
+
         /* Set default Paramters that are assumed to be Present */
         valueCache.put(Key.spawnRate.key, 40);
         valueCache.put(Key.blockRangeX.key, 3);
@@ -79,6 +79,12 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                 case maxSpawnRange:
                     OptionalParser.parseMaxSpawnRange(childParts, valueCache);
                     break;
+                case minSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMinSpawnHeight(childParts)), operand);
+                    break;
+                case maxSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMaxSpawnHeight(childParts)), operand);
+                    break;
                 default:
                     JASLog.warning("Did Not Recognize a valid Despawn properties from %s.", masterParts[i]);
                     break;
@@ -118,6 +124,14 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                 boolean sky = (Boolean) typeValuePair.getValue();
                 boolean canSeeSky = world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
                 outcome = sky ? !canSeeSky : canSeeSky;
+                break;
+            case minSpawnHeight:
+                Integer minSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord < minSpawnHeight ? true : false;
+                break;
+            case maxSpawnHeight:
+                Integer maxSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord > maxSpawnHeight ? true : false;
                 break;
             default:
                 break;
