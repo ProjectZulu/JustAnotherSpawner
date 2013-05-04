@@ -2,7 +2,6 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
 
-import java.util.ArrayList;
 import java.util.Map.Entry;
 
 import net.minecraft.world.World;
@@ -139,20 +138,4 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
         }
         return outcome;
     }
-
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public boolean isValidBlock(int blockID, int meta) {
-        parseString();
-        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(Key.blockList.key);
-        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(Key.metaList.key);
-
-        for (int i = 0; i < blockIDlist.size(); i++) {
-            if (blockID == blockIDlist.get(i) && meta == metaIDList.get(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 }
