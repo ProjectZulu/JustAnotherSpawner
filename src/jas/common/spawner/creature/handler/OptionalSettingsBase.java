@@ -13,37 +13,12 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
 
     @Override
     public boolean isOptionalEnabled() {
-        parseString();
-        return valueCache.get(Key.enabled.key) != null;
+        return isEnabled;
     }
 
     @Override
     public boolean isInverted() {
-        parseString();
-        return !(Boolean) valueCache.get(Key.enabled.key);
-    }
-
-    /**
-     * Represents Restriction on LightLevel.
-     * 
-     * @return True if Operation should continue as normal, False if it should be disallowed
-     */
-    public boolean isValidLightLevel(World world, int xCoord, int yCoord, int zCoord) {
-        parseString();
-        int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
-        return lightLevel > (Integer) valueCache.get(Key.maxLightLevel.key)
-                || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
-    }
-
-    public boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
-        parseString();
-        if (valueCache.get(Key.sky.key) == null) {
-            return true;
-        } else if ((Boolean) valueCache.get(Key.sky.key)) {
-            return !world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
-        } else {
-            return world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
-        }
+        return isInverted;
     }
 
     /**
@@ -58,5 +33,10 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
         Integer tempCutoff = (Integer) valueCache.get(Key.spawnRange);
         defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
         return playerDistance > defaultCutoff * defaultCutoff;
+    }
+    
+    protected boolean canBlockSeeTheSky(World world, int xCoord, int yCoord, int zCoord) {
+        int blockHeight = world.getTopSolidOrLiquidBlock(xCoord, zCoord);
+        return blockHeight <= yCoord;
     }
 }

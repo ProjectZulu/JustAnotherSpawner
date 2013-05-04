@@ -2,60 +2,64 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
 
-import java.util.ArrayList;
+import java.util.Map.Entry;
+
+import net.minecraft.world.World;
+
+import com.google.common.collect.ListMultimap;
 
 /**
  * For style see {@link OptionalSettings}
  */
 public class OptionalSettingsSpawning extends OptionalSettingsBase {
+
     public OptionalSettingsSpawning(String parseableString) {
         super(parseableString.replace("}", ""));
     }
 
     @Override
     protected final void parseString() {
-        if (stringParsed) {
+        if (stringParsed || parseableString.equals("")) {
             return;
         }
         stringParsed = true;
-
-        /* Set default Paramters that are assumed to be Present */
-        valueCache.put(Key.minLightLevel.key, 16); // Light < Min means Spawn
-        valueCache.put(Key.maxLightLevel.key, -1); // Light > Max means Spawn
-        valueCache.put(Key.blockList.key, new ArrayList<Integer>());
-        valueCache.put(Key.metaList.key, new ArrayList<Integer>());
-
-        if (parseableString.equals("")) {
-            return;
-        }
-
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
                 if (masterParts[i].equalsIgnoreCase(Key.spawn.key)) {
-                    valueCache.put(Key.enabled.key, Boolean.TRUE);
+                    isEnabled = true;
+                    isInverted = false;
                 } else if (masterParts[i].equalsIgnoreCase(Key.notSpawn.key)) {
-                    valueCache.put(Key.enabled.key, Boolean.FALSE);
+                    isEnabled = true;
+                    isInverted = true;
                 } else {
                     JASLog.severe("Optional Settings Error expected spawn from %s", masterParts[i]);
                     break;
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
+                Operand operand = Operand.OR;
+                if (childParts[0].startsWith("&")) {
+                    operand = Operand.AND;
+                    childParts[0] = childParts[0].substring(1);
+                } else if (childParts[0].startsWith("|")) {
+                    childParts[0] = childParts[0].substring(1);
+                }
 
-                switch (Key.getKeybyString(childParts[0])) {
+                Key key = Key.getKeybyString(childParts[0]);
+                switch (key) {
                 case light:
-                    OptionalParser.parseLight(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(Key.light, OptionalParser.parseLight(childParts)), operand);
                     break;
                 case block:
-                    OptionalParser.parseBlock(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(Key.block, OptionalParser.parseBlock(childParts)), operand);
                     break;
                 case spawnRange:
                     OptionalParser.parseSpawnRange(childParts, valueCache);
                     break;
                 case sky:
                 case noSky:
-                    OptionalParser.parseSky(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(Key.sky, OptionalParser.parseSky(childParts)), operand);
                     break;
                 case material:
                     // TODO: Add Material Tag ? Air or Water? What is the point?
@@ -63,6 +67,12 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
                     break;
                 case entityCap:
                     OptionalParser.parseEntityCap(childParts, valueCache);
+                    break;
+                case minSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMinSpawnHeight(childParts)), operand);
+                    break;
+                case maxSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMaxSpawnHeight(childParts)), operand);
                     break;
                 default:
                     JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
@@ -76,18 +86,56 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
         return (Integer) valueCache.get(Key.entityCap.key);
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean isValidBlock(int blockID, int meta) {
-        parseString();
-        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(Key.blockList.key);
-        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(Key.metaList.key);
+    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord) {
+        boolean outcome = true;
+        for (int i = 0; i < parsedChainable.size(); i++) {
+            TypeValuePair typeValuePair = parsedChainable.get(i);
+            if (i != 0) {
+                if (operandvalue.get(i) == Operand.AND && outcome == true) {
+                    continue;
+                } else if (operandvalue.get(i) == Operand.OR && outcome == false) {
+                    return false;
+                }
+            }
 
-        for (int i = 0; i < blockIDlist.size(); i++) {
-            if (blockID == blockIDlist.get(i) && meta == metaIDList.get(i)) {
-                return false;
+            Key key = typeValuePair.getType();
+            switch (key) {
+            case light:
+                int[] lightLevels = (int[]) typeValuePair.getValue();
+                int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
+                outcome = lightLevel > lightLevels[1] || lightLevel < lightLevels[0];
+                break;
+            case block:
+                @SuppressWarnings("unchecked")
+                ListMultimap<Integer, Integer> iDMetas = (ListMultimap<Integer, Integer>) typeValuePair.getValue();
+                int blockID = world.getBlockId(xCoord, yCoord - 1, zCoord);
+                int meta = world.getBlockMetadata(xCoord, yCoord - 1, zCoord);
+                boolean foundMatch = false;
+                for (Entry<Integer, Integer> iDMetaEntry : iDMetas.entries()) {
+                    if (blockID == iDMetaEntry.getKey() && meta == iDMetaEntry.getValue()) {
+                        foundMatch = true;
+                        break;
+                    }
+                }
+                outcome = foundMatch ? false : true;
+                break;
+            case sky:
+                boolean sky = (Boolean) typeValuePair.getValue();
+                boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
+                outcome = sky ? !canSeeSky : canSeeSky;
+                break;
+            case minSpawnHeight:
+                Integer minSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord < minSpawnHeight ? true : false;
+                break;
+            case maxSpawnHeight:
+                Integer maxSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord > maxSpawnHeight ? true : false;
+                break;
+            default:
+                break;
             }
         }
-        return true;
+        return outcome;
     }
-
 }

@@ -2,9 +2,11 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
 
-import java.util.ArrayList;
+import java.util.Map.Entry;
 
 import net.minecraft.world.World;
+
+import com.google.common.collect.ListMultimap;
 
 /**
  * For style see {@link OptionalSettings}
@@ -16,43 +18,47 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
 
     @Override
     protected final void parseString() {
-        if (stringParsed) {
+        if (stringParsed || parseableString.equals("")) {
             return;
         }
         stringParsed = true;
+
         /* Set default Paramters that are assumed to be Present */
-        valueCache.put(Key.minLightLevel.key, 16); // Light < Min means Spawn
-        valueCache.put(Key.maxLightLevel.key, -1); // Light > Max means Spawn
-        valueCache.put(Key.blockList.key, new ArrayList<Integer>());
-        valueCache.put(Key.metaList.key, new ArrayList<Integer>());
         valueCache.put(Key.spawnRate.key, 40);
         valueCache.put(Key.blockRangeX.key, 3);
         valueCache.put(Key.blockRangeY.key, 3);
         valueCache.put(Key.blockRangeZ.key, 3);
 
-        if (parseableString.equals("")) {
-            return;
-        }
-
         String[] masterParts = parseableString.split(":");
         for (int i = 0; i < masterParts.length; i++) {
             if (i == 0) {
                 if (masterParts[i].equalsIgnoreCase(Key.despawn.key)) {
-                    valueCache.put(Key.enabled.key, Boolean.TRUE);
+                    isEnabled = true;
+                    isInverted = false;
                 } else if (masterParts[i].equalsIgnoreCase(Key.notDespawn.key)) {
-                    valueCache.put(Key.enabled.key, Boolean.FALSE);
+                    isEnabled = true;
+                    isInverted = true;
                 } else {
                     JASLog.severe("Optional Settings Error expected %s from within %s", Key.despawn.key, masterParts[i]);
                     break;
                 }
             } else {
                 String[] childParts = masterParts[i].split(",");
-                switch (Key.getKeybyString(childParts[0])) {
+                Operand operand = Operand.OR;
+                if (childParts[0].startsWith("&")) {
+                    operand = Operand.AND;
+                    childParts[0] = childParts[0].substring(1);
+                } else if (childParts[0].startsWith("|")) {
+                    childParts[0] = childParts[0].substring(1);
+                }
+
+                Key key = Key.getKeybyString(childParts[0]);
+                switch (key) {
                 case light:
-                    OptionalParser.parseLight(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseLight(childParts)), operand);
                     break;
                 case block:
-                    OptionalParser.parseBlock(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseBlock(childParts)), operand);
                     break;
                 case blockRange:
                     OptionalParser.parseBlockRange(childParts, valueCache);
@@ -65,13 +71,19 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                     break;
                 case sky:
                 case noSky:
-                    OptionalParser.parseSky(childParts, valueCache);
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseSky(childParts)), operand);
                     break;
                 case despawnAge:
                     OptionalParser.parseDespawnAge(childParts, valueCache);
                     break;
                 case maxSpawnRange:
                     OptionalParser.parseMaxSpawnRange(childParts, valueCache);
+                    break;
+                case minSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMinSpawnHeight(childParts)), operand);
+                    break;
+                case maxSpawnHeight:
+                    addParsedChainable(new TypeValuePair(key, OptionalParser.parseMaxSpawnHeight(childParts)), operand);
                     break;
                 default:
                     JASLog.warning("Did Not Recognize a valid Despawn properties from %s.", masterParts[i]);
@@ -81,15 +93,51 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
         }
     }
 
-    @Override
-    public boolean isOptionalEnabled() {
-        parseString();
-        return valueCache.get(Key.enabled.key) != null;
-    }
-
     public int getRate() {
         parseString();
         return (Integer) valueCache.get(Key.spawnRate.key);
+    }
+
+    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord) {
+        boolean outcome = true;
+        for (int i = 0; i < parsedChainable.size(); i++) {
+            TypeValuePair typeValuePair = parsedChainable.get(i);
+            if (i != 0) {
+                if (operandvalue.get(i) == Operand.AND && outcome == true) {
+                    continue;
+                } else if (operandvalue.get(i) == Operand.OR && outcome == false) {
+                    return false;
+                }
+            }
+
+            Key key = typeValuePair.getType();
+            switch (key) {
+            case light:
+                int[] lightLevels = (int[]) typeValuePair.getValue();
+                int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
+                outcome = lightLevel > lightLevels[1] || lightLevel < lightLevels[0];
+                break;
+            case block:
+                outcome = isValidBlock(world, xCoord, yCoord, zCoord, typeValuePair);
+                break;
+            case sky:
+                boolean sky = (Boolean) typeValuePair.getValue();
+                boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
+                outcome = sky ? !canSeeSky : canSeeSky;
+                break;
+            case minSpawnHeight:
+                Integer minSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord < minSpawnHeight ? true : false;
+                break;
+            case maxSpawnHeight:
+                Integer maxSpawnHeight = (Integer) typeValuePair.getValue();
+                outcome = yCoord > maxSpawnHeight ? true : false;
+                break;
+            default:
+                break;
+            }
+        }
+        return outcome;
     }
 
     /**
@@ -97,25 +145,19 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
      * 
      * @return True if Operation should continue as normal, False if it should be disallowed
      */
-    @SuppressWarnings("unchecked")
-    public boolean isValidBlock(World world, int xCoord, int yCoord, int zCoord) {
-        parseString();
-        ArrayList<Integer> blockIDlist = (ArrayList<Integer>) valueCache.get(Key.blockList.key);
-        ArrayList<Integer> metaIDList = (ArrayList<Integer>) valueCache.get(Key.metaList.key);
-        if (blockIDlist.isEmpty()) {
-            return true;
-        }
-
+    private boolean isValidBlock(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair) {
+        @SuppressWarnings("unchecked")
+        ListMultimap<Integer, Integer> iDMetas = (ListMultimap<Integer, Integer>) typeValuePair.getValue();
         int xRange = (Integer) valueCache.get(Key.blockRangeX.key);
         int yRange = (Integer) valueCache.get(Key.blockRangeY.key);
         int zRange = (Integer) valueCache.get(Key.blockRangeZ.key);
         for (int i = -xRange; i <= xRange; i++) {
             for (int k = -zRange; k <= zRange; k++) {
                 for (int j = -yRange; j <= yRange; j++) {
-                    for (int m = 0; m < blockIDlist.size(); m++) {
+                    for (Entry<Integer, Integer> iDMetaEntry : iDMetas.entries()) {
                         int blockID = world.getBlockId(xCoord + i, yCoord + j, zCoord + k);
                         int meta = world.getBlockMetadata(xCoord + i, yCoord + j, zCoord + k);
-                        if (blockID == blockIDlist.get(m) && meta == metaIDList.get(m)) {
+                        if (blockID == iDMetaEntry.getKey() && meta == iDMetaEntry.getValue()) {
                             return false;
                         }
                     }

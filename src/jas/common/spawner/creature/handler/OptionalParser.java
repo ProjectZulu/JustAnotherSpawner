@@ -3,9 +3,11 @@ package jas.common.spawner.creature.handler;
 import jas.common.JASLog;
 import jas.common.Properties;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 
 public class OptionalParser {
 
@@ -17,14 +19,15 @@ public class OptionalParser {
      * @param values Values to be Used for Parsing
      * @param valueCache Cache used by OptionalSettings to hold values
      */
-    public static void parseLight(String[] values, HashMap<String, Object> valueCache) {
+    public static int[] parseLight(String[] values) {
         if (values.length == 3) {
-            valueCache.put(Key.minLightLevel.key, ParsingHelper.parseInteger(values[1],
-                    (Integer) valueCache.get(Key.minLightLevel.key), Key.minLightLevel.key));
-            valueCache.put(Key.maxLightLevel.key, ParsingHelper.parseInteger(values[2],
-                    (Integer) valueCache.get(Key.maxLightLevel.key), Key.maxLightLevel.key));
+            int[] lights = new int[2];
+            lights[0] = ParsingHelper.parseInteger(values[1], 16, Key.minLightLevel.key);
+            lights[1] = ParsingHelper.parseInteger(values[2], 16, Key.maxLightLevel.key);
+            return lights;
         } else {
             JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
+            return null;
         }
     }
 
@@ -33,10 +36,11 @@ public class OptionalParser {
      * 
      * @param values Values to be Used for Parsing
      * @param valueCache Cache used by OptionalSettings to hold values
+     * @return Returns a ArrayListMultimap mapping BlockID to Meta values
      */
-    public static void parseBlock(String[] values, HashMap<String, Object> valueCache) {
-        ArrayList<Integer> blockList = new ArrayList<Integer>();
-        ArrayList<Integer> metaList = new ArrayList<Integer>();
+    public static ListMultimap<Integer, Integer> parseBlock(String[] values) {
+        ListMultimap<Integer, Integer> blockMeta = ArrayListMultimap.create();
+
         for (int j = 1; j < values.length; j++) {
             int minID = -1;
             int maxID = -1;
@@ -79,14 +83,12 @@ public class OptionalParser {
                 for (int meta = minMeta; meta <= maxMeta; meta++) {
                     if (id != -1) {
                         JASLog.debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
-                        blockList.add(id);
-                        metaList.add(meta);
+                        blockMeta.put(id, meta);
                     }
                 }
             }
         }
-        valueCache.put(Key.blockList.key, blockList);
-        valueCache.put(Key.metaList.key, metaList);
+        return !blockMeta.isEmpty() ? blockMeta : null;
     }
 
     /**
@@ -152,18 +154,19 @@ public class OptionalParser {
         }
     }
 
-    public static void parseSky(String[] values, HashMap<String, Object> valueCache) {
+    public static Boolean parseSky(String[] values) {
         if (values.length == 1) {
             if (Key.sky.key.equalsIgnoreCase(values[0])) {
-                valueCache.put(Key.sky.key, Boolean.TRUE);
+                return Boolean.TRUE;
             } else {
-                valueCache.put(Key.sky.key, Boolean.FALSE);
+                return Boolean.FALSE;
             }
         } else {
             JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
+            return null;
         }
     }
-    
+
     public static void parseEntityCap(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
             valueCache.put(Key.entityCap.key, ParsingHelper.parseInteger(values[1], 0, Key.entityCap.key));
@@ -185,6 +188,24 @@ public class OptionalParser {
             valueCache.put(Key.maxSpawnRange.key, ParsingHelper.parseInteger(values[1], 0, Key.maxSpawnRange.key));
         } else {
             JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+        }
+    }
+
+    public static Integer parseMinSpawnHeight(String[] values) {
+        if (values.length == 2) {
+            return ParsingHelper.parseInteger(values[1], 256, Key.minSpawnHeight.key);
+        } else {
+            JASLog.severe("Error Parsing Min Spawn Height parameter. Invalid Argument Length.");
+            return null;
+        }
+    }
+
+    public static Integer parseMaxSpawnHeight(String[] values) {
+        if (values.length == 2) {
+            return ParsingHelper.parseInteger(values[1], -1, Key.maxSpawnHeight.key);
+        } else {
+            JASLog.severe("Error Parsing Max Spawn Height parameter. Invalid Argument Length.");
+            return null;
         }
     }
 }
