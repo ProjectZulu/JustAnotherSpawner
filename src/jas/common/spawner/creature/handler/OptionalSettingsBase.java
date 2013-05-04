@@ -59,4 +59,9 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
         defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
         return playerDistance > defaultCutoff * defaultCutoff;
     }
+    
+    protected boolean canBlockSeeTheSky(World world, int xCoord, int yCoord, int zCoord) {
+        int blockHeight = world.getTopSolidOrLiquidBlock(xCoord, zCoord);
+        return blockHeight <= yCoord;
+    }
 }

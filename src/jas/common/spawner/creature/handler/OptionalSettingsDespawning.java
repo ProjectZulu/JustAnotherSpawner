@@ -122,7 +122,7 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                 break;
             case sky:
                 boolean sky = (Boolean) typeValuePair.getValue();
-                boolean canSeeSky = world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
+                boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
                 outcome = sky ? !canSeeSky : canSeeSky;
                 break;
             case minSpawnHeight:
