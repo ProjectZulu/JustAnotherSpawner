@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
@@ -240,7 +241,9 @@ public class CustomSpawner {
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
                                                         .getCanSpawnHere(entityliving))) {
                                             ++j2;
-                                            JASLog.info("Spawning Creature %s at %s, %s, %s ",
+                                            JASLog.info("Spawning %s type Entity %s aka %s of  at %s, %s, %s ",
+                                                    spawnlistentry.getLivingHandler().creatureTypeID,
+                                                    EntityList.classToStringMapping.get(entityliving.getClass()),
                                                     entityliving.getEntityName(), entityliving.posX, entityliving.posY,
                                                     entityliving.posZ);
                                             worldServer.spawnEntityInWorld(entityliving);
@@ -327,8 +330,10 @@ public class CustomSpawner {
                         }
 
                         entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-                        JASLog.info("Chunk Spawned %s at %s, %s, %s ", entityliving.getEntityName(), entityliving.posX,
-                                entityliving.posY, entityliving.posZ);
+                        JASLog.info("Chunk Spawned %s type Entity %s aka %s of  at %s, %s, %s ",
+                                spawnListEntry.getLivingHandler().creatureTypeID,
+                                EntityList.classToStringMapping.get(entityliving.getClass()),
+                                entityliving.getEntityName(), entityliving.posX, entityliving.posY, entityliving.posZ);
                         world.spawnEntityInWorld(entityliving);
                         creatureSpecificInit(entityliving, world, f, f1, f2);
                         flag = true;
