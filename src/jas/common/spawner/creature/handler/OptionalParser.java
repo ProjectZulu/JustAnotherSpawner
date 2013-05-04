@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 public class OptionalParser {
 
     /**
@@ -17,6 +20,19 @@ public class OptionalParser {
      * @param values Values to be Used for Parsing
      * @param valueCache Cache used by OptionalSettings to hold values
      */
+    public static int[] parseLight(String[] values) {
+        if (values.length == 3) {
+            int[] lights = new int[2];
+            lights[0] = ParsingHelper.parseInteger(values[1], 16, Key.minLightLevel.key);
+            lights[1] = ParsingHelper.parseInteger(values[2], 16, Key.maxLightLevel.key);
+            return lights;
+        } else {
+            JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
+            return null;
+        }
+    }
+
+    @Deprecated
     public static void parseLight(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 3) {
             valueCache.put(Key.minLightLevel.key, ParsingHelper.parseInteger(values[1],
@@ -33,7 +49,62 @@ public class OptionalParser {
      * 
      * @param values Values to be Used for Parsing
      * @param valueCache Cache used by OptionalSettings to hold values
+     * @return Returns a ArrayListMultimap mapping BlockID to Meta values
      */
+    public static ListMultimap<Integer, Integer> parseBlock(String[] values) {
+        ListMultimap<Integer, Integer> blockMeta = ArrayListMultimap.create();
+
+        for (int j = 1; j < values.length; j++) {
+            int minID = -1;
+            int maxID = -1;
+            int minMeta = 0;
+            int maxMeta = 0;
+            /* Parse Scenario: 2>4-1>2 ADDS (Block,Meta)(2,1)(2,2)(3,1)(3,2)(4,1)(4,2) */
+            String[] idMetaParts = values[j].split("-");
+            for (int k = 0; k < idMetaParts.length; k++) {
+                String[] rangeParts = idMetaParts[k].split(">");
+                if (k == 0) {
+                    for (int l = 0; l < rangeParts.length; l++) {
+                        if (l == 0) {
+                            minID = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinBlockID");
+                        } else if (l == 1) {
+                            maxID = ParsingHelper.parseInteger(rangeParts[l], maxID, "parseMaxBlockID");
+                        } else {
+                            JASLog.warning("Block entry %s contains too many > elements.", values[j]);
+                        }
+                    }
+                } else if (k == 1) {
+                    for (int l = 0; l < rangeParts.length; l++) {
+                        if (l == 0) {
+                            minMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinMetaID");
+                        } else if (l == 1) {
+                            maxMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMaxMetaID");
+                        } else {
+                            JASLog.warning("Block entry %s contains too many > elements.", values[j]);
+                        }
+                    }
+                } else {
+                    JASLog.warning("Block entry %s contains too many - elements.", values[j]);
+                }
+            }
+
+            /* Gaurantee Max > Min. Auxillary Purpose: Gaurantees max is not -1 if only min is Set */
+            maxID = minID > maxID ? minID : maxID;
+            maxMeta = minMeta > maxMeta ? minMeta : maxMeta;
+
+            for (int id = minID; id <= maxID; id++) {
+                for (int meta = minMeta; meta <= maxMeta; meta++) {
+                    if (id != -1) {
+                        JASLog.debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
+                        blockMeta.put(id, meta);
+                    }
+                }
+            }
+        }
+        return !blockMeta.isEmpty() ? blockMeta : null;
+    }
+
+    @Deprecated
     public static void parseBlock(String[] values, HashMap<String, Object> valueCache) {
         ArrayList<Integer> blockList = new ArrayList<Integer>();
         ArrayList<Integer> metaList = new ArrayList<Integer>();
@@ -152,6 +223,20 @@ public class OptionalParser {
         }
     }
 
+    public static Boolean parseSky(String[] values) {
+        if (values.length == 1) {
+            if (Key.sky.key.equalsIgnoreCase(values[0])) {
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+        } else {
+            JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
+            return null;
+        }
+    }
+
+    @Deprecated
     public static void parseSky(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 1) {
             if (Key.sky.key.equalsIgnoreCase(values[0])) {
@@ -163,7 +248,7 @@ public class OptionalParser {
             JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
         }
     }
-    
+
     public static void parseEntityCap(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
             valueCache.put(Key.entityCap.key, ParsingHelper.parseInteger(values[1], 0, Key.entityCap.key));

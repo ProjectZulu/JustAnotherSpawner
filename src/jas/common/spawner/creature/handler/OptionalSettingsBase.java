@@ -13,14 +13,12 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
 
     @Override
     public boolean isOptionalEnabled() {
-        parseString();
-        return valueCache.get(Key.enabled.key) != null;
+        return isEnabled;
     }
 
     @Override
     public boolean isInverted() {
-        parseString();
-        return !(Boolean) valueCache.get(Key.enabled.key);
+        return isInverted;
     }
 
     /**
@@ -28,6 +26,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
      * 
      * @return True if Operation should continue as normal, False if it should be disallowed
      */
+    @Deprecated
     public boolean isValidLightLevel(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
         int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
@@ -35,6 +34,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                 || lightLevel < (Integer) valueCache.get(Key.minLightLevel.key);
     }
 
+    @Deprecated
     public boolean isValidSky(World world, int xCoord, int yCoord, int zCoord) {
         parseString();
         if (valueCache.get(Key.sky.key) == null) {
