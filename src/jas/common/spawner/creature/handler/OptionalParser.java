@@ -31,7 +31,7 @@ public class OptionalParser {
             return null;
         }
     }
-    
+
     @Deprecated
     public static void parseLight(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 3) {
@@ -235,7 +235,7 @@ public class OptionalParser {
             return null;
         }
     }
-    
+
     @Deprecated
     public static void parseSky(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 1) {

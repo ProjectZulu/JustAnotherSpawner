@@ -77,16 +77,6 @@ public class OptionalSettingsSpawning extends OptionalSettingsBase {
         }
     }
 
-    @Override
-    public boolean isOptionalEnabled() {
-        return isEnabled;
-    }
-
-    @Override
-    public boolean isInverted() {
-        return isInverted;
-    }
-
     public Integer getEntityCap() {
         return (Integer) valueCache.get(Key.entityCap.key);
     }

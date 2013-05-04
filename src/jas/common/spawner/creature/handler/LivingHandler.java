@@ -116,9 +116,7 @@ public class LivingHandler {
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
             boolean canDespawn = !despawning.isInverted();
-            if (!despawning.isValidLightLevel(entity.worldObj, xCoord, yCoord, zCoord)
-                    || !despawning.isValidSky(entity.worldObj, xCoord, yCoord, zCoord)
-                    || !despawning.isValidBlock(entity.worldObj, xCoord, yCoord, zCoord)) {
+            if (!despawning.isValidLocation(entity.worldObj, xCoord, yCoord, zCoord)) {
                 canDespawn = despawning.isInverted();
             }
 
