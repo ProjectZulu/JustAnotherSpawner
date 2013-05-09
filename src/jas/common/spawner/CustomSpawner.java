@@ -1,6 +1,7 @@
 package jas.common.spawner;
 
 import jas.common.JASLog;
+import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
@@ -9,9 +10,9 @@ import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
@@ -30,27 +31,6 @@ import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeEventFactory;
 
 public class CustomSpawner {
-    /** The 17x17 area around the player where mobs can spawn */
-    private static ConcurrentHashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new ConcurrentHashMap<ChunkCoordIntPair, Boolean>();
-
-    private static ConcurrentHashMap<String, CountableInt> creatureTypeCount = new ConcurrentHashMap<String, CountableInt>();
-    private static ConcurrentHashMap<String, CountableInt> creatureCount = new ConcurrentHashMap<String, CountableInt>();
-
-    private static class CountableInt {
-        int value = 1;
-
-        CountableInt(int startValue) {
-            value = startValue;
-        }
-
-        public int increment() {
-            return ++value;
-        }
-
-        public int get() {
-            return value;
-        }
-    }
 
     /**
      * Populates eligibleChunksForSpawning with All Valid Chunks. Unlike its vanilla counterpart
@@ -61,8 +41,8 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final void determineChunksForSpawnering(WorldServer worldServer) {
-        eligibleChunksForSpawning.clear();
+    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(WorldServer worldServer) {
+        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
         int i;
         int j;
         for (i = 0; i < worldServer.playerEntities.size(); ++i) {
@@ -84,6 +64,7 @@ public class CustomSpawner {
                 }
             }
         }
+        return eligibleChunksForSpawning;
     }
 
     /**
@@ -91,57 +72,18 @@ public class CustomSpawner {
      * 
      * @param worldServer
      */
-    public static void countEntityInChunks(WorldServer worldServer) {
-        creatureTypeCount.clear();
-        creatureCount.clear();
+    public static void countEntityInChunks(WorldServer worldServer, EntityCounter creatureType,
+            EntityCounter creatureCount) {
         @SuppressWarnings("unchecked")
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
             LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
             if (livingHandler != null) {
-                incrementOrPutIfAbsent(livingHandler.creatureTypeID, creatureTypeCount, 1);
-                incrementOrPutIfAbsent(entity.getClass().getSimpleName(), creatureCount, 1);
+                creatureType.incrementOrPutIfAbsent(livingHandler.creatureTypeID, 1);
+                creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
             }
         }
-    }
-
-    /**
-     * Gets or Puts if absent a CountableInt from the provided Map.
-     * 
-     * @param key Key for Value inside the hash we want to get
-     * @param countingHash Hash that is being used for Counting
-     * @param defaultValue Default Value CountableInt is initialized to
-     * @return CountableInt that has not been iterated
-     */
-    private static CountableInt getOrPutIfAbsent(String key, ConcurrentHashMap<String, CountableInt> countingHash,
-            int defaultValue) {
-        CountableInt count = countingHash.get(key);
-        if (count == null) {
-            count = new CountableInt(defaultValue);
-            countingHash.put(key, count);
-        }
-        return count;
-    }
-
-    /**
-     * Gets or Puts if absent a CountableInt from the provided Map.
-     * 
-     * @param key Key for Value inside the hash we want to iterate
-     * @param countingHash Hash that is being used for Counting
-     * @param defaultValue Default Value CountableInt is initialized to
-     * @return CountableInt that has been iterated
-     */
-    private static CountableInt incrementOrPutIfAbsent(String key,
-            ConcurrentHashMap<String, CountableInt> countingHash, int defaultValue) {
-        CountableInt count = countingHash.get(key);
-        if (count == null) {
-            count = new CountableInt(defaultValue);
-            countingHash.put(key, count);
-        } else {
-            count.increment();
-        }
-        return count;
     }
 
     /**
@@ -150,10 +92,12 @@ public class CustomSpawner {
      * 
      * @param creatureType CreatureType spawnList that is being Spawned
      */
-    public static final void spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType) {
+    public static final void spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType,
+            HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning, EntityCounter creatureTypeCount,
+            EntityCounter creatureCount) {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
 
-        CountableInt typeCount = getOrPutIfAbsent(creatureType.typeID, creatureTypeCount, 0);
+        CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
         int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
         if (typeCount.get() <= entityTypeCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
@@ -207,8 +151,8 @@ public class CustomSpawner {
                                             if (spawnlistentry == null) {
                                                 continue;
                                             }
-                                            livingCount = getOrPutIfAbsent(spawnlistentry.livingClass.getSimpleName(),
-                                                    CustomSpawner.creatureCount, 0);
+                                            livingCount = creatureCount.getOrPutIfAbsent(
+                                                    spawnlistentry.livingClass.getSimpleName(), 0);
                                             livingCap = CreatureHandlerRegistry.INSTANCE.getLivingHandler(
                                                     spawnlistentry.livingClass).getLivingCap();
 

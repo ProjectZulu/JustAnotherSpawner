@@ -170,7 +170,7 @@ public class LivingHandler {
             canSpawn = spawning.isInverted();
         }
 
-        return canSpawn && entity.worldObj.checkIfAABBIsClear(entity.boundingBox)
+        return canSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
                 && !entity.worldObj.isAnyLiquid(entity.boundingBox);
     }
