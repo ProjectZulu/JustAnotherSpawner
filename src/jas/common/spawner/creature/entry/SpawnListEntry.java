@@ -5,7 +5,7 @@ import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
-import jas.common.spawner.creature.handler.ParsingHelper;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 
 import java.util.Locale;
 

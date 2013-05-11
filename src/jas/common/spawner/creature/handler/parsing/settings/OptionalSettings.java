@@ -1,6 +1,10 @@
-package jas.common.spawner.creature.handler;
+package jas.common.spawner.creature.handler.parsing.settings;
+
+import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 
 /**
@@ -17,8 +21,9 @@ public abstract class OptionalSettings {
     boolean isInverted = false;
     public final String parseableString;
     protected boolean stringParsed = false;
+    protected EnumSet<Key> validKeys = EnumSet.noneOf(Key.class);
 
-    enum Operand {
+    public enum Operand {
         AND, OR;
     }
 
@@ -44,7 +49,6 @@ public abstract class OptionalSettings {
 
     public OptionalSettings(String parseableString) {
         this.parseableString = parseableString;
-        parseString();
     }
 
     protected abstract void parseString();

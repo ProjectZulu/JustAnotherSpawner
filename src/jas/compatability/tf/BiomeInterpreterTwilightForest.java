@@ -1,9 +1,9 @@
 package jas.compatability.tf;
 
 import jas.api.BiomeInterpreter;
+import jas.common.ReflectionHelper;
 import jas.common.spawner.biome.structure.BiomeInterpreterHelper;
-import jas.common.spawner.creature.handler.ParsingHelper;
-import jas.common.spawner.creature.handler.ReflectionHelper;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;

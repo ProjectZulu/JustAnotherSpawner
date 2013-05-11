@@ -1,4 +1,4 @@
-package jas.common.spawner.creature.handler;
+package jas.common.spawner.creature.handler.parsing;
 
 import jas.common.JASLog;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;

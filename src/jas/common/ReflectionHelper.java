@@ -1,6 +1,5 @@
-package jas.common.spawner.creature.handler;
+package jas.common;
 
-import jas.common.JASLog;
 
 import java.lang.reflect.Field;
 

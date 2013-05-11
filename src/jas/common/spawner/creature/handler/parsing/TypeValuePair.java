@@ -1,4 +1,6 @@
-package jas.common.spawner.creature.handler;
+package jas.common.spawner.creature.handler.parsing;
+
+import jas.common.spawner.creature.handler.parsing.keys.Key;
 
 public class TypeValuePair {
 

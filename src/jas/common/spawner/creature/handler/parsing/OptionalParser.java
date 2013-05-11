@@ -1,7 +1,9 @@
-package jas.common.spawner.creature.handler;
+package jas.common.spawner.creature.handler.parsing;
 
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -9,8 +11,30 @@ import java.util.logging.Level;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
+//TODO: most MEthods in this Class should be refactored the appropriate KeyParser
 public class OptionalParser {
 
+    public static Integer parseSingleInteger(String[] values, Integer defaultInt, String parameter) {
+        if (values.length == 2) {
+            return ParsingHelper.parseInteger(values[1], defaultInt, parameter);
+        } else {
+            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
+            return null;
+        }
+    }
+
+    public static int[] parseDoubleInteger(String[] values, int[] defaultInts, String parameter) {
+        if (values.length == 3) {
+            int[] integers = new int[2];
+            integers[0] = ParsingHelper.parseInteger(values[1], defaultInts[0], "1st " + parameter);
+            integers[1] = ParsingHelper.parseInteger(values[2], defaultInts[1], "2nd " + parameter);
+            return integers;
+        } else {
+            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
+            return null;
+        }
+    }
+    
     /**
      * Parses the Light Tag.
      * 
@@ -22,15 +46,15 @@ public class OptionalParser {
     public static int[] parseLight(String[] values) {
         if (values.length == 3) {
             int[] lights = new int[2];
-            lights[0] = ParsingHelper.parseInteger(values[1], 16, Key.minLightLevel.key);
-            lights[1] = ParsingHelper.parseInteger(values[2], 16, Key.maxLightLevel.key);
+            lights[0] = ParsingHelper.parseInteger(values[1], 16, "Min " + Key.light.key);
+            lights[1] = ParsingHelper.parseInteger(values[2], 16, "Max " + Key.light.key);
             return lights;
         } else {
             JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
             return null;
         }
     }
-
+    
     /**
      * Parses the Block Tag.
      * 
@@ -99,26 +123,19 @@ public class OptionalParser {
      */
     public static void parseBlockRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 4) {
-            valueCache
-                    .put(Key.blockRangeX.key, ParsingHelper.parseInteger(values[1],
-                            (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
-
-            valueCache
-                    .put(Key.blockRangeY.key, ParsingHelper.parseInteger(values[2],
-                            (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
-            valueCache
-                    .put(Key.blockRangeZ.key, ParsingHelper.parseInteger(values[3],
-                            (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
+            valueCache.put(Key.blockRangeX.key,
+                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+            valueCache.put(Key.blockRangeY.key,
+                    ParsingHelper.parseInteger(values[2], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+            valueCache.put(Key.blockRangeZ.key,
+                    ParsingHelper.parseInteger(values[3], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else if (values.length == 2) {
-            valueCache
-                    .put(Key.blockRangeX.key, ParsingHelper.parseInteger(values[1],
-                            (Integer) valueCache.get(Key.blockRangeX.key), "blockRangeX"));
-            valueCache
-                    .put(Key.blockRangeY.key, ParsingHelper.parseInteger(values[1],
-                            (Integer) valueCache.get(Key.blockRangeY.key), "blockRangeY"));
-            valueCache
-                    .put(Key.blockRangeZ.key, ParsingHelper.parseInteger(values[1],
-                            (Integer) valueCache.get(Key.blockRangeZ.key), "blockRangeZ"));
+            valueCache.put(Key.blockRangeX.key,
+                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+            valueCache.put(Key.blockRangeY.key,
+                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+            valueCache.put(Key.blockRangeZ.key,
+                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else {
             JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Argument Length.");
         }
@@ -133,7 +150,7 @@ public class OptionalParser {
     public static void parseSpawnRate(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
             valueCache.put(Key.spawnRate.key, ParsingHelper.parseInteger(values[1],
-                    (Integer) valueCache.get(Key.spawnRate.key), Key.spawnRate.key));
+                    OptionalSettingsBase.defaultSpawnRate, Key.spawnRate.key));
         } else {
             JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Argument Length.");
         }
