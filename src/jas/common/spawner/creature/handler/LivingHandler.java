@@ -197,6 +197,7 @@ public class LivingHandler {
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
 
         if (resultParts.length == 4) {
+            /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome*/
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");

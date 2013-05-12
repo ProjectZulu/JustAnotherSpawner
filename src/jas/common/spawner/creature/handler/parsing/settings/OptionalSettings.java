@@ -21,7 +21,7 @@ public abstract class OptionalSettings {
     boolean isInverted = false;
     public final String parseableString;
     protected boolean stringParsed = false;
-    protected EnumSet<Key> validKeys = EnumSet.noneOf(Key.class);
+    protected EnumSet<Key> validKeys;
 
     public enum Operand {
         AND, OR;
@@ -49,8 +49,14 @@ public abstract class OptionalSettings {
 
     public OptionalSettings(String parseableString) {
         this.parseableString = parseableString;
+        validKeys = EnumSet.noneOf(Key.class);
     }
 
+    public OptionalSettings(String parseableString, EnumSet<Key> validKeys) {
+        this.parseableString = parseableString;
+        this.validKeys = validKeys;
+    }
+    
     protected abstract void parseString();
 
     public abstract boolean isOptionalEnabled();

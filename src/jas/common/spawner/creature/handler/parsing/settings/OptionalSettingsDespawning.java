@@ -9,15 +9,15 @@ import java.util.EnumSet;
  */
 public class OptionalSettingsDespawning extends OptionalSettingsBase {
     public OptionalSettingsDespawning(String parseableString) {
-        super(parseableString.replace("}", ""));
-        validKeys = EnumSet.of(Key.despawn, Key.light, Key.block, Key.blockFoot, Key.blockRange, Key.spawnRange,
-                Key.spawnRate, Key.sky, Key.despawnAge, Key.maxSpawnRange, Key.minSpawnHeight, Key.maxSpawnHeight);
-        parseString();
+        super(parseableString.replace("}", ""), EnumSet.of(Key.despawn, Key.light, Key.block, Key.blockFoot,
+                Key.blockRange, Key.spawnRange, Key.spawnRate, Key.sky, Key.despawnAge, Key.maxSpawnRange,
+                Key.minSpawnHeight, Key.maxSpawnHeight, Key.liquid, Key.opaque, Key.normal, Key.solidSide));
     }
 
     public int getRate() {
         parseString();
-        return (Integer) valueCache.get(Key.spawnRate.key);
+        Integer rate = (Integer) valueCache.get(Key.spawnRate.key);
+        return rate != null ? rate : 40;
     }
 
     public boolean isValidAge(int currentAge, int defaultCutoff) {

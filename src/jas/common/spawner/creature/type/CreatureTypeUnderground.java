@@ -6,14 +6,15 @@ import net.minecraft.world.World;
 public class CreatureTypeUnderground extends CreatureType {
 
     public CreatureTypeUnderground(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning) {
-        super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            boolean chunkSpawning, String optionalParameters) {
+        super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
 
     @Override
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, boolean chunkSpawning) {
-        return new CreatureTypeUnderground(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            int spawnRate, boolean chunkSpawning, String optionalParameters) {
+        return new CreatureTypeUnderground(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+                optionalParameters);
     }
 
     @Override

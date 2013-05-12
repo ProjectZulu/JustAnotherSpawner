@@ -4,16 +4,16 @@ import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 
 public class CreatureTypeOpensky extends CreatureType {
-
     public CreatureTypeOpensky(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning) {
-        super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            boolean chunkSpawning, String optionalParameters) {
+        super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
 
     @Override
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, boolean chunkSpawning) {
-        return new CreatureTypeOpensky(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            int spawnRate, boolean chunkSpawning, String optionalParameters) {
+        return new CreatureTypeOpensky(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+                optionalParameters);
     }
 
     @Override
