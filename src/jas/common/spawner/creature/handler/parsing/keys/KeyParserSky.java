@@ -19,7 +19,6 @@ public class KeyParserSky extends KeyParserBase {
     public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         Operand operand = getOperand(parseable);
-
         TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSky(parseable));
 
         if (typeValue.getValue() != null) {
