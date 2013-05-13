@@ -16,10 +16,11 @@ public class KeyParserSky extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSky(parseable));
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
+        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSky(pieces));
 
         if (typeValue.getValue() != null) {
             parsedChainable.add(typeValue);
@@ -30,7 +31,7 @@ public class KeyParserSky extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 

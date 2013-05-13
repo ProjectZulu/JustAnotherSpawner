@@ -16,11 +16,13 @@ public class KeyParserMaxHeight extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
+        String[] pieces = parseable.split(",");
 
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSingleInteger(parseable, -1, key.key));
+        Operand operand = getOperand(pieces);
+
+        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSingleInteger(pieces, -1, key.key));
 
         if (typeValue.getValue() != null) {
             parsedChainable.add(typeValue);
@@ -31,7 +33,7 @@ public class KeyParserMaxHeight extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 

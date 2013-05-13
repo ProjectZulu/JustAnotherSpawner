@@ -55,7 +55,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                     }
                 }
             } else {
-                String[] childParts = masterParts[i].split(",");
+                String[] childParts = masterParts[i].split(",", 2);
                 boolean foundMatch = false;
                 for (Key key : validKeys) {
                     if (key.keyParser == null) {
@@ -64,11 +64,11 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                     if (key.keyParser.isMatch(childParts[0])) {
                         foundMatch = true;
                         if (key.keyParser.getKeyType() == KeyType.CHAINABLE) {
-                            if (!key.keyParser.parseChainable(childParts, parsedChainable, operandvalue)) {
+                            if (!key.keyParser.parseChainable(masterParts[i], parsedChainable, operandvalue)) {
                                 JASLog.severe("Failed to Parse Chainable from %s", masterParts[i]);
                             }
                         } else if (key.keyParser.getKeyType() == KeyType.VALUE) {
-                            if (!key.keyParser.parseValue(childParts, valueCache)) {
+                            if (!key.keyParser.parseValue(masterParts[i], valueCache)) {
                                 JASLog.severe("Failed to Parse Value from %s", masterParts[i]);
                             }
                         }

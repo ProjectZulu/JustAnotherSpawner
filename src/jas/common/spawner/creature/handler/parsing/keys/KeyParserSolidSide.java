@@ -18,44 +18,45 @@ public class KeyParserSolidSide extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
 
         boolean isInverted = false;
-        if (parseable[0].startsWith("!")) {
+        if (pieces[0].startsWith("!")) {
             isInverted = true;
         }
 
         TypeValuePair typeValue = null;
 
-        if (parseable.length == 5 || parseable.length == 8) {
-            int side = ParsingHelper.parseInteger(parseable[1], 0, "side");
-            int rangeX = ParsingHelper.parseInteger(parseable[2], 0, "normalBlockRangeX");
-            int rangeY = ParsingHelper.parseInteger(parseable[3], 0, "normalBlockRangeY");
-            int rangeZ = ParsingHelper.parseInteger(parseable[4], 0, "normalBlockRangeZ");
-            if (parseable.length == 7) {
-                int offsetX = ParsingHelper.parseInteger(parseable[5], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(parseable[6], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(parseable[7], 0, "normalOffsetZ");
+        if (pieces.length == 5 || pieces.length == 8) {
+            int side = ParsingHelper.parseInteger(pieces[1], 0, "side");
+            int rangeX = ParsingHelper.parseInteger(pieces[2], 0, "normalBlockRangeX");
+            int rangeY = ParsingHelper.parseInteger(pieces[3], 0, "normalBlockRangeY");
+            int rangeZ = ParsingHelper.parseInteger(pieces[4], 0, "normalBlockRangeZ");
+            if (pieces.length == 7) {
+                int offsetX = ParsingHelper.parseInteger(pieces[5], 0, "normalOffsetX");
+                int offsetY = ParsingHelper.parseInteger(pieces[6], 0, "normalOffsetY");
+                int offsetZ = ParsingHelper.parseInteger(pieces[7], 0, "normalOffsetZ");
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, side, rangeX, rangeY, rangeZ, offsetX,
                         offsetY, offsetZ });
             } else {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, side, rangeX, rangeY, rangeZ });
             }
-        } else if (parseable.length == 3 || parseable.length == 6) {
-            int side = ParsingHelper.parseInteger(parseable[1], 0, "side");
-            int range = ParsingHelper.parseInteger(parseable[2], 0, "normalBlockRange");
-            if (parseable.length == 6) {
-                int offsetX = ParsingHelper.parseInteger(parseable[3], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(parseable[4], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(parseable[5], 0, "normalOffsetZ");
+        } else if (pieces.length == 3 || pieces.length == 6) {
+            int side = ParsingHelper.parseInteger(pieces[1], 0, "side");
+            int range = ParsingHelper.parseInteger(pieces[2], 0, "normalBlockRange");
+            if (pieces.length == 6) {
+                int offsetX = ParsingHelper.parseInteger(pieces[3], 0, "normalOffsetX");
+                int offsetY = ParsingHelper.parseInteger(pieces[4], 0, "normalOffsetY");
+                int offsetZ = ParsingHelper.parseInteger(pieces[5], 0, "normalOffsetZ");
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, side, range, offsetX, offsetY, offsetZ });
             } else {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, side, range });
             }
         } else {
-            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, parseable.length);
+            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
         }
 
         if (typeValue != null && typeValue.getValue() != null) {
@@ -67,7 +68,7 @@ public class KeyParserSolidSide extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 

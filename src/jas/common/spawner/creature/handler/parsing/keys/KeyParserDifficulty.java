@@ -17,16 +17,18 @@ public class KeyParserDifficulty extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
+        String[] pieces = parseable.split(",");
+
+        Operand operand = getOperand(pieces);
 
         boolean isInverted = false;
-        if (parseable[0].startsWith("!")) {
+        if (pieces[0].startsWith("!")) {
             isInverted = true;
         }
 
-        int difficulty = ParsingHelper.parseInteger(parseable[1], 0, key.key);
+        int difficulty = ParsingHelper.parseInteger(pieces[1], 0, key.key);
         if (difficulty < 0 || difficulty > 3) {
             JASLog.info("Difficulty must be between 0 (Peaceful) and 3 (Hard)");
             return false;
@@ -43,7 +45,7 @@ public class KeyParserDifficulty extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 

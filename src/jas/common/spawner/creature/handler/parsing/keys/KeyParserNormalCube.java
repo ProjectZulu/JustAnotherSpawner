@@ -17,42 +17,43 @@ public class KeyParserNormalCube extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
 
         boolean isInverted = false;
-        if (parseable[0].startsWith("!")) {
+        if (pieces[0].startsWith("!")) {
             isInverted = true;
         }
 
         TypeValuePair typeValue = null;
 
-        if (parseable.length == 4 || parseable.length == 7) {
-            int rangeX = ParsingHelper.parseInteger(parseable[1], 0, "normalBlockRangeX");
-            int rangeY = ParsingHelper.parseInteger(parseable[2], 0, "normalBlockRangeY");
-            int rangeZ = ParsingHelper.parseInteger(parseable[3], 0, "normalBlockRangeZ");
-            if (parseable.length == 7) {
-                int offsetX = ParsingHelper.parseInteger(parseable[4], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(parseable[5], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(parseable[6], 0, "normalOffsetZ");
+        if (pieces.length == 4 || pieces.length == 7) {
+            int rangeX = ParsingHelper.parseInteger(pieces[1], 0, "normalBlockRangeX");
+            int rangeY = ParsingHelper.parseInteger(pieces[2], 0, "normalBlockRangeY");
+            int rangeZ = ParsingHelper.parseInteger(pieces[3], 0, "normalBlockRangeZ");
+            if (pieces.length == 7) {
+                int offsetX = ParsingHelper.parseInteger(pieces[4], 0, "normalOffsetX");
+                int offsetY = ParsingHelper.parseInteger(pieces[5], 0, "normalOffsetY");
+                int offsetZ = ParsingHelper.parseInteger(pieces[6], 0, "normalOffsetZ");
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeY, rangeZ, offsetX, offsetY,
                         offsetZ });
             } else {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeY, rangeZ });
             }
-        } else if (parseable.length == 2 || parseable.length == 5) {
-            int range = ParsingHelper.parseInteger(parseable[1], 0, "normalBlockRange");
-            if (parseable.length == 5) {
-                int offsetX = ParsingHelper.parseInteger(parseable[2], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(parseable[3], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(parseable[4], 0, "normalOffsetZ");
+        } else if (pieces.length == 2 || pieces.length == 5) {
+            int range = ParsingHelper.parseInteger(pieces[1], 0, "normalBlockRange");
+            if (pieces.length == 5) {
+                int offsetX = ParsingHelper.parseInteger(pieces[2], 0, "normalOffsetX");
+                int offsetY = ParsingHelper.parseInteger(pieces[3], 0, "normalOffsetY");
+                int offsetZ = ParsingHelper.parseInteger(pieces[4], 0, "normalOffsetZ");
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, range, offsetX, offsetY, offsetZ });
             } else {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, range });
             }
         } else {
-            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, parseable.length);
+            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
         }
 
         if (typeValue != null && typeValue.getValue() != null) {
@@ -64,7 +65,7 @@ public class KeyParserNormalCube extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 

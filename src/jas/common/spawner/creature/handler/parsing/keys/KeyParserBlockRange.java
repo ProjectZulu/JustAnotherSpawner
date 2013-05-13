@@ -16,14 +16,15 @@ public class KeyParserBlockRange extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
-        OptionalParser.parseBlockRange(parseable, valueCache);
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
+        String[] pieces = parseable.split(",");
+        OptionalParser.parseBlockRange(pieces, valueCache);
         return true;
     }
 

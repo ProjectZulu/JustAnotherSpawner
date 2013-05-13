@@ -16,14 +16,14 @@ public abstract class KeyParser {
 
     public abstract boolean isInvertable();
 
-    public abstract boolean isMatch(String string);
+    public abstract boolean isMatch(String title);
 
     public abstract KeyType getKeyType();
 
-    public abstract boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public abstract boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue);
 
-    public abstract boolean parseValue(String[] parseable, HashMap<String, Object> valueCache);
+    public abstract boolean parseValue(String parseable, HashMap<String, Object> valueCache);
 
     public abstract boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord,
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache);

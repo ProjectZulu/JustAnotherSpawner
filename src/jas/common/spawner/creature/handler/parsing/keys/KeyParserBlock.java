@@ -2,8 +2,8 @@ package jas.common.spawner.creature.handler.parsing.keys;
 
 import jas.common.spawner.creature.handler.parsing.OptionalParser;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
-import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,11 +20,13 @@ public class KeyParserBlock extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
+        String[] pieces = parseable.split(",");
 
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseBlock(parseable));
+        Operand operand = getOperand(pieces);
+
+        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseBlock(pieces));
 
         if (typeValue.getValue() != null) {
             parsedChainable.add(typeValue);
@@ -35,7 +37,7 @@ public class KeyParserBlock extends KeyParserBase {
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 
