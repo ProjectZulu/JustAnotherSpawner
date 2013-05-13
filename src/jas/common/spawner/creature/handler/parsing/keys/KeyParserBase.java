@@ -16,20 +16,44 @@ public abstract class KeyParserBase extends KeyParser {
 
     @Override
     public boolean isMatch(String string) {
-        if (string.equalsIgnoreCase(key.key)) {
-            return true;
-        } else if (isInvertable() && string.equalsIgnoreCase("!" + key.key)) {
-            return true;
-        } else if (getKeyType() == KeyType.CHAINABLE
-                && (string.equalsIgnoreCase("|" + key.key) || string.equalsIgnoreCase("&" + key.key))) {
-            return true;
+        if (string == null) {
+            return false;
+        }
+
+        Character character = isFirstSpecial(string);
+        if (isSpecialCharValid(character)) {
+            string = string.substring(1);
+            character = isFirstSpecial(string);
+            if (isSpecialCharValid(character)) {
+                string = string.substring(1);
+            }
+        }
+
+        return string.equalsIgnoreCase(key.key);
+    }
+
+    protected final Character isFirstSpecial(String string) {
+        if (string.startsWith("&") || string.startsWith("|") || string.startsWith("!")) {
+            return string.charAt(0);
+        }
+        return null;
+    }
+
+    protected final boolean isSpecialCharValid(Character character) {
+        if (character == null) {
+            return false;
+        }
+        if (character.equals('&') || character.equals('|')) {
+            return getKeyType() == KeyType.CHAINABLE;
+        } else if (character.equals('!')) {
+            return isInvertable;
         }
         return false;
     }
 
     protected Operand getOperand(String[] parseable) {
         Operand operand = Operand.OR;
-        if (parseable[0].startsWith("&")) {
+        if (parseable[0].charAt(0) == '&' || parseable[0].charAt(1) == '&') {
             operand = Operand.AND;
         }
         return operand;
