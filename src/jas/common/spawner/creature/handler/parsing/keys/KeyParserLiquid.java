@@ -19,13 +19,14 @@ public class KeyParserLiquid extends KeyParserBase {
     @Override
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
 
         boolean isInverted = false;
-        if (pieces[0].startsWith("!")) {
+        if (isInverted(parseable)) {
             isInverted = true;
         }
+
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
 
         TypeValuePair typeValue = null;
 

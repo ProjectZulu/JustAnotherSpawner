@@ -1,6 +1,6 @@
 package jas.common.spawner.creature.handler.parsing.keys;
 
-import jas.common.spawner.creature.handler.parsing.OptionalParser;
+import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
@@ -20,14 +20,14 @@ public class KeyParserSky extends KeyParserBase {
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
         Operand operand = getOperand(pieces);
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSky(pieces));
-
-        if (typeValue.getValue() != null) {
-            parsedChainable.add(typeValue);
+        if (pieces.length == 1) {
+            parsedChainable.add(new TypeValuePair(key, isInverted(parseable)));
             operandvalue.add(operand);
             return true;
+        } else {
+            JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
+            return false;
         }
-        return false;
     }
 
     @Override

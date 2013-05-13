@@ -24,7 +24,7 @@ public class KeyParserDifficulty extends KeyParserBase {
         Operand operand = getOperand(pieces);
 
         boolean isInverted = false;
-        if (pieces[0].startsWith("!")) {
+        if (isInverted(parseable)) {
             isInverted = true;
         }
 

@@ -171,6 +171,7 @@ public class OptionalParser {
         }
     }
 
+    @Deprecated
     public static Boolean parseSky(String[] values) {
         if (values.length == 1) {
             if (Key.sky.key.equalsIgnoreCase(values[0])) {

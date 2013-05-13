@@ -33,8 +33,15 @@ public abstract class KeyParserBase extends KeyParser {
     }
 
     protected final Character isFirstSpecial(String string) {
+        return isIndexSpecial(string, 0);
+    }
+
+    protected final Character isIndexSpecial(String string, int index) {
+        if (string.length() <= index) {
+            return null;
+        }
         if (string.startsWith("&") || string.startsWith("|") || string.startsWith("!")) {
-            return string.charAt(0);
+            return string.charAt(index);
         }
         return null;
     }
@@ -47,6 +54,15 @@ public abstract class KeyParserBase extends KeyParser {
             return getKeyType() == KeyType.CHAINABLE;
         } else if (character.equals('!')) {
             return isInvertable;
+        }
+        return false;
+    }
+
+    protected boolean isInverted(String string) {
+        Character first = isIndexSpecial(string, 0);
+        Character second = isIndexSpecial(string, 1);
+        if ((first != null && first.equals('!')) || (second != null && second.equals('!'))) {
+            return true;
         }
         return false;
     }
