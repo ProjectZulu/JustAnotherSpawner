@@ -49,6 +49,12 @@ public class CreatureType {
     protected OptionalSettingsCreatureTypeSpawn spawning;
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+            boolean chunkSpawning) {
+        this(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+                "{spawn:!solidside,1,0,0,-1,0:liquid,0:normal,0:normal,0,0,1,0,!opaque,0,0,-1,0:!sky}");
+    }
+
+    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning, String optionalParameters) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;

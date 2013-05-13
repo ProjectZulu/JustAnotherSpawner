@@ -6,6 +6,11 @@ import net.minecraft.world.WorldServer;
 public class CreatureTypeMonster extends CreatureType {
 
     public CreatureTypeMonster(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+            boolean chunkSpawning) {
+        super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+    }
+
+    public CreatureTypeMonster(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning, String optionalParameters) {
         super(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
