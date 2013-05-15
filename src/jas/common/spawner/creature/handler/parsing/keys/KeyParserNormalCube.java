@@ -19,41 +19,44 @@ public class KeyParserNormalCube extends KeyParserBase {
     @Override
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
-
         boolean isInverted = false;
         if (isInverted(parseable)) {
             isInverted = true;
         }
 
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
         TypeValuePair typeValue = null;
 
-        if (pieces.length == 4 || pieces.length == 7) {
-            int rangeX = ParsingHelper.parseInteger(pieces[1], 0, "normalBlockRangeX");
-            int rangeY = ParsingHelper.parseInteger(pieces[2], 0, "normalBlockRangeY");
-            int rangeZ = ParsingHelper.parseInteger(pieces[3], 0, "normalBlockRangeZ");
-            if (pieces.length == 7) {
-                int offsetX = ParsingHelper.parseInteger(pieces[4], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(pieces[5], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(pieces[6], 0, "normalOffsetZ");
+        if (pieces.length == 2 || pieces.length == 3) {
+            int rangeX, rangeY, rangeZ;
+            rangeX = rangeY = rangeZ = 0;
+            String[] rangePieces = pieces[1].split("/");
+            if (rangePieces.length == 3) {
+                rangeX = ParsingHelper.parseFilteredInteger(rangePieces[0], 0, key.key + "BlockRangeX");
+                rangeY = ParsingHelper.parseFilteredInteger(rangePieces[1], 0, key.key + "BlockRangeY");
+                rangeZ = ParsingHelper.parseFilteredInteger(rangePieces[2], 0, key.key + "BlockRangeZ");
+            } else if (rangePieces.length == 1) {
+                rangeX = ParsingHelper.parseFilteredInteger(rangePieces[0], 0, key.key + "BlockRangeX");
+                rangeY = rangeX;
+                rangeZ = rangeX;
+            } else {
+                JASLog.severe("Error Parsing Range of %s. Invalid Argument Length of %s.", key.key, rangePieces.length);
+            }
+
+            if (pieces.length == 3) {
+                String[] offsetPieces = pieces[2].split("/");
+                int offsetX = ParsingHelper.parseFilteredInteger(offsetPieces[0], 0, key.key + "OffsetX");
+                int offsetY = ParsingHelper.parseFilteredInteger(offsetPieces[1], 0, key.key + "OffsetY");
+                int offsetZ = ParsingHelper.parseFilteredInteger(offsetPieces[2], 0, key.key + "OffsetZ");
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeY, rangeZ, offsetX, offsetY,
                         offsetZ });
             } else {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeY, rangeZ });
             }
-        } else if (pieces.length == 2 || pieces.length == 5) {
-            int range = ParsingHelper.parseInteger(pieces[1], 0, "normalBlockRange");
-            if (pieces.length == 5) {
-                int offsetX = ParsingHelper.parseInteger(pieces[2], 0, "normalOffsetX");
-                int offsetY = ParsingHelper.parseInteger(pieces[3], 0, "normalOffsetY");
-                int offsetZ = ParsingHelper.parseInteger(pieces[4], 0, "normalOffsetZ");
-                typeValue = new TypeValuePair(key, new Object[] { isInverted, range, offsetX, offsetY, offsetZ });
-            } else {
-                typeValue = new TypeValuePair(key, new Object[] { isInverted, range });
-            }
         } else {
             JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
+            return false;
         }
 
         if (typeValue != null && typeValue.getValue() != null) {
@@ -75,40 +78,27 @@ public class KeyParserNormalCube extends KeyParserBase {
 
         Object[] values = (Object[]) typeValuePair.getValue();
         boolean isInverted = (Boolean) values[0];
-        int offsetX = 0;
-        int offsetY = 0;
-        int offsetZ = 0;
-        int rangeX = 0;
-        int rangeY = 0;
-        int rangeZ = 0;
 
         if (values.length == 4 || values.length == 7) {
-            rangeX = (Integer) values[1];
-            rangeY = (Integer) values[2];
-            rangeZ = (Integer) values[3];
+            int rangeX = (Integer) values[1];
+            int rangeY = (Integer) values[2];
+            int rangeZ = (Integer) values[3];
+            int offsetX, offsetY, offsetZ;
+            offsetX = offsetY = offsetZ = 0;
             if (values.length == 7) {
                 offsetX = (Integer) values[4];
                 offsetY = (Integer) values[5];
                 offsetZ = (Integer) values[6];
             }
-        } else if (values.length == 2 || values.length == 5) {
-            rangeX = (Integer) values[1];
-            rangeY = rangeX;
-            rangeZ = rangeX;
-            if (values.length == 5) {
-                offsetX = (Integer) values[2];
-                offsetY = (Integer) values[3];
-                offsetZ = (Integer) values[4];
-            }
-        }
 
-        for (int i = -rangeX; i <= rangeX; i++) {
-            for (int k = -rangeZ; k <= rangeZ; k++) {
-                for (int j = rangeY; j <= rangeY; j++) {
-                    boolean isNormal = world.isBlockNormalCube(xCoord + offsetX + i, yCoord + offsetY + j, zCoord
-                            + offsetZ + k);
-                    if (!isInverted && isNormal || isInverted && !isNormal) {
-                        return false;
+            for (int i = -rangeX; i <= rangeX; i++) {
+                for (int k = -rangeZ; k <= rangeZ; k++) {
+                    for (int j = -rangeY; j <= rangeY; j++) {
+                        boolean isNormal = world.isBlockNormalCube(xCoord + offsetX + i, yCoord + offsetY + j, zCoord
+                                + offsetZ + k);
+                        if (!isInverted && isNormal || isInverted && !isNormal) {
+                            return false;
+                        }
                     }
                 }
             }

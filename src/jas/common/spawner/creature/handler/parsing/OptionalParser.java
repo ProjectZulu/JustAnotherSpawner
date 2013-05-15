@@ -16,7 +16,7 @@ public class OptionalParser {
 
     public static Integer parseSingleInteger(String[] values, Integer defaultInt, String parameter) {
         if (values.length == 2) {
-            return ParsingHelper.parseInteger(values[1], defaultInt, parameter);
+            return ParsingHelper.parseFilteredInteger(values[1], defaultInt, parameter);
         } else {
             JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
             return null;
@@ -26,8 +26,8 @@ public class OptionalParser {
     public static int[] parseDoubleInteger(String[] values, int[] defaultInts, String parameter) {
         if (values.length == 3) {
             int[] integers = new int[2];
-            integers[0] = ParsingHelper.parseInteger(values[1], defaultInts[0], "1st " + parameter);
-            integers[1] = ParsingHelper.parseInteger(values[2], defaultInts[1], "2nd " + parameter);
+            integers[0] = ParsingHelper.parseFilteredInteger(values[1], defaultInts[0], "1st " + parameter);
+            integers[1] = ParsingHelper.parseFilteredInteger(values[2], defaultInts[1], "2nd " + parameter);
             return integers;
         } else {
             JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
@@ -46,8 +46,8 @@ public class OptionalParser {
     public static int[] parseLight(String[] values) {
         if (values.length == 3) {
             int[] lights = new int[2];
-            lights[0] = ParsingHelper.parseInteger(values[1], 16, "Min " + Key.light.key);
-            lights[1] = ParsingHelper.parseInteger(values[2], 16, "Max " + Key.light.key);
+            lights[0] = ParsingHelper.parseFilteredInteger(values[1], 16, "Min " + Key.light.key);
+            lights[1] = ParsingHelper.parseFilteredInteger(values[2], 16, "Max " + Key.light.key);
             return lights;
         } else {
             JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
@@ -77,9 +77,9 @@ public class OptionalParser {
                 if (k == 0) {
                     for (int l = 0; l < rangeParts.length; l++) {
                         if (l == 0) {
-                            minID = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinBlockID");
+                            minID = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMinBlockID");
                         } else if (l == 1) {
-                            maxID = ParsingHelper.parseInteger(rangeParts[l], maxID, "parseMaxBlockID");
+                            maxID = ParsingHelper.parseFilteredInteger(rangeParts[l], maxID, "parseMaxBlockID");
                         } else {
                             JASLog.warning("Block entry %s contains too many > elements.", values[j]);
                         }
@@ -87,9 +87,9 @@ public class OptionalParser {
                 } else if (k == 1) {
                     for (int l = 0; l < rangeParts.length; l++) {
                         if (l == 0) {
-                            minMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMinMetaID");
+                            minMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMinMetaID");
                         } else if (l == 1) {
-                            maxMeta = ParsingHelper.parseInteger(rangeParts[l], minID, "parseMaxMetaID");
+                            maxMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMaxMetaID");
                         } else {
                             JASLog.warning("Block entry %s contains too many > elements.", values[j]);
                         }
@@ -124,18 +124,18 @@ public class OptionalParser {
     public static void parseBlockRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 4) {
             valueCache.put(Key.blockRangeX.key,
-                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
             valueCache.put(Key.blockRangeY.key,
-                    ParsingHelper.parseInteger(values[2], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+                    ParsingHelper.parseFilteredInteger(values[2], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
             valueCache.put(Key.blockRangeZ.key,
-                    ParsingHelper.parseInteger(values[3], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
+                    ParsingHelper.parseFilteredInteger(values[3], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else if (values.length == 2) {
             valueCache.put(Key.blockRangeX.key,
-                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
             valueCache.put(Key.blockRangeY.key,
-                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
             valueCache.put(Key.blockRangeZ.key,
-                    ParsingHelper.parseInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
+                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else {
             JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Argument Length.");
         }
@@ -149,7 +149,7 @@ public class OptionalParser {
      */
     public static void parseSpawnRate(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
-            valueCache.put(Key.spawnRate.key, ParsingHelper.parseInteger(values[1],
+            valueCache.put(Key.spawnRate.key, ParsingHelper.parseFilteredInteger(values[1],
                     OptionalSettingsBase.defaultSpawnRate, Key.spawnRate.key));
         } else {
             JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Argument Length.");
@@ -165,7 +165,7 @@ public class OptionalParser {
     public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
             valueCache.put(Key.spawnRange.key,
-                    ParsingHelper.parseInteger(values[1], Properties.despawnDist, Key.spawnRange.key));
+                    ParsingHelper.parseFilteredInteger(values[1], Properties.despawnDist, Key.spawnRange.key));
         } else {
             JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
         }
@@ -187,7 +187,7 @@ public class OptionalParser {
 
     public static void parseEntityCap(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
-            valueCache.put(Key.entityCap.key, ParsingHelper.parseInteger(values[1], 0, Key.entityCap.key));
+            valueCache.put(Key.entityCap.key, ParsingHelper.parseFilteredInteger(values[1], 0, Key.entityCap.key));
         } else {
             JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
@@ -195,7 +195,7 @@ public class OptionalParser {
 
     public static void parseDespawnAge(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
-            valueCache.put(Key.despawnAge.key, ParsingHelper.parseInteger(values[1], 600, Key.despawnAge.key));
+            valueCache.put(Key.despawnAge.key, ParsingHelper.parseFilteredInteger(values[1], 600, Key.despawnAge.key));
         } else {
             JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
@@ -203,7 +203,7 @@ public class OptionalParser {
 
     public static void parseMaxSpawnRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
-            valueCache.put(Key.maxSpawnRange.key, ParsingHelper.parseInteger(values[1], 0, Key.maxSpawnRange.key));
+            valueCache.put(Key.maxSpawnRange.key, ParsingHelper.parseFilteredInteger(values[1], 0, Key.maxSpawnRange.key));
         } else {
             JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
@@ -211,7 +211,7 @@ public class OptionalParser {
 
     public static Integer parseMinSpawnHeight(String[] values) {
         if (values.length == 2) {
-            return ParsingHelper.parseInteger(values[1], 256, Key.minSpawnHeight.key);
+            return ParsingHelper.parseFilteredInteger(values[1], 256, Key.minSpawnHeight.key);
         } else {
             JASLog.severe("Error Parsing Min Spawn Height parameter. Invalid Argument Length.");
             return null;
@@ -220,7 +220,7 @@ public class OptionalParser {
 
     public static Integer parseMaxSpawnHeight(String[] values) {
         if (values.length == 2) {
-            return ParsingHelper.parseInteger(values[1], -1, Key.maxSpawnHeight.key);
+            return ParsingHelper.parseFilteredInteger(values[1], -1, Key.maxSpawnHeight.key);
         } else {
             JASLog.severe("Error Parsing Max Spawn Height parameter. Invalid Argument Length.");
             return null;

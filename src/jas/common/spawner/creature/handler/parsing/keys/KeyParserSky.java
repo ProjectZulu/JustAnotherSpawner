@@ -38,9 +38,9 @@ public class KeyParserSky extends KeyParserBase {
     @Override
     public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
             HashMap<String, Object> valueCache) {
-        boolean sky = (Boolean) typeValuePair.getValue();
+        boolean isInverted = (Boolean) typeValuePair.getValue();
         boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
-        return sky ? !canSeeSky : canSeeSky;
+        return isInverted ? canSeeSky : !canSeeSky;
     }
 
     protected boolean canBlockSeeTheSky(World world, int xCoord, int yCoord, int zCoord) {

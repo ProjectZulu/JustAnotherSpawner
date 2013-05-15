@@ -71,10 +71,10 @@ public class SpawnListEntry extends WeightedRandomItem {
 
         String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
         if (resultParts.length == 4) {
-            int resultSpawnWeight = ParsingHelper.parseInteger(resultParts[0], packSize, "spawnWeight");
-            int resultPackSize = ParsingHelper.parseInteger(resultParts[1], packSize, "packSize");
-            int resultMinChunkPack = ParsingHelper.parseInteger(resultParts[2], packSize, "minChunkPack");
-            int resultMaxChunkPack = ParsingHelper.parseInteger(resultParts[3], packSize, "maxChunkPack");
+            int resultSpawnWeight = ParsingHelper.parseFilteredInteger(resultParts[0], packSize, "spawnWeight");
+            int resultPackSize = ParsingHelper.parseFilteredInteger(resultParts[1], packSize, "packSize");
+            int resultMinChunkPack = ParsingHelper.parseFilteredInteger(resultParts[2], packSize, "minChunkPack");
+            int resultMaxChunkPack = ParsingHelper.parseFilteredInteger(resultParts[3], packSize, "maxChunkPack");
             return new SpawnListEntry(livingClass, pckgName, resultSpawnWeight, resultPackSize, resultMinChunkPack,
                     resultMaxChunkPack);
         } else {
