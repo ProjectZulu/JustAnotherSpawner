@@ -51,7 +51,7 @@ public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
 
         String[] keyParts = structureKey.split("_");
         String featureName = keyParts[0];
-        int index = ParsingHelper.parseInteger(keyParts[1], -1, structureKey);
+        int index = ParsingHelper.parseFilteredInteger(keyParts[1], -1, structureKey);
         TFFeature feature = TFFeature.featureList[featureNameToID.get(featureName)];
         for (EnumCreatureType creatureType : EnumCreatureType.values()) {
             collection.addAll(feature.getSpawnableList(creatureType, index));

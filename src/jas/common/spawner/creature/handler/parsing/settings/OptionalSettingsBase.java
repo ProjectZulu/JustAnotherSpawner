@@ -4,6 +4,9 @@ import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
+
+import java.util.EnumSet;
+
 import net.minecraft.world.World;
 
 /**
@@ -14,8 +17,9 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
     public static int defaultBlockRange = 3;
     public static int defaultSpawnRate = 40;
 
-    public OptionalSettingsBase(String parseableString) {
-        super(parseableString);
+    public OptionalSettingsBase(String parseableString, EnumSet<Key> validKeys) {
+        super(parseableString, validKeys);
+        parseString();
     }
 
     @Override
@@ -51,22 +55,29 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                     }
                 }
             } else {
-                String[] childParts = masterParts[i].split(",");
+                String[] childParts = masterParts[i].split(",", 2);
+                boolean foundMatch = false;
                 for (Key key : validKeys) {
                     if (key.keyParser == null) {
                         continue;
                     }
-
                     if (key.keyParser.isMatch(childParts[0])) {
+                        foundMatch = true;
                         if (key.keyParser.getKeyType() == KeyType.CHAINABLE) {
-                            key.keyParser.parseChainable(childParts, parsedChainable, operandvalue);
+                            if (!key.keyParser.parseChainable(masterParts[i], parsedChainable, operandvalue)) {
+                                JASLog.severe("Failed to Parse Chainable from %s", masterParts[i]);
+                            }
                         } else if (key.keyParser.getKeyType() == KeyType.VALUE) {
-                            key.keyParser.parseValue(childParts, valueCache);
+                            if (!key.keyParser.parseValue(masterParts[i], valueCache)) {
+                                JASLog.severe("Failed to Parse Value from %s", masterParts[i]);
+                            }
                         }
                         break;
                     }
                 }
-                JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
+                if (!foundMatch) {
+                    JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
+                }
             }
         }
     }

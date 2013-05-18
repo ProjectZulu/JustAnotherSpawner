@@ -16,13 +16,14 @@ public class KeyParserDespawnAge extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable, ArrayList<Operand> operandvalue) {
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable, ArrayList<Operand> operandvalue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
-        OptionalParser.parseDespawnAge(parseable, valueCache);
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
+        String[] pieces = parseable.split(",");
+        OptionalParser.parseDespawnAge(pieces, valueCache);
         return true;
     }
 

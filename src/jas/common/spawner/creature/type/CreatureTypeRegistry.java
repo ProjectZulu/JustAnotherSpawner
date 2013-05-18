@@ -52,13 +52,16 @@ public enum CreatureTypeRegistry {
     }
 
     private CreatureTypeRegistry() {
-        addSpawnCategory(new CreatureTypeOpensky(CREATURE, 10, Material.air, 400, true));
+        addSpawnCategory(new CreatureType(CREATURE, 10, Material.air, 400, true,
+                "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
         addSpawnCategory(new CreatureTypeMonster(MONSTER, 70, Material.air, 1, false));
         addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false));
-
-        addSpawnCategory(new CreatureTypeUnderground(UNDERGROUND, 10, Material.air, 1, false));
-        addSpawnCategory(new CreatureTypeOpensky(OPENSKY, 10, Material.air, 1, false));
+        addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false,
+                "{spawn:!liquid,0:!liquid,0,[0/-1/0]:normal,0,[0/1/0]}"));
+        addSpawnCategory(new CreatureType(UNDERGROUND, 10, Material.air, 1, false,
+                "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:sky}"));
+        addSpawnCategory(new CreatureType(OPENSKY, 10, Material.air, 1, false,
+                "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
     }
 
     public void initializeFromConfig(File configDirectory, MinecraftServer minecraftServer) {

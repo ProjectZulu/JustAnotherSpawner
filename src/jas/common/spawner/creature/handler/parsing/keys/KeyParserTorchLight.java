@@ -7,11 +7,12 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-public class KeyParserMinHeight extends KeyParserBase {
+public class KeyParserTorchLight extends KeyParserBase {
 
-    public KeyParserMinHeight(Key key) {
+    public KeyParserTorchLight(Key key) {
         super(key, false, KeyType.CHAINABLE);
     }
 
@@ -21,7 +22,8 @@ public class KeyParserMinHeight extends KeyParserBase {
         String[] pieces = parseable.split(",");
         Operand operand = getOperand(pieces);
 
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSingleInteger(pieces, 256, key.key));
+        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseDoubleInteger(pieces,
+                new int[] { 16, -1 }, key.key));
 
         if (typeValue.getValue() != null) {
             parsedChainable.add(typeValue);
@@ -39,7 +41,8 @@ public class KeyParserMinHeight extends KeyParserBase {
     @Override
     public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
             HashMap<String, Object> valueCache) {
-        Integer minSpawnHeight = (Integer) typeValuePair.getValue();
-        return yCoord < minSpawnHeight ? true : false;
+        int[] lightLevels = (int[]) typeValuePair.getValue();
+        int lightLevel = world.getSavedLightValue(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+        return lightLevel > lightLevels[1] || lightLevel < lightLevels[0];
     }
 }

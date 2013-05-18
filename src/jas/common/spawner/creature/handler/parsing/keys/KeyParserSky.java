@@ -1,6 +1,6 @@
 package jas.common.spawner.creature.handler.parsing.keys;
 
-import jas.common.spawner.creature.handler.parsing.OptionalParser;
+import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
@@ -16,30 +16,31 @@ public class KeyParserSky extends KeyParserBase {
     }
 
     @Override
-    public boolean parseChainable(String[] parseable, ArrayList<TypeValuePair> parsedChainable,
+    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
-        Operand operand = getOperand(parseable);
-        TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSky(parseable));
-
-        if (typeValue.getValue() != null) {
-            parsedChainable.add(typeValue);
+        String[] pieces = parseable.split(",");
+        Operand operand = getOperand(pieces);
+        if (pieces.length == 1) {
+            parsedChainable.add(new TypeValuePair(key, isInverted(parseable)));
             operandvalue.add(operand);
             return true;
+        } else {
+            JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
+            return false;
         }
-        return false;
     }
 
     @Override
-    public boolean parseValue(String[] parseable, HashMap<String, Object> valueCache) {
+    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
             HashMap<String, Object> valueCache) {
-        boolean sky = (Boolean) typeValuePair.getValue();
+        boolean isInverted = (Boolean) typeValuePair.getValue();
         boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
-        return sky ? !canSeeSky : canSeeSky;
+        return isInverted ? canSeeSky : !canSeeSky;
     }
 
     protected boolean canBlockSeeTheSky(World world, int xCoord, int yCoord, int zCoord) {
