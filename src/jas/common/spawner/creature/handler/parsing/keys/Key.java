@@ -19,7 +19,7 @@ public enum Key {
             KeyParserMinHeight.class), maxSpawnHeight("maxSpawnHeight", KeyParserMaxHeight.class), normal("normal",
             KeyParserNormalCube.class), liquid("liquid", KeyParserLiquid.class), opaque("opaque",
             KeyParserOpaqueBlock.class), solidSide("solidSide", KeyParserSolidSide.class), difficulty("difficulty",
-            KeyParserDifficulty.class),
+            KeyParserDifficulty.class), torchLight("torchLight", KeyParserTorchLight.class),
 
     /* Sub Tags */
     blockRangeX("blockRangeX", null), blockRangeY("blockRangeY", null), blockRangeZ("blockRangeZ", null),

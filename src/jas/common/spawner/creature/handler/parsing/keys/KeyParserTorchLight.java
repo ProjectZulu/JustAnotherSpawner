@@ -7,11 +7,12 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-public class KeyParserLight extends KeyParserBase {
+public class KeyParserTorchLight extends KeyParserBase {
 
-    public KeyParserLight(Key key) {
+    public KeyParserTorchLight(Key key) {
         super(key, false, KeyType.CHAINABLE);
     }
 
@@ -41,7 +42,7 @@ public class KeyParserLight extends KeyParserBase {
     public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
             HashMap<String, Object> valueCache) {
         int[] lightLevels = (int[]) typeValuePair.getValue();
-        int lightLevel = world.getBlockLightValue(xCoord, yCoord, zCoord);
+        int lightLevel = world.getSavedLightValue(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
         return lightLevel > lightLevels[1] || lightLevel < lightLevels[0];
     }
 }
