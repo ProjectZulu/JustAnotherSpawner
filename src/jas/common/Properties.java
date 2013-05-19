@@ -27,8 +27,6 @@ public class Properties {
         Configuration config = new Configuration(
                 new File(configDirectory, DefaultProps.MODDIR + "GlobalProperties.cfg"));
         config.load();
-        debugMode = config.get("Properties.Logging", "Debug Mode", debugMode).getBoolean(debugMode);
-
         turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
                 turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
         emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start",

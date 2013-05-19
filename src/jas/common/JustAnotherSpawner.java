@@ -49,7 +49,7 @@ public class JustAnotherSpawner {
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         Properties.loadProperties(modConfigDirectoryFile);
-        JASLog.configureLogging(Properties.debugMode);
+        JASLog.configureLogging(modConfigDirectoryFile);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
         // proxy.registerKeyBinding();
