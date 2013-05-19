@@ -71,11 +71,37 @@ public enum CreatureTypeRegistry {
                 + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "CreatureType" + ".cfg"));
         masterConfig.load();
         worldConfig.load();
+        String comment = "Format: category name seperated by commas i.e. <CategoryName1>,<CategoryName2>";
+        String customNames = masterConfig.get("Extra Categories", "Additions", "", comment).getString().toUpperCase();
+        customNames = worldConfig.get("Extra Categories", "Additions", customNames, comment).getString().toUpperCase();
         for (String typeID : types.keySet()) {
             CreatureType creatureType = types.get(typeID).createFromConfig(masterConfig).createFromConfig(worldConfig);
             types.put(typeID, creatureType);
         }
+        String[] pieces = customNames.split(",");
+        for (String categoryName : pieces) {
+            if (isValidName(categoryName)) {
+                types.put(categoryName,
+                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(masterConfig)
+                                .createFromConfig(worldConfig));
+            }
+        }
+
         masterConfig.save();
         worldConfig.save();
+    }
+
+    private boolean isValidName(String name) {
+        if (name.equals("")) {
+            return false;
+        }
+
+        if (name.equalsIgnoreCase(NONE) || name.equalsIgnoreCase(CREATURE) || name.equalsIgnoreCase(MONSTER)
+                || name.equalsIgnoreCase(AMBIENT) || name.equalsIgnoreCase(WATERCREATURE)
+                || name.equalsIgnoreCase(UNDERGROUND) || name.equalsIgnoreCase(OPENSKY)) {
+            JASLog.info("Ignoring Custom Category name %s. Name is reserved.", name);
+            return false;
+        }
+        return true;
     }
 }
