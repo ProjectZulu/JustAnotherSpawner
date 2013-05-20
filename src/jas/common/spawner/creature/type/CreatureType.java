@@ -9,6 +9,8 @@ import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -43,28 +45,49 @@ public class CreatureType {
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final ListMultimap<String, SpawnListEntry> groupNameToSpawnEntry = ArrayListMultimap.create();
+    public final String optionalParameters;
+    protected OptionalSettingsCreatureTypeSpawn spawning;
 
     public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
+        this(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+                "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]}");
+    }
+
+    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+            boolean chunkSpawning, String optionalParameters) {
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
         this.spawnRate = spawnRate;
         this.chunkSpawning = chunkSpawning;
+        this.optionalParameters = optionalParameters;
+        for (String string : optionalParameters.split("\\{")) {
+            String parsed = string.replace("}", "");
+            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+            if (Key.spawn.keyParser.isMatch(titletag)) {
+                spawning = new OptionalSettingsCreatureTypeSpawn(parsed);
+            }
+        }
+        spawning = spawning == null ? new OptionalSettingsCreatureTypeSpawn("") : spawning;
     }
 
     public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
 
     public final CreatureType spawnRateTo(int spawnRate) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
 
     public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
-    
+
+    public final CreatureType optionalParametersTo(String optionalParameters) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+    }
+
     public boolean isReady(WorldServer world) {
         return world.getWorldInfo().getWorldTotalTime() % spawnRate == 0L;
     }
@@ -82,8 +105,8 @@ public class CreatureType {
      * @param chunkSpawning
      */
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, boolean chunkSpawning) {
-        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            int spawnRate, boolean chunkSpawning, String optionalParameters) {
+        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
     }
 
     /**
@@ -163,7 +186,7 @@ public class CreatureType {
     public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
         Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
-            
+
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
@@ -229,7 +252,7 @@ public class CreatureType {
      */
     private SpawnListEntry getRandomEntry(Random random, ImmutableCollection<String> groupIDList) {
         int totalWeight = 0;
-        
+
         for (String groupID : groupIDList) {
             for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
                 totalWeight += spawnListEntry.itemWeight;
@@ -317,19 +340,29 @@ public class CreatureType {
      * @return
      */
     public boolean canSpawnAtLocation(World world, int xCoord, int yCoord, int zCoord) {
-        if (spawnMedium == Material.water) {
-            return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                    && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
-                    && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
-        } else if (!world.doesBlockHaveSolidTopSurface(xCoord, yCoord - 1, zCoord)) {
-            return false;
+        boolean canSpawn = true;
+        if (spawning.isOptionalEnabled()) {
+            canSpawn = !spawning.isInverted();
+            if (!spawning.isValidLocation(world, xCoord, yCoord, zCoord)) {
+                canSpawn = spawning.isInverted();
+            }
+
+            return canSpawn;
         } else {
-            int l = world.getBlockId(xCoord, yCoord - 1, zCoord);
-            boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world, xCoord,
-                    yCoord - 1, zCoord));
-            return spawnBlock && l != Block.bedrock.blockID && !world.isBlockNormalCube(xCoord, yCoord, zCoord)
-                    && !world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                    && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+            if (spawnMedium == Material.water) {
+                return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
+                        && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
+                        && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+            } else if (!world.doesBlockHaveSolidTopSurface(xCoord, yCoord - 1, zCoord)) {
+                return false;
+            } else {
+                int l = world.getBlockId(xCoord, yCoord - 1, zCoord);
+                boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world,
+                        xCoord, yCoord - 1, zCoord));
+                return spawnBlock && l != Block.bedrock.blockID && !world.isBlockNormalCube(xCoord, yCoord, zCoord)
+                        && !world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
+                        && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+            }
         }
     }
 
@@ -345,8 +378,10 @@ public class CreatureType {
                 .getInt();
         boolean resultChunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", chunkSpawning)
                 .getBoolean(chunkSpawning);
+        String resultOptionalParameters = config.get("LivingType." + typeID, "Optional Tags", optionalParameters)
+                .getString();
         return this.maxNumberOfCreatureTo(resultMaxNumberOfCreature).spawnRateTo(resultSpawnRate)
-                .chunkSpawningTo(resultChunkSpawning);
+                .chunkSpawningTo(resultChunkSpawning).optionalParametersTo(resultOptionalParameters);
     }
 
     /*

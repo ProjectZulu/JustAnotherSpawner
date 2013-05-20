@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.common.spawner.creature.handler.ReflectionHelper;
+import jas.common.ReflectionHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;

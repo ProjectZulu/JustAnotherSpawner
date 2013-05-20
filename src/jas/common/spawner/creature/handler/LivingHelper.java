@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
+import jas.common.ReflectionHelper;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 

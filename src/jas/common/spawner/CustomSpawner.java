@@ -1,6 +1,7 @@
 package jas.common.spawner;
 
 import jas.common.JASLog;
+import jas.common.JASLog.LogType;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -185,7 +186,8 @@ public class CustomSpawner {
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
                                                         .getCanSpawnHere(entityliving))) {
                                             ++j2;
-                                            JASLog.info("Spawning %s type Entity %s aka %s of  at %s, %s, %s ",
+                                            JASLog.log(LogType.SPAWNING, Level.INFO,
+                                                    "Spawning %s type Entity %s aka %s of  at %s, %s, %s ",
                                                     spawnlistentry.getLivingHandler().creatureTypeID,
                                                     EntityList.classToStringMapping.get(entityliving.getClass()),
                                                     entityliving.getEntityName(), entityliving.posX, entityliving.posY,
@@ -274,7 +276,8 @@ public class CustomSpawner {
                         }
 
                         entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-                        JASLog.info("Chunk Spawned %s type Entity %s aka %s of  at %s, %s, %s ",
+                        JASLog.log(LogType.SPAWNING, Level.INFO,
+                                "Chunk Spawned %s type Entity %s aka %s of  at %s, %s, %s ",
                                 spawnListEntry.getLivingHandler().creatureTypeID,
                                 EntityList.classToStringMapping.get(entityliving.getClass()),
                                 entityliving.getEntityName(), entityliving.posX, entityliving.posY, entityliving.posZ);

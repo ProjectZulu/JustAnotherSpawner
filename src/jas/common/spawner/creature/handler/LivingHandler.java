@@ -3,6 +3,10 @@ package jas.common.spawner.creature.handler;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -38,9 +42,9 @@ public class LivingHandler {
         for (String string : optionalParameters.split("\\{")) {
             String parsed = string.replace("}", "");
             String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-            if (titletag.equals(Key.spawn.key) || titletag.equals(Key.notSpawn.key)) {
+            if (Key.spawn.keyParser.isMatch(titletag)) {
                 spawning = new OptionalSettingsSpawning(parsed);
-            } else if (titletag.equals(Key.despawn.key) || titletag.equals(Key.notDespawn.key)) {
+            } else if (Key.despawn.keyParser.isMatch(titletag)) {
                 despawning = new OptionalSettingsDespawning(parsed);
             }
         }
@@ -193,6 +197,7 @@ public class LivingHandler {
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
 
         if (resultParts.length == 4) {
+            /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome*/
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");

@@ -1,4 +1,4 @@
-package jas.common.spawner.creature.handler;
+package jas.common.spawner.creature.handler.parsing;
 
 import jas.common.JASLog;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -6,7 +6,7 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 public class ParsingHelper {
 
     /**
-     * Attempt to Parse an Integer
+     * Attempt to Parse an Integer. Performs no filters.
      * 
      * @param value String to be Parsed
      * @param fallBack Default value if value cannot be parsed
@@ -28,7 +28,26 @@ public class ParsingHelper {
             return fallBack;
         }
     }
-    
+
+    /**
+     * Attempt to Parse an Integer. Filters all non-numeric Characters, excluding the negative (-) sign.
+     */
+    public static int parseFilteredInteger(String value, int fallBack, String fieldName) {
+        try {
+            return Integer.parseInt(value.replaceAll("[^\\d-]", ""));
+        } catch (NumberFormatException e) {
+            if (fieldName != null) {
+                JASLog.warning(
+                        "Error Parsing %s for an integer. %s was unreadable. The Default value of %s will be used.",
+                        value, fieldName, fallBack);
+            } else {
+                JASLog.warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
+                        fallBack);
+            }
+            return fallBack;
+        }
+    }
+
     /**
      * Attempt to Parse an Boolean
      * 

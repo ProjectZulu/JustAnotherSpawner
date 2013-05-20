@@ -1,9 +1,9 @@
 package jas.compatability.tf;
 
 import jas.api.BiomeInterpreter;
+import jas.common.ReflectionHelper;
 import jas.common.spawner.biome.structure.BiomeInterpreterHelper;
-import jas.common.spawner.creature.handler.ParsingHelper;
-import jas.common.spawner.creature.handler.ReflectionHelper;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +51,7 @@ public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
 
         String[] keyParts = structureKey.split("_");
         String featureName = keyParts[0];
-        int index = ParsingHelper.parseInteger(keyParts[1], -1, structureKey);
+        int index = ParsingHelper.parseFilteredInteger(keyParts[1], -1, structureKey);
         TFFeature feature = TFFeature.featureList[featureNameToID.get(featureName)];
         for (EnumCreatureType creatureType : EnumCreatureType.values()) {
             collection.addAll(feature.getSpawnableList(creatureType, index));
