@@ -26,8 +26,14 @@ import com.google.common.collect.ListMultimap;
 public enum BiomeGroupRegistry {
     INSTANCE;
 
+    /** Group Identifier to Group Instance Regsitry */
     private final HashMap<String, BiomeGroup> iDToGroup = new HashMap<String, BiomeGroup>();
+
+    /** Reverse Look-up Map to Get All Groups a Particular Biome is In */
     private final ListMultimap<String, String> packgNameToGroupIDList = ArrayListMultimap.create();
+
+    /** Cusom Biome Names: Mappings For PackageNames to Unique Names */
+    private final HashMap<String, String> biomeIdentifiers = new HashMap<String, String>();
 
     /*
      * Reverse Lookup Used to Filter Used to get a biome without needed to run through entire array. Primary use is to
@@ -70,7 +76,11 @@ public enum BiomeGroupRegistry {
     public ImmutableMultimap<String, String> getPackgNameToGroupIDList() {
         return ImmutableMultimap.copyOf(packgNameToGroupIDList);
     }
-
+    
+    /**
+     * Biome Group Class
+     *
+     */
     public static class BiomeGroup {
         public final String groupID;
         private final List<String> pckgNames = new ArrayList<String>();
@@ -119,15 +129,22 @@ public enum BiomeGroupRegistry {
             }
             groupIDToBiomeID.put(biome.biomeName.toLowerCase(), biome.biomeID);
             pckgNameToBiomeID.put(BiomeHelper.getPackageName(biome), biome.biomeID);
+            /* Write Biome Name --> Package Names to Configuration for End User Reference */
             masterConfig.get("BiomeGroups.ReferenceBiomes", biome.biomeName, BiomeHelper.getPackageName(biome));
             worldConfig.get("BiomeGroups.ReferenceBiomes", biome.biomeName, BiomeHelper.getPackageName(biome));
         }
-        Set<String> groupNames = getBiomeGroups(worldConfig, getBiomeGroups(masterConfig, groupIDToBiomeID.keySet()));
+        Set<String> groupNames = getCustomBiomeGroups(worldConfig,
+                getCustomBiomeGroups(masterConfig, Collections.<String> emptySet()));
 
         /* Create BiomeGroups */
         ArrayList<BiomeGroup> biomeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
-        for (String groupName : groupNames) {
+        for (String groupName : groupIDToBiomeID.keySet()) {
             biomeGroups.add(new BiomeGroup(groupName));
+        }
+        for (String groupName : groupNames) {
+            if (groupIDToBiomeID.get(groupName).isEmpty()) {
+                biomeGroups.add(new BiomeGroup(groupName));
+            }
         }
 
         /* Foreach Biome Group */
@@ -154,7 +171,7 @@ public enum BiomeGroupRegistry {
      * @param defautlGroups Set of Default BiomeGroup groupIDs
      * @return Set of BiomeGroup groupIDs
      */
-    private Set<String> getBiomeGroups(Configuration config, Set<String> defautlGroups) {
+    private Set<String> getCustomBiomeGroups(Configuration config, Set<String> defautlGroups) {
         String defautlGroupString = "";
         Iterator<String> iterator = defautlGroups.iterator();
         while (iterator.hasNext()) {
@@ -164,7 +181,7 @@ public enum BiomeGroupRegistry {
                 defautlGroupString = defautlGroupString.concat(",");
             }
         }
-        Property resultProp = config.get("BiomeGroups.AllGroups", "BiomeGroups", defautlGroupString,
+        Property resultProp = config.get("BiomeGroups.CustomGroups", "Custom Group Names", defautlGroupString,
                 "All Group Names. Seperated by Commas. Edit this to add/remove groups.");
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
