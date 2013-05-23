@@ -175,8 +175,7 @@ public class LivingHandler {
         }
 
         return canSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
-                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty()
-                && !entity.worldObj.isAnyLiquid(entity.boundingBox);
+                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
     }
 
     /**
