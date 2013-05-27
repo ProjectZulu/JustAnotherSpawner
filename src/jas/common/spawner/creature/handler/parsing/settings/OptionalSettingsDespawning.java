@@ -36,7 +36,7 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
      */
     public boolean isMaxDistance(int playerDistance, int defaultCutoff) {
         parseString();
-        Integer tempCutoff = (Integer) valueCache.get(Key.maxSpawnRange);
+        Integer tempCutoff = (Integer) valueCache.get(Key.maxSpawnRange.key);
         defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
         return playerDistance > defaultCutoff * defaultCutoff;
     }

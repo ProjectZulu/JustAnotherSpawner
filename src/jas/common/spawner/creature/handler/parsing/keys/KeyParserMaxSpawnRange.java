@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler.parsing.keys;
 
-import jas.common.spawner.creature.handler.parsing.OptionalParser;
+import jas.common.JASLog;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
@@ -24,8 +25,14 @@ public class KeyParserMaxSpawnRange extends KeyParserBase {
     @Override
     public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
         String[] pieces = parseable.split(",");
-        OptionalParser.parseMaxSpawnRange(pieces, valueCache);
-        return true;
+        if (pieces.length == 2) {
+            valueCache.put(Key.maxSpawnRange.key,
+                    ParsingHelper.parseFilteredInteger(pieces[1], 0, Key.maxSpawnRange.key));
+            return true;
+        } else {
+            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+            return false;
+        }
     }
 
     @Override
