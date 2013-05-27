@@ -201,14 +201,6 @@ public class OptionalParser {
         }
     }
 
-    public static void parseMaxSpawnRange(String[] values, HashMap<String, Object> valueCache) {
-        if (values.length == 2) {
-            valueCache.put(Key.maxSpawnRange.key, ParsingHelper.parseFilteredInteger(values[1], 0, Key.maxSpawnRange.key));
-        } else {
-            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
-        }
-    }
-
     public static Integer parseMinSpawnHeight(String[] values) {
         if (values.length == 2) {
             return ParsingHelper.parseFilteredInteger(values[1], 256, Key.minSpawnHeight.key);
