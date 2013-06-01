@@ -2,6 +2,7 @@ package jas.common.spawner.biome.group;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -110,11 +111,8 @@ public enum BiomeGroupRegistry {
     }
 
     public void createBiomeGroups(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "BiomeGroups" + ".cfg"));
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "BiomeGroups" + ".cfg"));
-        masterConfig.load();
+                + Properties.saveName + "/" + "BiomeGroups" + ".cfg"));
         worldConfig.load();
 
         /* Create Package Name Mappings */
@@ -124,11 +122,9 @@ public enum BiomeGroupRegistry {
             }
             String packageName = BiomeHelper.getPackageName(biome);
             String mappingComment = "Custom Name Mapping for Unique Biome Package Name. Mapping is used to add biomes to groups. Each must be unique or biome will be unreachable. Case sensitive.";
-            masterConfig.getCategory("biomegroups.packagenamemappings").setComment(mappingComment);
             worldConfig.getCategory("biomegroups.packagenamemappings").setComment(mappingComment);
 
-            Property nameMapping = masterConfig.get("biomegroups.packagenamemappings", packageName, biome.biomeName);
-            nameMapping = worldConfig.get("biomegroups.packagenamemappings", packageName, nameMapping.getString());
+            Property nameMapping = worldConfig.get("biomegroups.packagenamemappings", packageName, biome.biomeName);
 
             biomeMappingToPckg.put(nameMapping.getString(), packageName);
             biomePckgToMapping.put(packageName, nameMapping.getString());
@@ -156,11 +152,8 @@ public enum BiomeGroupRegistry {
         }
 
         /* Get Custom BiomeGroupNames */
-        String customGroupComment = "Custom Group Names. Seperated by Commas. Edit this to add/remove groups";
-        Property customGroupProp = masterConfig.get("BiomeGroups.CustomGroups", "Custom Group Names", "",
-                customGroupComment);
-        customGroupProp = worldConfig.get("BiomeGroups.CustomGroups", "Custom Group Names",
-                customGroupProp.getString(), customGroupComment);
+        Property customGroupProp = worldConfig.get("BiomeGroups.CustomGroups", "Custom Group Names", "",
+                "Custom Group Names. Seperated by Commas. Edit this to add/remove groups");
         String[] resultgroups = customGroupProp.getString().split(",");
         for (String groupName : resultgroups) {
             biomeGroups.add(new BiomeGroup(groupName));
@@ -168,14 +161,11 @@ public enum BiomeGroupRegistry {
 
         /* For Every Biome Group; Filter BiomeList Through Configuration */
         for (BiomeGroup biomeGroup : biomeGroups) {
-            getGroupSpawnList(masterConfig, biomeGroup);
             getGroupSpawnList(worldConfig, biomeGroup);
             if (biomeGroup.pckgNames.size() > 0) {
                 registerGroup(biomeGroup);
             }
         }
-
-        masterConfig.save();
         worldConfig.save();
     }
 

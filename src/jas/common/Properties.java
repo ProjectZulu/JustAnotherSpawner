@@ -17,6 +17,7 @@ public class Properties {
     public static int despawnDist = 32;
     public static int maxDespawnDist = 128;
     public static int minDespawnTime = 600;
+    public static String saveName = "";
 
     /**
      * Load Global Properties
@@ -52,18 +53,18 @@ public class Properties {
      * @param configDirectory
      */
     public static void loadWorldProperties(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "WorldGlobalProperties" + ".cfg"));
+        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "SaveConfig.cfg"));
+        worldGloablConfig.load();
+        Property property = worldGloablConfig.get("Save_Name", minecraftServer.worldServers[0].getWorldInfo()
+                .getWorldName(), minecraftServer.worldServers[0].getWorldInfo().getWorldName());
+        saveName = property.getString().equals("") ? "default" : property.getString();
+        worldGloablConfig.save();
+
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "WorldGlobalProperties"
-                + ".cfg"));
-        masterConfig.load();
+                + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
-
-        despawnDist = masterConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
         despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
-
-        masterConfig.save();
         worldConfig.save();
     }
 }

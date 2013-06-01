@@ -3,6 +3,7 @@ package jas.common.spawner.biome.structure;
 import jas.api.BiomeInterpreter;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -64,11 +65,8 @@ public class BiomeHandler {
      * @param world
      */
     public final void readFromConfig(File configDirectory, World world) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "StructureSpawns" + ".cfg"));
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + world.getWorldInfo().getWorldName() + "/" + "StructureSpawns" + ".cfg"));
-        masterConfig.load();
+                + Properties.saveName + "/" + "StructureSpawns" + ".cfg"));
         worldConfig.load();
         /*
          * For Every Structure Key; Generate Two Configuration Categories: One to list Entities, the Other to Generate
@@ -88,8 +86,7 @@ public class BiomeHandler {
                 }
             }
             /* Under StructureSpawns.SpawnList have List of Entities that are Spawnable. */
-            Property resultNames = masterConfig.get("CreatureSettings.SpawnList", structureKey, entityList);
-            resultNames = worldConfig.get("CreatureSettings.SpawnList", structureKey, resultNames.getString());
+            Property resultNames = worldConfig.get("CreatureSettings.SpawnList", structureKey, entityList);
             ArrayList<Class<? extends EntityLiving>> classList = mobNamesToMobClasses(resultNames.getString());
 
             /*
@@ -101,7 +98,7 @@ public class BiomeHandler {
                 if (!CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).creatureTypeID
                         .equals(CreatureTypeRegistry.NONE)) {
                     jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = createDefaultJASSpawnEntry(
-                            livingClass, structureKey).createFromConfig(masterConfig).createFromConfig(worldConfig);
+                            livingClass, structureKey).createFromConfig(worldConfig);
 
                     if (spawnListEntry.itemWeight > 0
                             && CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass).shouldSpawn) {
@@ -122,7 +119,6 @@ public class BiomeHandler {
                 }
             }
         }
-        masterConfig.save();
         worldConfig.save();
     }
 
