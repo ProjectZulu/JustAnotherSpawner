@@ -170,7 +170,9 @@ public enum BiomeGroupRegistry {
         for (BiomeGroup biomeGroup : biomeGroups) {
             getGroupSpawnList(masterConfig, biomeGroup);
             getGroupSpawnList(worldConfig, biomeGroup);
-            registerGroup(biomeGroup);
+            if (biomeGroup.pckgNames.size() > 0) {
+                registerGroup(biomeGroup);
+            }
         }
 
         masterConfig.save();
