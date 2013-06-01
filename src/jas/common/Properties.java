@@ -18,6 +18,7 @@ public class Properties {
     public static int maxDespawnDist = 128;
     public static int minDespawnTime = 600;
     public static String saveName = "";
+    public static String importName = "";
 
     /**
      * Load Global Properties
@@ -47,20 +48,30 @@ public class Properties {
         config.save();
     }
 
+    public static void loadWorldSaveConfiguration(File configDirectory, MinecraftServer minecraftServer) {
+        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "SaveConfig.cfg"));
+        worldGloablConfig.load();
+        Property saveProp = worldGloablConfig.get("Save_Configuration."
+                + minecraftServer.worldServers[0].getWorldInfo().getWorldName(), "Save_Name",
+                minecraftServer.worldServers[0].getWorldInfo().getWorldName(),
+                "Folder name to look for and generate CFG files");
+        saveName = saveProp.getString().equals("") ? "default" : saveProp.getString();
+
+        Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
+                "Folder name to Copy Missing Files From");
+        importName = importProp.getString();
+
+        worldGloablConfig.save();
+    }
+
+    
     /**
      * Load World Specific Global Properties
      * 
      * @param configDirectory
      */
     public static void loadWorldProperties(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "SaveConfig.cfg"));
-        worldGloablConfig.load();
-        Property property = worldGloablConfig.get("Save_Name", minecraftServer.worldServers[0].getWorldInfo()
-                .getWorldName(), minecraftServer.worldServers[0].getWorldInfo().getWorldName());
-        saveName = property.getString().equals("") ? "default" : property.getString();
-        worldGloablConfig.save();
-
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
