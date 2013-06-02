@@ -34,7 +34,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
+@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION, dependencies = "after:*")
 @NetworkMod(clientSideRequired = false, serverSideRequired = false, channels = { DefaultProps.defaultChannel }, packetHandler = PacketHandler.class)
 public class JustAnotherSpawner {
 
