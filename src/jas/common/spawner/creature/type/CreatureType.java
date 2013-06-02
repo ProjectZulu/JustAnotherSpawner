@@ -343,7 +343,7 @@ public class CreatureType {
         boolean canSpawn = true;
         if (spawning.isOptionalEnabled()) {
             canSpawn = !spawning.isInverted();
-            if (!spawning.isValidLocation(world, xCoord, yCoord, zCoord)) {
+            if (!spawning.isValidLocation(world, null, xCoord, yCoord, zCoord)) {
                 canSpawn = spawning.isInverted();
             }
 

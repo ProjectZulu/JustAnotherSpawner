@@ -7,6 +7,7 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 public class KeyParserTop extends KeyParserBase {
@@ -36,8 +37,8 @@ public class KeyParserTop extends KeyParserBase {
     }
 
     @Override
-    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
-            HashMap<String, Object> valueCache) {
+    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         boolean isInverted = (Boolean) typeValuePair.getValue();
         boolean isTopBlock = (world.getBiomeGenForCoords(xCoord, zCoord).topBlock & 255) == world.getBlockId(xCoord,
                 yCoord - 1, zCoord);

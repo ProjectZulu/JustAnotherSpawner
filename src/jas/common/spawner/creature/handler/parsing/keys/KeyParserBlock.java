@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 import com.google.common.collect.ListMultimap;
@@ -42,8 +43,8 @@ public class KeyParserBlock extends KeyParserBase {
     }
 
     @Override
-    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
-            HashMap<String, Object> valueCache) {
+    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         return isValidBlock(world, xCoord, yCoord, zCoord, typeValuePair, valueCache);
     }
 

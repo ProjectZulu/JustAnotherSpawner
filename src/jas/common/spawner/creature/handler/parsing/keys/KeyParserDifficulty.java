@@ -8,6 +8,7 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 public class KeyParserDifficulty extends KeyParserBase {
@@ -50,8 +51,8 @@ public class KeyParserDifficulty extends KeyParserBase {
     }
 
     @Override
-    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
-            HashMap<String, Object> valueCache) {
+    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         Object[] values = (Object[]) typeValuePair.getValue();
         Boolean isInverted = (Boolean) values[0];
         Integer difficulty = (Integer) values[1];
