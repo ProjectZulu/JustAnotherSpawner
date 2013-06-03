@@ -48,7 +48,15 @@ public abstract class KeyParserRange extends KeyParserBase {
         boolean isInverted = (Boolean) values[0];
 
         int current = getCurrent(world, entity, xCoord, yCoord, zCoord, typeValuePair, valueCache);
-        boolean isValid = current > (Integer) values[2] || current < (Integer) values[1];
+        int minRange = (Integer) values[1];
+        int maxRange = (Integer) values[2];
+
+        boolean isValid = !(current <= maxRange && current >= minRange);
+        if (minRange <= maxRange) {
+            isValid = (current <= maxRange && current >= minRange);
+        } else {
+            isValid = !(current <= minRange && current >= maxRange);
+        }
         return isInverted ? isValid : !isValid;
     }
 
