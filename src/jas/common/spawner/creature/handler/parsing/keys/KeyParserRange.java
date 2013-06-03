@@ -29,11 +29,11 @@ public abstract class KeyParserRange extends KeyParserBase {
             TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), min, max });
             parsedChainable.add(typeValue);
             operandvalue.add(operand);
+            return true;
         } else {
             JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", key.key);
             return false;
         }
-        return false;
     }
 
     @Override
@@ -55,7 +55,7 @@ public abstract class KeyParserRange extends KeyParserBase {
         if (minRange <= maxRange) {
             isValid = (current <= maxRange && current >= minRange);
         } else {
-            isValid = !(current <= minRange && current >= maxRange);
+            isValid = !(current < minRange && current > maxRange);
         }
         return isInverted ? isValid : !isValid;
     }
