@@ -12,6 +12,7 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import jas.compatability.CompatabilityManager;
 
 import java.io.File;
+import java.io.IOException;
 
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.GameRules;
@@ -33,7 +34,7 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.TickRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION)
+@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION, dependencies = "after:*")
 @NetworkMod(clientSideRequired = false, serverSideRequired = false, channels = { DefaultProps.defaultChannel }, packetHandler = PacketHandler.class)
 public class JustAnotherSpawner {
 
@@ -71,6 +72,8 @@ public class JustAnotherSpawner {
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
+        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer());
+        importDefaultFiles(modConfigDirectoryFile);
         Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
         BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile, event.getServer());
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
@@ -91,6 +94,19 @@ public class JustAnotherSpawner {
         if (gameRule.hasRule(ruleName)) {
         } else {
             gameRule.addGameRule(ruleName, "true");
+        }
+    }
+
+    private void importDefaultFiles(File modConfigDirectoryFile) {
+        File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.saveName);
+        File importFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.importName);
+        if (worldFolder.exists() || !importFolder.exists()) {
+            return;
+        }
+        try {
+            FileUtilities.copy(importFolder, worldFolder);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

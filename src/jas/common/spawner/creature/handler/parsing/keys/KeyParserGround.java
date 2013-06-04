@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
@@ -39,8 +40,8 @@ public class KeyParserGround extends KeyParserBase {
     }
 
     @Override
-    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
-            HashMap<String, Object> valueCache) {
+    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         boolean isInverted = (Boolean) typeValuePair.getValue();
         boolean canSeeSky = canBlockSeeTheSky(world, xCoord, yCoord, zCoord);
         return isInverted ? canSeeSky : !canSeeSky;

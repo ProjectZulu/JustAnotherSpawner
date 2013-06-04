@@ -17,6 +17,8 @@ public class Properties {
     public static int despawnDist = 32;
     public static int maxDespawnDist = 128;
     public static int minDespawnTime = 600;
+    public static String saveName = "";
+    public static String importName = "";
 
     /**
      * Load Global Properties
@@ -46,24 +48,33 @@ public class Properties {
         config.save();
     }
 
+    public static void loadWorldSaveConfiguration(File configDirectory, MinecraftServer minecraftServer) {
+        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "SaveConfig.cfg"));
+        worldGloablConfig.load();
+        Property saveProp = worldGloablConfig
+                .get("Save_Configuration." + minecraftServer.worldServers[0].getWorldInfo().getWorldName(),
+                        "Save_Name", minecraftServer.worldServers[0].getWorldInfo().getWorldName(),
+                        "Folder name to look for and generate CFG files. Case Sensitive if OS allows. Beware invalid OS characters.");
+        saveName = saveProp.getString().equals("") ? "default" : saveProp.getString();
+
+        Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
+                "Folder name to Copy Missing Files From. Case Sensitive if OS allows. Beware invalid OS characters.");
+        importName = importProp.getString();
+
+        worldGloablConfig.save();
+    }
+
     /**
      * Load World Specific Global Properties
      * 
      * @param configDirectory
      */
     public static void loadWorldProperties(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "WorldGlobalProperties" + ".cfg"));
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "WorldGlobalProperties"
-                + ".cfg"));
-        masterConfig.load();
+                + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
-
-        despawnDist = masterConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
         despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
-
-        masterConfig.save();
         worldConfig.save();
     }
 }

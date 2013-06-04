@@ -5,18 +5,17 @@ import jas.common.spawner.creature.handler.parsing.TypeValuePair;
 import java.util.HashMap;
 
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 
-public class KeyParserTorchLight extends KeyParserRange {
+public class KeyParserOrigin extends KeyParserRange {
 
-    public KeyParserTorchLight(Key key) {
+    public KeyParserOrigin(Key key) {
         super(key);
     }
 
     @Override
     int getCurrent(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord, TypeValuePair typeValuePair,
             HashMap<String, Object> valueCache) {
-        return world.getSavedLightValue(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
+        return (int) Math.sqrt(world.getSpawnPoint().getDistanceSquared(xCoord, yCoord, zCoord));
     }
 }

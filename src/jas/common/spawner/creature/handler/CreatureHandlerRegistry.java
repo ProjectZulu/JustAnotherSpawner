@@ -2,6 +2,7 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -97,12 +98,9 @@ public enum CreatureHandlerRegistry {
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
-            Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
-            Configuration worldConfig = getConfigurationFile(configDirectory, world.getWorldInfo().getWorldName(),
-                    mobName);
+            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
 
-            LivingHandler resultLivingHandler = livingHandlers.get(livingClass).createFromConfig(masterConfig)
-                    .createFromConfig(worldConfig);
+            LivingHandler resultLivingHandler = livingHandlers.get(livingClass).createFromConfig(worldConfig);
             livingHandlers.put(livingClass, resultLivingHandler);
         }
     }
@@ -115,15 +113,13 @@ public enum CreatureHandlerRegistry {
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
-            Configuration masterConfig = getConfigurationFile(configDirectory, "Master", mobName);
-            Configuration worldConfig = getConfigurationFile(configDirectory, world.getWorldInfo().getWorldName(),
-                    mobName);
+            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
 
             if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGroup group : BiomeGroupRegistry.INSTANCE.getBiomeGroups()) {
 
                     SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass).createFromConfig(
-                            masterConfig).createFromConfig(worldConfig);
+                            worldConfig);
 
                     if (spawnListEntry.itemWeight > 0 && livingHandlers.get(livingClass).shouldSpawn) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", mobName,

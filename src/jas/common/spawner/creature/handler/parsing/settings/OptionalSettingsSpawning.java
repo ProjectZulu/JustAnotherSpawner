@@ -10,9 +10,10 @@ import java.util.EnumSet;
 public class OptionalSettingsSpawning extends OptionalSettingsBase {
 
     public OptionalSettingsSpawning(String parseableString) {
-        super(parseableString.replace("}", ""), EnumSet.of(Key.spawn, Key.light, Key.block, Key.blockFoot,
-                Key.spawnRange, Key.sky, Key.entityCap, Key.minSpawnHeight, Key.maxSpawnHeight, Key.liquid, Key.opaque,
-                Key.normal, Key.solidSide, Key.difficulty, Key.torchLight, Key.ground, Key.top, Key.fill));
+        super(parseableString.replace("}", ""), EnumSet.of(Key.spawn, Key.light, Key.block, Key.blockRange,
+                Key.blockFoot, Key.spawnRange, Key.sky, Key.entityCap, Key.minSpawnHeight, Key.maxSpawnHeight,
+                Key.liquid, Key.opaque, Key.normal, Key.solidSide, Key.difficulty, Key.torchLight, Key.ground, Key.top,
+                Key.fill, Key.modspawn, Key.origin, Key.players));
     }
 
     public Integer getEntityCap() {

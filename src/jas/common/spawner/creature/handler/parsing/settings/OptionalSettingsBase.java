@@ -7,6 +7,7 @@ import jas.common.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
 
 import java.util.EnumSet;
 
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
 /**
@@ -82,7 +83,16 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
         }
     }
 
-    public boolean isValidLocation(World world, int xCoord, int yCoord, int zCoord) {
+    /**
+     * 
+     * @param world World being evaluated
+     * @param entity Entity being processed. May be null where not applicable.
+     * @param xCoord X coord location in the world
+     * @param yCoord Y coord location in the world
+     * @param zCoord Z coord location in the world
+     * @return
+     */
+    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord) {
         boolean outcome = true;
         for (int i = 0; i < parsedChainable.size(); i++) {
             TypeValuePair typeValuePair = parsedChainable.get(i);
@@ -95,7 +105,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
             }
 
             Key key = typeValuePair.getType();
-            outcome = key.keyParser.isValidLocation(world, xCoord, yCoord, zCoord, typeValuePair, valueCache);
+            outcome = key.keyParser.isValidLocation(world, entity, xCoord, yCoord, zCoord, typeValuePair, valueCache);
         }
         return outcome;
     }

@@ -120,7 +120,7 @@ public class LivingHandler {
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
             boolean canDespawn = !despawning.isInverted();
-            if (!despawning.isValidLocation(entity.worldObj, xCoord, yCoord, zCoord)) {
+            if (!despawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
                 canDespawn = despawning.isInverted();
             }
 
@@ -170,7 +170,7 @@ public class LivingHandler {
 
         boolean canSpawn = !spawning.isInverted();
 
-        if (!spawning.isValidLocation(entity.worldObj, xCoord, yCoord, zCoord)) {
+        if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
             canSpawn = spawning.isInverted();
         }
 
@@ -196,7 +196,7 @@ public class LivingHandler {
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
 
         if (resultParts.length == 4) {
-            /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome*/
+            /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome */
             String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
                     "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");

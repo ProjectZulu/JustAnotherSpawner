@@ -2,6 +2,7 @@ package jas.common.spawner.creature.type;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
+import jas.common.Properties;
 
 import java.io.File;
 import java.util.HashMap;
@@ -65,29 +66,23 @@ public enum CreatureTypeRegistry {
     }
 
     public void initializeFromConfig(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration masterConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "Master/" + "CreatureType" + ".cfg"));
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + minecraftServer.worldServers[0].getWorldInfo().getWorldName() + "/" + "CreatureType" + ".cfg"));
-        masterConfig.load();
+                + Properties.saveName + "/" + "CreatureType" + ".cfg"));
         worldConfig.load();
         String comment = "Format: category name seperated by commas i.e. <CategoryName1>,<CategoryName2>";
-        String customNames = masterConfig.get("Extra Categories", "Additions", "", comment).getString().toUpperCase();
-        customNames = worldConfig.get("Extra Categories", "Additions", customNames, comment).getString().toUpperCase();
+        String customNames = worldConfig.get("Extra Categories", "Additions", "", comment).getString().toUpperCase();
         for (String typeID : types.keySet()) {
-            CreatureType creatureType = types.get(typeID).createFromConfig(masterConfig).createFromConfig(worldConfig);
+            CreatureType creatureType = types.get(typeID).createFromConfig(worldConfig);
             types.put(typeID, creatureType);
         }
         String[] pieces = customNames.split(",");
         for (String categoryName : pieces) {
             if (isValidName(categoryName)) {
                 types.put(categoryName,
-                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(masterConfig)
-                                .createFromConfig(worldConfig));
+                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(worldConfig));
             }
         }
 
-        masterConfig.save();
         worldConfig.save();
     }
 
