@@ -186,14 +186,15 @@ public class CustomSpawner {
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
                                                         .getCanSpawnHere(entityliving))) {
                                             ++j2;
+                                            worldServer.spawnEntityInWorld(entityliving);
+                                            creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
                                             JASLog.log(LogType.SPAWNING, Level.INFO,
                                                     "Spawning %s type Entity %s aka %s of  at %s, %s, %s ",
                                                     spawnlistentry.getLivingHandler().creatureTypeID,
                                                     EntityList.classToStringMapping.get(entityliving.getClass()),
                                                     entityliving.getEntityName(), entityliving.posX, entityliving.posY,
                                                     entityliving.posZ);
-                                            worldServer.spawnEntityInWorld(entityliving);
-                                            creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
+
                                             typeCount.increment();
                                             livingCount.increment();
 
