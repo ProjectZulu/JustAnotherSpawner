@@ -98,6 +98,9 @@ public class JustAnotherSpawner {
     }
 
     private void importDefaultFiles(File modConfigDirectoryFile) {
+        if (Properties.importName.trim().equals("")) {
+            return;
+        }
         File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.saveName);
         File importFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.importName);
         if (worldFolder.exists() || !importFolder.exists()) {
