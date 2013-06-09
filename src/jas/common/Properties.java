@@ -52,11 +52,19 @@ public class Properties {
         Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "SaveConfig.cfg"));
         worldGloablConfig.load();
+        Property defaultsaveProp = worldGloablConfig
+                .get("Save_Configuration",
+                        "Default Save_Name",
+                        "{$world}",
+                        "Default name used for Save_Name. {$world} is replaced by world name. Case Sensitive if OS allows. Beware invalid OS characters.");
+        saveName = defaultsaveProp.getString().replace("{$world}",
+                minecraftServer.worldServers[0].getWorldInfo().getWorldName());
+
         Property saveProp = worldGloablConfig
                 .get("Save_Configuration." + minecraftServer.worldServers[0].getWorldInfo().getWorldName(),
-                        "Save_Name", minecraftServer.worldServers[0].getWorldInfo().getWorldName(),
+                        "Save_Name", saveName,
                         "Folder name to look for and generate CFG files. Case Sensitive if OS allows. Beware invalid OS characters.");
-        saveName = saveProp.getString().equals("") ? "default" : saveProp.getString();
+        saveName = saveProp.getString().trim().equals("") ? "default" : saveProp.getString();
 
         Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
                 "Folder name to Copy Missing Files From. Case Sensitive if OS allows. Beware invalid OS characters.");
