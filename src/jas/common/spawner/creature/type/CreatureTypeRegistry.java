@@ -1,16 +1,13 @@
 package jas.common.spawner.creature.type;
 
-import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
+import jas.common.config.EntityCategoryConfiguration;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 
 import net.minecraft.block.material.Material;
-import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.Configuration;
 
 public enum CreatureTypeRegistry {
     INSTANCE;
@@ -65,25 +62,22 @@ public enum CreatureTypeRegistry {
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
     }
 
-    public void initializeFromConfig(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + Properties.saveName + "/" + "CreatureType" + ".cfg"));
-        worldConfig.load();
-        String comment = "Format: category name seperated by commas i.e. <CategoryName1>,<CategoryName2>";
-        String customNames = worldConfig.get("Extra Categories", "Additions", "", comment).getString().toUpperCase();
+    public void initializeFromConfig(File configDirectory) {
+        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory);
+        config.load();
+        String customNames = config.getCustomCategories("").getString().toUpperCase();
         for (String typeID : types.keySet()) {
-            CreatureType creatureType = types.get(typeID).createFromConfig(worldConfig);
+            CreatureType creatureType = types.get(typeID).createFromConfig(config);
             types.put(typeID, creatureType);
         }
         String[] pieces = customNames.split(",");
         for (String categoryName : pieces) {
             if (isValidName(categoryName)) {
                 types.put(categoryName,
-                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(worldConfig));
+                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(config));
             }
         }
-
-        worldConfig.save();
+        config.save();
     }
 
     private boolean isValidName(String name) {
@@ -98,5 +92,45 @@ public enum CreatureTypeRegistry {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Used to save the currently loaded settings into the Configuration Files
+     * 
+     * If config settings are already present, they will be overwritten
+     */
+    public void saveToConfig(File configDirectory) {
+        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory);
+        config.load();
+
+        /* Save Extra Categories */
+        String nameString = "";
+        Iterator<String> typeNames = types.keySet().iterator();
+        while (typeNames.hasNext()) {
+            String typeName = typeNames.next();
+            if (isReservedName(typeName)) {
+                continue;
+            }
+            typeName = nameString.concat(typeName);
+            if (typeNames.hasNext()) {
+                typeName = nameString.concat(",");
+            }
+        }
+        config.getCustomCategories(nameString).set(nameString);
+
+        /* Save All Category Settings */
+        for (CreatureType entry : types.values()) {
+            entry.saveToConfig(config);
+        }
+        config.save();
+    }
+
+    private boolean isReservedName(String name) {
+        if (name.equalsIgnoreCase(NONE) || name.equalsIgnoreCase(CREATURE) || name.equalsIgnoreCase(MONSTER)
+                || name.equalsIgnoreCase(AMBIENT) || name.equalsIgnoreCase(WATERCREATURE)
+                || name.equalsIgnoreCase(UNDERGROUND) || name.equalsIgnoreCase(OPENSKY)) {
+            return true;
+        }
+        return false;
     }
 }
