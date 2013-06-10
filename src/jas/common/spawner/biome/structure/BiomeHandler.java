@@ -1,25 +1,23 @@
 package jas.common.spawner.biome.structure;
 
 import jas.api.BiomeInterpreter;
-import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
+import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.SpawnListEntry;
-import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -64,10 +62,7 @@ public class BiomeHandler {
      * @param configDirectory
      * @param world
      */
-    public final void readFromConfig(File configDirectory, World world) {
-        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + Properties.saveName + "/" + "StructureSpawns" + ".cfg"));
-        worldConfig.load();
+    public final void readFromConfig(StructureConfiguration worldConfig, World world) {
         /*
          * For Every Structure Key; Generate Two Configuration Categories: One to list Entities, the Other to Generate
          * SpawnListEntry Settings
@@ -86,7 +81,7 @@ public class BiomeHandler {
                 }
             }
             /* Under StructureSpawns.SpawnList have List of Entities that are Spawnable. */
-            Property resultNames = worldConfig.get("CreatureSettings.SpawnList", structureKey, entityList);
+            Property resultNames = worldConfig.getStructureSpawns(structureKey, entityList);
             ArrayList<Class<? extends EntityLiving>> classList = mobNamesToMobClasses(resultNames.getString());
 
             /*
@@ -119,7 +114,26 @@ public class BiomeHandler {
                 }
             }
         }
-        worldConfig.save();
+    }
+
+    public void saveToConfig(StructureConfiguration config) {
+        for (Entry<String, Collection<jas.common.spawner.creature.entry.SpawnListEntry>> entry : structureKeysToSpawnList
+                .asMap().entrySet()) {
+
+            String entityListString = "";
+            Iterator<jas.common.spawner.creature.entry.SpawnListEntry> iterator = entry.getValue().iterator();
+            while (iterator.hasNext()) {
+                jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = iterator.next();
+                spawnListEntry.saveToConfig(config);
+
+                entityListString = entityListString.concat((String) EntityList.classToStringMapping.get(spawnListEntry
+                        .getClass()));
+                if (iterator.hasNext()) {
+                    entityListString = entityListString.concat(",");
+                }
+            }
+            config.getStructureSpawns(entry.getKey(), entityListString).set(entityListString);
+        }
     }
 
     /**
