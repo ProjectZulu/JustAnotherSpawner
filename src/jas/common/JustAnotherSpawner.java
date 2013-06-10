@@ -75,7 +75,7 @@ public class JustAnotherSpawner {
         Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer());
         importDefaultFiles(modConfigDirectoryFile);
         Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
-        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile, event.getServer());
+        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile);
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
