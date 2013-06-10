@@ -188,13 +188,20 @@ public class CustomSpawner {
                                             ++j2;
                                             worldServer.spawnEntityInWorld(entityliving);
                                             creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
-                                            JASLog.log(LogType.SPAWNING, Level.INFO,
-                                                    "Spawning %s type Entity %s aka %s of  at %s, %s, %s ",
-                                                    spawnlistentry.getLivingHandler().creatureTypeID,
-                                                    EntityList.classToStringMapping.get(entityliving.getClass()),
-                                                    entityliving.getEntityName(), entityliving.posX, entityliving.posY,
-                                                    entityliving.posZ);
-
+                                            try {
+                                                JASLog.log(LogType.SPAWNING, Level.INFO,
+                                                        "Spawning %s type Entity %s aka %s at %s, %s, %s ",
+                                                        spawnlistentry.getLivingHandler().creatureTypeID,
+                                                        EntityList.classToStringMapping.get(entityliving.getClass()),
+                                                        entityliving.getEntityName(), entityliving.posX,
+                                                        entityliving.posY, entityliving.posZ);
+                                            } catch (Exception e) {
+                                                JASLog.log(LogType.SPAWNING, Level.INFO,
+                                                        "Spawning %s type Entity %s at %s, %s, %s ",
+                                                        spawnlistentry.getLivingHandler().creatureTypeID,
+                                                        EntityList.classToStringMapping.get(entityliving.getClass()),
+                                                        entityliving.posX, entityliving.posY, entityliving.posZ);
+                                            }
                                             typeCount.increment();
                                             livingCount.increment();
 
