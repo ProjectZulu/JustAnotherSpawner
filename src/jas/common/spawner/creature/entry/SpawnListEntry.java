@@ -30,6 +30,10 @@ public class SpawnListEntry extends WeightedRandomItem {
     public final int minChunkPack;
     public final int maxChunkPack;
 
+    public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
+            + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
+            + "MaxChunkPackSize";
+
     public SpawnListEntry(Class<? extends EntityLiving> livingClass, String pckgName, int weight, int packSize,
             int minChunkPack, int maxChunkPack) {
         super(weight);
@@ -44,6 +48,11 @@ public class SpawnListEntry extends WeightedRandomItem {
         return CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass);
     }
 
+    public static void setupConfigCategory(Configuration config) {
+        ConfigCategory category = config.getCategory("CreatureSettings.SpawnListEntry".toLowerCase(Locale.ENGLISH));
+        category.setComment(SpawnListEntry.SpawnListCategoryComment);
+    }
+    
     /**
      * Creates a new instance of this from configuration using itself as the default
      * 
@@ -52,22 +61,10 @@ public class SpawnListEntry extends WeightedRandomItem {
      */
     public SpawnListEntry createFromConfig(Configuration config) {
         String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
                 + Integer.toString(maxChunkPack);
-
-        Property resultValue;
-        String categoryKey;
-        if (Properties.sortCreatureByBiome) {
-            categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
-            resultValue = config.get(categoryKey, mobName, defaultValue);
-        } else {
-            categoryKey = "CreatureSettings.SpawnListEntry." + mobName;
-            resultValue = config.get(categoryKey, pckgName, defaultValue);
-        }
-        ConfigCategory category = config.getCategory(categoryKey.toLowerCase(Locale.ENGLISH));
-        category.setComment(CreatureHandlerRegistry.SpawnListCategoryComment);
+        Property resultValue = getSpawnEntryProperty(config, defaultValue);
 
         String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
         if (resultParts.length == 4) {
@@ -84,6 +81,31 @@ public class SpawnListEntry extends WeightedRandomItem {
             resultValue.set(defaultValue);
             return new SpawnListEntry(livingClass, pckgName, itemWeight, packSize, minChunkPack, maxChunkPack);
         }
+    }
+
+    public void saveToConfig(Configuration config) {
+        String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
+                + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
+                + Integer.toString(maxChunkPack);
+        Property resultValue = getSpawnEntryProperty(config, defaultValue);
+        resultValue.set(defaultValue);
+    }
+
+    private Property getSpawnEntryProperty(Configuration config, String defaultValue) {
+        String mobName = (String) EntityList.classToStringMapping.get(livingClass);
+
+        Property resultValue;
+        String categoryKey;
+        if (Properties.sortCreatureByBiome) {
+            categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
+            resultValue = config.get(categoryKey, mobName, defaultValue);
+        } else {
+            categoryKey = "CreatureSettings.SpawnListEntry." + mobName;
+            resultValue = config.get(categoryKey, pckgName, defaultValue);
+        }
+        ConfigCategory category = config.getCategory(categoryKey.toLowerCase(Locale.ENGLISH));
+        category.setComment(SpawnListCategoryComment);
+        return resultValue;
     }
 
     @Override

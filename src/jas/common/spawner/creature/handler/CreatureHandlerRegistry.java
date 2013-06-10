@@ -1,8 +1,8 @@
 package jas.common.spawner.creature.handler;
 
-import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.config.LivingConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
@@ -24,7 +24,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 
 import com.google.common.base.CharMatcher;
@@ -37,13 +36,11 @@ public enum CreatureHandlerRegistry {
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
     private final HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>> handlersToAdd = new HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>>();
 
-    private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();
+    /* Map of Entity modID to their Respective Configuration File, cleared immediately After Saving */
+    private final HashMap<String, LivingConfiguration> modConfigCache = new HashMap<String, LivingConfiguration>();
+
+    /* List of Currently Found Entities, Cleared on World Start before re-populating */
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
-    public static final String delimeter = DefaultProps.DELIMETER;
-    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
-            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
-    public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
-            + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
 
     /* Boolean Used by Client to know if setup has been run */
     @SideOnly(Side.CLIENT)
@@ -61,6 +58,19 @@ public enum CreatureHandlerRegistry {
         initializeLivingHandlers(world);
         configLivingHandlers(configDirectory, world);
         generateSpawnListEntries(configDirectory, world);
+        saveAndCloseConfigs();
+    }
+
+    public void saveCurrentToConfig(File configDirectory) {
+        for (Entry<Class<? extends EntityLiving>, LivingHandler> handler : livingHandlers.entrySet()) {
+            String mobName = (String) EntityList.classToStringMapping.get(handler.getKey());
+            LivingConfiguration config = getLoadedConfigurationFile(configDirectory, mobName);
+
+            for (SpawnListEntry spawnEntry : CreatureTypeRegistry.INSTANCE.getCreatureType(
+                    handler.getValue().creatureTypeID).getAllSpawns()) {
+                spawnEntry.saveToConfig(config);
+            }
+        }
         saveAndCloseConfigs();
     }
 
@@ -98,7 +108,7 @@ public enum CreatureHandlerRegistry {
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
-            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
+            LivingConfiguration worldConfig = getLoadedConfigurationFile(configDirectory, mobName);
 
             LivingHandler resultLivingHandler = livingHandlers.get(livingClass).createFromConfig(worldConfig);
             livingHandlers.put(livingClass, resultLivingHandler);
@@ -113,7 +123,7 @@ public enum CreatureHandlerRegistry {
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
-            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
+            LivingConfiguration worldConfig = getLoadedConfigurationFile(configDirectory, mobName);
 
             if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGroup group : BiomeGroupRegistry.INSTANCE.getBiomeGroups()) {
@@ -151,33 +161,25 @@ public enum CreatureHandlerRegistry {
      * @param fullMobName
      * @return
      */
-    private Configuration getConfigurationFile(File configDirectory, String worldName, String fullMobName) {
+    private LivingConfiguration getLoadedConfigurationFile(File configDirectory, String fullMobName) {
         String modID;
         String[] mobNameParts = fullMobName.split("\\.");
-        if (mobNameParts.length == 2) {
+        if (mobNameParts.length >= 2) {
             String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
             modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);
         } else {
             modID = "Vanilla";
         }
 
-        Configuration config;
-        if (modConfigCache.get(worldName + modID) == null) {
-            config = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldName + "/"
-                    + DefaultProps.ENTITYSUBDIR + modID + ".cfg"));
+        LivingConfiguration config;
+        if (modConfigCache.get(Properties.saveName + modID) == null) {
+            config = new LivingConfiguration(configDirectory, modID);
             config.load();
-            setupCategories(config);
-            modConfigCache.put(worldName + modID, config);
+            LivingHandler.setupConfigCategory(config);
+            SpawnListEntry.setupConfigCategory(config);
+            modConfigCache.put(Properties.saveName + modID, config);
         }
-        return modConfigCache.get(worldName + modID);
-    }
-
-    private void setupCategories(Configuration config) {
-        ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
-        category.setComment(LivingHandlerCategoryComment);
-
-        category = config.getCategory("CreatureSettings.SpawnListEntry".toLowerCase(Locale.ENGLISH));
-        category.setComment(SpawnListCategoryComment);
+        return modConfigCache.get(Properties.saveName + modID);
     }
 
     /**
