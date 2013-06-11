@@ -2,7 +2,7 @@ package jas.common;
 
 import java.io.File;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
@@ -58,10 +58,10 @@ public class Properties {
         config.save();
     }
 
-    public static void loadWorldSaveConfiguration(File configDirectory, MinecraftServer minecraftServer) {
+    public static void loadWorldSaveConfiguration(File configDirectory, World world) {
         Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "SaveConfig.cfg"));
-        String curWorldName = minecraftServer.worldServers[0].getWorldInfo().getWorldName();
+        String curWorldName = world.getWorldInfo().getWorldName();
         worldGloablConfig.load();
 
         /* Load Save Use Import_Name */
@@ -114,7 +114,7 @@ public class Properties {
      * 
      * @param configDirectory
      */
-    public static void loadWorldProperties(File configDirectory, MinecraftServer minecraftServer) {
+    public static void loadWorldProperties(File configDirectory) {
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();

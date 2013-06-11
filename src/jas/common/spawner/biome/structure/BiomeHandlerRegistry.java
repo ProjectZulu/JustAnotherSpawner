@@ -7,7 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.minecraft.world.WorldServer;
+import net.minecraft.world.World;
 
 public enum BiomeHandlerRegistry {
     INSTANCE;
@@ -25,7 +25,7 @@ public enum BiomeHandlerRegistry {
         biomeInterpreters.add(biomeInterpreter);
     }
 
-    public void setupHandlers(File configDir, WorldServer worldServer) {
+    public void setupHandlers(File configDir, World world) {
         for (BiomeInterpreter interpreter : biomeInterpreters) {
             biomeHandlers.add(new BiomeHandler(interpreter));
         }
@@ -33,7 +33,7 @@ public enum BiomeHandlerRegistry {
         StructureConfiguration structureConfig = new StructureConfiguration(configDir);
         structureConfig.load();
         for (BiomeHandler biomeHandler : biomeHandlers) {
-            biomeHandler.readFromConfig(structureConfig, worldServer);
+            biomeHandler.readFromConfig(structureConfig, world);
         }
         structureConfig.save();
     }

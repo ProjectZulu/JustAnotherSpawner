@@ -36,10 +36,7 @@ public enum BiomeGroupRegistry {
     /** Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration */
     private final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
 
-    /*
-     * Reverse Lookup Used to Filter Used to get a biome without needed to run through entire array. Primary use is to
-     * filter submitted BiomeNames to Ensure they correspond to actual Biomes.
-     */
+    /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names*/
     public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
 
     /**
@@ -123,6 +120,7 @@ public enum BiomeGroupRegistry {
 
             biomeMappingToPckg.put(nameMapping.getString(), packageName);
             biomePckgToMapping.put(packageName, nameMapping.getString());
+            pckgNameToBiomeID.put(packageName, biome.biomeID);
         }
 
         ArrayList<BiomeGroup> biomeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
