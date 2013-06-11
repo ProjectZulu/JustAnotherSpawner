@@ -34,6 +34,10 @@ public class SpawnListEntry extends WeightedRandomItem {
     public final String optionalParameters;
     protected OptionalSpawnListSpawning spawning;
 
+    public OptionalSpawnListSpawning getOptionalSpawning() {
+        return spawning;
+    }
+    
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
             + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
             + "MaxChunkPackSize";

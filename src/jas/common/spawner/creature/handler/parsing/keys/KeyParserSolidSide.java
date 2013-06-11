@@ -27,7 +27,7 @@ public class KeyParserSolidSide extends KeyParserBase {
         }
 
         String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
         TypeValuePair typeValue = null;
 
         if (pieces.length == 3 || pieces.length == 4) {

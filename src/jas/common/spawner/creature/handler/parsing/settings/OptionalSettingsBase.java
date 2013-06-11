@@ -48,11 +48,13 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                     }
                     if (key.keyParser.isMatch(masterParts[i])) {
                         isEnabled = true;
-                        if (key.keyParser.isInvertable() && masterParts[i].startsWith("!")) {
+                        if (key.keyParser.isInvertable() && key.keyParser.isInverted(masterParts[i])) {
                             isInverted = true;
                         } else {
                             isInverted = false;
                         }
+                        /* The isOperand operation is not needed since isMatch return false for invalid characters */
+                        operand = key.keyParser.parseOperand(masterParts[i]);
                     }
                 }
             } else {

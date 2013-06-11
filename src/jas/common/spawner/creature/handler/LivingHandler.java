@@ -4,8 +4,10 @@ import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.config.LivingConfiguration;
+import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureType;
@@ -98,13 +100,15 @@ public class LivingHandler {
      * both ensures that a Modder can implement their own logic indepenently of the modded creature and that end users
      * are allowed to customize their experience
      * 
+     * @param entity Entity being Spawned
+     * @param spawnListEntry SpawnListEntry the Entity belongs to
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    public final boolean getCanSpawnHere(EntityLiving entity) {
-        if (!spawning.isOptionalEnabled()) {
+    public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
+        if (!spawning.isOptionalEnabled() && !spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
             return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
         } else {
-            return isValidLocation(entity);
+            return isValidLocation(entity, spawnListEntry);
         }
     }
 
@@ -170,17 +174,27 @@ public class LivingHandler {
      * @param entity
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    private final boolean isValidLocation(EntityLiving entity) {
+    private final boolean isValidLocation(EntityLiving entity, SpawnListEntry spawnListEntry) {
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
 
-        boolean canSpawn = !spawning.isInverted();
+        boolean canSpawn;
 
+        boolean canLivingSpawn = !spawning.isInverted();
         if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-            canSpawn = spawning.isInverted();
+            canLivingSpawn = spawning.isInverted();
         }
 
+        boolean canSpawnListSpawn = !spawnListEntry.getOptionalSpawning().isInverted();
+        if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
+            canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
+        }
+        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
+            canSpawn = canLivingSpawn && canSpawnListSpawn;
+        } else {
+            canSpawn = canLivingSpawn || canSpawnListSpawn;
+        }
         return canSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
     }
@@ -189,7 +203,7 @@ public class LivingHandler {
         ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
         category.setComment(LivingHandler.LivingHandlerCategoryComment);
     }
-    
+
     /**
      * Creates a new instance of this from configuration using itself as the default
      * 

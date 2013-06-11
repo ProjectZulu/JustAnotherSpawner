@@ -22,7 +22,7 @@ public class KeyParserPlayers extends KeyParserBase {
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         if (pieces.length == 5) {
             int minSearchRange = ParsingHelper.parseFilteredInteger(pieces[1], 32, "1st " + key.key);

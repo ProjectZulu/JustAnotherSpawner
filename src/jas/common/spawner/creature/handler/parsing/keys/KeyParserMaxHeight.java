@@ -21,7 +21,7 @@ public class KeyParserMaxHeight extends KeyParserBase {
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
 
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSingleInteger(pieces, -1, key.key));
 

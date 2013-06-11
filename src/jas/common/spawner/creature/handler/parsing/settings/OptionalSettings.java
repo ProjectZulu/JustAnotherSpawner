@@ -23,6 +23,11 @@ public abstract class OptionalSettings {
     protected boolean stringParsed = false;
     protected EnumSet<Key> validKeys;
 
+    /**
+     * Operand of the Parent Tag this OptionalSettings represents. Note not all OptionalSettings utilize this.
+     */
+    protected Operand operand = Operand.OR;
+
     public enum Operand {
         AND, OR;
     }
@@ -56,10 +61,14 @@ public abstract class OptionalSettings {
         this.parseableString = parseableString;
         this.validKeys = validKeys;
     }
-    
+
     protected abstract void parseString();
 
     public abstract boolean isOptionalEnabled();
 
     public abstract boolean isInverted();
+
+    public Operand getOperand() {
+        return operand;
+    }
 }
