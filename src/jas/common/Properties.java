@@ -22,7 +22,7 @@ public class Properties {
     public static boolean loadedSortCreatureByBiome = true;
 
     public static boolean turnGameruleSpawningOff = false;
-    public static boolean emptyVanillaSpawnLists = false;
+    public static boolean emptyVanillaSpawnLists = true;
 
     public static int despawnDist = 32;
     public static int maxDespawnDist = 128;
@@ -42,7 +42,7 @@ public class Properties {
         turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
                 turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
         emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start",
-                emptyVanillaSpawnLists).getBoolean(emptyVanillaSpawnLists);
+                true).getBoolean(true);
 
         globalSortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome",
                 globalSortCreatureByBiome).getBoolean(globalSortCreatureByBiome);
