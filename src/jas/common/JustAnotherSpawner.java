@@ -85,23 +85,6 @@ public class JustAnotherSpawner {
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
         
-//        if (Properties.universalDirectory != Properties.loadedUniversalDirectory
-//                || Properties.savedSortCreatureByBiome != Properties.loadedSortCreatureByBiome) {
-//            Properties.universalDirectory = Properties.loadedUniversalDirectory;
-//            Properties.savedSortCreatureByBiome = Properties.loadedSortCreatureByBiome;
-//            System.gc();
-//            File entityFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/"
-//                    + DefaultProps.ENTITYSUBDIR);
-//            int i = 0;
-//            for (File file : entityFolder.listFiles()) {
-//                JASLog.info("Attempting Delete %s : %s --- %s | %s | %s ", i,file.getName(), file.exists(), file.isDirectory(), file.delete());
-//                i++;
-//            }
-//            saveCurrentToConfig(modConfigDirectoryFile);
-//        } else {
-////            saveAndCloseConfigs();
-//        }
-        
         if (Properties.emptyVanillaSpawnLists) {
             clearVanillaSpawnLists();
         }
