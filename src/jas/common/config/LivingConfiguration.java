@@ -26,4 +26,14 @@ public class LivingConfiguration extends Configuration {
     public Property getLivingHandler(String mobName, String value) {
         return this.get("CreatureSettings.LivingHandler", mobName, value);
     }
+
+    public Property getSavedSortByBiome(boolean sortByBiome) {
+        return this.get("Save_Configuration", "Sort Creature By Biome", sortByBiome,
+                "DO NOT TOUCH. Internally used to remember how the Configuration file was actually saved.");
+    }
+
+    public Property getSavedUseUniversalConfig(boolean useUniversalConfig) {
+        return this.get("Save_Configuration", "Universal Entity CFG", useUniversalConfig,
+                "DO NOT TOUCH. Internally used to remember how the Configuration directory was actually saved.");
+    }
 }

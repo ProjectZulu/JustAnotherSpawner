@@ -27,6 +27,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.Property;
 
 import com.google.common.base.CharMatcher;
 
@@ -75,6 +76,14 @@ public enum CreatureHandlerRegistry {
     }
 
     public void saveCurrentToConfig(File configDirectory) {
+        LivingConfiguration tempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
+        tempSettings.load();
+        Property byBiome = tempSettings.getSavedSortByBiome(Properties.universalDirectory);
+        byBiome.set(Properties.universalDirectory);
+        Property isUniversal = tempSettings.getSavedUseUniversalConfig(Properties.savedSortCreatureByBiome);
+        isUniversal.set(Properties.universalDirectory);
+        tempSettings.save();
+
         for (Entry<Class<? extends EntityLiving>, LivingHandler> handler : livingHandlers.entrySet()) {
             LivingConfiguration config = getLoadedConfigurationFile(configDirectory, handler.getKey());
             handler.getValue().saveToConfig(config);

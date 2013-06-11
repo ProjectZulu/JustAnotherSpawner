@@ -1,5 +1,7 @@
 package jas.common;
 
+import jas.common.config.LivingConfiguration;
+
 import java.io.File;
 
 import net.minecraft.world.World;
@@ -41,8 +43,8 @@ public class Properties {
         config.load();
         turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
                 turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
-        emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start",
-                true).getBoolean(true);
+        emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start", true)
+                .getBoolean(true);
 
         globalSortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome",
                 globalSortCreatureByBiome).getBoolean(globalSortCreatureByBiome);
@@ -90,23 +92,20 @@ public class Properties {
                         "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.")
                 .getBoolean(globalSortCreatureByBiome);
 
-        Property sortProperty = worldGloablConfig.get("Save_Configuration." + curWorldName + ".save data - ignore me",
-                "Sort Creature By Biome - Memory", globalSortCreatureByBiome,
-                "DO NOT TOUCH. Internally used to remember how the Configuration file was actually saved.");
-        savedSortCreatureByBiome = sortProperty.getBoolean(globalSortCreatureByBiome);
-        sortProperty.set(loadedSortCreatureByBiome);
-
-        /* Load Save Use Universal Entity Directory */
+        /* Load Save/Use Universal Entity Directory */
         loadedUniversalDirectory = worldGloablConfig.get("Save_Configuration." + curWorldName,
                 "Universal Entity CFG - Settings", false,
                 "Specifies if the User wants the Entity CFG to Combined into a Universal CFG.").getBoolean(false);
-        Property univerProp = worldGloablConfig.get("Save_Configuration." + curWorldName + ".save data - ignore me",
-                "Universal Entity CFG - Memory", loadedUniversalDirectory,
-                "DO NOT TOUCH. Internally used to remember how the Configuration directory was actually saved.");
-        universalDirectory = univerProp.getBoolean(loadedUniversalDirectory);
-        univerProp.set(loadedUniversalDirectory);
-
         worldGloablConfig.save();
+
+        /* Temp Settings Holds the data showing telling how the directories/files were saved and need to be read */
+        LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
+        livingTempSettings.load();
+        savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(globalSortCreatureByBiome).getBoolean(
+                globalSortCreatureByBiome);
+        universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
+                loadedUniversalDirectory);
+        livingTempSettings.save();
     }
 
     /**
