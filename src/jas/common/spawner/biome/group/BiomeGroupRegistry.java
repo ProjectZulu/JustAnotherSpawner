@@ -1,8 +1,7 @@
 package jas.common.spawner.biome.group;
 
-import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
+import jas.common.config.BiomeGroupConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,11 +11,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -110,10 +108,9 @@ public enum BiomeGroupRegistry {
         }
     }
 
-    public void createBiomeGroups(File configDirectory, MinecraftServer minecraftServer) {
-        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + Properties.saveName + "/" + "BiomeGroups" + ".cfg"));
-        worldConfig.load();
+    public void createBiomeGroups(File configDirectory) {
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        biomeConfig.load();
 
         /* Create Package Name Mappings */
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
@@ -121,10 +118,8 @@ public enum BiomeGroupRegistry {
                 continue;
             }
             String packageName = BiomeHelper.getPackageName(biome);
-            String mappingComment = "Custom Name Mapping for Unique Biome Package Name. Mapping is used to add biomes to groups. Each must be unique or biome will be unreachable. Case sensitive.";
-            worldConfig.getCategory("biomegroups.packagenamemappings").setComment(mappingComment);
 
-            Property nameMapping = worldConfig.get("biomegroups.packagenamemappings", packageName, biome.biomeName);
+            Property nameMapping = biomeConfig.getBiomeMapping(packageName, biome.biomeName);
 
             biomeMappingToPckg.put(nameMapping.getString(), packageName);
             biomePckgToMapping.put(packageName, nameMapping.getString());
@@ -152,21 +147,24 @@ public enum BiomeGroupRegistry {
         }
 
         /* Get Custom BiomeGroupNames */
-        Property customGroupProp = worldConfig.get("BiomeGroups.CustomGroups", "Custom Group Names", "",
-                "Custom Group Names. Seperated by Commas. Edit this to add/remove groups");
+
+        Property customGroupProp = biomeConfig.getGroupList("");
         String[] resultgroups = customGroupProp.getString().split(",");
         for (String groupName : resultgroups) {
+            if (groupName.trim().equals("")) {
+                continue;
+            }
             biomeGroups.add(new BiomeGroup(groupName));
         }
 
         /* For Every Biome Group; Filter BiomeList Through Configuration */
         for (BiomeGroup biomeGroup : biomeGroups) {
-            getGroupSpawnList(worldConfig, biomeGroup);
+            getGroupSpawnList(biomeConfig, biomeGroup);
             if (biomeGroup.pckgNames.size() > 0) {
                 registerGroup(biomeGroup);
             }
         }
-        worldConfig.save();
+        biomeConfig.save();
     }
 
     /**
@@ -176,20 +174,8 @@ public enum BiomeGroupRegistry {
      * @param group
      * @return
      */
-    private void getGroupSpawnList(Configuration config, BiomeGroup group) {
-        String defautlGroupString = "";
-        Iterator<String> iterator = group.pckgNames.iterator();
-        while (iterator.hasNext()) {
-            String string = iterator.next();
-            JASLog.info("String %s", string);
-            defautlGroupString = defautlGroupString.concat(biomePckgToMapping.get(string));
-            if (iterator.hasNext()) {
-                defautlGroupString = defautlGroupString.concat(",");
-            }
-        }
-        Property resultProp = config
-                .get("BiomeGroups.BiomeLists." + group.groupID, "BiomeList", defautlGroupString,
-                        "List of All Biomes Contained in this Group. Format is package mapping (see packagenamemappings) seperated by commas.");
+    private void getGroupSpawnList(BiomeGroupConfiguration config, BiomeGroup group) {
+        Property resultProp = config.getBiomeList(group.groupID, groupBiomesToString(group));
 
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
@@ -208,5 +194,67 @@ public enum BiomeGroupRegistry {
         }
         group.pckgNames.clear();
         group.pckgNames.addAll(biomeNames);
+    }
+
+    private String groupBiomesToString(BiomeGroup group) {
+        String defautlGroupString = "";
+        Iterator<String> iterator = group.pckgNames.iterator();
+        while (iterator.hasNext()) {
+            String string = iterator.next();
+            defautlGroupString = defautlGroupString.concat(biomePckgToMapping.get(string));
+            if (iterator.hasNext()) {
+                defautlGroupString = defautlGroupString.concat(",");
+            }
+        }
+        return defautlGroupString;
+    }
+
+    /**
+     * Used to save the currently loaded settings into the Configuration Files
+     * 
+     * If config settings are already present, they will be overwritten
+     */
+    public void saveCurrentToConfig(File configDirectory) {
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        biomeConfig.load();
+        saveMappingsToConfig(biomeConfig);
+        saveCustomGroupsToConfig(biomeConfig);
+        biomeConfig.save();
+    }
+
+    private void saveMappingsToConfig(BiomeGroupConfiguration config) {
+        for (Entry<String, String> mappingEntry : biomePckgToMapping.entrySet()) {
+            Property mappingProp = config.getBiomeMapping(mappingEntry.getKey(), mappingEntry.getValue());
+            mappingProp.set(mappingEntry.getValue());
+        }
+    }
+
+    private void saveCustomGroupsToConfig(BiomeGroupConfiguration config) {
+        /* Save Group Names to Config */
+        String biomeNameString = "";
+        Iterator<String> iterator = iDToGroup.keySet().iterator();
+        while (iterator.hasNext()) {
+            String biomeID = iterator.next();
+            boolean isDefaultGroup = false;
+            for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+                if (biomeID.equalsIgnoreCase(biome.biomeName)) {
+                    isDefaultGroup = true;
+                    break;
+                }
+            }
+            if (!isDefaultGroup) {
+                biomeNameString.concat(biomeID);
+            }
+        }
+
+        Property namesProp = config.getGroupList(biomeNameString);
+        namesProp.set(biomeNameString);
+
+        /* Save Group Contents to Config */
+        for (Entry<String, BiomeGroup> entry : iDToGroup.entrySet()) {
+            String biomelist = groupBiomesToString(entry.getValue());
+            Property listProp = config.getBiomeList(entry.getKey(), biomelist);
+            listProp.set(biomelist);
+        }
     }
 }

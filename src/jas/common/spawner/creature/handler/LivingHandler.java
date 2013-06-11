@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.config.LivingConfiguration;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
@@ -10,16 +11,22 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpaw
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.util.Locale;
 import java.util.logging.Level;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 public class LivingHandler {
+
+    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + DefaultProps.DELIMETER
+            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
+
     public final Class<? extends EntityLiving> entityClass;
     public final String creatureTypeID;
     public final boolean shouldSpawn;
@@ -178,19 +185,24 @@ public class LivingHandler {
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
     }
 
+    public static void setupConfigCategory(Configuration config) {
+        ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
+        category.setComment(LivingHandler.LivingHandlerCategoryComment);
+    }
+    
     /**
      * Creates a new instance of this from configuration using itself as the default
      * 
      * @param config
      * @return
      */
-    protected LivingHandler createFromConfig(Configuration config) {
+    protected LivingHandler createFromConfig(LivingConfiguration config) {
         String mobName = (String) EntityList.classToStringMapping.get(entityClass);
 
         String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
                 + optionalParameters;
 
-        Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
+        Property resultValue = config.getLivingHandler(mobName, defaultValue);
 
         String[] resultMasterParts = resultValue.getString().split("\\{", 2);
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
@@ -228,5 +240,12 @@ public class LivingHandler {
             resultValue.set(defaultValue);
             return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, "");
         }
+    }
+
+    public void saveToConfig(LivingConfiguration config) {
+        String mobName = (String) EntityList.classToStringMapping.get(entityClass);
+        String currentValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
+                + optionalParameters;
+        config.getLivingHandler(mobName, currentValue).set(currentValue);
     }
 }
