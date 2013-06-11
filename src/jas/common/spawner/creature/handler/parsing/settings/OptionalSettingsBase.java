@@ -79,7 +79,8 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                     }
                 }
                 if (!foundMatch) {
-                    JASLog.severe("Could Not Recognize any valid Spawn properties from %s", masterParts[i]);
+                    JASLog.severe("Could Not Recognize any valid %s properties from %s", this.getClass()
+                            .getSimpleName(), masterParts[i]);
                 }
             }
         }
