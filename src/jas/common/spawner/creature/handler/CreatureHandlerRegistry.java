@@ -257,7 +257,7 @@ public enum CreatureHandlerRegistry {
                         for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
                             if (spawnListEntry.entityClass.equals(livingClass)) {
                                 return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
-                                        spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
+                                        spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
                             }
                         }
                     }
@@ -265,7 +265,7 @@ public enum CreatureHandlerRegistry {
 
             }
         }
-        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4);
+        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4, "");
     }
 
     /**

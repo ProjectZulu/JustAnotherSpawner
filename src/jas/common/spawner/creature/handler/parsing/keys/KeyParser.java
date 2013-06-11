@@ -17,6 +17,10 @@ public abstract class KeyParser {
 
     public abstract boolean isInvertable();
 
+    public abstract boolean isInverted(String parseable);
+
+    public abstract Operand parseOperand(String parseable);
+
     public abstract boolean isMatch(String title);
 
     public abstract KeyType getKeyType();

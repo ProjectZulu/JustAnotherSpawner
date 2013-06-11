@@ -21,7 +21,7 @@ public abstract class KeyParserRange extends KeyParserBase {
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         if (pieces.length == 3) {
             int min = ParsingHelper.parseFilteredInteger(pieces[1], 16, "1st " + key.key);

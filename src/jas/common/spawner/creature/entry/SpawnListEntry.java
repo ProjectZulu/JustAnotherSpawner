@@ -6,6 +6,8 @@ import jas.common.Properties;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSpawnListSpawning;
 
 import java.util.Locale;
 
@@ -29,19 +31,35 @@ public class SpawnListEntry extends WeightedRandomItem {
     public final String pckgName;
     public final int minChunkPack;
     public final int maxChunkPack;
+    public final String optionalParameters;
+    protected OptionalSpawnListSpawning spawning;
 
+    public OptionalSpawnListSpawning getOptionalSpawning() {
+        return spawning;
+    }
+    
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
             + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
             + "MaxChunkPackSize";
 
     public SpawnListEntry(Class<? extends EntityLiving> livingClass, String pckgName, int weight, int packSize,
-            int minChunkPack, int maxChunkPack) {
+            int minChunkPack, int maxChunkPack, String optionalParameters) {
         super(weight);
         this.livingClass = livingClass;
         this.packSize = packSize;
         this.pckgName = pckgName;
         this.minChunkPack = minChunkPack;
         this.maxChunkPack = maxChunkPack;
+        this.optionalParameters = optionalParameters;
+
+        for (String string : optionalParameters.split("\\{")) {
+            String parsed = string.replace("}", "");
+            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+            if (Key.spawn.keyParser.isMatch(titletag)) {
+                spawning = new OptionalSpawnListSpawning(parsed);
+            }
+        }
+        spawning = spawning == null ? new OptionalSpawnListSpawning("") : spawning;
     }
 
     public LivingHandler getLivingHandler() {
@@ -63,23 +81,25 @@ public class SpawnListEntry extends WeightedRandomItem {
         String mobName = (String) EntityList.classToStringMapping.get(livingClass);
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
-                + Integer.toString(maxChunkPack);
+                + Integer.toString(maxChunkPack) + optionalParameters;
         Property resultValue = getSpawnEntryProperty(config, defaultValue);
 
-        String[] resultParts = resultValue.getString().split("\\" + DefaultProps.DELIMETER);
+        String[] resultMasterParts = resultValue.getString().split("\\{", 2);
+        String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
         if (resultParts.length == 4) {
             int resultSpawnWeight = ParsingHelper.parseFilteredInteger(resultParts[0], packSize, "spawnWeight");
             int resultPackSize = ParsingHelper.parseFilteredInteger(resultParts[1], packSize, "packSize");
             int resultMinChunkPack = ParsingHelper.parseFilteredInteger(resultParts[2], packSize, "minChunkPack");
             int resultMaxChunkPack = ParsingHelper.parseFilteredInteger(resultParts[3], packSize, "maxChunkPack");
+            String optionalParameters = resultMasterParts.length == 2 ? "{" + resultMasterParts[1] : "";
             return new SpawnListEntry(livingClass, pckgName, resultSpawnWeight, resultPackSize, resultMinChunkPack,
-                    resultMaxChunkPack);
+                    resultMaxChunkPack, optionalParameters);
         } else {
             JASLog.severe(
                     "SpawnListEntry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
                     mobName, packSize, itemWeight);
             resultValue.set(defaultValue);
-            return new SpawnListEntry(livingClass, pckgName, itemWeight, packSize, minChunkPack, maxChunkPack);
+            return new SpawnListEntry(livingClass, pckgName, itemWeight, packSize, minChunkPack, maxChunkPack, "");
         }
     }
 

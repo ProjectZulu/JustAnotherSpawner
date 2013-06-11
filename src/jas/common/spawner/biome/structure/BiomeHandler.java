@@ -152,10 +152,10 @@ public class BiomeHandler {
             SpawnListEntry spawnListEntry = iterator.next();
             if (spawnListEntry.entityClass.equals(livingClass)) {
                 return new jas.common.spawner.creature.entry.SpawnListEntry(livingClass, structureKey,
-                        spawnListEntry.itemWeight, 4, spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
+                        spawnListEntry.itemWeight, 4, spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
             }
         }
-        return new jas.common.spawner.creature.entry.SpawnListEntry(livingClass, structureKey, 0, 4, 0, 4);
+        return new jas.common.spawner.creature.entry.SpawnListEntry(livingClass, structureKey, 0, 4, 0, 4, "");
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
