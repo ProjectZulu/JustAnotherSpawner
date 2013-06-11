@@ -83,12 +83,16 @@ public enum CreatureHandlerRegistry {
 
             for (SpawnListEntry spawnEntry : CreatureTypeRegistry.INSTANCE.getCreatureType(
                     handler.getValue().creatureTypeID).getAllRejectedSpawns()) {
-                spawnEntry.saveToConfig(config);
+                if (spawnEntry.livingClass.equals(handler.getKey())) {
+                    spawnEntry.saveToConfig(config);
+                }
             }
 
             for (SpawnListEntry spawnEntry : CreatureTypeRegistry.INSTANCE.getCreatureType(
                     handler.getValue().creatureTypeID).getAllSpawns()) {
-                spawnEntry.saveToConfig(config);
+                if (spawnEntry.livingClass.equals(handler.getKey())) {
+                    spawnEntry.saveToConfig(config);
+                }
             }
         }
         saveAndCloseConfigs();

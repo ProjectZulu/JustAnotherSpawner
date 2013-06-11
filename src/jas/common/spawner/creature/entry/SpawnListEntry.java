@@ -28,6 +28,7 @@ import net.minecraftforge.common.Property;
 public class SpawnListEntry extends WeightedRandomItem {
     public final Class<? extends EntityLiving> livingClass;
     public final int packSize;
+    /* Auto-refactoring Fails, but pckgName refers to String identifier that represents the BiomeGroup or StructureGroup */
     public final String pckgName;
     public final int minChunkPack;
     public final int maxChunkPack;
@@ -37,7 +38,7 @@ public class SpawnListEntry extends WeightedRandomItem {
     public OptionalSpawnListSpawning getOptionalSpawning() {
         return spawning;
     }
-    
+
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
             + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
             + "MaxChunkPackSize";
