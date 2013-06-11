@@ -45,6 +45,8 @@ public class CreatureType {
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final ListMultimap<String, SpawnListEntry> groupNameToSpawnEntry = ArrayListMultimap.create();
+    /* Contains the List of SpawnEntries which were Considered Invalid */
+    private final ListMultimap<String, SpawnListEntry> groupNameToRejectedSpawnEntry = ArrayListMultimap.create();
     public final String optionalParameters;
     protected OptionalSettingsCreatureTypeSpawn spawning;
 
@@ -120,6 +122,16 @@ public class CreatureType {
     }
 
     /**
+     * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
+     * 
+     * @param pckgName
+     * @param spawnListEntry
+     */
+    public void addInvalidSpawn(SpawnListEntry spawnListEntry) {
+        groupNameToRejectedSpawnEntry.get(spawnListEntry.pckgName).add(spawnListEntry);
+    }
+
+    /**
      * Removes the SpawnListEntry defined by biomeName and LivingClass from the CreatureType.
      * 
      * @param pckgName
@@ -145,6 +157,10 @@ public class CreatureType {
      */
     public Collection<SpawnListEntry> getAllSpawns() {
         return groupNameToSpawnEntry.values();
+    }
+
+    public Collection<SpawnListEntry> getAllRejectedSpawns() {
+        return groupNameToRejectedSpawnEntry.values();
     }
 
     /**

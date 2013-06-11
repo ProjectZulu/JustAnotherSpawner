@@ -52,7 +52,7 @@ public class SpawnListEntry extends WeightedRandomItem {
         ConfigCategory category = config.getCategory("CreatureSettings.SpawnListEntry".toLowerCase(Locale.ENGLISH));
         category.setComment(SpawnListEntry.SpawnListCategoryComment);
     }
-    
+
     /**
      * Creates a new instance of this from configuration using itself as the default
      * 
@@ -96,7 +96,7 @@ public class SpawnListEntry extends WeightedRandomItem {
 
         Property resultValue;
         String categoryKey;
-        if (Properties.sortCreatureByBiome) {
+        if (Properties.savedSortCreatureByBiome) {
             categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
             resultValue = config.get(categoryKey, mobName, defaultValue);
         } else {

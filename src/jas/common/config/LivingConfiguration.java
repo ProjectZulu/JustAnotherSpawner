@@ -10,6 +10,8 @@ import net.minecraftforge.common.Property;
 
 public class LivingConfiguration extends Configuration {
 
+    public final String filename;
+
     /**
      * 
      * @param configDirectory
@@ -18,6 +20,7 @@ public class LivingConfiguration extends Configuration {
     public LivingConfiguration(File configDirectory, String fileName) {
         super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/"
                 + DefaultProps.ENTITYSUBDIR + fileName + ".cfg"));
+        this.filename = fileName;
     }
 
     public Property getLivingHandler(String mobName, String value) {

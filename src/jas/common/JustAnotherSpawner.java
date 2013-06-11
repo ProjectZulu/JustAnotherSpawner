@@ -44,8 +44,13 @@ public class JustAnotherSpawner {
     @SidedProxy(clientSide = "jas.common.proxy.ClientProxy", serverSide = "jas.common.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    private File modConfigDirectoryFile;
+    /* Only Populated after {@link#FMLPreInitializationEvent} */
+    private static File modConfigDirectoryFile;
 
+    public static File getModConfigDirectory() {
+        return modConfigDirectoryFile;
+    }
+    
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
@@ -79,7 +84,24 @@ public class JustAnotherSpawner {
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile);
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
-
+        
+//        if (Properties.universalDirectory != Properties.loadedUniversalDirectory
+//                || Properties.savedSortCreatureByBiome != Properties.loadedSortCreatureByBiome) {
+//            Properties.universalDirectory = Properties.loadedUniversalDirectory;
+//            Properties.savedSortCreatureByBiome = Properties.loadedSortCreatureByBiome;
+//            System.gc();
+//            File entityFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/"
+//                    + DefaultProps.ENTITYSUBDIR);
+//            int i = 0;
+//            for (File file : entityFolder.listFiles()) {
+//                JASLog.info("Attempting Delete %s : %s --- %s | %s | %s ", i,file.getName(), file.exists(), file.isDirectory(), file.delete());
+//                i++;
+//            }
+//            saveCurrentToConfig(modConfigDirectoryFile);
+//        } else {
+////            saveAndCloseConfigs();
+//        }
+        
         if (Properties.emptyVanillaSpawnLists) {
             clearVanillaSpawnLists();
         }
