@@ -121,7 +121,7 @@ public enum CreatureHandlerRegistry {
         populateEntityList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), false, "");
+                    world), true, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }
