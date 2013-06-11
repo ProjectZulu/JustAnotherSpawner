@@ -50,7 +50,9 @@ public class JustAnotherSpawner {
     public static File getModConfigDirectory() {
         return modConfigDirectoryFile;
     }
-    
+
+    ImportedSpawnList importedSpawnList;
+
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
@@ -58,6 +60,7 @@ public class JustAnotherSpawner {
         JASLog.configureLogging(modConfigDirectoryFile);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
+        MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
     }
 
@@ -70,26 +73,22 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
-        if (Properties.emptyVanillaSpawnLists) {
-            clearVanillaSpawnLists();
-        }
+        importedSpawnList = new ImportedSpawnList();
+        importedSpawnList.importVanillaSpawnLists(Properties.emptyVanillaSpawnLists);
     }
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
-        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer());
+        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer().worldServers[0]);
         importDefaultFiles(modConfigDirectoryFile);
-        Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
+        Properties.loadWorldProperties(modConfigDirectoryFile);
         BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile);
         CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile);
-        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
+                importedSpawnList);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
-        
-        if (Properties.emptyVanillaSpawnLists) {
-            clearVanillaSpawnLists();
-        }
 
-        GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
+        GameRules gameRule = event.getServer().worldServers[0].getGameRules();
         if (Properties.turnGameruleSpawningOff) {
             JASLog.info("Setting GameRule doMobSpawning to false");
             gameRule.setOrCreateGameRule("doMobSpawning", "false");

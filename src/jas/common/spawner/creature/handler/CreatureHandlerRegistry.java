@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
+import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
 import jas.common.Properties;
 import jas.common.config.LivingConfiguration;
@@ -13,6 +14,7 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,7 +26,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
 
 import com.google.common.base.CharMatcher;
@@ -55,10 +56,10 @@ public enum CreatureHandlerRegistry {
         }
     }
 
-    public void serverStartup(File configDirectory, World world) {
+    public void serverStartup(File configDirectory, World world, ImportedSpawnList spawnList) {
         initializeLivingHandlers(world);
         configLivingHandlers(configDirectory, world);
-        generateSpawnListEntries(configDirectory, world);
+        generateSpawnListEntries(configDirectory, world, spawnList);
         saveAndCloseConfigs();
         if (Properties.universalDirectory != Properties.loadedUniversalDirectory
                 || Properties.savedSortCreatureByBiome != Properties.loadedSortCreatureByBiome) {
@@ -120,7 +121,7 @@ public enum CreatureHandlerRegistry {
         populateEntityList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), false, "");
+                    world), true, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }
@@ -140,7 +141,7 @@ public enum CreatureHandlerRegistry {
     /**
      * Generates SpawnListEntries for LivingHandlers which have been enabled to Spawn
      */
-    public void generateSpawnListEntries(File configDirectory, World world) {
+    public void generateSpawnListEntries(File configDirectory, World world, ImportedSpawnList spawnList) {
         clearSpawnLists();
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
@@ -150,8 +151,8 @@ public enum CreatureHandlerRegistry {
             if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGroup group : BiomeGroupRegistry.INSTANCE.getBiomeGroups()) {
 
-                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass).createFromConfig(
-                            worldConfig);
+                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass, spawnList)
+                            .createFromConfig(worldConfig);
 
                     if (spawnListEntry.itemWeight > 0 && livingHandlers.get(livingClass).shouldSpawn) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", mobName,
@@ -248,25 +249,18 @@ public enum CreatureHandlerRegistry {
      * @param livingClass
      * @return
      */
-    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass) {
+    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass,
+            ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
             for (Integer biomeID : BiomeGroupRegistry.INSTANCE.pckgNameToBiomeID.get(pckgNames)) {
-                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
-                EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
-                if (creatureType != null) {
-                    @SuppressWarnings("unchecked")
-                    List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biome
-                            .getSpawnableList(creatureType);
-                    if (spawnListEntries != null) {
-                        for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
-                            if (spawnListEntry.entityClass.equals(livingClass)) {
-                                return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
-                                        spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
-                            }
-                        }
+                Collection<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = importedSpawnList
+                        .getSpawnableCreatureList(biomeID);
+                for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                    if (spawnListEntry.entityClass.equals(livingClass)) {
+                        return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
+                                spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
                     }
                 }
-
             }
         }
         return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4, "");

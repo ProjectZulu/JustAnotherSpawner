@@ -2,7 +2,7 @@ package jas.common;
 
 import java.io.File;
 
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
@@ -22,7 +22,7 @@ public class Properties {
     public static boolean loadedSortCreatureByBiome = true;
 
     public static boolean turnGameruleSpawningOff = false;
-    public static boolean emptyVanillaSpawnLists = false;
+    public static boolean emptyVanillaSpawnLists = true;
 
     public static int despawnDist = 32;
     public static int maxDespawnDist = 128;
@@ -42,7 +42,7 @@ public class Properties {
         turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
                 turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
         emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start",
-                emptyVanillaSpawnLists).getBoolean(emptyVanillaSpawnLists);
+                true).getBoolean(true);
 
         globalSortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome",
                 globalSortCreatureByBiome).getBoolean(globalSortCreatureByBiome);
@@ -58,10 +58,10 @@ public class Properties {
         config.save();
     }
 
-    public static void loadWorldSaveConfiguration(File configDirectory, MinecraftServer minecraftServer) {
+    public static void loadWorldSaveConfiguration(File configDirectory, World world) {
         Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "SaveConfig.cfg"));
-        String curWorldName = minecraftServer.worldServers[0].getWorldInfo().getWorldName();
+        String curWorldName = world.getWorldInfo().getWorldName();
         worldGloablConfig.load();
 
         /* Load Save Use Import_Name */
@@ -114,7 +114,7 @@ public class Properties {
      * 
      * @param configDirectory
      */
-    public static void loadWorldProperties(File configDirectory, MinecraftServer minecraftServer) {
+    public static void loadWorldProperties(File configDirectory) {
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
