@@ -266,17 +266,34 @@ public enum BiomeGroupRegistry {
             }
             boolean foundMatch = false;
 
+            boolean adding = true;
+            if (name.startsWith("+")) {
+                name = name.substring(1);
+                adding = true;
+            } else if (name.startsWith("-")) {
+                name = name.substring(1);
+                adding = false;
+            }
+
             String[] parts = name.split("\\|", 2);
             if (parts.length == 1) {
                 String pckgName = biomeMappingToPckg.get(parts[0]);
                 if (pckgName != null) {
-                    biomeNames.add(pckgName);
+                    if (adding) {
+                        biomeNames.add(pckgName);
+                    } else {
+                        biomeNames.remove(pckgName);
+                    }
                     foundMatch = true;
                 }
             } else if (parts[0].equalsIgnoreCase("A")) {
                 BiomeGroup attributeGroup = iDToAttribute.get(parts[1].toLowerCase());
                 if (attributeGroup != null) {
-                    biomeNames.addAll(attributeGroup.pckgNames);
+                    if (adding) {
+                        biomeNames.addAll(attributeGroup.pckgNames);
+                    } else {
+                        biomeNames.removeAll(attributeGroup.pckgNames);
+                    }
                     foundMatch = true;
                 }
             }
