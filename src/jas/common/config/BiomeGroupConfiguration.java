@@ -24,14 +24,27 @@ public class BiomeGroupConfiguration extends Configuration {
         return this.get(BiomeConfigCategory + ".packagenamemappings", packageName, biomeName);
     }
 
-    public Property getBiomeList(String biomeGroupID, String defautlGroupString) {
+    public Property getBiomeGroupBiomes(String biomeGroupID, String defautlGroupString) {
         return this
                 .get(BiomeConfigCategory + ".BiomeLists." + biomeGroupID, "BiomeList", defautlGroupString,
                         "List of All Biomes Contained in this Group. Format is package mapping (see packagenamemappings) seperated by commas");
     }
 
-    public Property getGroupList(String groupNames) {
+    public Property getBiomeGroupList(String groupNames) {
         return this.get(BiomeConfigCategory + ".customgroups", "Custom Group Names", groupNames,
                 "Custom Group Names. Seperated by Commas. Edit this to add/remove groups");
+    }
+
+    public Property getAttributeList(String attributeNames) {
+        return get(BiomeConfigCategory + ".customattributes", "Custom Group Names", attributeNames,
+                "Custom Attribute Names. Seperated by Commas. Edit this to add/remove groups");
+    }
+
+    public Property getAtrributeBiomes(String attributeID, String defautlGroupString) {
+        return get(
+                BiomeConfigCategory + ".attributebiomelists." + attributeID,
+                "AtrributeList",
+                defautlGroupString,
+                "List of All Biomes Contained in this Atrribute. Format is package mapping (see packagenamemappings) seperated by commas");
     }
 }

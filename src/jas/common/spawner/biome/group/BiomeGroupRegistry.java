@@ -15,6 +15,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.common.BiomeDictionary.Type;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -27,7 +29,6 @@ public enum BiomeGroupRegistry {
 
     /** Group Identifier to Group Instance Regsitry */
     private final HashMap<String, BiomeGroup> iDToGroup = new HashMap<String, BiomeGroup>();
-
     /** Reverse Look-up Map to Get All Groups a Particular Biome is In */
     private final ListMultimap<String, String> packgNameToGroupIDList = ArrayListMultimap.create();
 
@@ -35,9 +36,18 @@ public enum BiomeGroupRegistry {
     private final HashMap<String, String> biomeMappingToPckg = new HashMap<String, String>();
     /** Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration */
     private final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
-
-    /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names*/
+    /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names */
     public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
+
+    /**
+     * Mapping Between AttributeID and the Biomes it Represents. Internally, Attributes are simply BiomeGroups (i.e list
+     * of biomes).
+     * 
+     * Neither Attribute IDs, BiomeGroups, or BiomeMappings are not allowed to be the same.
+     * 
+     * BiomeMappings overwrite Attribute IDs overwrite BiomeGroups
+     */
+    private final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
 
     /**
      * Should Only Be Used to Register BiomeGroups with their finished
@@ -123,9 +133,67 @@ public enum BiomeGroupRegistry {
             pckgNameToBiomeID.put(packageName, biome.biomeID);
         }
 
+        ArrayList<BiomeGroup> attributeGroups = getAttributeGroups(biomeConfig);
+        ArrayList<BiomeGroup> biomeGroups = getBiomeGroups(biomeConfig);
+
+        /* Filter Every Attribute Through Configuration */
+        for (BiomeGroup attributeGroup : attributeGroups) {
+            getAttributeSpawnList(biomeConfig, attributeGroup);
+        }
+
+        /* For Every Biome Group; Filter BiomeList Through Configuration */
+        for (BiomeGroup biomeGroup : biomeGroups) {
+            getGroupSpawnList(biomeConfig, biomeGroup);
+            if (biomeGroup.pckgNames.size() > 0) {
+                registerGroup(biomeGroup);
+            }
+        }
+        biomeConfig.save();
+    }
+
+    /**
+     * Creates the default Attribute Groups as well as Custom AttributeGroups (which are empty by default)
+     * 
+     * @param biomeConfig
+     * @return
+     */
+    private ArrayList<BiomeGroup> getAttributeGroups(BiomeGroupConfiguration biomeConfig) {
+        ArrayList<BiomeGroup> attributeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
+
+        /* Get Default Groups From BiomeDictionary */
+        for (Type type : BiomeDictionary.Type.values()) {
+            BiomeGroup biomeGroup = new BiomeGroup(type.toString());
+            for (BiomeGenBase biome : BiomeDictionary.getBiomesForType(type)) {
+                biomeGroup.pckgNames.add(BiomeHelper.getPackageName(biome));
+            }
+            attributeGroups.add(biomeGroup);
+            iDToAttribute.put(type.toString(), biomeGroup);
+        }
+
+        /* Get Empty Custom Attributes */
+        Property customAttributeProp = biomeConfig.getAttributeList("");
+        String[] resultAttributes = customAttributeProp.getString().split(",");
+        for (String attributeName : resultAttributes) {
+            if (attributeName.trim().equals("")) {
+                continue;
+            }
+            BiomeGroup biomeGroup = new BiomeGroup(attributeName);
+            attributeGroups.add(biomeGroup);
+            iDToAttribute.put(attributeName, biomeGroup);
+        }
+        return attributeGroups;
+    }
+
+    /**
+     * Creates the default Biome Groups as well as Custom BiomeGroups (which are empty by default)
+     * 
+     * @param biomeConfig
+     * @return
+     */
+    private ArrayList<BiomeGroup> getBiomeGroups(BiomeGroupConfiguration biomeConfig) {
         ArrayList<BiomeGroup> biomeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
 
-        /* Map PackageBiomeName to ID for default groups */
+        /* Map PackageBiomeName to ID for default groups : Used to Overcome DuplicateIDs */
         ListMultimap<String, Integer> groupIDToBiomeID = ArrayListMultimap.create();
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
             if (biome == null) {
@@ -145,8 +213,7 @@ public enum BiomeGroupRegistry {
         }
 
         /* Get Custom BiomeGroupNames */
-
-        Property customGroupProp = biomeConfig.getGroupList("");
+        Property customGroupProp = biomeConfig.getBiomeGroupList("");
         String[] resultgroups = customGroupProp.getString().split(",");
         for (String groupName : resultgroups) {
             if (groupName.trim().equals("")) {
@@ -154,15 +221,29 @@ public enum BiomeGroupRegistry {
             }
             biomeGroups.add(new BiomeGroup(groupName));
         }
+        return biomeGroups;
+    }
 
-        /* For Every Biome Group; Filter BiomeList Through Configuration */
-        for (BiomeGroup biomeGroup : biomeGroups) {
-            getGroupSpawnList(biomeConfig, biomeGroup);
-            if (biomeGroup.pckgNames.size() > 0) {
-                registerGroup(biomeGroup);
+    public void getAttributeSpawnList(BiomeGroupConfiguration config, BiomeGroup attributeGroup) {
+        Property resultProp = config.getAtrributeBiomes(attributeGroup.groupID, groupBiomesToString(attributeGroup));
+
+        String resultGroupString = resultProp.getString();
+        String[] resultgroups = resultGroupString.split(",");
+        Set<String> biomeNames = new HashSet<String>();
+        for (String name : resultgroups) {
+            if (name.equals("")) {
+                continue;
             }
+            String pckgName = biomeMappingToPckg.get(name);
+            if (pckgName == null) {
+                JASLog.severe("Error while Parsing %s AttributeGroup. Biome entry %s is not a valid biome mapping",
+                        attributeGroup.groupID, name);
+                continue;
+            }
+            biomeNames.add(pckgName);
         }
-        biomeConfig.save();
+        attributeGroup.pckgNames.clear();
+        attributeGroup.pckgNames.addAll(biomeNames);
     }
 
     /**
@@ -173,7 +254,7 @@ public enum BiomeGroupRegistry {
      * @return
      */
     private void getGroupSpawnList(BiomeGroupConfiguration config, BiomeGroup group) {
-        Property resultProp = config.getBiomeList(group.groupID, groupBiomesToString(group));
+        Property resultProp = config.getBiomeGroupBiomes(group.groupID, groupBiomesToString(group));
 
         String resultGroupString = resultProp.getString();
         String[] resultgroups = resultGroupString.split(",");
@@ -245,13 +326,13 @@ public enum BiomeGroupRegistry {
             }
         }
 
-        Property namesProp = config.getGroupList(biomeNameString);
+        Property namesProp = config.getBiomeGroupList(biomeNameString);
         namesProp.set(biomeNameString);
 
         /* Save Group Contents to Config */
         for (Entry<String, BiomeGroup> entry : iDToGroup.entrySet()) {
             String biomelist = groupBiomesToString(entry.getValue());
-            Property listProp = config.getBiomeList(entry.getKey(), biomelist);
+            Property listProp = config.getBiomeGroupBiomes(entry.getKey(), biomelist);
             listProp.set(biomelist);
         }
     }
