@@ -160,7 +160,9 @@ public enum BiomeGroupRegistry {
 
         BiomeGroup allbiomes = new BiomeGroup("allbiomes");
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
-            allbiomes.pckgNames.add(BiomeHelper.getPackageName(biome));
+            if (biome != null) {
+                allbiomes.pckgNames.add(BiomeHelper.getPackageName(biome));
+            }
         }
         JASLog.debug(Level.INFO, "Created Attribute %s", allbiomes.groupID);
         attributeGroups.add(allbiomes);
