@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -43,9 +44,7 @@ public enum BiomeGroupRegistry {
      * Mapping Between AttributeID and the Biomes it Represents. Internally, Attributes are simply BiomeGroups (i.e list
      * of biomes).
      * 
-     * Neither Attribute IDs, BiomeGroups, or BiomeMappings are not allowed to be the same.
-     * 
-     * BiomeMappings overwrite Attribute IDs overwrite BiomeGroups
+     * Neither Attribute ID and BiomeMappings are not allowed to be the same. They can be the same as BiomeGroups.
      */
     private final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
 
@@ -53,11 +52,8 @@ public enum BiomeGroupRegistry {
      * Should Only Be Used to Register BiomeGroups with their finished
      */
     public void registerGroup(BiomeGroup group) {
-        JASLog.info("Registering BiomeGroup %s", group.groupID);
+        JASLog.info("Registering BiomeGroup %s with biomes %s", group.groupID, groupBiomesToString(group));
         iDToGroup.put(group.groupID, group);
-        for (String biomeName : group.pckgNames) {
-            JASLog.info("BiomeGroup %s contains PckgBiome %s", group.groupID, biomeName);
-        }
         for (String pckgName : group.pckgNames) {
             packgNameToGroupIDList.get(pckgName).add(group.groupID);
         }
@@ -141,7 +137,7 @@ public enum BiomeGroupRegistry {
             getAttributeSpawnList(biomeConfig, attributeGroup);
         }
 
-        /* For Every Biome Group; Filter BiomeList Through Configuration */
+        /* For Every biome Group; Filter BiomeList Through Configuration */
         for (BiomeGroup biomeGroup : biomeGroups) {
             getGroupSpawnList(biomeConfig, biomeGroup);
             if (biomeGroup.pckgNames.size() > 0) {
@@ -167,7 +163,8 @@ public enum BiomeGroupRegistry {
                 biomeGroup.pckgNames.add(BiomeHelper.getPackageName(biome));
             }
             attributeGroups.add(biomeGroup);
-            iDToAttribute.put(type.toString(), biomeGroup);
+            JASLog.debug(Level.INFO, "Created Attribute %s", biomeGroup.groupID);
+            iDToAttribute.put(biomeGroup.groupID, biomeGroup);
         }
 
         /* Get Empty Custom Attributes */
@@ -179,7 +176,8 @@ public enum BiomeGroupRegistry {
             }
             BiomeGroup biomeGroup = new BiomeGroup(attributeName);
             attributeGroups.add(biomeGroup);
-            iDToAttribute.put(attributeName, biomeGroup);
+            JASLog.debug(Level.INFO, "Created Attribute %s", biomeGroup.groupID);
+            iDToAttribute.put(biomeGroup.groupID, biomeGroup);
         }
         return attributeGroups;
     }
@@ -263,13 +261,27 @@ public enum BiomeGroupRegistry {
             if (name.equals("")) {
                 continue;
             }
-            String pckgName = biomeMappingToPckg.get(name);
-            if (pckgName == null) {
-                JASLog.severe("Error while Parsing %s BiomeGroup. BiomeEntry %s is not a valid biome mapping",
-                        group.groupID, name);
-                continue;
+            boolean foundMatch = false;
+
+            String[] parts = name.split("\\|", 2);
+            if (parts.length == 1) {
+                String pckgName = biomeMappingToPckg.get(parts[0]);
+                if (pckgName != null) {
+                    biomeNames.add(pckgName);
+                    foundMatch = true;
+                }
+            } else if (parts[0].equalsIgnoreCase("A")) {
+                BiomeGroup attributeGroup = iDToAttribute.get(parts[1].toLowerCase());
+                if (attributeGroup != null) {
+                    biomeNames.addAll(attributeGroup.pckgNames);
+                    foundMatch = true;
+                }
             }
-            biomeNames.add(pckgName);
+
+            if (!foundMatch) {
+                JASLog.severe("Error while Parsing %s BiomeGroup. Entry %s is not a valid biome mapping or attribute",
+                        group.groupID, name);
+            }
         }
         group.pckgNames.clear();
         group.pckgNames.addAll(biomeNames);
