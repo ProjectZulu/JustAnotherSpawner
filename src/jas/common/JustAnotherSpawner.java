@@ -14,9 +14,8 @@ import jas.compatability.CompatabilityManager;
 import java.io.File;
 import java.io.IOException;
 
-import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
@@ -73,6 +72,7 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
+        BiomeDictionary.registerAllBiomes();
         importedSpawnList = new ImportedSpawnList();
         importedSpawnList.importVanillaSpawnLists(Properties.emptyVanillaSpawnLists);
     }
@@ -114,20 +114,6 @@ public class JustAnotherSpawner {
             FileUtilities.copy(importFolder, worldFolder);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void clearVanillaSpawnLists() {
-        JASLog.info("Emptying Vanilla Spawn Lists.");
-        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
-            if (biome == null) {
-                continue;
-            }
-            for (EnumCreatureType type : EnumCreatureType.values()) {
-                if (biome.getSpawnableList(type) != null) {
-                    biome.getSpawnableList(type).clear();
-                }
-            }
         }
     }
 }
