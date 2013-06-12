@@ -88,6 +88,8 @@ public enum BiomeGroupRegistry {
     public static class BiomeGroup {
         public final String groupID;
         private final List<String> pckgNames = new ArrayList<String>();
+        /* String Used to Build Package Names i.e. desert,A|Forest,glacier */
+        private String biomeString = "";
 
         public BiomeGroup(String groupID) {
             this.groupID = groupID.toLowerCase();
@@ -242,6 +244,7 @@ public enum BiomeGroupRegistry {
         }
         attributeGroup.pckgNames.clear();
         attributeGroup.pckgNames.addAll(biomeNames);
+        attributeGroup.biomeString = resultGroupString;
     }
 
     /**
@@ -285,6 +288,7 @@ public enum BiomeGroupRegistry {
         }
         group.pckgNames.clear();
         group.pckgNames.addAll(biomeNames);
+        group.biomeString = resultGroupString;
     }
 
     private String groupBiomesToString(BiomeGroup group) {
