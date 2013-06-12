@@ -158,14 +158,22 @@ public enum BiomeGroupRegistry {
     private ArrayList<BiomeGroup> getAttributeGroups(BiomeGroupConfiguration biomeConfig) {
         ArrayList<BiomeGroup> attributeGroups = new ArrayList<BiomeGroupRegistry.BiomeGroup>();
 
+        BiomeGroup allbiomes = new BiomeGroup("allbiomes");
+        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+            allbiomes.pckgNames.add(BiomeHelper.getPackageName(biome));
+        }
+        JASLog.debug(Level.INFO, "Created Attribute %s", allbiomes.groupID);
+        attributeGroups.add(allbiomes);
+        iDToAttribute.put(allbiomes.groupID, allbiomes);
+
         /* Get Default Groups From BiomeDictionary */
         for (Type type : BiomeDictionary.Type.values()) {
             BiomeGroup biomeGroup = new BiomeGroup(type.toString());
             for (BiomeGenBase biome : BiomeDictionary.getBiomesForType(type)) {
                 biomeGroup.pckgNames.add(BiomeHelper.getPackageName(biome));
             }
-            attributeGroups.add(biomeGroup);
             JASLog.debug(Level.INFO, "Created Attribute %s", biomeGroup.groupID);
+            attributeGroups.add(biomeGroup);
             iDToAttribute.put(biomeGroup.groupID, biomeGroup);
         }
 
@@ -177,8 +185,8 @@ public enum BiomeGroupRegistry {
                 continue;
             }
             BiomeGroup biomeGroup = new BiomeGroup(attributeName);
-            attributeGroups.add(biomeGroup);
             JASLog.debug(Level.INFO, "Created Attribute %s", biomeGroup.groupID);
+            attributeGroups.add(biomeGroup);
             iDToAttribute.put(biomeGroup.groupID, biomeGroup);
         }
         return attributeGroups;
