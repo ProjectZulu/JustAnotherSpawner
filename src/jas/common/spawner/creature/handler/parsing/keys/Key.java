@@ -23,7 +23,7 @@ public enum Key {
             KeyParserGround.class), top("top", KeyParserTop.class), fill("fill", KeyParserFill.class), modspawn(
             "modSpawn", KeyParserModSpawn.class), origin("origin", KeyParserOrigin.class), players("players",
             KeyParserPlayers.class), entities("entities", KeyParserEntities.class), random("random",
-            KeyParserRandom.class),
+            KeyParserRandom.class), writenbt("writenbt", KeyParserWriteNBT.class),
 
     /* Sub Tags */
     blockRangeX("blockRangeX", null), blockRangeY("blockRangeY", null), blockRangeZ("blockRangeZ", null),
