@@ -7,7 +7,7 @@ import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
-import jas.common.spawner.creature.handler.parsing.settings.OptionalSpawnListSpawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
 
 import java.util.Locale;
 
@@ -33,9 +33,9 @@ public class SpawnListEntry extends WeightedRandomItem {
     public final int minChunkPack;
     public final int maxChunkPack;
     public final String optionalParameters;
-    protected OptionalSpawnListSpawning spawning;
+    protected OptionalSettingsSpawnListSpawning spawning;
 
-    public OptionalSpawnListSpawning getOptionalSpawning() {
+    public OptionalSettingsSpawnListSpawning getOptionalSpawning() {
         return spawning;
     }
 
@@ -57,10 +57,10 @@ public class SpawnListEntry extends WeightedRandomItem {
             String parsed = string.replace("}", "");
             String titletag = parsed.split("\\:", 2)[0].toLowerCase();
             if (Key.spawn.keyParser.isMatch(titletag)) {
-                spawning = new OptionalSpawnListSpawning(parsed);
+                spawning = new OptionalSettingsSpawnListSpawning(parsed);
             }
         }
-        spawning = spawning == null ? new OptionalSpawnListSpawning("") : spawning;
+        spawning = spawning == null ? new OptionalSettingsSpawnListSpawning("") : spawning;
     }
 
     public LivingHandler getLivingHandler() {
