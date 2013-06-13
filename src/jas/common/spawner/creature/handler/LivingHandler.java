@@ -181,15 +181,17 @@ public class LivingHandler {
 
         boolean canSpawn;
 
-        boolean canLivingSpawn = !spawning.isInverted();
+        boolean canLivingSpawn = spawning.isOptionalEnabled() ? !spawning.isInverted() : false;
         if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
             canLivingSpawn = spawning.isInverted();
         }
 
-        boolean canSpawnListSpawn = !spawnListEntry.getOptionalSpawning().isInverted();
+        boolean canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isOptionalEnabled() ? !spawnListEntry
+                .getOptionalSpawning().isInverted() : false;
         if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
             canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
         }
+        
         if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
             canSpawn = canLivingSpawn && canSpawnListSpawn;
         } else {
