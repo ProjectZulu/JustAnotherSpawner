@@ -20,7 +20,7 @@ public class KeyParserTop extends KeyParserBase {
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
         if (pieces.length == 1) {
             parsedChainable.add(new TypeValuePair(key, isInverted(parseable)));
             operandvalue.add(operand);

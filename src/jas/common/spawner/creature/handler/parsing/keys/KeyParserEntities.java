@@ -8,13 +8,13 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
-public class KeyParserPlayers extends KeyParserBase {
+public class KeyParserEntities extends KeyParserBase {
 
-    public KeyParserPlayers(Key key) {
+    public KeyParserEntities(Key key) {
         super(key, true, KeyType.CHAINABLE);
     }
 
@@ -24,13 +24,14 @@ public class KeyParserPlayers extends KeyParserBase {
         String[] pieces = parseable.split(",");
         Operand operand = parseOperand(pieces);
 
-        if (pieces.length == 5) {
-            int minSearchRange = ParsingHelper.parseFilteredInteger(pieces[1], 32, "1st " + key.key);
-            int maxSearchRange = ParsingHelper.parseFilteredInteger(pieces[2], 32, "1st " + key.key);
-            int min = ParsingHelper.parseFilteredInteger(pieces[3], 16, "2st " + key.key);
-            int max = ParsingHelper.parseFilteredInteger(pieces[4], -1, "3nd " + key.key);
-            TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), minSearchRange,
-                    maxSearchRange, min, max });
+        if (pieces.length == 6) {
+            String entityName = pieces[1];
+            int minSearchRange = ParsingHelper.parseFilteredInteger(pieces[2], 32, "1st " + key.key);
+            int maxSearchRange = ParsingHelper.parseFilteredInteger(pieces[3], 32, "1st " + key.key);
+            int min = ParsingHelper.parseFilteredInteger(pieces[4], 16, "2st " + key.key);
+            int max = ParsingHelper.parseFilteredInteger(pieces[5], -1, "3nd " + key.key);
+            TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), entityName,
+                    minSearchRange, maxSearchRange, min, max });
             parsedChainable.add(typeValue);
             operandvalue.add(operand);
             return true;
@@ -50,12 +51,13 @@ public class KeyParserPlayers extends KeyParserBase {
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         Object[] values = (Object[]) typeValuePair.getValue();
         boolean isInverted = (Boolean) values[0];
-        int minSearch = (Integer) values[1];
-        int maxSearch = (Integer) values[2];
+        String entityName = (String) values[1];
+        int minSearch = (Integer) values[2];
+        int maxSearch = (Integer) values[3];
 
-        int current = countNearbyPlayers(world, xCoord, yCoord, zCoord, minSearch, maxSearch);
-        int minRange = (Integer) values[3];
-        int maxRange = (Integer) values[4];
+        int current = countNearbyEntities(world, entityName, xCoord, yCoord, zCoord, minSearch, maxSearch);
+        int minRange = (Integer) values[4];
+        int maxRange = (Integer) values[5];
 
         boolean isValid;
         if (minRange <= maxRange) {
@@ -66,12 +68,25 @@ public class KeyParserPlayers extends KeyParserBase {
         return isInverted ? isValid : !isValid;
     }
 
-    private int countNearbyPlayers(World world, int xCoord, int yCoord, int zCoord, int minRange, int maxRange) {
+    private int countNearbyEntities(World world, String searchName, int xCoord, int yCoord, int zCoord, int minRange,
+            int maxRange) {
         int count = 0;
-        for (int i = 0; i < world.playerEntities.size(); ++i) {
-            EntityPlayer player = (EntityPlayer) world.playerEntities.get(i);
-            if (player.isEntityAlive()) {
-                int distance = (int) Math.sqrt(player.getDistanceSq(xCoord, yCoord, zCoord));
+        for (int i = 0; i < world.loadedEntityList.size(); ++i) {
+            Entity entities = (Entity) world.loadedEntityList.get(i);
+            if (entities.isEntityAlive()) {
+                String entityName = "";
+                try {
+                    entityName = entities.getEntityName();
+                } catch (Exception e) {
+                    JASLog.severe("Error Accessing Entity Name of %s", entities.getClass().getSimpleName());
+                    e.printStackTrace();
+                    continue;
+                }
+                if (!searchName.trim().equals("") && !searchName.equalsIgnoreCase(entityName)) {
+                    continue;
+                }
+
+                int distance = (int) Math.sqrt(entities.getDistanceSq(xCoord, yCoord, zCoord));
                 if (maxRange >= minRange && distance >= minRange && distance <= maxRange) {
                     count++;
                     continue;

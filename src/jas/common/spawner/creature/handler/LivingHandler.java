@@ -3,23 +3,32 @@ package jas.common.spawner.creature.handler;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.config.LivingConfiguration;
+import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.util.Locale;
 import java.util.logging.Level;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 public class LivingHandler {
+
+    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + DefaultProps.DELIMETER
+            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
+
     public final Class<? extends EntityLiving> entityClass;
     public final String creatureTypeID;
     public final boolean shouldSpawn;
@@ -91,13 +100,15 @@ public class LivingHandler {
      * both ensures that a Modder can implement their own logic indepenently of the modded creature and that end users
      * are allowed to customize their experience
      * 
+     * @param entity Entity being Spawned
+     * @param spawnListEntry SpawnListEntry the Entity belongs to
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    public final boolean getCanSpawnHere(EntityLiving entity) {
-        if (!spawning.isOptionalEnabled()) {
+    public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
+        if (!spawning.isOptionalEnabled() && !spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
             return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
         } else {
-            return isValidLocation(entity);
+            return isValidLocation(entity, spawnListEntry);
         }
     }
 
@@ -163,19 +174,36 @@ public class LivingHandler {
      * @param entity
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    private final boolean isValidLocation(EntityLiving entity) {
+    private final boolean isValidLocation(EntityLiving entity, SpawnListEntry spawnListEntry) {
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
 
-        boolean canSpawn = !spawning.isInverted();
+        boolean canSpawn;
 
+        boolean canLivingSpawn = spawning.isOptionalEnabled() ? !spawning.isInverted() : false;
         if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-            canSpawn = spawning.isInverted();
+            canLivingSpawn = spawning.isInverted();
         }
 
+        boolean canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isOptionalEnabled() ? !spawnListEntry
+                .getOptionalSpawning().isInverted() : false;
+        if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
+            canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
+        }
+        
+        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
+            canSpawn = canLivingSpawn && canSpawnListSpawn;
+        } else {
+            canSpawn = canLivingSpawn || canSpawnListSpawn;
+        }
         return canSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+    }
+
+    public static void setupConfigCategory(Configuration config) {
+        ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
+        category.setComment(LivingHandler.LivingHandlerCategoryComment);
     }
 
     /**
@@ -184,13 +212,13 @@ public class LivingHandler {
      * @param config
      * @return
      */
-    protected LivingHandler createFromConfig(Configuration config) {
+    protected LivingHandler createFromConfig(LivingConfiguration config) {
         String mobName = (String) EntityList.classToStringMapping.get(entityClass);
 
         String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
                 + optionalParameters;
 
-        Property resultValue = config.get("CreatureSettings.LivingHandler", mobName, defaultValue);
+        Property resultValue = config.getLivingHandler(mobName, defaultValue);
 
         String[] resultMasterParts = resultValue.getString().split("\\{", 2);
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
@@ -228,5 +256,12 @@ public class LivingHandler {
             resultValue.set(defaultValue);
             return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, "");
         }
+    }
+
+    public void saveToConfig(LivingConfiguration config) {
+        String mobName = (String) EntityList.classToStringMapping.get(entityClass);
+        String currentValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
+                + optionalParameters;
+        config.getLivingHandler(mobName, currentValue).set(currentValue);
     }
 }

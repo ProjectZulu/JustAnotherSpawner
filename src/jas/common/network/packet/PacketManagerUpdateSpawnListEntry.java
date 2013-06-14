@@ -21,6 +21,7 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
     private int packSize;
     private int minChunkPack;
     private int maxChunkPack;
+    private String optionalParameters;
 
     public PacketManagerUpdateSpawnListEntry(int packetID) {
         super(packetID);
@@ -28,11 +29,12 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
 
     public void setPacketData(String creatureType, SpawnListEntry spawnListEntry) {
         setPacketData(spawnListEntry.livingClass, creatureType, spawnListEntry.pckgName, spawnListEntry.itemWeight,
-                spawnListEntry.packSize, spawnListEntry.minChunkPack, spawnListEntry.maxChunkPack);
+                spawnListEntry.packSize, spawnListEntry.minChunkPack, spawnListEntry.maxChunkPack,
+                spawnListEntry.optionalParameters);
     }
 
     public void setPacketData(Class<? extends EntityLiving> livingClass, String creatureType, String biomeName,
-            int weight, int packSize, int minChunkPack, int maxChunkPack) {
+            int weight, int packSize, int minChunkPack, int maxChunkPack, String optionalParameters) {
         this.mobName = (String) EntityList.classToStringMapping.get(livingClass);
         this.creatureType = creatureType;
         this.biomeName = biomeName;
@@ -40,6 +42,7 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
         this.packSize = packSize;
         this.minChunkPack = minChunkPack;
         this.maxChunkPack = maxChunkPack;
+        this.optionalParameters = optionalParameters;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
         dataStream.writeInt(packSize);
         dataStream.writeInt(minChunkPack);
         dataStream.writeInt(maxChunkPack);
+        dataStream.writeUTF(optionalParameters);
     }
 
     @Override
@@ -59,10 +63,10 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
         try {
             setPacketData((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(dataStream.readUTF()),
                     dataStream.readUTF(), dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(),
-                    dataStream.readInt(), dataStream.readInt());
+                    dataStream.readInt(), dataStream.readInt(), dataStream.readUTF());
             CreatureType type = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureType);
             type.updateOrAddSpawn(new SpawnListEntry((Class<? extends EntityLiving>) EntityList.stringToClassMapping
-                    .get(mobName), biomeName, spawnWeight, packSize, minChunkPack, maxChunkPack));
+                    .get(mobName), biomeName, spawnWeight, packSize, minChunkPack, maxChunkPack, optionalParameters));
             return true;
         } catch (IOException e) {
             e.printStackTrace();

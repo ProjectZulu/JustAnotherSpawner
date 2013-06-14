@@ -11,9 +11,9 @@ import java.util.HashMap;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
-public abstract class KeyParserRange extends KeyParserBase {
+public class KeyParserRandom extends KeyParserBase {
 
-    public KeyParserRange(Key key) {
+    public KeyParserRandom(Key key) {
         super(key, true, KeyType.CHAINABLE);
     }
 
@@ -23,10 +23,12 @@ public abstract class KeyParserRange extends KeyParserBase {
         String[] pieces = parseable.split(",");
         Operand operand = parseOperand(pieces);
 
-        if (pieces.length == 3) {
-            int min = ParsingHelper.parseFilteredInteger(pieces[1], 16, "1st " + key.key);
-            int max = ParsingHelper.parseFilteredInteger(pieces[2], -1, "2nd " + key.key);
-            TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), min, max });
+        if (pieces.length == 4) {
+            int randInt = ParsingHelper.parseFilteredInteger(pieces[1], 16, "RandomRange " + key.key);
+            int randOffset = ParsingHelper.parseFilteredInteger(pieces[2], 16, "RandomOffset " + key.key);
+            int maximum = ParsingHelper.parseFilteredInteger(pieces[3], -1, "Maximum " + key.key);
+            TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), randInt, randOffset,
+                    maximum });
             parsedChainable.add(typeValue);
             operandvalue.add(operand);
             return true;
@@ -47,19 +49,11 @@ public abstract class KeyParserRange extends KeyParserBase {
         Object[] values = (Object[]) typeValuePair.getValue();
         boolean isInverted = (Boolean) values[0];
 
-        int current = getCurrent(world, entity, xCoord, yCoord, zCoord, typeValuePair, valueCache);
-        int minRange = (Integer) values[1];
-        int maxRange = (Integer) values[2];
+        int randInt = (Integer) values[1];
+        int randOffset = (Integer) values[2];
+        int maximum = (Integer) values[3];
 
-        boolean isValid = !(current <= maxRange && current >= minRange);
-        if (minRange <= maxRange) {
-            isValid = (current <= maxRange && current >= minRange);
-        } else {
-            isValid = !(current < minRange && current > maxRange);
-        }
+        boolean isValid = !(world.rand.nextInt(randInt) + randOffset <= maximum);
         return isInverted ? isValid : !isValid;
     }
-
-    abstract int getCurrent(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
-            TypeValuePair typeValuePair, HashMap<String, Object> valueCache);
 }

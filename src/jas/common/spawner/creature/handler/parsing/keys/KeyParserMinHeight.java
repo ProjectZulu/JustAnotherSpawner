@@ -20,7 +20,7 @@ public class KeyParserMinHeight extends KeyParserBase {
     public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseSingleInteger(pieces, 256, key.key));
 

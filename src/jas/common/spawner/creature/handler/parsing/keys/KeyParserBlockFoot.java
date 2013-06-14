@@ -24,7 +24,7 @@ public class KeyParserBlockFoot extends KeyParserBase {
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
 
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         TypeValuePair typeValue = new TypeValuePair(key, OptionalParser.parseBlock(pieces));
 

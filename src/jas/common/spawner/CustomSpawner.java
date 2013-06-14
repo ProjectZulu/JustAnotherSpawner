@@ -184,7 +184,7 @@ public class CustomSpawner {
                                                 spawnX, spawnY, spawnZ);
                                         if (canSpawn == Result.ALLOW
                                                 || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
-                                                        .getCanSpawnHere(entityliving))) {
+                                                        .getCanSpawnHere(entityliving, spawnlistentry))) {
                                             ++j2;
                                             worldServer.spawnEntityInWorld(entityliving);
                                             creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
