@@ -323,9 +323,16 @@ public enum BiomeGroupRegistry {
         Iterator<String> iterator = group.pckgNames.iterator();
         while (iterator.hasNext()) {
             String string = iterator.next();
-            defautlGroupString = defautlGroupString.concat(biomePckgToMapping.get(string));
-            if (iterator.hasNext()) {
-                defautlGroupString = defautlGroupString.concat(",");
+            String mapping = biomePckgToMapping.get(string);
+            if (mapping != null) {
+                defautlGroupString = defautlGroupString.concat(mapping);
+                if (iterator.hasNext()) {
+                    defautlGroupString = defautlGroupString.concat(",");
+                }
+            } else {
+                if (string != null) {
+                    JASLog.warning("Could not find mapping for '%s' ", string);
+                }
             }
         }
         return defautlGroupString;

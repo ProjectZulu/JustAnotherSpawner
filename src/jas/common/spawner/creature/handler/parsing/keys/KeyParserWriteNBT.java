@@ -45,7 +45,6 @@ public class KeyParserWriteNBT extends KeyParserBase {
     public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         String nbtOperation = (String) typeValuePair.getValue();
-        JASLog.info("XXX: %s", nbtOperation);
         try {
             NBTTagCompound entityNBT = new NBTTagCompound();
             entity.writeToNBT(entityNBT);
