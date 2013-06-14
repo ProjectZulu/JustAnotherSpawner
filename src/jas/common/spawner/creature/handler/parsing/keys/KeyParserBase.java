@@ -51,14 +51,14 @@ public abstract class KeyParserBase extends KeyParser {
             return false;
         }
         if (character.equals('&') || character.equals('|')) {
-            return getKeyType() == KeyType.CHAINABLE;
+            return getKeyType() == KeyType.CHAINABLE || getKeyType() == KeyType.PARENT;
         } else if (character.equals('!')) {
             return isInvertable;
         }
         return false;
     }
 
-    protected boolean isInverted(String string) {
+    public boolean isInverted(String string) {
         Character first = isIndexSpecial(string, 0);
         Character second = isIndexSpecial(string, 1);
         if ((first != null && first.equals('!')) || (second != null && second.equals('!'))) {
@@ -67,9 +67,13 @@ public abstract class KeyParserBase extends KeyParser {
         return false;
     }
 
-    protected Operand getOperand(String[] parseable) {
+    public Operand parseOperand(String[] parseable) {
+        return parseOperand(parseable[0]);
+    }
+
+    public Operand parseOperand(String parseable) {
         Operand operand = Operand.OR;
-        if (parseable[0].charAt(0) == '&' || parseable[0].charAt(1) == '&') {
+        if (parseable.charAt(0) == '&' || parseable.charAt(1) == '&') {
             operand = Operand.AND;
         }
         return operand;

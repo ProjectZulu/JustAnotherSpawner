@@ -1,8 +1,10 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
+import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.config.LivingConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -12,10 +14,11 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
@@ -23,9 +26,8 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.Property;
 
 import com.google.common.base.CharMatcher;
 
@@ -37,13 +39,11 @@ public enum CreatureHandlerRegistry {
     private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
     private final HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>> handlersToAdd = new HashMap<Class<? extends EntityLiving>, Class<? extends LivingHandler>>();
 
-    private final HashMap<String, Configuration> modConfigCache = new HashMap<String, Configuration>();
+    /* Map of Entity modID to their Respective Configuration File, cleared immediately After Saving */
+    private final HashMap<String, LivingConfiguration> modConfigCache = new HashMap<String, LivingConfiguration>();
+
+    /* List of Currently Found Entities, Cleared on World Start before re-populating */
     private List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
-    public static final String delimeter = DefaultProps.DELIMETER;
-    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + delimeter
-            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
-    public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + delimeter + "SpawnPackSize"
-            + delimeter + "MinChunkPackSize" + delimeter + "MaxChunkPackSize";
 
     /* Boolean Used by Client to know if setup has been run */
     @SideOnly(Side.CLIENT)
@@ -57,10 +57,54 @@ public enum CreatureHandlerRegistry {
         }
     }
 
-    public void serverStartup(File configDirectory, World world) {
+    public void serverStartup(File configDirectory, World world, ImportedSpawnList spawnList) {
         initializeLivingHandlers(world);
         configLivingHandlers(configDirectory, world);
-        generateSpawnListEntries(configDirectory, world);
+        generateSpawnListEntries(configDirectory, world, spawnList);
+        saveAndCloseConfigs();
+        if (Properties.universalDirectory != Properties.loadedUniversalDirectory
+                || Properties.savedSortCreatureByBiome != Properties.loadedSortCreatureByBiome) {
+            Properties.universalDirectory = Properties.loadedUniversalDirectory;
+            Properties.savedSortCreatureByBiome = Properties.loadedSortCreatureByBiome;
+            File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/"
+                    + DefaultProps.ENTITYSUBDIR);
+            for (File file : entityFolder.listFiles()) {
+                file.delete();
+            }
+            saveCurrentToConfig(configDirectory);
+        }
+    }
+
+    public void saveCurrentToConfig(File configDirectory) {
+        LivingConfiguration tempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
+        tempSettings.load();
+        Property byBiome = tempSettings.getSavedSortByBiome(Properties.universalDirectory);
+        byBiome.set(Properties.universalDirectory);
+        Property isUniversal = tempSettings.getSavedUseUniversalConfig(Properties.savedSortCreatureByBiome);
+        isUniversal.set(Properties.universalDirectory);
+        tempSettings.save();
+
+        for (Entry<Class<? extends EntityLiving>, LivingHandler> handler : livingHandlers.entrySet()) {
+            LivingConfiguration config = getLoadedConfigurationFile(configDirectory, handler.getKey());
+            handler.getValue().saveToConfig(config);
+            if (handler.getValue().creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
+                continue;
+            }
+
+            for (SpawnListEntry spawnEntry : CreatureTypeRegistry.INSTANCE.getCreatureType(
+                    handler.getValue().creatureTypeID).getAllRejectedSpawns()) {
+                if (spawnEntry.livingClass.equals(handler.getKey())) {
+                    spawnEntry.saveToConfig(config);
+                }
+            }
+
+            for (SpawnListEntry spawnEntry : CreatureTypeRegistry.INSTANCE.getCreatureType(
+                    handler.getValue().creatureTypeID).getAllSpawns()) {
+                if (spawnEntry.livingClass.equals(handler.getKey())) {
+                    spawnEntry.saveToConfig(config);
+                }
+            }
+        }
         saveAndCloseConfigs();
     }
 
@@ -72,7 +116,7 @@ public enum CreatureHandlerRegistry {
         }
     }
 
-    public void saveAndCloseConfigs() {
+    private void saveAndCloseConfigs() {
         for (Configuration config : modConfigCache.values()) {
             config.save();
         }
@@ -86,7 +130,7 @@ public enum CreatureHandlerRegistry {
         populateEntityList();
         for (Class<? extends EntityLiving> livingClass : entityList) {
             LivingHandler livingHandler = new LivingHandler(livingClass, enumCreatureTypeToLivingType(livingClass,
-                    world), false, "");
+                    world), true, "");
             livingHandlers.put(livingClass, livingHandler);
         }
     }
@@ -96,9 +140,7 @@ public enum CreatureHandlerRegistry {
      */
     public void configLivingHandlers(File configDirectory, World world) {
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
-            String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-
-            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
+            LivingConfiguration worldConfig = getLoadedConfigurationFile(configDirectory, livingClass);
 
             LivingHandler resultLivingHandler = livingHandlers.get(livingClass).createFromConfig(worldConfig);
             livingHandlers.put(livingClass, resultLivingHandler);
@@ -108,18 +150,18 @@ public enum CreatureHandlerRegistry {
     /**
      * Generates SpawnListEntries for LivingHandlers which have been enabled to Spawn
      */
-    public void generateSpawnListEntries(File configDirectory, World world) {
+    public void generateSpawnListEntries(File configDirectory, World world, ImportedSpawnList spawnList) {
         clearSpawnLists();
         for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
             String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
-            Configuration worldConfig = getConfigurationFile(configDirectory, Properties.saveName, mobName);
+            LivingConfiguration worldConfig = getLoadedConfigurationFile(configDirectory, livingClass);
 
             if (!livingHandlers.get(livingClass).creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                 for (BiomeGroup group : BiomeGroupRegistry.INSTANCE.getBiomeGroups()) {
 
-                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass).createFromConfig(
-                            worldConfig);
+                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass, spawnList)
+                            .createFromConfig(worldConfig);
 
                     if (spawnListEntry.itemWeight > 0 && livingHandlers.get(livingClass).shouldSpawn) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", mobName,
@@ -127,6 +169,8 @@ public enum CreatureHandlerRegistry {
                         CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
                                 .addSpawn(spawnListEntry);
                     } else {
+                        CreatureTypeRegistry.INSTANCE.getCreatureType(spawnListEntry.getLivingHandler().creatureTypeID)
+                                .addInvalidSpawn(spawnListEntry);
                         JASLog.debug(
                                 Level.INFO,
                                 "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
@@ -142,6 +186,11 @@ public enum CreatureHandlerRegistry {
         }
     }
 
+    private LivingConfiguration getLoadedConfigurationFile(File configDirectory,
+            Class<? extends EntityLiving> entityClass) {
+        return getLoadedConfigurationFile(configDirectory, entityClass, Properties.universalDirectory);
+    }
+
     /**
      * Caches and Retrieves Configration Files for Individual modIDs. The ModID is inferred from the entity name in the
      * form ModID:EntityName
@@ -151,33 +200,38 @@ public enum CreatureHandlerRegistry {
      * @param fullMobName
      * @return
      */
-    private Configuration getConfigurationFile(File configDirectory, String worldName, String fullMobName) {
-        String modID;
-        String[] mobNameParts = fullMobName.split("\\.");
-        if (mobNameParts.length == 2) {
-            String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
-            modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);
+    private LivingConfiguration getLoadedConfigurationFile(File configDirectory,
+            Class<? extends EntityLiving> entityClass, boolean universalDirectory) {
+        if (universalDirectory) {
+            if (modConfigCache.get(Properties.saveName + "Universal") == null) {
+                LivingConfiguration config = new LivingConfiguration(configDirectory, "Universal");
+                config.load();
+                LivingHandler.setupConfigCategory(config);
+                SpawnListEntry.setupConfigCategory(config);
+                modConfigCache.put(Properties.saveName + "Universal", config);
+                return config;
+            }
+            return modConfigCache.get(Properties.saveName + "Universal");
         } else {
-            modID = "Vanilla";
+            String fullMobName = (String) EntityList.classToStringMapping.get(entityClass);
+            String modID;
+            String[] mobNameParts = fullMobName.split("\\.");
+            if (mobNameParts.length >= 2) {
+                String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
+                modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);
+            } else {
+                modID = "Vanilla";
+            }
+
+            if (modConfigCache.get(Properties.saveName + modID) == null) {
+                LivingConfiguration config = new LivingConfiguration(configDirectory, modID);
+                config.load();
+                LivingHandler.setupConfigCategory(config);
+                SpawnListEntry.setupConfigCategory(config);
+                modConfigCache.put(Properties.saveName + modID, config);
+            }
+            return modConfigCache.get(Properties.saveName + modID);
         }
-
-        Configuration config;
-        if (modConfigCache.get(worldName + modID) == null) {
-            config = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldName + "/"
-                    + DefaultProps.ENTITYSUBDIR + modID + ".cfg"));
-            config.load();
-            setupCategories(config);
-            modConfigCache.put(worldName + modID, config);
-        }
-        return modConfigCache.get(worldName + modID);
-    }
-
-    private void setupCategories(Configuration config) {
-        ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
-        category.setComment(LivingHandlerCategoryComment);
-
-        category = config.getCategory("CreatureSettings.SpawnListEntry".toLowerCase(Locale.ENGLISH));
-        category.setComment(SpawnListCategoryComment);
     }
 
     /**
@@ -204,28 +258,21 @@ public enum CreatureHandlerRegistry {
      * @param livingClass
      * @return
      */
-    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass) {
+    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass,
+            ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
             for (Integer biomeID : BiomeGroupRegistry.INSTANCE.pckgNameToBiomeID.get(pckgNames)) {
-                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
-                EnumCreatureType creatureType = livingTypeToEnumCreatureType(livingHandlers.get(livingClass).creatureTypeID);
-                if (creatureType != null) {
-                    @SuppressWarnings("unchecked")
-                    List<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = biome
-                            .getSpawnableList(creatureType);
-                    if (spawnListEntries != null) {
-                        for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
-                            if (spawnListEntry.entityClass.equals(livingClass)) {
-                                return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
-                                        spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount);
-                            }
-                        }
+                Collection<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = importedSpawnList
+                        .getSpawnableCreatureList(biomeID);
+                for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                    if (spawnListEntry.entityClass.equals(livingClass)) {
+                        return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
+                                spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
                     }
                 }
-
             }
         }
-        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4);
+        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4, "");
     }
 
     /**

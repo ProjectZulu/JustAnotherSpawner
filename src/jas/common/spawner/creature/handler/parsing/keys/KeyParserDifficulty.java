@@ -22,7 +22,7 @@ public class KeyParserDifficulty extends KeyParserBase {
             ArrayList<Operand> operandvalue) {
         String[] pieces = parseable.split(",");
 
-        Operand operand = getOperand(pieces);
+        Operand operand = parseOperand(pieces);
 
         boolean isInverted = false;
         if (isInverted(parseable)) {

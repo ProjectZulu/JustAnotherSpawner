@@ -2,6 +2,7 @@ package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.JASLog;
+import jas.common.config.EntityCategoryConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
@@ -31,7 +32,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.Configuration;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableCollection;
@@ -45,6 +45,8 @@ public class CreatureType {
     public final boolean chunkSpawning;
     public final Material spawnMedium;
     private final ListMultimap<String, SpawnListEntry> groupNameToSpawnEntry = ArrayListMultimap.create();
+    /* Contains the List of SpawnEntries which were Considered Invalid */
+    private final ListMultimap<String, SpawnListEntry> groupNameToRejectedSpawnEntry = ArrayListMultimap.create();
     public final String optionalParameters;
     protected OptionalSettingsCreatureTypeSpawn spawning;
 
@@ -120,6 +122,16 @@ public class CreatureType {
     }
 
     /**
+     * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
+     * 
+     * @param pckgName
+     * @param spawnListEntry
+     */
+    public void addInvalidSpawn(SpawnListEntry spawnListEntry) {
+        groupNameToRejectedSpawnEntry.get(spawnListEntry.pckgName).add(spawnListEntry);
+    }
+
+    /**
      * Removes the SpawnListEntry defined by biomeName and LivingClass from the CreatureType.
      * 
      * @param pckgName
@@ -145,6 +157,10 @@ public class CreatureType {
      */
     public Collection<SpawnListEntry> getAllSpawns() {
         return groupNameToSpawnEntry.values();
+    }
+
+    public Collection<SpawnListEntry> getAllRejectedSpawns() {
+        return groupNameToRejectedSpawnEntry.values();
     }
 
     /**
@@ -372,16 +388,26 @@ public class CreatureType {
      * @param config
      * @return
      */
-    public CreatureType createFromConfig(Configuration config) {
-        int resultSpawnRate = config.get("LivingType." + typeID, "Spawn Rate", spawnRate).getInt();
-        int resultMaxNumberOfCreature = config.get("LivingType." + typeID, "Creature Spawn Cap", maxNumberOfCreature)
-                .getInt();
-        boolean resultChunkSpawning = config.get("LivingType." + typeID, "Do Chunk Spawning", chunkSpawning)
-                .getBoolean(chunkSpawning);
-        String resultOptionalParameters = config.get("LivingType." + typeID, "Optional Tags", optionalParameters)
-                .getString();
+    public CreatureType createFromConfig(EntityCategoryConfiguration config) {
+        int resultSpawnRate = config.getSpawnRate(typeID, spawnRate).getInt();
+        int resultMaxNumberOfCreature = config.getSpawnCap(typeID, maxNumberOfCreature).getInt();
+        boolean resultChunkSpawning = config.getChunkSpawning(typeID, chunkSpawning).getBoolean(chunkSpawning);
+        String resultOptionalParameters = config.getOptionalTags(typeID, optionalParameters).getString();
         return this.maxNumberOfCreatureTo(resultMaxNumberOfCreature).spawnRateTo(resultSpawnRate)
                 .chunkSpawningTo(resultChunkSpawning).optionalParametersTo(resultOptionalParameters);
+    }
+
+    /**
+     * Creates a new instance of creature types from configuration using itself as the default
+     * 
+     * @param config
+     * @return
+     */
+    public void saveToConfig(EntityCategoryConfiguration config) {
+        config.getSpawnRate(typeID, spawnRate).set(spawnRate);
+        config.getSpawnCap(typeID, maxNumberOfCreature).set(maxNumberOfCreature);
+        config.getChunkSpawning(typeID, chunkSpawning).set(chunkSpawning);
+        config.getOptionalTags(typeID, optionalParameters).set(optionalParameters);
     }
 
     /*

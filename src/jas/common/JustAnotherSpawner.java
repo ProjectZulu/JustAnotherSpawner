@@ -14,9 +14,8 @@ import jas.compatability.CompatabilityManager;
 import java.io.File;
 import java.io.IOException;
 
-import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
@@ -44,7 +43,14 @@ public class JustAnotherSpawner {
     @SidedProxy(clientSide = "jas.common.proxy.ClientProxy", serverSide = "jas.common.proxy.CommonProxy")
     public static CommonProxy proxy;
 
-    private File modConfigDirectoryFile;
+    /* Only Populated after {@link#FMLPreInitializationEvent} */
+    private static File modConfigDirectoryFile;
+
+    public static File getModConfigDirectory() {
+        return modConfigDirectoryFile;
+    }
+
+    ImportedSpawnList importedSpawnList;
 
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
@@ -53,6 +59,7 @@ public class JustAnotherSpawner {
         JASLog.configureLogging(modConfigDirectoryFile);
         TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
+        MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
     }
 
@@ -65,26 +72,23 @@ public class JustAnotherSpawner {
 
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
-        if (Properties.emptyVanillaSpawnLists) {
-            clearVanillaSpawnLists();
-        }
+        BiomeDictionary.registerAllBiomes();
+        importedSpawnList = new ImportedSpawnList();
+        importedSpawnList.importVanillaSpawnLists(Properties.emptyVanillaSpawnLists);
     }
 
     @ServerStarting
     public void serverStart(FMLServerStartingEvent event) {
-        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer());
+        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer().worldServers[0]);
         importDefaultFiles(modConfigDirectoryFile);
-        Properties.loadWorldProperties(modConfigDirectoryFile, event.getServer());
-        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile, event.getServer());
-        CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile, event.getServer());
-        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        Properties.loadWorldProperties(modConfigDirectoryFile);
+        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile);
+        CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile);
+        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
+                importedSpawnList);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
 
-        if (Properties.emptyVanillaSpawnLists) {
-            clearVanillaSpawnLists();
-        }
-
-        GameRules gameRule = event.getServer().worldServerForDimension(0).getGameRules();
+        GameRules gameRule = event.getServer().worldServers[0].getGameRules();
         if (Properties.turnGameruleSpawningOff) {
             JASLog.info("Setting GameRule doMobSpawning to false");
             gameRule.setOrCreateGameRule("doMobSpawning", "false");
@@ -110,20 +114,6 @@ public class JustAnotherSpawner {
             FileUtilities.copy(importFolder, worldFolder);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void clearVanillaSpawnLists() {
-        JASLog.info("Emptying Vanilla Spawn Lists.");
-        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
-            if (biome == null) {
-                continue;
-            }
-            for (EnumCreatureType type : EnumCreatureType.values()) {
-                if (biome.getSpawnableList(type) != null) {
-                    biome.getSpawnableList(type).clear();
-                }
-            }
         }
     }
 }

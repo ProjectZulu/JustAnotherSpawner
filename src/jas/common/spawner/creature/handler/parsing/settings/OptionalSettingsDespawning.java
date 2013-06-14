@@ -12,7 +12,8 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
         super(parseableString.replace("}", ""), EnumSet.of(Key.despawn, Key.light, Key.block, Key.blockFoot,
                 Key.blockRange, Key.spawnRange, Key.spawnRate, Key.sky, Key.despawnAge, Key.maxSpawnRange,
                 Key.minSpawnHeight, Key.maxSpawnHeight, Key.liquid, Key.opaque, Key.normal, Key.solidSide,
-                Key.difficulty, Key.torchLight, Key.ground, Key.top, Key.fill, Key.origin, Key.players));
+                Key.difficulty, Key.torchLight, Key.ground, Key.top, Key.fill, Key.origin, Key.players, Key.entities,
+                Key.random));
     }
 
     public int getRate() {
