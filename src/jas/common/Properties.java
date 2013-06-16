@@ -97,15 +97,6 @@ public class Properties {
                 "Universal Entity CFG - Settings", false,
                 "Specifies if the User wants the Entity CFG to Combined into a Universal CFG.").getBoolean(false);
         worldGloablConfig.save();
-
-        /* Temp Settings Holds the data showing telling how the directories/files were saved and need to be read */
-        LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
-        livingTempSettings.load();
-        savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(globalSortCreatureByBiome).getBoolean(
-                globalSortCreatureByBiome);
-        universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
-                loadedUniversalDirectory);
-        livingTempSettings.save();
     }
 
     /**
@@ -114,6 +105,15 @@ public class Properties {
      * @param configDirectory
      */
     public static void loadWorldProperties(File configDirectory) {
+        /* Temp Settings Holds the data showing telling how the directories/files were saved and need to be read */
+        LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
+        livingTempSettings.load();
+        savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(globalSortCreatureByBiome).getBoolean(
+                globalSortCreatureByBiome);
+        universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
+                loadedUniversalDirectory);
+        livingTempSettings.save();
+        
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
