@@ -1,7 +1,6 @@
 package jas.common.spawner.biome.structure;
 
 import jas.api.BiomeInterpreter;
-import jas.common.JASLog;
 import jas.common.ReflectionHelper;
 
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class BiomeInterpreterNether implements BiomeInterpreter {
                 return "NetherBridge";
             }
         } else {
-            JASLog.info("Biome or Chunkprovider is wrong, %s, %s", biome, chunkProviderHell);
+//            JASLog.info("Biome or Chunkprovider is wrong, %s, %s", biome, chunkProviderHell);
         }
         return null;
     }
