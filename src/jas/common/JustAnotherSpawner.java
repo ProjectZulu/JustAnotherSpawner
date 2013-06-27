@@ -17,6 +17,8 @@ import java.io.IOException;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.event.world.WorldEvent;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -87,20 +89,23 @@ public class JustAnotherSpawner {
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
                 importedSpawnList);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
+    }
 
-        GameRules gameRule = event.getServer().worldServers[0].getGameRules();
-        if (Properties.turnGameruleSpawningOff) {
-            JASLog.info("Setting GameRule doMobSpawning to false");
+    @ForgeSubscribe
+    public void worldLoad(WorldEvent.Load event) {
+        GameRules gameRule = event.world.getGameRules();
+        if (gameRule != null && Properties.turnGameruleSpawningOff) {
+            JASLog.info("Setting GameRule doMobSpawning for %s-%s to false", event.world.getWorldInfo().getWorldName(),
+                    event.world.provider.dimensionId);
             gameRule.setOrCreateGameRule("doMobSpawning", "false");
         }
 
         String ruleName = "doCustomMobSpawning";
-        if (gameRule.hasRule(ruleName)) {
-        } else {
+        if (!gameRule.hasRule(ruleName)) {
             gameRule.addGameRule(ruleName, "true");
         }
     }
-
+    
     private void importDefaultFiles(File modConfigDirectoryFile) {
         if (Properties.importName.trim().equals("")) {
             return;
