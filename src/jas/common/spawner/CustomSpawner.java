@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -124,6 +125,7 @@ public class CustomSpawner {
                             int blockSpawnZ = i2;
                             byte variance = 6;
                             SpawnListEntry spawnlistentry = null;
+                            EntityLivingData entitylivingdata = null;
                             CountableInt livingCount = null;
                             int livingCap = 0;
                             for (int k3 = 0; k3 < 4; ++k3) {
@@ -187,7 +189,10 @@ public class CustomSpawner {
                                                         .getCanSpawnHere(entityliving, spawnlistentry))) {
                                             ++j2;
                                             worldServer.spawnEntityInWorld(entityliving);
-                                            creatureSpecificInit(entityliving, worldServer, spawnX, spawnY, spawnZ);
+                                            if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX,
+                                                    spawnY, spawnZ)) {
+                                                entitylivingdata = entityliving.func_110161_a(entitylivingdata);
+                                            }
                                             try {
                                                 JASLog.log(LogType.SPAWNING, Level.INFO,
                                                         "Spawning %s type Entity %s aka %s at %s, %s, %s ",
@@ -233,17 +238,6 @@ public class CustomSpawner {
     }
 
     /**
-     * Used to Trigger Special Creature Conditions, such as Skeletons Riding Spiders
-     */
-    private static void creatureSpecificInit(EntityLiving entityLiving, World par1World, float xCoord, float yCoord,
-            float zCoord) {
-        if (ForgeEventFactory.doSpecialSpawn(entityLiving, par1World, xCoord, yCoord, zCoord)) {
-            return;
-        }
-        entityLiving.initCreature();
-    }
-
-    /**
      * Called during chunk generation to spawn initial creatures.
      */
     public static void performWorldGenSpawning(World world, CreatureType creatureType, BiomeGenBase biome, int par2,
@@ -255,6 +249,7 @@ public class CustomSpawner {
             int i2 = k1;
             SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world,
                     BiomeHelper.getPackageName(biome), j1, world.getTopSolidOrLiquidBlock(j1, k1), k1);
+            EntityLivingData entitylivingdata = null;
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
@@ -290,7 +285,9 @@ public class CustomSpawner {
                                 EntityList.classToStringMapping.get(entityliving.getClass()),
                                 entityliving.getEntityName(), entityliving.posX, entityliving.posY, entityliving.posZ);
                         world.spawnEntityInWorld(entityliving);
-                        creatureSpecificInit(entityliving, world, f, f1, f2);
+                        if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
+                            entitylivingdata = entityliving.func_110161_a(entitylivingdata);
+                        }
                         flag = true;
                     } else {
                         JASLog.debug(Level.INFO,

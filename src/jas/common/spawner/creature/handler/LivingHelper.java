@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler;
 import jas.common.JASLog;
 import jas.common.ReflectionHelper;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
 
 public class LivingHelper {
@@ -47,12 +48,12 @@ public class LivingHelper {
      * @param worldServer Instance of World
      * @return
      */
-    public static void setAge(EntityLiving entity, int value) {
+    public static void setAge(EntityLivingBase entity, int value) {
         try {
             ReflectionHelper
-                    .setCatchableFieldUsingReflection("field_70708_bq", EntityLiving.class, entity, true, value);
+                    .setCatchableFieldUsingReflection("field_70708_bq", EntityLivingBase.class, entity, true, value);
         } catch (NoSuchFieldException e) {
-            ReflectionHelper.setFieldUsingReflection("entityAge", EntityLiving.class, entity, true, value);
+            ReflectionHelper.setFieldUsingReflection("entityAge", EntityLivingBase.class, entity, true, value);
         }
     }
 }
