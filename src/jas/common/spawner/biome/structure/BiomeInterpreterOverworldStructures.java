@@ -35,14 +35,14 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
         ChunkProviderGenerate chunkProviderGenerate = BiomeInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderGenerate.class);
         if (chunkProviderGenerate != null) {
-            MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, chunkProviderGenerate,
+            MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, ChunkProviderGenerate.class, chunkProviderGenerate,
                     "strongholdGenerator", "field_73225_u");
             String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
             if (stronghold != null) {
                 return stronghold;
             }
 
-            MapGenStructure mineshaftGen = getStructureGen(MapGenMineshaft.class, chunkProviderGenerate,
+            MapGenStructure mineshaftGen = getStructureGen(MapGenMineshaft.class, ChunkProviderGenerate.class, chunkProviderGenerate,
                     "mineshaftGenerator", "field_73223_w");
             String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
             if (mineshaft != null) {
@@ -52,13 +52,14 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
         return null;
     }
 
-    private MapGenStructure getStructureGen(Class<? extends MapGenStructure> fieldClass, Object containerInstance,
+    private MapGenStructure getStructureGen(Class<? extends MapGenStructure> fieldClass, Class<?> containingClass, Object containerInstance,
             String fieldName, String obfName) {
         MapGenStructure structure;
         try {
-            structure = ReflectionHelper.getCatchableFieldFromReflection(obfName, containerInstance, fieldClass);
+            structure = ReflectionHelper.getCatchableFieldFromReflection(obfName, containingClass, containerInstance,
+                    fieldClass);
         } catch (NoSuchFieldException e) {
-            structure = ReflectionHelper.getFieldFromReflection(fieldName, containerInstance, fieldClass);
+            structure = ReflectionHelper.getFieldFromReflection(fieldName, containingClass, containerInstance, fieldClass);
         }
         return structure;
     }
@@ -72,5 +73,4 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
     public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
         return world.getWorldInfo().getDimension() == 0;
     }
-
 }

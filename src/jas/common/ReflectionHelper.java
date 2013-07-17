@@ -116,9 +116,60 @@ public class ReflectionHelper {
      * @param type
      * @return
      */
+    public static <T> T getFieldFromReflection(String fieldName, Class<?> fieldClass, Object containterInstance, Class<T> type) {
+        try {
+            Field desiredField = fieldClass.getDeclaredField(fieldName);
+            desiredField.setAccessible(true);
+            return type.cast(desiredField.get(containterInstance));
+        }catch (NoSuchFieldException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }catch (IllegalArgumentException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }catch (IllegalAccessException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }catch (SecurityException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to Perform Reflection to Get non-static Field of Provided Type. Field is assumed Private.
+     * @param fieldName
+     * @param type
+     * @return
+     */
     public static <T> T getCatchableFieldFromReflection(String fieldName, Object containterInstance, Class<T> type) throws NoSuchFieldException {
         try {
             Field desiredField = containterInstance.getClass().getDeclaredField(fieldName);
+            desiredField.setAccessible(true);
+            return type.cast(desiredField.get(containterInstance));
+        }catch (IllegalArgumentException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }catch (IllegalAccessException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }catch (SecurityException e) {
+            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Helper method to Perform Reflection to Get non-static Field of Provided Type. Field is assumed Private.
+     * @param fieldName
+     * @param type
+     * @return
+     */
+    public static <T> T getCatchableFieldFromReflection(String fieldName, Class<?> containingClass, Object containterInstance, Class<T> type) throws NoSuchFieldException {
+        try {
+            Field desiredField = containingClass.getDeclaredField(fieldName);
             desiredField.setAccessible(true);
             return type.cast(desiredField.get(containterInstance));
         }catch (IllegalArgumentException e) {
