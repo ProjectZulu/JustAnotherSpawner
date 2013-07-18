@@ -71,6 +71,6 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
 
     @Override
     public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
-        return world.getWorldInfo().getDimension() == 0;
+        return world.provider.dimensionId == 0;
     }
 }
