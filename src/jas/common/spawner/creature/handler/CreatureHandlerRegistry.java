@@ -78,9 +78,9 @@ public enum CreatureHandlerRegistry {
     public void saveCurrentToConfig(File configDirectory) {
         LivingConfiguration tempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings");
         tempSettings.load();
-        Property byBiome = tempSettings.getSavedSortByBiome(Properties.universalDirectory);
-        byBiome.set(Properties.universalDirectory);
-        Property isUniversal = tempSettings.getSavedUseUniversalConfig(Properties.savedSortCreatureByBiome);
+        Property byBiome = tempSettings.getSavedSortByBiome(Properties.savedSortCreatureByBiome);
+        byBiome.set(Properties.savedSortCreatureByBiome);
+        Property isUniversal = tempSettings.getSavedUseUniversalConfig(Properties.universalDirectory);
         isUniversal.set(Properties.universalDirectory);
         tempSettings.save();
 
