@@ -1,5 +1,6 @@
 package jas.common.spawner;
 
+import jas.common.BiomeBlacklist;
 import jas.common.Properties;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -15,6 +16,12 @@ import cpw.mods.fml.common.TickType;
 
 public class SpawnerTicker implements IScheduledTickHandler {
 
+    private BiomeBlacklist blacklist;
+    
+    public SpawnerTicker(BiomeBlacklist blacklist) {
+        this.blacklist = blacklist;
+    }
+    
     @Override
     public EnumSet<TickType> ticks() {
         return EnumSet.of(TickType.WORLD);
@@ -43,7 +50,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
                 CreatureType creatureType = typeIterator.next();
                 if (creatureType.isReady(world)) {
                     CustomSpawner.spawnCreaturesInChunks(world, creatureType, eligibleChunksForSpawning,
-                            creatureTypeCount, creatureCount);
+                            creatureTypeCount, creatureCount, blacklist);
                 }
             }
         }

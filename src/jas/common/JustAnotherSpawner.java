@@ -53,14 +53,13 @@ public class JustAnotherSpawner {
     }
 
     ImportedSpawnList importedSpawnList;
-
+    BiomeBlacklist biomeBlacklist;
+    
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         Properties.loadProperties(modConfigDirectoryFile);
         JASLog.configureLogging(modConfigDirectoryFile);
-        TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
-        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
         MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
     }
@@ -75,8 +74,10 @@ public class JustAnotherSpawner {
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
         BiomeDictionary.registerAllBiomes();
-        importedSpawnList = new ImportedSpawnList();
-        importedSpawnList.importVanillaSpawnLists(Properties.emptyVanillaSpawnLists);
+        biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
+        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
+        TickRegistry.registerTickHandler(new SpawnerTicker(biomeBlacklist), Side.SERVER);
+        importedSpawnList = new ImportedSpawnList(biomeBlacklist, Properties.emptyVanillaSpawnLists);
     }
 
     @ServerStarting

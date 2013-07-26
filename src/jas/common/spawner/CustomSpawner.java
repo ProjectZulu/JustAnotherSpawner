@@ -1,5 +1,6 @@
 package jas.common.spawner;
 
+import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
 import jas.common.JASLog.LogType;
 import jas.common.spawner.EntityCounter.CountableInt;
@@ -96,7 +97,7 @@ public class CustomSpawner {
      */
     public static final void spawnCreaturesInChunks(WorldServer worldServer, CreatureType creatureType,
             HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning, EntityCounter creatureTypeCount,
-            EntityCounter creatureCount) {
+            EntityCounter creatureCount, BiomeBlacklist blacklist) {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
 
         CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
@@ -137,6 +138,11 @@ public class CustomSpawner {
                                     float spawnX = blockSpawnX + 0.5F;
                                     float spawnY = blockSpawnY;
                                     float spawnZ = blockSpawnZ + 0.5F;
+                                    
+                                    if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(blockSpawnX,
+                                            blockSpawnZ))) {
+                                        continue labelChunkStart;
+                                    }
 
                                     if (worldServer.getClosestPlayer(spawnX, spawnY, spawnZ, 24.0D) == null) {
                                         float xOffset = spawnX - chunkcoordinates.posX;
