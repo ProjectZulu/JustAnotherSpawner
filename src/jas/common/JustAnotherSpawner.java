@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.common.command.CommandCountCap;
 import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
@@ -90,6 +91,7 @@ public class JustAnotherSpawner {
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
                 importedSpawnList);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        event.registerServerCommand(new CommandCountCap());
     }
 
     @ForgeSubscribe
