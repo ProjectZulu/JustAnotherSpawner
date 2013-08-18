@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.common.command.CommandCanSpawnHere;
 import jas.common.command.CommandCountCap;
 import jas.common.command.CommandListSpawns;
 import jas.common.gui.GuiHandler;
@@ -94,6 +95,7 @@ public class JustAnotherSpawner {
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
         event.registerServerCommand(new CommandCountCap());
         event.registerServerCommand(new CommandListSpawns());
+        event.registerServerCommand(new CommandCanSpawnHere());
     }
 
     @ForgeSubscribe
