@@ -82,9 +82,9 @@ public class CommandCanSpawnHere extends CommandBase {
                     targetPlayer.preventEntitySpawning = tempPreventEntitySpawning;
 
                     StringBuilder resultMessage = new StringBuilder();
-                    resultMessage.append(typeCanSpawnHere ? "§2" : "§4").append(entityType.typeID).append(" type ")
+                    resultMessage.append(typeCanSpawnHere ? "\u00A72" : "\u00A74").append(entityType.typeID).append(" type ")
                             .append(typeCanSpawnHere ? "can" : "cannot").append(" spawn here. ");
-                    resultMessage.append(entityCanSpawnHere ? "§2" : "§4").append(entityName).append(" entity ")
+                    resultMessage.append(entityCanSpawnHere ? "\u00A72" : "\u00A74").append(entityName).append(" entity ")
                             .append(entityCanSpawnHere ? "can" : "cannot").append(" spawn here.");
                     commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(resultMessage.toString()));
                     return;
@@ -94,7 +94,7 @@ public class CommandCanSpawnHere extends CommandBase {
         }
 
         if (!foundMatch) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a("§6".concat(entityName).concat(
+            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a("\u00A76".concat(entityName).concat(
                     " does not exist in the spawnlist of ".concat(biomePckgName).concat("."))));
         }
     }

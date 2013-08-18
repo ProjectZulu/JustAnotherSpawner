@@ -110,8 +110,8 @@ public class CommandCountCap extends CommandBase {
                         worldTypeContents.append(", ");
                     }
                     int entityTypeCap = entityType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-                    worldTypeContents.append("§r").append(entityType.typeID).append(":")
-                            .append(counter.get() >= entityTypeCap ? "§4" : "§2").append(counter.get()).append("§r")
+                    worldTypeContents.append("\u00A7r").append(entityType.typeID).append(":")
+                            .append(counter.get() >= entityTypeCap ? "\u00A74" : "\u00A72").append(counter.get()).append("\u00A7r")
                             .append("/").append(entityTypeCap);
                 }
             }

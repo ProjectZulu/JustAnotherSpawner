@@ -69,12 +69,12 @@ public class CommandListSpawns extends CommandBase {
                 } else {
                     biomeContents.append(", ");
                 }
-                biomeContents.append("§1").append(entityType.typeID).append("§r| ");
+                biomeContents.append("\u00A71").append(entityType.typeID).append("\u00A7r| ");
                 Iterator<SpawnListEntry> spawnListIterator = entityType.getSpawnList(biomePckgName).iterator();
                 while (spawnListIterator.hasNext()) {
                     SpawnListEntry entry = spawnListIterator.next();
-                    biomeContents.append(EntityList.classToStringMapping.get(entry.livingClass)).append("[§4")
-                            .append(entry.itemWeight).append("§r");
+                    biomeContents.append(EntityList.classToStringMapping.get(entry.livingClass)).append("[\u00A74")
+                            .append(entry.itemWeight).append("\u00A7r");
                     if (expandedEntries) {
                         biomeContents.append("/").append(entry.packSize).append("/").append(entry.minChunkPack)
                                 .append("/").append(entry.maxChunkPack);
