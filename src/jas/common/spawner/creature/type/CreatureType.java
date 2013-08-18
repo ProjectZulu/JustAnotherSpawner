@@ -13,6 +13,7 @@ import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -161,6 +162,17 @@ public class CreatureType {
 
     public Collection<SpawnListEntry> getAllRejectedSpawns() {
         return groupNameToRejectedSpawnEntry.values();
+    }
+
+    public Collection<SpawnListEntry> getSpawnList(String biomePackageName) {
+        ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+                biomePackageName);
+        ArrayList<SpawnListEntry> spawns = new ArrayList<SpawnListEntry>(groupIDList.size() * 7);
+
+        for (String groupID : groupIDList) {
+            spawns.addAll(groupNameToSpawnEntry.get(groupID));
+        }
+        return spawns;
     }
 
     /**
