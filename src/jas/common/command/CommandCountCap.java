@@ -13,6 +13,7 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -59,6 +60,8 @@ public class CommandCountCap extends CommandBase {
         if (stringArgs.length == 2) {
             try {
                 targetDim = parseInt(commandSender, stringArgs[0]);
+            } catch (NumberInvalidException e) {
+
             } finally {
                 if (targetDim == null) {
                     targetPlayer = func_82359_c(commandSender, stringArgs[0]);
@@ -80,7 +83,7 @@ public class CommandCountCap extends CommandBase {
         World[] worlds = targetPlayer != null ? new World[] { targetPlayer.worldObj }
                 : MinecraftServer.getServer().worldServers;
         for (int i = 0; i < worlds.length; i++) {
-            if (worlds[i] == null || targetDim == null || !targetDim.equals(worlds[i].provider.dimensionId)) {
+            if (worlds[i] == null || (targetDim != null && !targetDim.equals(worlds[i].provider.dimensionId))) {
                 continue;
             }
             World world = worlds[i];
