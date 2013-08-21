@@ -2,6 +2,8 @@ package jas.common;
 
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class ReflectionHelper {
     /**
@@ -11,6 +13,48 @@ public class ReflectionHelper {
      */
     public static boolean isUnObfuscated(Class<?> regularClass, String regularClassName){
         return regularClass.getSimpleName().equals(regularClassName);
+    }
+    
+    private static Method getIntanceOfMethod(String eclipseName, String seargeName, Object containterInstance,
+            Class<?>... topClassToLook) {
+        Class<?> classToSearch = containterInstance.getClass();
+        while (classToSearch.getSuperclass() != null) {
+            for (Method method : classToSearch.getDeclaredMethods()) {
+                if (eclipseName.equalsIgnoreCase(method.getName()) || seargeName.equalsIgnoreCase(method.getName())) {
+                    return method;
+                }
+            }
+            classToSearch = classToSearch.getSuperclass();
+        }
+        return null;
+    }
+
+    public static Object invokeMethod(String eclipseName, String seargeName, Object containterInstance, Object... args) {
+        try {
+            Method method;
+            method = getIntanceOfMethod(eclipseName, seargeName, containterInstance);
+            if (method == null) {
+                throw new NoSuchMethodException();
+            }
+            method.setAccessible(true);
+            return method.invoke(containterInstance, args);
+        } catch (NoSuchMethodException e) {
+            JASLog.severe("Obfuscation needs updating to access method %s. Notify modmaker.", eclipseName);
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            JASLog.severe("SecurityException accessing method %s. Notify modmaker.", eclipseName);
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            JASLog.severe("IllegalAccessException accessing method %s. Notify modmaker.", eclipseName);
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            JASLog.severe("IllegalArgumentException accessing method %s. Notify modmaker.", eclipseName);
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            JASLog.severe("InvocationTargetException accessing method %s. Notify modmaker.", eclipseName);
+            e.printStackTrace();
+        }
+        return null;
     }
     
     /**

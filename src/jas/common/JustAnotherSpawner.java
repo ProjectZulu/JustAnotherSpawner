@@ -1,6 +1,7 @@
 package jas.common;
 
 import jas.common.command.CommandCanSpawnHere;
+import jas.common.command.CommandComposition;
 import jas.common.command.CommandCountCap;
 import jas.common.command.CommandListSpawns;
 import jas.common.gui.GuiHandler;
@@ -96,6 +97,7 @@ public class JustAnotherSpawner {
         event.registerServerCommand(new CommandCountCap());
         event.registerServerCommand(new CommandListSpawns());
         event.registerServerCommand(new CommandCanSpawnHere());
+        event.registerServerCommand(new CommandComposition());
     }
 
     @ForgeSubscribe
