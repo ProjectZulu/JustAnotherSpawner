@@ -6,6 +6,7 @@ import jas.common.command.CommandCountCap;
 import jas.common.command.CommandKillAll;
 import jas.common.command.CommandListSpawns;
 import jas.common.command.CommandLocate;
+import jas.common.command.CommandPackageEntity;
 import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
@@ -102,6 +103,7 @@ public class JustAnotherSpawner {
         event.registerServerCommand(new CommandComposition());
         event.registerServerCommand(new CommandKillAll());
         event.registerServerCommand(new CommandLocate());
+        event.registerServerCommand(new CommandPackageEntity());
     }
 
     @ForgeSubscribe
