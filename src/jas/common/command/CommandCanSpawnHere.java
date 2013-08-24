@@ -5,20 +5,19 @@ import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.World;
 
-public class CommandCanSpawnHere extends CommandBase {
+public class CommandCanSpawnHere extends CommandJasBase {
     public String getCommandName() {
         return "jascanspawnhere";
     }
@@ -36,8 +35,7 @@ public class CommandCanSpawnHere extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender commandSender, String[] stringArgs) {
-
+    public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 0 || stringArgs.length >= 3) {
             throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
         }
@@ -82,10 +80,10 @@ public class CommandCanSpawnHere extends CommandBase {
                     targetPlayer.preventEntitySpawning = tempPreventEntitySpawning;
 
                     StringBuilder resultMessage = new StringBuilder();
-                    resultMessage.append(typeCanSpawnHere ? "\u00A72" : "\u00A74").append(entityType.typeID).append(" type ")
-                            .append(typeCanSpawnHere ? "can" : "cannot").append(" spawn here. ");
-                    resultMessage.append(entityCanSpawnHere ? "\u00A72" : "\u00A74").append(entityName).append(" entity ")
-                            .append(entityCanSpawnHere ? "can" : "cannot").append(" spawn here.");
+                    resultMessage.append(typeCanSpawnHere ? "\u00A72" : "\u00A74").append(entityType.typeID)
+                            .append(" type ").append(typeCanSpawnHere ? "can" : "cannot").append(" spawn here. ");
+                    resultMessage.append(entityCanSpawnHere ? "\u00A72" : "\u00A74").append(entityName)
+                            .append(" entity ").append(entityCanSpawnHere ? "can" : "cannot").append(" spawn here.");
                     commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(resultMessage.toString()));
                     return;
                 }
@@ -94,8 +92,8 @@ public class CommandCanSpawnHere extends CommandBase {
         }
 
         if (!foundMatch) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a("\u00A76".concat(entityName).concat(
-                    " does not exist in the spawnlist of ".concat(biomePckgName).concat("."))));
+            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a("\u00A76".concat(entityName)
+                    .concat(" does not exist in the spawnlist of ".concat(biomePckgName).concat("."))));
         }
     }
 
@@ -113,17 +111,19 @@ public class CommandCanSpawnHere extends CommandBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+        stringArgs = correctedParseArgs(stringArgs, false);
+        List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {
-            return getListOfStringsMatchingLastWord(stringArgs, MinecraftServer.getServer().getAllUsernames());
+            addPlayerUsernames(tabCompletions);
         } else if (stringArgs.length == 2) {
-            @SuppressWarnings("unchecked")
-            String[] arrayValues = (String[]) EntityList.classToStringMapping.values().toArray(
-                    new String[EntityList.classToStringMapping.values().size()]);
-            return getListOfStringsMatchingLastWord(stringArgs, arrayValues);
+            addEntityNames(tabCompletions);
+        }
+
+        if (!tabCompletions.isEmpty()) {
+            return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
-            return null;
+            return tabCompletions;
         }
     }
 }

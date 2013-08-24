@@ -3,13 +3,12 @@ package jas.common.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
 import net.minecraft.util.ChatMessageComponent;
 
-public class CommandPackageEntity extends CommandBase {
+public class CommandPackageEntity extends CommandJasBase {
     public String getCommandName() {
         return "jasentitypackage";
     }
@@ -27,18 +26,13 @@ public class CommandPackageEntity extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length == 0) {
+    public void process(ICommandSender commandSender, String[] stringArgs) {
+        if (stringArgs.length != 1) {
             throw new WrongUsageException("commands.jasentitypackage.usage", new Object[0]);
         }
 
-        String name = "";
-        for (String arg : stringArgs) {
-            name = name.concat(arg);
-        }
-
+        String name = stringArgs[0];
         Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(name);
-
         if (entityClass != null) {
             commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(name.concat(" package is ").concat(
                     entityClass.getName())));
@@ -51,14 +45,18 @@ public class CommandPackageEntity extends CommandBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+        stringArgs = correctedParseArgs(stringArgs, false);
+        List<String> tabCompletions = new ArrayList<String>();
+
         if (stringArgs.length == 1) {
-            List<String> values = new ArrayList<String>();
-            values.addAll(EntityList.classToStringMapping.values());
-            return getListOfStringsMatchingLastWord(stringArgs, values.toArray(new String[values.size()]));
+            addEntityNames(tabCompletions);
+        }
+
+        if (!tabCompletions.isEmpty()) {
+            return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
-            return null;
+            return tabCompletions;
         }
     }
 }

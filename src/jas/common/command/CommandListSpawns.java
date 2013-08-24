@@ -9,15 +9,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
 
-public class CommandListSpawns extends CommandBase {
+public class CommandListSpawns extends CommandJasBase {
     public String getCommandName() {
         return "jaslistspawns";
     }
@@ -41,8 +39,7 @@ public class CommandListSpawns extends CommandBase {
      * <spawnEntry2>
      */
     @Override
-    public void processCommand(ICommandSender commandSender, String[] stringArgs) {
-
+    public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 0 || stringArgs.length >= 4) {
             throw new WrongUsageException("commands.jaslistspawns.usage", new Object[0]);
         }
@@ -98,23 +95,22 @@ public class CommandListSpawns extends CommandBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+        stringArgs = correctedParseArgs(stringArgs, false);
+        List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {
-            return getListOfStringsMatchingLastWord(stringArgs, MinecraftServer.getServer().getAllUsernames());
+            addPlayerUsernames(tabCompletions);
         } else if (stringArgs.length == 2) {
-            List<String> values = new ArrayList<String>();
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
-            while (iterator.hasNext()) {
-                CreatureType entityType = iterator.next();
-                values.add(entityType.typeID);
-            }
-            String[] arrayValues = values.toArray(new String[values.size()]);
-            return getListOfStringsMatchingLastWord(stringArgs, arrayValues);
+            addEntityTypes(tabCompletions);
         } else if (stringArgs.length == 3) {
-            return getListOfStringsMatchingLastWord(stringArgs, new String[] { "true", "false" });
+            tabCompletions.add("true");
+            tabCompletions.add("false");
+        }
+
+        if (!tabCompletions.isEmpty()) {
+            return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
-            return null;
+            return tabCompletions;
         }
     }
 }

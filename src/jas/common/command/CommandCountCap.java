@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
@@ -22,7 +21,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-public class CommandCountCap extends CommandBase {
+public class CommandCountCap extends CommandJasBase {
 
     public String getCommandName() {
         return "jascountcap";
@@ -49,8 +48,7 @@ public class CommandCountCap extends CommandBase {
      * /jascountcap <EntityType> --OUTPUT--> New Line for Each Dimension of <EntityType> is <XX> out of <EntityTypeCap>
      */
     @Override
-    public void processCommand(ICommandSender commandSender, String[] stringArgs) {
-
+    public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 0 || stringArgs.length >= 3) {
             throw new WrongUsageException("commands.jascountcap.usage", new Object[0]);
         }
@@ -114,8 +112,8 @@ public class CommandCountCap extends CommandBase {
                     }
                     int entityTypeCap = entityType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
                     worldTypeContents.append("\u00A7r").append(entityType.typeID).append(":")
-                            .append(counter.get() >= entityTypeCap ? "\u00A74" : "\u00A72").append(counter.get()).append("\u00A7r")
-                            .append("/").append(entityTypeCap);
+                            .append(counter.get() >= entityTypeCap ? "\u00A74" : "\u00A72").append(counter.get())
+                            .append("\u00A7r").append("/").append(entityTypeCap);
                 }
             }
 
@@ -131,38 +129,20 @@ public class CommandCountCap extends CommandBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    @SuppressWarnings("rawtypes")
-    public List addTabCompletionOptions(ICommandSender par1ICommandSender, String[] par2ArrayOfStr) {
-        if (par2ArrayOfStr.length == 1) {
-            List<String> typeNames = new ArrayList<String>();
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
-            while (iterator.hasNext()) {
-                CreatureType entityType = iterator.next();
-                typeNames.add(entityType.typeID);
-            }
-            String[] combinedValues = new String[typeNames.size()
-                    + MinecraftServer.getServer().getAllUsernames().length];
-            int index = 0;
-            for (String username : MinecraftServer.getServer().getAllUsernames()) {
-                combinedValues[index] = username;
-                index++;
-            }
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+        stringArgs = correctedParseArgs(stringArgs, false);
+        List<String> tabCompletions = new ArrayList<String>();
+        if (stringArgs.length == 1) {
+            addEntityTypes(tabCompletions);
+            addPlayerUsernames(tabCompletions);
+        } else if (stringArgs.length == 2) {
+            addEntityTypes(tabCompletions);
+        }
 
-            for (String typeName : typeNames) {
-                combinedValues[index] = typeName;
-                index++;
-            }
-
-            return getListOfStringsMatchingLastWord(par2ArrayOfStr, combinedValues);
+        if (!tabCompletions.isEmpty()) {
+            return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
-            List<String> values = new ArrayList<String>();
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
-            while (iterator.hasNext()) {
-                CreatureType entityType = iterator.next();
-                values.add(entityType.typeID);
-            }
-            String[] arrayValues = values.toArray(new String[values.size()]);
-            return getListOfStringsMatchingLastWord(par2ArrayOfStr, arrayValues);
+            return tabCompletions;
         }
     }
 }

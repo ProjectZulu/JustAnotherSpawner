@@ -2,24 +2,20 @@ package jas.common.command;
 
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
-import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
 
-public class CommandLocate extends CommandBase {
+public class CommandLocate extends CommandJasBase {
     public String getCommandName() {
         return "jaslocate";
     }
@@ -37,8 +33,7 @@ public class CommandLocate extends CommandBase {
     }
 
     @Override
-    public void processCommand(ICommandSender commandSender, String[] stringArgs) {
-
+    public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length >= 4) {
             throw new WrongUsageException("commands.jaslocate.usage", new Object[0]);
         }
@@ -86,44 +81,22 @@ public class CommandLocate extends CommandBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+        stringArgs = correctedParseArgs(stringArgs, false);
+        List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {
-            List<String> values = new ArrayList<String>();
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
-            while (iterator.hasNext()) {
-                CreatureType creatureType = iterator.next();
-                values.add(creatureType.typeID);
-            }
-
-            values.addAll(EntityList.classToStringMapping.values());
-
-            String[] combinedValues = new String[values.size() + MinecraftServer.getServer().getAllUsernames().length];
-            int index = 0;
-            for (String username : MinecraftServer.getServer().getAllUsernames()) {
-                combinedValues[index] = username;
-                index++;
-            }
-
-            for (String typeName : values) {
-                combinedValues[index] = typeName;
-                index++;
-            }
-
-            return getListOfStringsMatchingLastWord(stringArgs, combinedValues);
+            addEntityTypes(tabCompletions);
+            addPlayerUsernames(tabCompletions);
+            addEntityNames(tabCompletions);
         } else if (stringArgs.length == 2) {
-            List<String> values = new ArrayList<String>();
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
-            while (iterator.hasNext()) {
-                CreatureType entityType = iterator.next();
-                values.add(entityType.typeID);
-            }
-            values.addAll(EntityList.classToStringMapping.values());
-            return getListOfStringsMatchingLastWord(stringArgs, values.toArray(new String[values.size()]));
-        } else if (stringArgs.length == 3) {
-            return getListOfStringsMatchingLastWord(stringArgs, new String[] { "true", "false" });
+            addEntityTypes(tabCompletions);
+            addEntityNames(tabCompletions);
+        }
+
+        if (!tabCompletions.isEmpty()) {
+            return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
-            return null;
+            return tabCompletions;
         }
     }
 }
