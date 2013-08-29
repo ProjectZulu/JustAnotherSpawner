@@ -12,14 +12,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public class CommandCountCap extends CommandJasBase {
 
@@ -49,39 +46,24 @@ public class CommandCountCap extends CommandJasBase {
      */
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length == 0 || stringArgs.length >= 3) {
+        if (stringArgs.length >= 3) {
             throw new WrongUsageException("commands.jascountcap.usage", new Object[0]);
         }
 
-        EntityPlayerMP targetPlayer = null;
-        Integer targetDim = null;
-        if (stringArgs.length == 2) {
-            try {
-                targetDim = parseInt(commandSender, stringArgs[0]);
-            } catch (NumberInvalidException e) {
-
-            } finally {
-                if (targetDim == null) {
-                    targetPlayer = func_82359_c(commandSender, stringArgs[0]);
-                } else {
-                    boolean foundMatch = false;
-                    for (WorldServer world : MinecraftServer.getServer().worldServers) {
-                        if (targetDim.equals(world.provider.dimensionId)) {
-                            foundMatch = true;
-                        }
-                    }
-                    if (!foundMatch) {
-                        throw new WrongUsageException("commands.jascountcap.invaliddimension", new Object[0]);
-                    }
-                }
-            }
+        World targetWorld = null;
+        if (stringArgs.length > 0) {
+            targetWorld = getTargetWorld(stringArgs[0], commandSender);
         }
 
-        String typeName = stringArgs[stringArgs.length == 1 ? 0 : 1];
-        World[] worlds = targetPlayer != null ? new World[] { targetPlayer.worldObj }
-                : MinecraftServer.getServer().worldServers;
+        if (targetWorld == null) {
+            targetWorld = func_82359_c(commandSender, commandSender.getCommandSenderName()).worldObj;
+        }
+
+        String typeName = stringArgs.length == 0 ? "*" : stringArgs[stringArgs.length == 1 ? 0 : 1];
+        World[] worlds = stringArgs.length == 2 && stringArgs[0].equals("*") ? MinecraftServer.getServer().worldServers
+                : new World[] { targetWorld };
         for (int i = 0; i < worlds.length; i++) {
-            if (worlds[i] == null || (targetDim != null && !targetDim.equals(worlds[i].provider.dimensionId))) {
+            if (worlds[i] == null) {
                 continue;
             }
             World world = worlds[i];
