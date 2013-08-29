@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.api.CompatibilityRegistrationEvent;
 import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
@@ -9,7 +10,6 @@ import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import jas.compatability.CompatabilityManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +68,6 @@ public class JustAnotherSpawner {
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
         NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
-        CompatabilityManager.addCompatabilityResources();
     }
 
     @PostInit
@@ -78,6 +77,7 @@ public class JustAnotherSpawner {
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
         TickRegistry.registerTickHandler(new SpawnerTicker(biomeBlacklist), Side.SERVER);
         importedSpawnList = new ImportedSpawnList(biomeBlacklist, Properties.emptyVanillaSpawnLists);
+        MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
     }
 
     @ServerStarting

@@ -1,6 +1,7 @@
 package jas.common.spawner.biome.structure;
 
 import jas.api.BiomeInterpreter;
+import jas.api.CompatibilityLoader;
 import jas.common.config.StructureConfiguration;
 
 import java.io.File;
