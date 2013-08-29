@@ -16,6 +16,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>COMP_SRC</name>
+			<type>2</type>
+			<location>D:/Minecraft Modding/Project Zulu 2.0/Minecraft 16/jas/src_comp</location>
+		</link>
+		<link>
 			<name>GIT_SRC</name>
 			<type>2</type>
 			<locationURI>GIT_SRC</locationURI>
