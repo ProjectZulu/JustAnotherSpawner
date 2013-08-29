@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatMessageComponent;
@@ -37,7 +38,7 @@ public class CommandKillAll extends CommandJasBase {
 
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length >= 3) {
+        if (stringArgs.length >= 4) {
             throw new WrongUsageException("commands.jaskillall.usage", new Object[0]);
         }
 
@@ -50,6 +51,8 @@ public class CommandKillAll extends CommandJasBase {
 
         String entityCategName = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
 
+        String entityFilter = stringArgs.length == 3 ? stringArgs[2] : "";
+
         EntityCounter deathCount = new EntityCounter();
         int totalDeaths = 0;
         @SuppressWarnings("unchecked")
@@ -57,7 +60,8 @@ public class CommandKillAll extends CommandJasBase {
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
             LivingHandler handler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
-            if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))) {
+            if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
+                    && isEntityFiltered(entity, entityFilter)) {
                 if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {
                     entity.setDead();
                     deathCount.incrementOrPutIfAbsent(handler.creatureTypeID, 0);
@@ -80,6 +84,14 @@ public class CommandKillAll extends CommandJasBase {
         commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(deathMessage.toString()));
     }
 
+    private boolean isEntityFiltered(Entity entity, String filter) {
+        String name = (String) EntityList.classToStringMapping.get(entity.getClass());
+        if (!filter.equals("") && name != null || name.contains(filter)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Adds the strings available in this command to the given list of tab completion options.
      */
@@ -92,7 +104,7 @@ public class CommandKillAll extends CommandJasBase {
         } else if (stringArgs.length == 2) {
             addEntityTypes(tabCompletions);
         }
-        
+
         if (!tabCompletions.isEmpty()) {
             return getStringsMatchingLastWord(stringArgs, tabCompletions);
         } else {
