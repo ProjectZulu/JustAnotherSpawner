@@ -44,7 +44,7 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(WorldServer worldServer) {
+    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(World worldServer) {
         HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
         int i;
         int j;
@@ -75,7 +75,7 @@ public class CustomSpawner {
      * 
      * @param worldServer
      */
-    public static void countEntityInChunks(WorldServer worldServer, EntityCounter creatureType,
+    public static void countEntityInChunks(World worldServer, EntityCounter creatureType,
             EntityCounter creatureCount) {
         @SuppressWarnings("unchecked")
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();

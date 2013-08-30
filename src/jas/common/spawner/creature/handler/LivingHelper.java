@@ -56,4 +56,14 @@ public class LivingHelper {
             ReflectionHelper.setFieldUsingReflection("entityAge", EntityLivingBase.class, entity, true, value);
         }
     }
+
+    /**
+     * Check the entity to see if it can despawn
+     * 
+     * @param livingClass Class of Desired Creature
+     * @return
+     */
+    public static boolean canDespawn(EntityLivingBase entity) {
+        return (boolean) ReflectionHelper.invokeMethod("canDespawn", "func_70692_ba", entity);
+    }
 }

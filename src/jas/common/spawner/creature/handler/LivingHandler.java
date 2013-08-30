@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.Properties;
+import jas.common.ReflectionHelper;
 import jas.common.config.LivingConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
@@ -112,6 +113,48 @@ public class LivingHandler {
         }
     }
 
+    /**
+     * Evaluates if this Entity in its current location / state would be capable of despawning eventually
+     */
+    public final boolean canDespawn(EntityLiving entity) {
+        if (!getDespawning().isOptionalEnabled()) {
+            return LivingHelper.canDespawn(entity);
+        }
+        EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
+        int xCoord = MathHelper.floor_double(entity.posX);
+        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+        int zCoord = MathHelper.floor_double(entity.posZ);
+
+        if (entityplayer != null) {
+            double d0 = entityplayer.posX - entity.posX;
+            double d1 = entityplayer.posY - entity.posY;
+            double d2 = entityplayer.posZ - entity.posZ;
+            double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+
+            boolean canDespawn = !despawning.isInverted();
+            if (!despawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
+                canDespawn = despawning.isInverted();
+            }
+
+            if (canDespawn == false) {
+                return false;
+            }
+
+            boolean validDistance = despawning.isMidDistance((int) d3, Properties.despawnDist);
+            boolean isOfAge = despawning.isValidAge(entity.getAge(), Properties.minDespawnTime);
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, Properties.maxDespawnDist);
+
+            if (instantDespawn) {
+                return true;
+            } else if (validDistance) {
+                return true;
+            } else if (!validDistance) {
+                return false;
+            }
+        }
+        return false;
+    }
+    
     /**
      * Called by Despawn to Manually Attempt to Despawn Entity
      * 

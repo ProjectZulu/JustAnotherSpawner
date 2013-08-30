@@ -1,6 +1,13 @@
 package jas.common;
 
 import jas.api.CompatibilityRegistrationEvent;
+import jas.common.command.CommandCanSpawnHere;
+import jas.common.command.CommandComposition;
+import jas.common.command.CommandCountCap;
+import jas.common.command.CommandKillAll;
+import jas.common.command.CommandListSpawns;
+import jas.common.command.CommandLocate;
+import jas.common.command.CommandPackageEntity;
 import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
@@ -90,6 +97,13 @@ public class JustAnotherSpawner {
         CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
                 importedSpawnList);
         BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        event.registerServerCommand(new CommandCountCap());
+        event.registerServerCommand(new CommandListSpawns());
+        event.registerServerCommand(new CommandCanSpawnHere());
+        event.registerServerCommand(new CommandComposition());
+        event.registerServerCommand(new CommandKillAll());
+        event.registerServerCommand(new CommandLocate());
+        event.registerServerCommand(new CommandPackageEntity());
     }
 
     @ForgeSubscribe
