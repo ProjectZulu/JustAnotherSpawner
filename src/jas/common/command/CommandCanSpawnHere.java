@@ -40,14 +40,22 @@ public class CommandCanSpawnHere extends CommandJasBase {
             throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
         }
 
-        EntityPlayerMP targetPlayer = func_82359_c(commandSender, stringArgs[0]);
-        String biomePckgName = BiomeHelper.getPackageName(targetPlayer.worldObj.getBiomeGenForCoords(
-                (int) targetPlayer.posX, (int) targetPlayer.posZ));
-        String entityName = stringArgs[1];
+        EntityPlayerMP targetPlayer;
+        String entityName;
+        if (stringArgs.length == 1) {
+            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            entityName = stringArgs[0];
+        } else {
+            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+            entityName = stringArgs[1];
+        }
 
         if (!isValidEntityName(entityName)) {
             throw new WrongUsageException("commands.jascanspawnhere.entitynotfound", new Object[0]);
         }
+
+        String biomePckgName = BiomeHelper.getPackageName(targetPlayer.worldObj.getBiomeGenForCoords(
+                (int) targetPlayer.posX, (int) targetPlayer.posZ));
 
         boolean foundMatch = false;
         Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
