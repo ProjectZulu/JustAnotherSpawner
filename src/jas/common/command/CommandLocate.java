@@ -34,7 +34,7 @@ public class CommandLocate extends CommandJasBase {
 
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length >= 4) {
+        if (stringArgs.length >= 3) {
             throw new WrongUsageException("commands.jaslocate.usage", new Object[0]);
         }
 
