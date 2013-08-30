@@ -40,14 +40,20 @@ public class CommandListSpawns extends CommandJasBase {
      */
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length == 0 || stringArgs.length >= 4) {
+        if (stringArgs.length >= 4) {
             throw new WrongUsageException("commands.jaslistspawns.usage", new Object[0]);
         }
 
-        EntityPlayerMP targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+        EntityPlayerMP targetPlayer;
+        try {
+            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+        } catch (Exception e) {
+            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+        }
+
         String biomePckgName = BiomeHelper.getPackageName(targetPlayer.worldObj.getBiomeGenForCoords(
                 (int) targetPlayer.posX, (int) targetPlayer.posZ));
-        String entityCategName = stringArgs[1];
+        String entityCategName = stringArgs.length == 0 ? "*" : stringArgs[stringArgs.length == 1 ? 0 : 1];
         boolean expandedEntries = stringArgs.length == 3 ? stringArgs[2].equalsIgnoreCase("true") : false;
 
         StringBuilder biomeContents = new StringBuilder();
