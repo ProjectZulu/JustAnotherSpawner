@@ -1,5 +1,6 @@
 package jas.compatability;
 
+import jas.common.JASLog;
 import jas.compatability.tf.TFLoadInfo;
 
 import java.util.ArrayList;
@@ -29,16 +30,24 @@ public class JASCompatability {
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    @ForgeSubscribe
-    public void CompatibilityRegistration(jas.api.CompatibilityRegistrationEvent event) {
-        for (LoadInfo moduleInfo : modulesInfo) {
-            if (shouldLoadModule(moduleInfo)) {
-                for (Object object : moduleInfo.getObjectsToRegister()) {
-                    event.loader.registerObject(object);
-                }
-            }
-        }
-    }
+	@ForgeSubscribe
+	public void CompatibilityRegistration(
+			jas.api.CompatibilityRegistrationEvent event) {
+		for (LoadInfo moduleInfo : modulesInfo) {
+			try {
+				if (shouldLoadModule(moduleInfo)) {
+					for (Object object : moduleInfo.getObjectsToRegister()) {
+						event.loader.registerObject(object);
+					}
+				}
+			} catch (Exception e) {
+				JASLog.severe(
+						"Failed to load JAS compatability module %s due to %s",
+						moduleInfo.loaderID(), e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
 
     private boolean shouldLoadModule(LoadInfo moduleInfo) {
         for (String modID : moduleInfo.getRequiredModIDs()) {

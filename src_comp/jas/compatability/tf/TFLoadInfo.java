@@ -20,4 +20,9 @@ public class TFLoadInfo implements LoadInfo {
         list.add(new BiomeInterpreterTwilightForest());
         return list;
     }
+
+	@Override
+	public String loaderID() {
+		return "TwilightForest";
+	}
 }
