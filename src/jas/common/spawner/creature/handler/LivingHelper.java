@@ -64,6 +64,6 @@ public class LivingHelper {
      * @return
      */
     public static boolean canDespawn(EntityLivingBase entity) {
-        return (boolean) ReflectionHelper.invokeMethod("canDespawn", "func_70692_ba", entity);
+        return (Boolean) ReflectionHelper.invokeMethod("canDespawn", "func_70692_ba", entity);
     }
 }
