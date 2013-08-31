@@ -21,6 +21,7 @@ import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
 public class BiomeHandler {
@@ -38,6 +39,14 @@ public class BiomeHandler {
         }
     }
 
+    public ImmutableList<String> getStructureKeys() {
+        return ImmutableList.copyOf(structureKeys);
+    }
+
+    public ImmutableList<jas.common.spawner.creature.entry.SpawnListEntry> getStructureSpawnList(String structureKey) {
+        return ImmutableList.copyOf(structureKeysToSpawnList.get(structureKey));
+    }
+    
     /**
      * Gets the SpawnList For the Worlds Biome Coords Provided.
      * 
@@ -52,6 +61,10 @@ public class BiomeHandler {
         return Collections.emptyList();
     }
 
+    public String getStructure(World world, int xCoord, int yCoord, int zCoord) {
+        return interpreter.areCoordsStructure(world, xCoord, yCoord, zCoord);
+    }
+    
     public boolean doesHandlerApply(World world, int xCoord, int yCoord, int zCoord) {
         return interpreter.shouldUseHandler(world, world.getBiomeGenForCoords(xCoord, zCoord));
     }
