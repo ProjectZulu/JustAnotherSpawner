@@ -16,6 +16,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
@@ -26,7 +28,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 public class CommandCanSpawnHere extends CommandJasBase {
     public String getCommandName() {
-        return "jascanspawnhere";
+        return "canspawnhere";
     }
 
     /**
@@ -40,7 +42,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     public String getCommandUsage(ICommandSender commandSender) {
         return "commands.jascanspawnhere.usage";
     }
-
+    
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 0 || stringArgs.length > 2) {

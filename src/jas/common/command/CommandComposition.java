@@ -21,7 +21,7 @@ import net.minecraft.util.ChatMessageComponent;
 
 public class CommandComposition extends CommandJasBase {
     public String getCommandName() {
-        return "jascomposition";
+        return "composition";
     }
 
     /**

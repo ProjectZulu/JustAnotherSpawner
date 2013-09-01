@@ -20,7 +20,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 public class CommandListSpawns extends CommandJasBase {
     public String getCommandName() {
-        return "jaslistspawns";
+        return "listspawns";
     }
 
     /**

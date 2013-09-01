@@ -21,7 +21,7 @@ import net.minecraft.util.ChatMessageComponent;
 
 public class CommandKillAll extends CommandJasBase {
     public String getCommandName() {
-        return "jaskillall";
+        return "killall";
     }
 
     /**

@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 public class CommandCountCap extends CommandJasBase {
 
     public String getCommandName() {
-        return "jascountcap";
+        return "countcap";
     }
 
     /**

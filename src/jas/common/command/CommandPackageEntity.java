@@ -10,7 +10,7 @@ import net.minecraft.util.ChatMessageComponent;
 
 public class CommandPackageEntity extends CommandJasBase {
     public String getCommandName() {
-        return "jasentitypackage";
+        return "entitypackage";
     }
 
     /**

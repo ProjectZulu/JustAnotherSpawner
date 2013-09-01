@@ -17,7 +17,7 @@ import net.minecraft.util.ChatMessageComponent;
 
 public class CommandLocate extends CommandJasBase {
     public String getCommandName() {
-        return "jaslocate";
+        return "locate";
     }
 
     /**
