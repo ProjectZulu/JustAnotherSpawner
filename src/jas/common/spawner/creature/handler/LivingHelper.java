@@ -1,7 +1,10 @@
 package jas.common.spawner.creature.handler;
 
+import java.lang.reflect.InvocationTargetException;
+
 import jas.common.JASLog;
 import jas.common.ReflectionHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.World;
@@ -17,14 +20,19 @@ public class LivingHelper {
      */
     public static EntityLiving createCreature(Class<? extends EntityLiving> livingClass, World world) {
         try {
-            return livingClass.getConstructor(new Class[] { World.class }).newInstance(new Object[] { world });
+            return instantiateEntity(livingClass, world);
         } catch (Exception exception) {
-            JASLog.warning("Entity %s could not be initialized. Default defaults will be provided for it.",
-                    livingClass.getSimpleName());
+            JASLog.warning("Entity %s could not be initialized.", livingClass.getSimpleName());
         }
         return null;
     }
 
+    public static <T extends Entity> T instantiateEntity(Class<? extends T> entityClass, World world)
+            throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+            NoSuchMethodException, SecurityException {
+        return entityClass.getConstructor(new Class[] { World.class }).newInstance(new Object[] { world });
+    }
+    
     /**
      * Set Persistence Required of the instance of Entity Provided
      * 

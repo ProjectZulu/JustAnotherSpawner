@@ -8,6 +8,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+
 import net.minecraft.world.World;
 
 public enum BiomeHandlerRegistry {
@@ -43,6 +46,10 @@ public enum BiomeHandlerRegistry {
         return biomeHandlers.iterator();
     }
 
+    public ImmutableList<BiomeHandler> handlers() {
+        return ImmutableList.copyOf(biomeHandlers);
+    }
+    
     /**
      * Used to save the currently loaded settings into the Configuration Files
      * 

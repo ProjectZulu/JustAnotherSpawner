@@ -106,10 +106,13 @@ public class LivingHandler {
      * @return True if location is valid For entity to spawn, false otherwise
      */
     public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
-        if (!spawning.isOptionalEnabled() && !spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
-            return isValidLocation(entity, CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID));
+        boolean canLivingSpawn = isValidLiving(entity);
+        boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
+
+        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
+            return canLivingSpawn && canSpawnListSpawn;
         } else {
-            return isValidLocation(entity, spawnListEntry);
+            return canLivingSpawn || canSpawnListSpawn;
         }
     }
 
@@ -206,41 +209,43 @@ public class LivingHandler {
      * @param spawnType
      * @return
      */
-    protected boolean isValidLocation(EntityLiving entity, CreatureType spawnType) {
+    protected boolean isValidLocation(EntityLiving entity) {
         return entity.getCanSpawnHere();
     }
 
-    /**
-     * Alternative getCanSpawnHere independent of the Entity. By default this provides a way for End-Users to Skip the
-     * EntitySpecific check implemented by Modders while keeping the generic bounding box style checks in EntityLiving
-     * 
-     * @param entity
-     * @return True if location is valid For entity to spawn, false otherwise
-     */
-    private final boolean isValidLocation(EntityLiving entity, SpawnListEntry spawnListEntry) {
+    public final boolean isValidLiving(EntityLiving entity) {
+        if (!spawning.isOptionalEnabled()) {
+            return isValidLocation(entity);
+        }
+
         int xCoord = MathHelper.floor_double(entity.posX);
         int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
         int zCoord = MathHelper.floor_double(entity.posZ);
 
-        boolean canSpawn;
-
-        boolean canLivingSpawn = spawning.isOptionalEnabled() ? !spawning.isInverted() : false;
+        boolean canLivingSpawn = !spawning.isInverted();
         if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
             canLivingSpawn = spawning.isInverted();
         }
 
-        boolean canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isOptionalEnabled() ? !spawnListEntry
-                .getOptionalSpawning().isInverted() : false;
+        return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
+                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+    }
+
+    public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry) {
+        if (!spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
+            return false;
+        }
+
+        int xCoord = MathHelper.floor_double(entity.posX);
+        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+        int zCoord = MathHelper.floor_double(entity.posZ);
+
+        boolean canSpawnListSpawn = !spawnListEntry.getOptionalSpawning().isInverted();
         if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
             canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
         }
-        
-        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
-            canSpawn = canLivingSpawn && canSpawnListSpawn;
-        } else {
-            canSpawn = canLivingSpawn || canSpawnListSpawn;
-        }
-        return canSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
+
+        return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
     }
 

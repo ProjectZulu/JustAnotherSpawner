@@ -36,7 +36,7 @@ public enum BiomeGroupRegistry {
     /** Cusom Biome Names: Mappings For CustomBiomeNames to PackageNames used to read from configuration */
     private final HashMap<String, String> biomeMappingToPckg = new HashMap<String, String>();
     /** Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration */
-    private final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
+    public final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
     /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names */
     public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
 
