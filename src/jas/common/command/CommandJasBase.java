@@ -9,12 +9,8 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.NumberInvalidException;
 import net.minecraft.entity.EntityList;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 public abstract class CommandJasBase extends CommandBase {
 
@@ -58,28 +54,6 @@ public abstract class CommandJasBase extends CommandBase {
         return endArgs.toArray(new String[endArgs.size()]);
     }
 
-    protected World getTargetWorld(String arg, ICommandSender commandSender) {
-        try {
-            EntityPlayerMP targetPlayer = func_82359_c(commandSender, arg);
-            return targetPlayer.worldObj;
-        } catch (Exception e) {
-
-        }
-
-        try {
-            int targetDim = parseInt(commandSender, arg);
-            boolean foundMatch = false;
-            for (WorldServer world : MinecraftServer.getServer().worldServers) {
-                if (targetDim == world.provider.dimensionId) {
-                    return world;
-                }
-            }
-        } catch (NumberInvalidException e) {
-
-        }
-        return null;
-    }
-    
     protected List<String> getStringsMatchingLastWord(String[] stringArgs, List<String> tabCompletions) {
         String lastArg = stringArgs[stringArgs.length - 1];
         ArrayList<String> arraylist = new ArrayList<String>();
@@ -133,7 +107,7 @@ public abstract class CommandJasBase extends CommandBase {
     /**
      * Helper used to add Entity names to tabCompletetion list. Names with spaces are surrounded with quotation marks.
      */
-    protected void addEntityNames(List<String> tabCompletions) {
+    public static void addEntityNames(List<String> tabCompletions) {
         for (Object object : EntityList.classToStringMapping.values()) {
             String entityName = (String) object;
             if (entityName.contains(" ")) {
@@ -146,7 +120,7 @@ public abstract class CommandJasBase extends CommandBase {
     /**
      * Helper used to add Entity category names to tabCompletetion list.
      */
-    protected void addEntityTypes(List<String> tabCompletions) {
+    public static void addEntityTypes(List<String> tabCompletions) {
         Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
@@ -157,7 +131,7 @@ public abstract class CommandJasBase extends CommandBase {
     /**
      * Helper used to add logged in player usernames to tabCompletetion list.
      */
-    protected void addPlayerUsernames(List<String> tabCompletions) {
+    public static void addPlayerUsernames(List<String> tabCompletions) {
         for (String username : MinecraftServer.getServer().getAllUsernames()) {
             tabCompletions.add(username);
         }

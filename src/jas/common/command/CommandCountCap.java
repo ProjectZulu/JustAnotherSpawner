@@ -12,11 +12,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 public class CommandCountCap extends CommandJasBase {
 
@@ -107,6 +110,27 @@ public class CommandCountCap extends CommandJasBase {
         }
     }
 
+    private World getTargetWorld(String arg, ICommandSender commandSender) {
+        try {
+            EntityPlayerMP targetPlayer = func_82359_c(commandSender, arg);
+            return targetPlayer.worldObj;
+        } catch (Exception e) {
+
+        }
+
+        try {
+            int targetDim = parseInt(commandSender, arg);
+            for (WorldServer world : MinecraftServer.getServer().worldServers) {
+                if (targetDim == world.provider.dimensionId) {
+                    return world;
+                }
+            }
+        } catch (NumberInvalidException e) {
+
+        }
+        return null;
+    }
+    
     /**
      * Adds the strings available in this command to the given list of tab completion options.
      */
