@@ -1,5 +1,6 @@
 package jas.common.command;
 
+import jas.common.JASLog;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
@@ -16,8 +17,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
@@ -42,7 +41,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     public String getCommandUsage(ICommandSender commandSender) {
         return "commands.jascanspawnhere.usage";
     }
-    
+
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 0 || stringArgs.length > 2) {
@@ -197,7 +196,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
-        boolean canSpawn = livingHandler.getCanSpawnHere(entity, spawnListEntry);
+        boolean canSpawn = spawnListEntry == null ? false : livingHandler.getCanSpawnHere(entity, spawnListEntry);
         targetPlayer.preventEntitySpawning = tempSpawning;
         if (canSpawn) {
             return successMessage;
