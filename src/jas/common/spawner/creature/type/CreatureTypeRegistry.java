@@ -1,7 +1,9 @@
 package jas.common.spawner.creature.type;
 
 import jas.common.JASLog;
+import jas.common.WorldProperties;
 import jas.common.config.EntityCategoryConfiguration;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
 
 import java.io.File;
 import java.util.HashMap;
@@ -9,8 +11,7 @@ import java.util.Iterator;
 
 import net.minecraft.block.material.Material;
 
-public enum CreatureTypeRegistry {
-    INSTANCE;
+public class CreatureTypeRegistry {
     /** Hashmap containing Creature Types. */
     private final HashMap<String, CreatureType> types = new HashMap<String, CreatureType>();
 
@@ -25,6 +26,9 @@ public enum CreatureTypeRegistry {
     public static final String WATERCREATURE = "WATERCREATURE";
     public static final String UNDERGROUND = "UNDERGROUND";
     public static final String OPENSKY = "OPENSKY";
+
+    public final BiomeGroupRegistry biomeGroupRegistry;
+    public final WorldProperties worldProperties;
 
     public void addSpawnCategory(CreatureType creatureType) {
         if (types.containsKey(creatureType.typeID.toUpperCase())) {
@@ -49,21 +53,23 @@ public enum CreatureTypeRegistry {
                 .chunkSpawningTo(chunkSpawning));
     }
 
-    private CreatureTypeRegistry() {
-        addSpawnCategory(new CreatureType(CREATURE, 10, Material.air, 400, true,
+    public CreatureTypeRegistry(BiomeGroupRegistry biomeGroupRegistry, WorldProperties worldProperties) {
+        this.biomeGroupRegistry = biomeGroupRegistry;
+        this.worldProperties = worldProperties;
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, CREATURE, 10, Material.air, 400, true,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
-        addSpawnCategory(new CreatureTypeMonster(MONSTER, 70, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(AMBIENT, 15, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(WATERCREATURE, 15, Material.water, 1, false,
+        addSpawnCategory(new CreatureTypeMonster(biomeGroupRegistry, MONSTER, 70, Material.air, 1, false));
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, AMBIENT, 15, Material.air, 1, false));
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, WATERCREATURE, 15, Material.water, 1, false,
                 "{spawn:!liquid,0:!liquid,0,[0/-1/0]:normal,0,[0/1/0]}"));
-        addSpawnCategory(new CreatureType(UNDERGROUND, 10, Material.air, 1, false,
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, UNDERGROUND, 10, Material.air, 1, false,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:sky}"));
-        addSpawnCategory(new CreatureType(OPENSKY, 10, Material.air, 1, false,
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, OPENSKY, 10, Material.air, 1, false,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
     }
 
     public void initializeFromConfig(File configDirectory) {
-        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory);
+        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory, worldProperties);
         config.load();
         String customNames = config.getCustomCategories("").getString().toUpperCase();
         for (String typeID : types.keySet()) {
@@ -73,8 +79,8 @@ public enum CreatureTypeRegistry {
         String[] pieces = customNames.split(",");
         for (String categoryName : pieces) {
             if (isValidName(categoryName)) {
-                types.put(categoryName,
-                        new CreatureType(categoryName, 10, Material.air, 1, false).createFromConfig(config));
+                types.put(categoryName, new CreatureType(biomeGroupRegistry, categoryName, 10, Material.air, 1, false)
+                        .createFromConfig(config));
             }
         }
         config.save();
@@ -100,7 +106,7 @@ public enum CreatureTypeRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveToConfig(File configDirectory) {
-        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory);
+        EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory, worldProperties);
         config.load();
 
         /* Save Extra Categories */

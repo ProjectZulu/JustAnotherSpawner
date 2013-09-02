@@ -1,7 +1,8 @@
 package jas.common.config;
 
 import jas.common.DefaultProps;
-import jas.common.Properties;
+import jas.common.JustAnotherSpawner;
+import jas.common.WorldProperties;
 
 import java.io.File;
 
@@ -17,8 +18,8 @@ public class LivingConfiguration extends Configuration {
      * @param configDirectory
      * @param fileName Filename for this Configuration, typically modID
      */
-    public LivingConfiguration(File configDirectory, String fileName) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/"
+    public LivingConfiguration(File configDirectory, String fileName, WorldProperties worldProperties) {
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/"
                 + DefaultProps.ENTITYSUBDIR + fileName + ".cfg"));
         this.filename = fileName;
     }

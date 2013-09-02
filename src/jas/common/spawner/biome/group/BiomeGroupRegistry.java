@@ -1,6 +1,7 @@
 package jas.common.spawner.biome.group;
 
 import jas.common.JASLog;
+import jas.common.WorldProperties;
 import jas.common.config.BiomeGroupConfiguration;
 
 import java.io.File;
@@ -25,9 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 
-public enum BiomeGroupRegistry {
-    INSTANCE;
-
+public class BiomeGroupRegistry {
     /** Group Identifier to Group Instance Regsitry */
     private final HashMap<String, BiomeGroup> iDToGroup = new HashMap<String, BiomeGroup>();
     /** Reverse Look-up Map to Get All Groups a Particular Biome is In */
@@ -47,6 +46,12 @@ public enum BiomeGroupRegistry {
      * Neither Attribute ID and BiomeMappings are not allowed to be the same. They can be the same as BiomeGroups.
      */
     private final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
+
+    public final WorldProperties worldProperties;
+
+    public BiomeGroupRegistry(WorldProperties worldProperties) {
+        this.worldProperties = worldProperties;
+    }
 
     /**
      * Should Only Be Used to Register BiomeGroups with their finished
@@ -114,7 +119,7 @@ public enum BiomeGroupRegistry {
     }
 
     public void createBiomeGroups(File configDirectory) {
-        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
 
         /* Create Package Name Mappings */
@@ -344,7 +349,7 @@ public enum BiomeGroupRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveCurrentToConfig(File configDirectory) {
-        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
         saveMappingsToConfig(biomeConfig);
         saveCustomGroupsToConfig(biomeConfig);

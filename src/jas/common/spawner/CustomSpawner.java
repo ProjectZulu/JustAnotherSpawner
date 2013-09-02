@@ -3,10 +3,10 @@ package jas.common.spawner;
 import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
 import jas.common.JASLog.LogType;
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -75,13 +75,13 @@ public class CustomSpawner {
      * 
      * @param worldServer
      */
-    public static void countEntityInChunks(World worldServer, EntityCounter creatureType,
-            EntityCounter creatureCount) {
+    public static void countEntityInChunks(World worldServer, EntityCounter creatureType, EntityCounter creatureCount) {
         @SuppressWarnings("unchecked")
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                    .getLivingHandler(entity.getClass());
             if (livingHandler != null) {
                 creatureType.incrementOrPutIfAbsent(livingHandler.creatureTypeID, 1);
                 creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
@@ -138,7 +138,7 @@ public class CustomSpawner {
                                     float spawnX = blockSpawnX + 0.5F;
                                     float spawnY = blockSpawnY;
                                     float spawnZ = blockSpawnZ + 0.5F;
-                                    
+
                                     if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(blockSpawnX,
                                             blockSpawnZ))) {
                                         continue labelChunkStart;
@@ -155,15 +155,17 @@ public class CustomSpawner {
                                         }
 
                                         if (spawnlistentry == null) {
-                                            spawnlistentry = creatureType.getSpawnListEntryToSpawn(worldServer,
-                                                    blockSpawnX, blockSpawnY, blockSpawnZ);
+                                            spawnlistentry = creatureType.getSpawnListEntryToSpawn(JustAnotherSpawner
+                                                    .worldSettings().creatureHandlerRegistry(), JustAnotherSpawner
+                                                    .worldSettings().biomeHandlerRegistry(), worldServer, blockSpawnX,
+                                                    blockSpawnY, blockSpawnZ);
                                             if (spawnlistentry == null) {
                                                 continue;
                                             }
                                             livingCount = creatureCount.getOrPutIfAbsent(
                                                     spawnlistentry.livingClass.getSimpleName(), 0);
-                                            livingCap = CreatureHandlerRegistry.INSTANCE.getLivingHandler(
-                                                    spawnlistentry.livingClass).getLivingCap();
+                                            livingCap = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                                                    .getLivingHandler(spawnlistentry.livingClass).getLivingCap();
 
                                             if (typeCount.get() > entityTypeCap) {
                                                 return;
@@ -236,7 +238,7 @@ public class CustomSpawner {
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            if (creatureType.isEntityOfType(entity)) {
+            if (creatureType.isEntityOfType(JustAnotherSpawner.worldSettings().creatureHandlerRegistry(), entity)) {
                 count++;
             }
         }
@@ -253,7 +255,8 @@ public class CustomSpawner {
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;
             int i2 = k1;
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(world,
+            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(JustAnotherSpawner.worldSettings()
+                    .creatureHandlerRegistry(), JustAnotherSpawner.worldSettings().biomeHandlerRegistry(), world,
                     BiomeHelper.getPackageName(biome), j1, world.getTopSolidOrLiquidBlock(j1, k1), k1);
             EntityLivingData entitylivingdata = null;
             if (spawnListEntry == null) {

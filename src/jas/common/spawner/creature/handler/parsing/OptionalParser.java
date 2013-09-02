@@ -1,7 +1,7 @@
 package jas.common.spawner.creature.handler.parsing;
 
 import jas.common.JASLog;
-import jas.common.Properties;
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
@@ -34,7 +34,7 @@ public class OptionalParser {
             return null;
         }
     }
-    
+
     /**
      * Parses the Light Tag.
      * 
@@ -54,7 +54,7 @@ public class OptionalParser {
             return null;
         }
     }
-    
+
     /**
      * Parses the Block Tag.
      * 
@@ -123,19 +123,19 @@ public class OptionalParser {
      */
     public static void parseBlockRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 4) {
-            valueCache.put(Key.blockRangeX.key,
-                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
-            valueCache.put(Key.blockRangeY.key,
-                    ParsingHelper.parseFilteredInteger(values[2], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
-            valueCache.put(Key.blockRangeZ.key,
-                    ParsingHelper.parseFilteredInteger(values[3], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
+            valueCache.put(Key.blockRangeX.key, ParsingHelper.parseFilteredInteger(values[1],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+            valueCache.put(Key.blockRangeY.key, ParsingHelper.parseFilteredInteger(values[2],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+            valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseFilteredInteger(values[3],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else if (values.length == 2) {
-            valueCache.put(Key.blockRangeX.key,
-                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
-            valueCache.put(Key.blockRangeY.key,
-                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
-            valueCache.put(Key.blockRangeZ.key,
-                    ParsingHelper.parseFilteredInteger(values[1], OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
+            valueCache.put(Key.blockRangeX.key, ParsingHelper.parseFilteredInteger(values[1],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeX"));
+            valueCache.put(Key.blockRangeY.key, ParsingHelper.parseFilteredInteger(values[1],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeY"));
+            valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseFilteredInteger(values[1],
+                    OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else {
             JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Argument Length.");
         }
@@ -164,8 +164,8 @@ public class OptionalParser {
      */
     public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
-            valueCache.put(Key.spawnRange.key,
-                    ParsingHelper.parseFilteredInteger(values[1], Properties.despawnDist, Key.spawnRange.key));
+            valueCache.put(Key.spawnRange.key, ParsingHelper.parseFilteredInteger(values[1], JustAnotherSpawner
+                    .worldSettings().worldProperties().despawnDist, Key.spawnRange.key));
         } else {
             JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
         }

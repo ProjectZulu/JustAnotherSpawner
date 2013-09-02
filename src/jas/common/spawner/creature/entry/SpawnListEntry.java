@@ -2,8 +2,8 @@ package jas.common.spawner.creature.entry;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.JustAnotherSpawner;
+import jas.common.WorldProperties;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
@@ -64,7 +64,7 @@ public class SpawnListEntry extends WeightedRandomItem {
     }
 
     public LivingHandler getLivingHandler() {
-        return CreatureHandlerRegistry.INSTANCE.getLivingHandler(livingClass);
+        return JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(livingClass);
     }
 
     public static void setupConfigCategory(Configuration config) {
@@ -78,12 +78,12 @@ public class SpawnListEntry extends WeightedRandomItem {
      * @param config
      * @return
      */
-    public SpawnListEntry createFromConfig(Configuration config) {
+    public SpawnListEntry createFromConfig(Configuration config, WorldProperties worldProperties) {
         String mobName = (String) EntityList.classToStringMapping.get(livingClass);
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
                 + Integer.toString(maxChunkPack) + optionalParameters;
-        Property resultValue = getSpawnEntryProperty(config, defaultValue);
+        Property resultValue = getSpawnEntryProperty(config, defaultValue, worldProperties);
 
         String[] resultMasterParts = resultValue.getString().split("\\{", 2);
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
@@ -104,20 +104,20 @@ public class SpawnListEntry extends WeightedRandomItem {
         }
     }
 
-    public void saveToConfig(Configuration config) {
+    public void saveToConfig(Configuration config, WorldProperties worldProperties) {
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
                 + Integer.toString(maxChunkPack);
-        Property resultValue = getSpawnEntryProperty(config, defaultValue);
+        Property resultValue = getSpawnEntryProperty(config, defaultValue, worldProperties);
         resultValue.set(defaultValue);
     }
 
-    private Property getSpawnEntryProperty(Configuration config, String defaultValue) {
+    private Property getSpawnEntryProperty(Configuration config, String defaultValue, WorldProperties worldProperties) {
         String mobName = (String) EntityList.classToStringMapping.get(livingClass);
 
         Property resultValue;
         String categoryKey;
-        if (Properties.savedSortCreatureByBiome) {
+        if (worldProperties.savedSortCreatureByBiome) {
             categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
             resultValue = config.get(categoryKey, mobName, defaultValue);
         } else {

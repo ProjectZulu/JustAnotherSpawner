@@ -1,10 +1,10 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,7 +76,8 @@ public class CommandCountCap extends CommandJasBase {
             EntityCounter creatureCount = new EntityCounter();
             CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
 
-            Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
+            Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                    .getCreatureTypes();
             StringBuilder worldTypeContents = new StringBuilder();
             worldTypeContents.append("Results World (");
             worldTypeContents.append(world.provider.getDimensionName());
@@ -130,7 +131,7 @@ public class CommandCountCap extends CommandJasBase {
         }
         return null;
     }
-    
+
     /**
      * Adds the strings available in this command to the given list of tab completion options.
      */

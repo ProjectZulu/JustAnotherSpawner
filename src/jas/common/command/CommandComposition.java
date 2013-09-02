@@ -1,11 +1,10 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -54,7 +53,8 @@ public class CommandComposition extends CommandJasBase {
         StringBuilder countedContents = new StringBuilder();
 
         boolean foundMatch = false;
-        Iterator<CreatureType> creatureTypes = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
+        Iterator<CreatureType> creatureTypes = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                .getCreatureTypes();
         while (creatureTypes.hasNext()) {
             CreatureType creatureType = creatureTypes.next();
             if (entityCategName.equals("*") || entityCategName.equals(creatureType.typeID)) {
@@ -68,7 +68,8 @@ public class CommandComposition extends CommandJasBase {
                 Iterator<? extends Entity> creatureIterator = targetPlayer.worldObj.loadedEntityList.iterator();
                 while (creatureIterator.hasNext()) {
                     Entity entity = creatureIterator.next();
-                    LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+                    LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                            .getLivingHandler(entity.getClass());
                     if (livingHandler != null && entity instanceof EntityLiving
                             && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
                         creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);

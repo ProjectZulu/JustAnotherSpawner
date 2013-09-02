@@ -1,7 +1,7 @@
 package jas.common.network.packet;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketManager;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 
 import java.io.DataInputStream;
@@ -43,9 +43,12 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
             entityName = dataStream.readUTF();
             creatureTypeID = dataStream.readUTF();
             shouldSpawn = dataStream.readBoolean();
-            CreatureHandlerRegistry.INSTANCE.updateLivingHandler(
-                    (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName), creatureTypeID,
-                    shouldSpawn);
+            JustAnotherSpawner
+                    .worldSettings()
+                    .creatureHandlerRegistry()
+                    .updateLivingHandler(
+                            (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName),
+                            creatureTypeID, shouldSpawn);
             return true;
         } catch (IOException e) {
             e.printStackTrace();

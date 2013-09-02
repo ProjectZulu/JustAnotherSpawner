@@ -1,8 +1,8 @@
 package jas.common.network.packet;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketManager;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -44,7 +44,8 @@ public class PacketManagerUpdateCreatureType extends PacketManager {
     public boolean processPacket(DataInputStream dataStream, Player player) {
         try {
             setPacketData(dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(), dataStream.readBoolean());
-            CreatureTypeRegistry.INSTANCE.updateCreatureType(typeID, spawnRate, maxNumberOfCreature, chunkSpawning);
+            JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                    .updateCreatureType(typeID, spawnRate, maxNumberOfCreature, chunkSpawning);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
