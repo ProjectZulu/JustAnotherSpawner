@@ -57,6 +57,10 @@ public class BiomeGroupRegistry {
      * Should Only Be Used to Register BiomeGroups with their finished
      */
     public void registerGroup(BiomeGroup group) {
+        if (group.groupID == null || group.groupID.trim().equals("")) {
+            throw new IllegalArgumentException("Group ID cannot be " + group.groupID == null ? "null" : "empty");
+        }
+
         JASLog.info("Registering BiomeGroup %s with biomes %s", group.groupID, groupBiomesToString(group));
         iDToGroup.put(group.groupID, group);
         for (String pckgName : group.pckgNames) {
@@ -371,6 +375,10 @@ public class BiomeGroupRegistry {
             String biomeID = iterator.next();
             boolean isDefaultGroup = false;
             for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+                if (biome == null) {
+                    continue;
+                }
+
                 if (biomeID.equalsIgnoreCase(biome.biomeName)) {
                     isDefaultGroup = true;
                     break;

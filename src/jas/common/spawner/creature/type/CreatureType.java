@@ -423,7 +423,7 @@ public class CreatureType {
      * @param config
      * @return
      */
-    public void saveToConfig(EntityCategoryConfiguration config) {
+    public void saveCurrentToConfig(EntityCategoryConfiguration config) {
         config.getSpawnRate(typeID, spawnRate).set(spawnRate);
         config.getSpawnCap(typeID, maxNumberOfCreature).set(maxNumberOfCreature);
         config.getChunkSpawning(typeID, chunkSpawning).set(chunkSpawning);

@@ -105,7 +105,7 @@ public class CreatureTypeRegistry {
      * 
      * If config settings are already present, they will be overwritten
      */
-    public void saveToConfig(File configDirectory) {
+    public void saveCurrentToConfig(File configDirectory) {
         EntityCategoryConfiguration config = new EntityCategoryConfiguration(configDirectory, worldProperties);
         config.load();
 
@@ -126,7 +126,7 @@ public class CreatureTypeRegistry {
 
         /* Save All Category Settings */
         for (CreatureType entry : types.values()) {
-            entry.saveToConfig(config);
+            entry.saveCurrentToConfig(config);
         }
         config.save();
     }

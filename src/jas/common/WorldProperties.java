@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
-public class WorldProperties {
+public final class WorldProperties {
 
     /* Functional Universal Directory Settings, marks the Way the System should Sort */
     public boolean universalDirectory;
@@ -38,7 +38,7 @@ public class WorldProperties {
     /**
      * Load data related to how and where the files are desired to be saved
      */
-    public void loadWorldSaveConfiguration(File configDirectory, World world) {
+    private void loadWorldSaveConfiguration(File configDirectory, World world) {
         Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "SaveConfig.cfg"));
         String curWorldName = world.getWorldInfo().getWorldName();
@@ -76,7 +76,7 @@ public class WorldProperties {
         worldGloablConfig.save();
     }
 
-    public void importDefaultFiles(File modConfigDirectoryFile) {
+    private void importDefaultFiles(File modConfigDirectoryFile) {
         if (importName.trim().equals("")) {
             return;
         }
@@ -95,7 +95,7 @@ public class WorldProperties {
     /**
      * Load data related to how the files to be read were actually saved / formatted
      */
-    public void loadFileSaveConfiguration(File configDirectory) {
+    private void loadFileSaveConfiguration(File configDirectory) {
         LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
         livingTempSettings.load();
         savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(
@@ -106,11 +106,76 @@ public class WorldProperties {
         livingTempSettings.save();
     }
 
-    public void loadWorldProperties(File configDirectory) {
+    private void loadWorldProperties(File configDirectory) {
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
         despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
+        worldConfig.save();
+    }
+
+    public void saveCurrentToConfig(File configDirectory) {
+        saveWorldSaveConfiguration(configDirectory);
+        saveFileSaveConfiguration(configDirectory);
+        saveWorldProperties(configDirectory);
+    }
+
+    private void saveWorldSaveConfiguration(File configDirectory) {
+        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + "SaveConfig.cfg"));
+        String curWorldName = "Doesn't Matter as we are overwriting saved data";
+        worldGloablConfig.load();
+
+        /* Load Save Use Import_Name */
+        Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
+                "Folder name to Copy Missing Files From. Case Sensitive if OS allows. Beware invalid OS characters.");
+        importProp.set(importName);
+
+        /* Load Save Use Global Save_Name */
+        Property defaultsaveProp = worldGloablConfig
+                .get("Save_Configuration",
+                        "Default Save_Name",
+                        "{$world}",
+                        "Default name used for Save_Name. {$world} is replaced by world name. Case Sensitive if OS allows. Beware invalid OS characters.");
+        defaultsaveProp.set(saveName);
+
+        /* Load Save Use Actual Save_Name */
+        Property saveProp = worldGloablConfig
+                .get("Save_Configuration." + curWorldName, "Save_Name", saveName,
+                        "Folder name to look for and generate CFG files. Case Sensitive if OS allows. Beware invalid OS characters.");
+        saveProp.set(saveName);
+
+        /* Load Save Sort Creature By Biome */
+        Property loadedSortCreatureByBiomeProp = worldGloablConfig
+                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting", true,
+                        "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.");
+        loadedSortCreatureByBiomeProp.set(loadedSortCreatureByBiome);
+
+        /* Load Save/Use Universal Entity Directory */
+        Property loadedUniversalDirectoryProp = worldGloablConfig.get("Save_Configuration." + curWorldName,
+                "Universal Entity CFG - Settings", false,
+                "Specifies if the User wants the Entity CFG to Combined into a Universal CFG.");
+        loadedUniversalDirectoryProp.set(loadedUniversalDirectory);
+        worldGloablConfig.save();
+    }
+
+    private void saveFileSaveConfiguration(File configDirectory) {
+        LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
+        livingTempSettings.load();
+        Property savedSortCreatureByBiomeProp = livingTempSettings
+                .getSavedSortByBiome(JustAnotherSpawner.properties().globalSortCreatureByBiome);
+        savedSortCreatureByBiomeProp.set(savedSortCreatureByBiome);
+        Property universalDirectoryProp = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory);
+        universalDirectoryProp.set(universalDirectory);
+        livingTempSettings.save();
+    }
+
+    private void saveWorldProperties(File configDirectory) {
+        Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
+        worldConfig.load();
+        Property despawnDistProp = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist);
+        despawnDistProp.set(despawnDist);
         worldConfig.save();
     }
 }

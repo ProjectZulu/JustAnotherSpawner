@@ -141,8 +141,8 @@ public class BiomeHandler {
                 jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = iterator.next();
                 spawnListEntry.saveToConfig(config, worldProperties);
 
-                entityListString = entityListString.concat((String) EntityList.classToStringMapping.get(spawnListEntry
-                        .getClass()));
+                entityListString = entityListString.concat((String) EntityList.classToStringMapping
+                        .get(spawnListEntry.livingClass));
                 if (iterator.hasNext()) {
                     entityListString = entityListString.concat(",");
                 }

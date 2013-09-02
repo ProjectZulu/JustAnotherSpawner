@@ -62,8 +62,10 @@ public class BiomeHandlerRegistry {
      */
     public void saveCurrentToConfig(File configDirectory) {
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
+        structureConfig.load();
         for (BiomeHandler handler : biomeHandlers) {
             handler.saveToConfig(structureConfig, worldProperties);
         }
+        structureConfig.save();
     }
 }

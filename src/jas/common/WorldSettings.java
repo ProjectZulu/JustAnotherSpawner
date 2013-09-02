@@ -28,7 +28,7 @@ public final class WorldSettings {
 
     public void saveWorldSettings(File configDirectory) {
         biomeGroupRegistry.saveCurrentToConfig(configDirectory);
-        creatureTypeRegistry.saveToConfig(configDirectory);
+        creatureTypeRegistry.saveCurrentToConfig(configDirectory);
         creatureHandlerRegistry.saveCurrentToConfig(configDirectory);
         biomeHandlerRegistry.saveCurrentToConfig(configDirectory);
     }
