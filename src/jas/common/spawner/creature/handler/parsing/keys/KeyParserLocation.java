@@ -52,13 +52,13 @@ public class KeyParserLocation extends KeyParserBase {
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         Object[] values = (Object[]) typeValuePair.getValue();
         boolean isInverted = (Boolean) values[0];
-        int targetX = (int) values[1];
-        int targetY = (int) values[2];
-        int targetZ = (int) values[3];
+        int targetX = (Integer) values[1];
+        int targetY = (Integer) values[2];
+        int targetZ = (Integer) values[3];
 
-        int varX = (int) values[4];
-        int varY = (int) values[5];
-        int varZ = (int) values[6];
+        int varX = (Integer) values[4];
+        int varY = (Integer) values[5];
+        int varZ = (Integer) values[6];
 
         boolean isValid = false;
         if (isWithinTargetRange(xCoord, targetX, varX) && isWithinTargetRange(yCoord, targetY, varY)
