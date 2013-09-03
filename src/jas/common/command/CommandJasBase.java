@@ -1,7 +1,7 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -121,7 +121,7 @@ public abstract class CommandJasBase extends CommandBase {
      * Helper used to add Entity category names to tabCompletetion list.
      */
     public static void addEntityTypes(List<String> tabCompletions) {
-        Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
+        Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
             tabCompletions.add(entityType.typeID);

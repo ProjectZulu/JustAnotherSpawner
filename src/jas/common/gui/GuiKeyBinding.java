@@ -3,7 +3,6 @@ package jas.common.gui;
 import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketID;
 import jas.common.network.packet.PacketManagerServerSync;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 
 import java.util.EnumSet;
 
@@ -40,7 +39,8 @@ public class GuiKeyBinding extends KeyHandler {
     public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
         EntityPlayer player = Minecraft.getMinecraft().thePlayer;
         if (tickEnd && Minecraft.getMinecraft().currentScreen == null && player != null) {
-            CreatureHandlerRegistry.INSTANCE.clientStartup(Minecraft.getMinecraft().theWorld);
+            JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                    .clientStartup(Minecraft.getMinecraft().theWorld);
 
             PacketManagerServerSync packetManager = (PacketManagerServerSync) PacketID.SERVER_SYNC
                     .createPacketManager();

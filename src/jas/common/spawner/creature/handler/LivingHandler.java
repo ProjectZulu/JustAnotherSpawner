@@ -2,8 +2,7 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.JASLog;
-import jas.common.Properties;
-import jas.common.ReflectionHelper;
+import jas.common.JustAnotherSpawner;
 import jas.common.config.LivingConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
@@ -11,7 +10,6 @@ import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
-import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.Locale;
@@ -34,6 +32,7 @@ public class LivingHandler {
     public final String creatureTypeID;
     public final boolean shouldSpawn;
     public final String optionalParameters;
+    public final CreatureTypeRegistry creatureTypeRegistry;
     protected OptionalSettingsSpawning spawning;
     protected OptionalSettingsDespawning despawning;
 
@@ -41,10 +40,11 @@ public class LivingHandler {
         return despawning;
     }
 
-    public LivingHandler(Class<? extends EntityLiving> entityClass, String creatureTypeID, boolean shouldSpawn,
-            String optionalParameters) {
+    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, Class<? extends EntityLiving> entityClass,
+            String creatureTypeID, boolean shouldSpawn, String optionalParameters) {
+        this.creatureTypeRegistry = creatureTypeRegistry;
         this.entityClass = entityClass;
-        this.creatureTypeID = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureTypeID) != null ? creatureTypeID
+        this.creatureTypeID = creatureTypeRegistry.getCreatureType(creatureTypeID) != null ? creatureTypeID
                 : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
         this.optionalParameters = optionalParameters;
@@ -88,7 +88,7 @@ public class LivingHandler {
      */
     protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
             boolean shouldSpawn, String optionalParameters) {
-        return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
+        return new LivingHandler(creatureTypeRegistry, entityClass, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final int getLivingCap() {
@@ -143,9 +143,12 @@ public class LivingHandler {
                 return false;
             }
 
-            boolean validDistance = despawning.isMidDistance((int) d3, Properties.despawnDist);
-            boolean isOfAge = despawning.isValidAge(entity.getAge(), Properties.minDespawnTime);
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, Properties.maxDespawnDist);
+            boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
+                    .worldProperties().despawnDist);
+            boolean isOfAge = despawning.isValidAge(entity.getAge(), JustAnotherSpawner.worldSettings()
+                    .worldProperties().minDespawnTime);
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
+                    .worldProperties().maxDespawnDist);
 
             if (instantDespawn) {
                 return true;
@@ -157,7 +160,7 @@ public class LivingHandler {
         }
         return false;
     }
-    
+
     /**
      * Called by Despawn to Manually Attempt to Despawn Entity
      * 
@@ -186,9 +189,12 @@ public class LivingHandler {
                 return;
             }
 
-            boolean validDistance = despawning.isMidDistance((int) d3, Properties.despawnDist);
-            boolean isOfAge = despawning.isValidAge(entity.getAge(), Properties.minDespawnTime);
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, Properties.maxDespawnDist);
+            boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
+                    .worldProperties().despawnDist);
+            boolean isOfAge = despawning.isValidAge(entity.getAge(), JustAnotherSpawner.worldSettings()
+                    .worldProperties().minDespawnTime);
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
+                    .worldProperties().maxDespawnDist);
 
             if (instantDespawn) {
                 entity.setDead();
@@ -273,8 +279,8 @@ public class LivingHandler {
 
         if (resultParts.length == 4) {
             /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome */
-            String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
-                    "creatureTypeID");
+            String resultCreatureType = ParsingHelper.parseCreatureTypeID(creatureTypeRegistry, resultParts[0],
+                    creatureTypeID, "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
             boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], false, "forceDespawn");
             boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], true, "LocationCheck");
@@ -291,8 +297,8 @@ public class LivingHandler {
             return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{"
                     + resultValue.getString().split("\\{", 2)[1]) : resultHandler;
         } else if (resultParts.length == 2) {
-            String resultCreatureType = ParsingHelper.parseCreatureTypeID(resultParts[0], creatureTypeID,
-                    "creatureTypeID");
+            String resultCreatureType = ParsingHelper.parseCreatureTypeID(creatureTypeRegistry, resultParts[0],
+                    creatureTypeID, "creatureTypeID");
             boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
             LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
             return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultMasterParts[1])
@@ -302,7 +308,7 @@ public class LivingHandler {
                     "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
                     mobName, creatureTypeID, shouldSpawn);
             resultValue.set(defaultValue);
-            return new LivingHandler(entityClass, creatureTypeID, shouldSpawn, "");
+            return new LivingHandler(creatureTypeRegistry, entityClass, creatureTypeID, shouldSpawn, "");
         }
     }
 

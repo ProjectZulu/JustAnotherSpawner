@@ -50,15 +50,17 @@ public class CreatureType {
     private final ListMultimap<String, SpawnListEntry> groupNameToRejectedSpawnEntry = ArrayListMultimap.create();
     public final String optionalParameters;
     protected OptionalSettingsCreatureTypeSpawn spawning;
-
-    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+    public final BiomeGroupRegistry biomeGroupRegistry;
+    
+    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning) {
-        this(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+        this(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]}");
     }
 
-    public CreatureType(String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
+    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
             boolean chunkSpawning, String optionalParameters) {
+        this.biomeGroupRegistry = biomeGroupRegistry;
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
@@ -109,7 +111,8 @@ public class CreatureType {
      */
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
             int spawnRate, boolean chunkSpawning, String optionalParameters) {
-        return new CreatureType(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+        return new CreatureType(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+                optionalParameters);
     }
 
     /**
@@ -165,7 +168,7 @@ public class CreatureType {
     }
 
     public Collection<SpawnListEntry> getSpawnList(String biomePackageName) {
-        ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+        ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
                 biomePackageName);
         ArrayList<SpawnListEntry> spawns = new ArrayList<SpawnListEntry>(groupIDList.size() * 7);
 
@@ -211,19 +214,21 @@ public class CreatureType {
      * @return Creature to Spawn
      */
     @SuppressWarnings("unchecked")
-    public SpawnListEntry getSpawnListEntryToSpawn(World world, int xCoord, int yCoord, int zCoord) {
-        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
+    public SpawnListEntry getSpawnListEntryToSpawn(CreatureHandlerRegistry creatureHandlerRegistry,
+            BiomeHandlerRegistry biomeHandlerRegistry, World world, int xCoord, int yCoord, int zCoord) {
+        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(biomeHandlerRegistry, world, xCoord,
+                yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
 
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
                     structureSpawnList);
-            return isEntityOfType(spawnListEntry.livingClass) ? spawnListEntry : null;
+            return isEntityOfType(creatureHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry : null;
         }
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
         if (biomegenbase != null) {
-            ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+            ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
                     BiomeHelper.getPackageName(biomegenbase));
             return getRandomEntry(world.rand, groupIDList);
         }
@@ -236,27 +241,30 @@ public class CreatureType {
      * @param pckgName Name of Biome SpawnList to get CreatureType From
      * @return
      */
-    public SpawnListEntry getSpawnListEntryToSpawn(World world, String packgName, int xCoord, int yCoord, int zCoord) {
-        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(world, xCoord, yCoord, zCoord);
+    public SpawnListEntry getSpawnListEntryToSpawn(CreatureHandlerRegistry creatureHandlerRegistry,
+            BiomeHandlerRegistry biomeHandlerRegistry, World world, String packgName, int xCoord, int yCoord, int zCoord) {
+        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(biomeHandlerRegistry, world, xCoord,
+                yCoord, zCoord);
         if (!structureSpawnList.isEmpty()) {
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
                     structureSpawnList);
-            return isEntityOfType(spawnListEntry.livingClass) ? spawnListEntry : null;
+            return isEntityOfType(creatureHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry : null;
         }
 
         BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
         if (biomegenbase != null) {
-            ImmutableCollection<String> groupIDList = BiomeGroupRegistry.INSTANCE.getPackgNameToGroupIDList().get(
+            ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
                     BiomeHelper.getPackageName(biomegenbase));
             return getRandomEntry(world.rand, groupIDList);
         }
         return null;
     }
 
-    private Collection<SpawnListEntry> getStructureSpawnList(World world, int xCoord, int yCoord, int zCoord) {
-        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+    private Collection<SpawnListEntry> getStructureSpawnList(BiomeHandlerRegistry biomeHandlerRegistry, World world,
+            int xCoord, int yCoord, int zCoord) {
+        Iterator<BiomeHandler> iterator = biomeHandlerRegistry.getHandlers();
         while (iterator.hasNext()) {
             BiomeHandler handler = iterator.next();
             if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
@@ -328,8 +336,8 @@ public class CreatureType {
      * @param entity Entity that is being Checked
      * @return
      */
-    public boolean isEntityOfType(Entity entity) {
-        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Entity entity) {
+        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity.getClass());
         return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
@@ -339,8 +347,8 @@ public class CreatureType {
      * @param entity
      * @return
      */
-    public boolean isEntityOfType(Class<? extends EntityLiving> entity) {
-        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity);
+    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Class<? extends EntityLiving> entity) {
+        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity);
         return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
@@ -415,7 +423,7 @@ public class CreatureType {
      * @param config
      * @return
      */
-    public void saveToConfig(EntityCategoryConfiguration config) {
+    public void saveCurrentToConfig(EntityCategoryConfiguration config) {
         config.getSpawnRate(typeID, spawnRate).set(spawnRate);
         config.getSpawnCap(typeID, maxNumberOfCreature).set(maxNumberOfCreature);
         config.getChunkSpawning(typeID, chunkSpawning).set(chunkSpawning);

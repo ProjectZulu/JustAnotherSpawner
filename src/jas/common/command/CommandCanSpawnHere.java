@@ -1,16 +1,12 @@
 package jas.common.command;
 
-import jas.common.JASLog;
-import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHelper;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -56,9 +52,10 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingHandler livingHandler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(entity.getClass());
 
-        CreatureType livingType = CreatureTypeRegistry.INSTANCE.getCreatureType(livingHandler.creatureTypeID);
+        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(
+                livingHandler.creatureTypeID);
         if (livingType == null) {
             commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
                     "Entity %s is of type NONE and thus will never spawn.", entityName)));
@@ -143,7 +140,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (BiomeHandler biomeHandler : BiomeHandlerRegistry.INSTANCE.handlers()) {
+        for (BiomeHandler biomeHandler : JustAnotherSpawner.worldSettings().biomeHandlerRegistry().handlers()) {
             structureName = biomeHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
             if (structureName != null) {
@@ -173,7 +170,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             }
         }
 
-        String shortName = BiomeGroupRegistry.INSTANCE.biomePckgToMapping.get(packageBiome);
+        String shortName = JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping.get(packageBiome);
         return shortName == null ? biome.biomeName : shortName;
     }
 

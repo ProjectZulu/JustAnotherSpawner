@@ -1,11 +1,10 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,7 +84,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private String getTargetAtPlayer(EntityPlayerMP player) {
-        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+        Iterator<BiomeHandler> iterator = JustAnotherSpawner.worldSettings().biomeHandlerRegistry().getHandlers();
         while (iterator.hasNext()) {
             BiomeHandler handler = iterator.next();
             String target = handler.getStructure(player.worldObj, (int) player.posX, (int) player.posY,
@@ -120,7 +119,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<CreatureType> iterator = CreatureTypeRegistry.INSTANCE.getCreatureTypes();
+        Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
             if (entityCategName.equals("*") || entityType.typeID.equalsIgnoreCase(entityCategName)) {
@@ -162,7 +161,7 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+        Iterator<BiomeHandler> iterator = JustAnotherSpawner.worldSettings().biomeHandlerRegistry().getHandlers();
         while (iterator.hasNext()) {
             BiomeHandler type = iterator.next();
             for (String structureKey : type.getStructureKeys()) {
@@ -183,7 +182,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+        Iterator<BiomeHandler> iterator = JustAnotherSpawner.worldSettings().biomeHandlerRegistry().getHandlers();
         while (iterator.hasNext()) {
             BiomeHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {
@@ -263,7 +262,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addStructureNames(List<String> tabCompletions) {
-        Iterator<BiomeHandler> iterator = BiomeHandlerRegistry.INSTANCE.getHandlers();
+        Iterator<BiomeHandler> iterator = JustAnotherSpawner.worldSettings().biomeHandlerRegistry().getHandlers();
         while (iterator.hasNext()) {
             BiomeHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {

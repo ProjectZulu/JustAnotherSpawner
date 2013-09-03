@@ -1,7 +1,7 @@
 package jas.common.config;
 
 import jas.common.DefaultProps;
-import jas.common.Properties;
+import jas.common.WorldProperties;
 
 import java.io.File;
 
@@ -13,8 +13,9 @@ public class BiomeGroupConfiguration extends Configuration {
     public static final String BiomeConfigName = "BiomeGroups.cfg";
     public static final String BiomeConfigCategory = "biomegroups";
 
-    public BiomeGroupConfiguration(File configDirectory) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/" + BiomeConfigName));
+    public BiomeGroupConfiguration(File configDirectory, WorldProperties worldProperties) {
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/"
+                + BiomeConfigName));
     }
 
     public Property getBiomeMapping(String packageName, String biomeName) {

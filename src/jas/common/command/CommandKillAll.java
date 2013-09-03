@@ -1,8 +1,8 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -59,7 +59,8 @@ public class CommandKillAll extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.getLoadedEntityList().iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                    .getLivingHandler(entity.getClass());
             if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
                     && isEntityFiltered(entity, entityFilter)) {
                 if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {

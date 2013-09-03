@@ -1,6 +1,6 @@
 package jas.common.command;
 
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.JustAnotherSpawner;
 import jas.common.spawner.creature.handler.LivingHandler;
 
 import java.util.ArrayList;
@@ -54,7 +54,8 @@ public class CommandLocate extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.getLoadedEntityList().iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = CreatureHandlerRegistry.INSTANCE.getLivingHandler(entity.getClass());
+            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                    .getLivingHandler(entity.getClass());
             if (handler != null && (entityTarget.equals("*") || handler.creatureTypeID.equals(entityTarget))
                     || entityTarget.equals(EntityList.classToStringMapping.get(entity.getClass()))) {
                 foundMatch = true;

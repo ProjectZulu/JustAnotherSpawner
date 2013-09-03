@@ -133,9 +133,9 @@ public class ParsingHelper {
      * @param fieldName FieldName that is being parsed for error reporting. Null will omit it.
      * @return
      */
-    public static String parseCreatureTypeID(String value, String fallBack, String fieldName) {
-        if (!CreatureTypeRegistry.NONE.equalsIgnoreCase(value)
-                && CreatureTypeRegistry.INSTANCE.getCreatureType(value) == null) {
+    public static String parseCreatureTypeID(CreatureTypeRegistry creatureTypeRegistry, String value, String fallBack,
+            String fieldName) {
+        if (!CreatureTypeRegistry.NONE.equalsIgnoreCase(value) && creatureTypeRegistry.getCreatureType(value) == null) {
             if (fieldName != null) {
                 JASLog.warning(
                         "Error parsing entry %s. CreatureType of %s was unreadable. Value will be set to default %s",

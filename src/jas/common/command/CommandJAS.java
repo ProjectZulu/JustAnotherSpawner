@@ -21,6 +21,8 @@ public final class CommandJAS extends CommandJasBase {
         addCommand(new CommandKillAll());
         addCommand(new CommandLocate());
         addCommand(new CommandPackageEntity());
+        addCommand(new CommandSaveConfig());
+        addCommand(new CommandLoadConfig());
     }
 
     public void addCommand(CommandBase base) {
@@ -83,7 +85,7 @@ public final class CommandJAS extends CommandJasBase {
     @SuppressWarnings("unchecked")
     public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length == 1) {
-            return new ArrayList<String>(commands.keySet());
+            return getStringsMatchingLastWord(stringArgs, new ArrayList<String>(commands.keySet()));
         } else if (stringArgs.length > 1) {
             CommandWrapper command = commands.get(stringArgs[0]);
             if (command != null) {
