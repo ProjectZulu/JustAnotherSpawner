@@ -62,6 +62,6 @@ public class SpawnerTicker implements IScheduledTickHandler {
 
     @Override
     public int nextTickSpacing() {
-        return JustAnotherSpawner.properties().spawnerTickSpacing;
+        return JustAnotherSpawner.globalSettings().spawnerTickSpacing;
     }
 }

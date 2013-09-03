@@ -51,10 +51,10 @@ public class JustAnotherSpawner {
     ImportedSpawnList importedSpawnList;
     BiomeBlacklist biomeBlacklist;
 
-    private static Properties properties;
+    private static GlobalSettings globalSettings;
 
-    public static Properties properties() {
-        return properties;
+    public static GlobalSettings globalSettings() {
+        return globalSettings;
     }
 
     private static WorldSettings worldSettings;
@@ -66,7 +66,7 @@ public class JustAnotherSpawner {
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
-        properties = new Properties(modConfigDirectoryFile);
+        globalSettings = new GlobalSettings(modConfigDirectoryFile);
         JASLog.configureLogging(modConfigDirectoryFile);
         MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
@@ -84,7 +84,7 @@ public class JustAnotherSpawner {
         biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
         TickRegistry.registerTickHandler(new SpawnerTicker(biomeBlacklist), Side.SERVER);
-        importedSpawnList = new ImportedSpawnList(biomeBlacklist, properties.emptyVanillaSpawnLists);
+        importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
         MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
     }
 
@@ -97,7 +97,7 @@ public class JustAnotherSpawner {
     @ForgeSubscribe
     public void worldLoad(WorldEvent.Load event) {
         GameRules gameRule = event.world.getGameRules();
-        if (gameRule != null && properties.turnGameruleSpawningOff) {
+        if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
             JASLog.info("Setting GameRule doMobSpawning for %s-%s to false", event.world.getWorldInfo().getWorldName(),
                     event.world.provider.dimensionId);
             gameRule.setOrCreateGameRule("doMobSpawning", "false");

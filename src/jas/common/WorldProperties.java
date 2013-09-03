@@ -99,8 +99,8 @@ public final class WorldProperties {
         LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
         livingTempSettings.load();
         savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(
-                JustAnotherSpawner.properties().globalSortCreatureByBiome).getBoolean(
-                JustAnotherSpawner.properties().globalSortCreatureByBiome);
+                JustAnotherSpawner.globalSettings().globalSortCreatureByBiome).getBoolean(
+                JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
         universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
                 loadedUniversalDirectory);
         livingTempSettings.save();
@@ -163,7 +163,7 @@ public final class WorldProperties {
         LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
         livingTempSettings.load();
         Property savedSortCreatureByBiomeProp = livingTempSettings
-                .getSavedSortByBiome(JustAnotherSpawner.properties().globalSortCreatureByBiome);
+                .getSavedSortByBiome(JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
         savedSortCreatureByBiomeProp.set(savedSortCreatureByBiome);
         Property universalDirectoryProp = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory);
         universalDirectoryProp.set(universalDirectory);

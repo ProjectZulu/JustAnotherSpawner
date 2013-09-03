@@ -27,7 +27,7 @@ public class ImportedSpawnList {
     public ImportedSpawnList(BiomeBlacklist blacklist, boolean clearVanilla) {
         this.blacklist = blacklist;
 
-        JASLog.info("Importing and Clearing Vanilla Spawn Lists.");
+        JASLog.info("Importing ".concat(clearVanilla ? "and clearing " : "").concat("vanilla spawn lists."));
         for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
             BiomeGenBase biome = BiomeGenBase.biomeList[i];
             if (biome == null) {

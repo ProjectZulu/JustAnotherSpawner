@@ -5,7 +5,7 @@ import java.io.File;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
-public class Properties {
+public class GlobalSettings {
     public boolean debugMode = false;
     public int spawnerTickSpacing = 0;
 
@@ -14,7 +14,7 @@ public class Properties {
     public boolean turnGameruleSpawningOff = false;
     public boolean emptyVanillaSpawnLists = true;
 
-    Properties(File configDirectory) {
+    GlobalSettings(File configDirectory) {
         loadProperties(configDirectory);
     }
 
