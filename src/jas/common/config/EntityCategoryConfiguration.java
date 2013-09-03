@@ -1,7 +1,7 @@
 package jas.common.config;
 
 import jas.common.DefaultProps;
-import jas.common.Properties;
+import jas.common.WorldProperties;
 
 import java.io.File;
 
@@ -13,8 +13,8 @@ public class EntityCategoryConfiguration extends Configuration {
     public static final String configName = "CreatureType.cfg";
     public static final String configCategory = "LivingType";
 
-    public EntityCategoryConfiguration(File configDirectory) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + Properties.saveName + "/" + configName));
+    public EntityCategoryConfiguration(File configDirectory, WorldProperties worldProperties) {
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/" + configName));
     }
 
     public Property getCustomCategories(String categoryString) {

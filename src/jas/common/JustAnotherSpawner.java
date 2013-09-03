@@ -1,18 +1,14 @@
 package jas.common;
 
+import jas.api.CompatibilityRegistrationEvent;
+import jas.common.command.CommandJAS;
 import jas.common.gui.GuiHandler;
 import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
-import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import jas.compatability.CompatabilityManager;
 
 import java.io.File;
-import java.io.IOException;
 
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.BiomeDictionary;
@@ -20,11 +16,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.WorldEvent;
 import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.Init;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.Mod.PostInit;
-import cpw.mods.fml.common.Mod.PreInit;
-import cpw.mods.fml.common.Mod.ServerStarting;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -53,48 +46,55 @@ public class JustAnotherSpawner {
     }
 
     ImportedSpawnList importedSpawnList;
+    BiomeBlacklist biomeBlacklist;
 
-    @PreInit
+    private static GlobalSettings globalSettings;
+
+    public static GlobalSettings globalSettings() {
+        return globalSettings;
+    }
+
+    private static WorldSettings worldSettings;
+
+    public static WorldSettings worldSettings() {
+        return worldSettings;
+    }
+
+    @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
-        Properties.loadProperties(modConfigDirectoryFile);
+        globalSettings = new GlobalSettings(modConfigDirectoryFile);
         JASLog.configureLogging(modConfigDirectoryFile);
-        TickRegistry.registerTickHandler(new SpawnerTicker(), Side.SERVER);
-        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner());
         MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
     }
 
-    @Init
+    @EventHandler
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
         NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
-        CompatabilityManager.addCompatabilityResources();
     }
 
-    @PostInit
+    @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         BiomeDictionary.registerAllBiomes();
-        importedSpawnList = new ImportedSpawnList();
-        importedSpawnList.importVanillaSpawnLists(Properties.emptyVanillaSpawnLists);
+        biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
+        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
+        TickRegistry.registerTickHandler(new SpawnerTicker(biomeBlacklist), Side.SERVER);
+        importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
+        MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
     }
 
-    @ServerStarting
+    @EventHandler
     public void serverStart(FMLServerStartingEvent event) {
-        Properties.loadWorldSaveConfiguration(modConfigDirectoryFile, event.getServer().worldServers[0]);
-        importDefaultFiles(modConfigDirectoryFile);
-        Properties.loadWorldProperties(modConfigDirectoryFile);
-        BiomeGroupRegistry.INSTANCE.createBiomeGroups(modConfigDirectoryFile);
-        CreatureTypeRegistry.INSTANCE.initializeFromConfig(modConfigDirectoryFile);
-        CreatureHandlerRegistry.INSTANCE.serverStartup(modConfigDirectoryFile, event.getServer().worldServers[0],
-                importedSpawnList);
-        BiomeHandlerRegistry.INSTANCE.setupHandlers(modConfigDirectoryFile, event.getServer().worldServers[0]);
+        worldSettings = new WorldSettings(modConfigDirectoryFile, event.getServer().worldServers[0], importedSpawnList);
+        event.registerServerCommand(new CommandJAS());
     }
 
     @ForgeSubscribe
     public void worldLoad(WorldEvent.Load event) {
         GameRules gameRule = event.world.getGameRules();
-        if (gameRule != null && Properties.turnGameruleSpawningOff) {
+        if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
             JASLog.info("Setting GameRule doMobSpawning for %s-%s to false", event.world.getWorldInfo().getWorldName(),
                     event.world.provider.dimensionId);
             gameRule.setOrCreateGameRule("doMobSpawning", "false");
@@ -103,22 +103,6 @@ public class JustAnotherSpawner {
         String ruleName = "doCustomMobSpawning";
         if (!gameRule.hasRule(ruleName)) {
             gameRule.addGameRule(ruleName, "true");
-        }
-    }
-    
-    private void importDefaultFiles(File modConfigDirectoryFile) {
-        if (Properties.importName.trim().equals("")) {
-            return;
-        }
-        File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.saveName);
-        File importFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + Properties.importName);
-        if (worldFolder.exists() || !importFolder.exists()) {
-            return;
-        }
-        try {
-            FileUtilities.copy(importFolder, worldFolder);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }

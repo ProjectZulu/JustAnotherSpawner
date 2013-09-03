@@ -87,6 +87,6 @@ public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
 
     @Override
     public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
-        return world.getWorldInfo().getDimension() == TwilightForestMod.dimensionID;
+        return world.provider.dimensionId == TwilightForestMod.dimensionID;
     }
 }

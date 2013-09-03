@@ -1,9 +1,9 @@
 package jas.common.network.packet;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketManager;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -64,7 +64,7 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
             setPacketData((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(dataStream.readUTF()),
                     dataStream.readUTF(), dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(),
                     dataStream.readInt(), dataStream.readInt(), dataStream.readUTF());
-            CreatureType type = CreatureTypeRegistry.INSTANCE.getCreatureType(creatureType);
+            CreatureType type = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(creatureType);
             type.updateOrAddSpawn(new SpawnListEntry((Class<? extends EntityLiving>) EntityList.stringToClassMapping
                     .get(mobName), biomeName, spawnWeight, packSize, minChunkPack, maxChunkPack, optionalParameters));
             return true;

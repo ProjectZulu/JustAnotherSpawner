@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityCounter {
 
-    private ConcurrentHashMap<String, CountableInt> countingHash = new ConcurrentHashMap<String, CountableInt>();
+    public final ConcurrentHashMap<String, CountableInt> countingHash = new ConcurrentHashMap<String, CountableInt>();
 
     public static class CountableInt {
         int value = 1;

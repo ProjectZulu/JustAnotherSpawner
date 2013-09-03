@@ -1,6 +1,7 @@
 package jas.common.spawner.biome.group;
 
 import jas.common.JASLog;
+import jas.common.WorldProperties;
 import jas.common.config.BiomeGroupConfiguration;
 
 import java.io.File;
@@ -25,9 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 
-public enum BiomeGroupRegistry {
-    INSTANCE;
-
+public class BiomeGroupRegistry {
     /** Group Identifier to Group Instance Regsitry */
     private final HashMap<String, BiomeGroup> iDToGroup = new HashMap<String, BiomeGroup>();
     /** Reverse Look-up Map to Get All Groups a Particular Biome is In */
@@ -36,7 +35,7 @@ public enum BiomeGroupRegistry {
     /** Cusom Biome Names: Mappings For CustomBiomeNames to PackageNames used to read from configuration */
     private final HashMap<String, String> biomeMappingToPckg = new HashMap<String, String>();
     /** Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration */
-    private final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
+    public final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
     /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names */
     public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
 
@@ -48,10 +47,20 @@ public enum BiomeGroupRegistry {
      */
     private final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
 
+    public final WorldProperties worldProperties;
+
+    public BiomeGroupRegistry(WorldProperties worldProperties) {
+        this.worldProperties = worldProperties;
+    }
+
     /**
      * Should Only Be Used to Register BiomeGroups with their finished
      */
     public void registerGroup(BiomeGroup group) {
+        if (group.groupID == null || group.groupID.trim().equals("")) {
+            throw new IllegalArgumentException("Group ID cannot be " + group.groupID == null ? "null" : "empty");
+        }
+
         JASLog.info("Registering BiomeGroup %s with biomes %s", group.groupID, groupBiomesToString(group));
         iDToGroup.put(group.groupID, group);
         for (String pckgName : group.pckgNames) {
@@ -114,7 +123,7 @@ public enum BiomeGroupRegistry {
     }
 
     public void createBiomeGroups(File configDirectory) {
-        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
 
         /* Create Package Name Mappings */
@@ -344,7 +353,7 @@ public enum BiomeGroupRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveCurrentToConfig(File configDirectory) {
-        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory);
+        BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
         saveMappingsToConfig(biomeConfig);
         saveCustomGroupsToConfig(biomeConfig);
@@ -366,6 +375,10 @@ public enum BiomeGroupRegistry {
             String biomeID = iterator.next();
             boolean isDefaultGroup = false;
             for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+                if (biome == null) {
+                    continue;
+                }
+
                 if (biomeID.equalsIgnoreCase(biome.biomeName)) {
                     isDefaultGroup = true;
                     break;
