@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
+import jas.common.EntityProperties;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.config.LivingConfiguration;
@@ -145,8 +146,6 @@ public class LivingHandler {
 
             boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
                     .worldProperties().despawnDist);
-            boolean isOfAge = despawning.isValidAge(entity.getAge(), JustAnotherSpawner.worldSettings()
-                    .worldProperties().minDespawnTime);
             boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
                     .worldProperties().maxDespawnDist);
 
@@ -179,19 +178,23 @@ public class LivingHandler {
             double d2 = entityplayer.posZ - entity.posZ;
             double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
+            EntityProperties entityProps = (EntityProperties) entity
+                    .getExtendedProperties(EntityProperties.JAS_PROPERTIES);
+            entityProps.incrementAge(60);
+
             boolean canDespawn = !despawning.isInverted();
             if (!despawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
                 canDespawn = despawning.isInverted();
             }
 
             if (canDespawn == false) {
-                LivingHelper.setAge(entityplayer, 0);
+                entityProps.resetAge();
                 return;
             }
 
             boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
                     .worldProperties().despawnDist);
-            boolean isOfAge = despawning.isValidAge(entity.getAge(), JustAnotherSpawner.worldSettings()
+            boolean isOfAge = despawning.isValidAge(entityProps.getAge(), JustAnotherSpawner.worldSettings()
                     .worldProperties().minDespawnTime);
             boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
                     .worldProperties().maxDespawnDist);
@@ -200,10 +203,10 @@ public class LivingHandler {
                 entity.setDead();
             } else if (isOfAge && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0 && validDistance) {
                 JASLog.debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
-                        entity.getAge(), despawning.getRate());
+                        entityProps.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (!validDistance) {
-                LivingHelper.setAge(entityplayer, 0);
+                entityProps.resetAge();
             }
         }
     }
