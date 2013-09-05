@@ -7,6 +7,7 @@ XCOPY forge\mcp\src forge\mcp\src-bak /E /I /Q /y
 echo.
 echo Copying source 
 XCOPY "jas\src" "forge\mcp\src\minecraft" /E /Q /y
+XCOPY "jas\src_comp" "forge\mcp\src\minecraft" /E /Q /y
 echo.
 echo Recompile
 pushd forge\mcp
@@ -24,7 +25,7 @@ XCOPY forge\mcp\reobf\minecraft\jas forge\mcp\reobf\minecraft\SETUP\JustAnotherS
 
 echo Move Active into Setup
 pushd forge\mcp\reobf\minecraft\SETUP
-echo Using 7Zip to Zip Snow Mod
+echo Using 7Zip to Zip Mod
 "C:\Program Files\7-zip\7z.exe" a JustAnotherSpawner%Input%.zip .\JustAnotherSpawner\* -r | findstr /b /r /c:"\<Everything is Ok" /c:"\<Scanning" /c:"\<Creating archive"
 popd
 

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 
@@ -72,21 +73,14 @@ public class KeyParserEntities extends KeyParserBase {
             int maxRange) {
         int count = 0;
         for (int i = 0; i < world.loadedEntityList.size(); ++i) {
-            Entity entities = (Entity) world.loadedEntityList.get(i);
-            if (entities.isEntityAlive()) {
-                String entityName = "";
-                try {
-                    entityName = entities.getEntityName();
-                } catch (Exception e) {
-                    JASLog.severe("Error Accessing Entity Name of %s", entities.getClass().getSimpleName());
-                    e.printStackTrace();
-                    continue;
-                }
+            Entity entity = (Entity) world.loadedEntityList.get(i);
+            if (entity.isEntityAlive()) {
+            	String entityName = EntityList.getEntityString(entity);
                 if (!searchName.trim().equals("") && !searchName.equalsIgnoreCase(entityName)) {
                     continue;
                 }
 
-                int distance = (int) Math.sqrt(entities.getDistanceSq(xCoord, yCoord, zCoord));
+                int distance = (int) Math.sqrt(entity.getDistanceSq(xCoord, yCoord, zCoord));
                 if (maxRange >= minRange && distance >= minRange && distance <= maxRange) {
                     count++;
                     continue;

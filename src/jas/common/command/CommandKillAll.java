@@ -56,7 +56,7 @@ public class CommandKillAll extends CommandJasBase {
         EntityCounter deathCount = new EntityCounter();
         int totalDeaths = 0;
         @SuppressWarnings("unchecked")
-        Iterator<Entity> iterator = targetPlayer.worldObj.getLoadedEntityList().iterator();
+        Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
             LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
