@@ -3,6 +3,7 @@ package jas.common.spawner;
 import jas.common.BiomeBlacklist;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.creature.type.CreatureType;
+import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.Iterator;
 
@@ -26,8 +27,11 @@ public class ChunkSpawner {
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
-            Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-                    .getCreatureTypes();
+            if (JustAnotherSpawner.worldSettings() == null || JustAnotherSpawner.worldSettings().creatureHandlerRegistry() == null) {
+                return;
+            }
+            CreatureTypeRegistry creatureTypeRegistry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
+            Iterator<CreatureType> iterator = creatureTypeRegistry.getCreatureTypes();
             BiomeGenBase spawnBiome = event.world.getBiomeGenForCoords(k + 16, l + 16);
 
             if (spawnBiome == null || blacklist.isBlacklisted(spawnBiome)) {
