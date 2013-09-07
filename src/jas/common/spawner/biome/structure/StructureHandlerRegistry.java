@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -16,46 +16,46 @@ import com.google.common.collect.ImmutableList;
 
 import net.minecraft.world.World;
 
-public class BiomeHandlerRegistry {
-    private static final ArrayList<BiomeInterpreter> biomeInterpreters = new ArrayList<BiomeInterpreter>();
-    private final ArrayList<BiomeHandler> biomeHandlers = new ArrayList<BiomeHandler>();
+public class StructureHandlerRegistry {
+    private static final ArrayList<StructureInterpreter> structureInterpreters = new ArrayList<StructureInterpreter>();
+    private final ArrayList<StructureHandler> structureHandlers = new ArrayList<StructureHandler>();
     public final LivingHandlerRegistry livingHandlerRegistry;
     public final WorldProperties worldProperties;
 
     static {
-        biomeInterpreters.add(new BiomeInterpreterSwamp());
-        biomeInterpreters.add(new BiomeInterpreterNether());
-        biomeInterpreters.add(new BiomeInterpreterOverworldStructures());
+        structureInterpreters.add(new StructureInterpreterSwamp());
+        structureInterpreters.add(new StructureInterpreterNether());
+        structureInterpreters.add(new StructureInterpreterOverworldStructures());
     }
 
-    public static void registerInterpreter(BiomeInterpreter biomeInterpreter) {
-        biomeInterpreters.add(biomeInterpreter);
+    public static void registerInterpreter(StructureInterpreter structureInterpreter) {
+        structureInterpreters.add(structureInterpreter);
     }
 
-    public BiomeHandlerRegistry(LivingHandlerRegistry livingHandlerRegistry, WorldProperties worldProperties) {
+    public StructureHandlerRegistry(LivingHandlerRegistry livingHandlerRegistry, WorldProperties worldProperties) {
         this.livingHandlerRegistry = livingHandlerRegistry;
         this.worldProperties = worldProperties;
     }
 
     public void setupHandlers(File configDirectory, World world) {
-        for (BiomeInterpreter interpreter : biomeInterpreters) {
-            biomeHandlers.add(new BiomeHandler(interpreter));
+        for (StructureInterpreter interpreter : structureInterpreters) {
+            structureHandlers.add(new StructureHandler(interpreter));
         }
 
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
         structureConfig.load();
-        for (BiomeHandler biomeHandler : biomeHandlers) {
-            biomeHandler.readFromConfig(livingHandlerRegistry, structureConfig, world, worldProperties);
+        for (StructureHandler structureHandler : structureHandlers) {
+            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, world, worldProperties);
         }
         structureConfig.save();
     }
 
-    public Iterator<BiomeHandler> getHandlers() {
-        return biomeHandlers.iterator();
+    public Iterator<StructureHandler> getHandlers() {
+        return structureHandlers.iterator();
     }
 
-    public ImmutableList<BiomeHandler> handlers() {
-        return ImmutableList.copyOf(biomeHandlers);
+    public ImmutableList<StructureHandler> handlers() {
+        return ImmutableList.copyOf(structureHandlers);
     }
 
     /**
@@ -66,16 +66,16 @@ public class BiomeHandlerRegistry {
     public void saveCurrentToConfig(File configDirectory) {
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
         structureConfig.load();
-        for (BiomeHandler handler : biomeHandlers) {
+        for (StructureHandler handler : structureHandlers) {
             handler.saveToConfig(structureConfig, worldProperties);
         }
         structureConfig.save();
     }
 
     public Collection<SpawnListEntry> getSpawnListAt(World world, int xCoord, int yCoord, int zCoord) {
-        Iterator<BiomeHandler> iterator = this.getHandlers();
+        Iterator<StructureHandler> iterator = this.getHandlers();
         while (iterator.hasNext()) {
-            BiomeHandler handler = iterator.next();
+            StructureHandler handler = iterator.next();
             if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
                 Collection<SpawnListEntry> spawnEntryList = handler
                         .getStructureSpawnList(world, xCoord, yCoord, zCoord);

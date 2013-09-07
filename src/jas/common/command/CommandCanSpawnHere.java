@@ -2,7 +2,7 @@ package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
-import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.biome.structure.StructureHandler;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingHandler;
@@ -142,13 +142,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (BiomeHandler biomeHandler : JustAnotherSpawner.worldSettings().biomeHandlerRegistry().handlers()) {
-            structureName = biomeHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
+        for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()) {
+            structureName = StructureHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
             if (structureName != null) {
-                for (String structureKey : biomeHandler.getStructureKeys()) {
+                for (String structureKey : StructureHandler.getStructureKeys()) {
                     if (structureName.equals(structureKey)) {
-                        for (SpawnListEntry entry : biomeHandler.getStructureSpawnList(structureKey)) {
+                        for (SpawnListEntry entry : StructureHandler.getStructureSpawnList(structureKey)) {
                             if (entity.getClass().equals(entry.getClass())) {
                                 matchingSpawnListEntries.add(entry);
                             }

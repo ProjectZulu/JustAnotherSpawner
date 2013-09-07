@@ -1,8 +1,8 @@
 package jas.compatability.tf;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.ReflectionHelper;
-import jas.common.spawner.biome.structure.BiomeInterpreterHelper;
+import jas.common.spawner.biome.structure.StructureInterpreterHelper;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.MapGenTFMajorFeature;
 import twilightforest.world.TFWorld;
 
-public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
+public class StructureInterpreterTwilightForest implements StructureInterpreter {
 
     private HashMap<String, Integer> featureNameToID = new HashMap<String, Integer>();
 
@@ -62,7 +62,7 @@ public class BiomeInterpreterTwilightForest implements BiomeInterpreter {
 
     @Override
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        ChunkProviderTwilightForest chunkProviderTwilightForest = BiomeInterpreterHelper.getInnerChunkProvider(world,
+        ChunkProviderTwilightForest chunkProviderTwilightForest = StructureInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderTwilightForest.class);
         if (chunkProviderTwilightForest != null) {
             TFFeature nearestFeature = TFFeature.getNearestFeatureIncludeMore(xCoord >> 4, zCoord >> 4, world);

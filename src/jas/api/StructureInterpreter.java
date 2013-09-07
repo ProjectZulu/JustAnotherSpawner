@@ -7,23 +7,25 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.SpawnListEntry;
 
 /**
- * Used to add Support for Biome Structure Spawns. Instance must be registered in BiomeHandlerRegistry using
- * registerInterpreter(BiomeInterpreter biomeInterpreter) anytime before ServerStart. BiomeHandler and Configuration
- * will be automatically generated if registered properly.
- * 
- * Can and Should be Registered on Both Client and Server.
+ * Used to add Support for Biome Structure Spawns. Instance must be registered by subscribing to the
+ * {@link CompatibilityRegistrationEvent}. StructureHandler and Configuration will be automatically generated if registered
+ * properly.
  */
-public interface BiomeInterpreter {
+public interface StructureInterpreter {
 
     /**
-     * Returns a Collection of Objects used as Keys for Determining the SpawnList to use
+     * Returns a Collection of Objects used as Keys for representing seperate spawnlists.
+     * 
+     * This function is used to obtain all valid keys. It should not change after startup or between calls.
      * 
      * @return Collection of all Keys used for {@link getStructureSpawnList}. Return empty list if none.
      */
     public abstract Collection<String> getStructureKeys();
 
     /**
-     * Returns Collection of Spawnable Entities for the Given Structure Key
+     * Functions as default map between SpawnLists and Structure Keys from {@link #getStructureKeys}.
+     * 
+     * Note the function is called obtain default spawnlist which are later customized via user input.
      * 
      * @param structureKey Object Key From {@link getStructureKeys}
      * @return Collection of Valid Entity Classes. Return empty list if none.
@@ -31,7 +33,9 @@ public interface BiomeInterpreter {
     public abstract Collection<SpawnListEntry> getStructureSpawnList(String structureKey);
 
     /**
-     * Evaluates if Provided Location in Biome is
+     * Evaluates if provided location contains Structure. If valid, should return a valid String key
+     * 
+     * Returned string key should be one returned via {@link getStructureKeys}.
      * 
      * @param world World
      * @param xCoord X Coordinate Being Evaluated

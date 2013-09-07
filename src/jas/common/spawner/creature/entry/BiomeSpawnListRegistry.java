@@ -7,7 +7,7 @@ import jas.common.config.LivingConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.biome.group.BiomeHelper;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
+import jas.common.spawner.biome.structure.StructureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.MobSpecificConfigCache;
@@ -116,15 +116,15 @@ public class BiomeSpawnListRegistry {
     private WorldProperties worldProperties;
     private BiomeGroupRegistry biomeGroupRegistry;
     private LivingHandlerRegistry livingHandlerRegistry;
-    private BiomeHandlerRegistry biomeHandlerRegistry;
+    private StructureHandlerRegistry structureHandlerRegistry;
 
     public BiomeSpawnListRegistry(WorldProperties worldProperties, BiomeGroupRegistry biomeGroupRegistry,
             CreatureTypeRegistry creatureTypeRegistry, LivingHandlerRegistry livingHandlerRegistry,
-            BiomeHandlerRegistry biomeHandlerRegistry) {
+            StructureHandlerRegistry structureHandlerRegistry) {
         this.worldProperties = worldProperties;
         this.livingHandlerRegistry = livingHandlerRegistry;
         this.biomeGroupRegistry = biomeGroupRegistry;
-        this.biomeHandlerRegistry = biomeHandlerRegistry;
+        this.structureHandlerRegistry = structureHandlerRegistry;
     }
 
     /**
@@ -136,7 +136,7 @@ public class BiomeSpawnListRegistry {
      */
     public SpawnListEntry getSpawnListEntryToSpawn(World world, CreatureType creatureType, int xCoord, int yCoord,
             int zCoord) {
-        Collection<SpawnListEntry> structureSpawnList = biomeHandlerRegistry.getSpawnListAt(world, xCoord, yCoord,
+        Collection<SpawnListEntry> structureSpawnList = structureHandlerRegistry.getSpawnListAt(world, xCoord, yCoord,
                 zCoord);
         if (!structureSpawnList.isEmpty()) {
             JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,

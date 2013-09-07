@@ -1,7 +1,7 @@
 package jas.common;
 
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
+import jas.common.spawner.biome.structure.StructureHandlerRegistry;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -18,7 +18,7 @@ public final class WorldSettings {
     private BiomeGroupRegistry biomeGroupRegistry;
     private CreatureTypeRegistry creatureTypeRegistry;
     private LivingHandlerRegistry livingHandlerRegistry;
-    private BiomeHandlerRegistry biomeHandlerRegistry;
+    private StructureHandlerRegistry structureHandlerRegistry;
     private BiomeSpawnListRegistry biomeSpawnListRegistry;
 
     private ImportedSpawnList importedSpawnList;
@@ -43,7 +43,7 @@ public final class WorldSettings {
         biomeGroupRegistry.saveCurrentToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
         livingHandlerRegistry.saveToConfig(configDirectory);
-        biomeHandlerRegistry.saveCurrentToConfig(configDirectory);
+        structureHandlerRegistry.saveCurrentToConfig(configDirectory);
         biomeSpawnListRegistry.saveToConfig(configDirectory);
     }
 
@@ -59,11 +59,11 @@ public final class WorldSettings {
         livingHandlerRegistry = new LivingHandlerRegistry(creatureTypeRegistry, worldProperties);
         livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world, importedSpawnList);
 
-        biomeHandlerRegistry = new BiomeHandlerRegistry(livingHandlerRegistry, worldProperties);
-        biomeHandlerRegistry.setupHandlers(modConfigDirectoryFile, world);
+        structureHandlerRegistry = new StructureHandlerRegistry(livingHandlerRegistry, worldProperties);
+        structureHandlerRegistry.setupHandlers(modConfigDirectoryFile, world);
 
         biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, creatureTypeRegistry,
-                livingHandlerRegistry, biomeHandlerRegistry);
+                livingHandlerRegistry, structureHandlerRegistry);
         biomeSpawnListRegistry.loadFromConfig(modConfigDirectoryFile, importedSpawnList);
         saveWorldSettings(modConfigDirectoryFile, world);
     }
@@ -84,8 +84,8 @@ public final class WorldSettings {
         return livingHandlerRegistry;
     }
 
-    public BiomeHandlerRegistry biomeHandlerRegistry() {
-        return biomeHandlerRegistry;
+    public StructureHandlerRegistry structureHandlerRegistry() {
+        return structureHandlerRegistry;
     }
 
     public BiomeSpawnListRegistry biomeSpawnListRegistry() {

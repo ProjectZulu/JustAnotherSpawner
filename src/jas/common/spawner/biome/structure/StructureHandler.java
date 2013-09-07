@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
@@ -25,14 +25,14 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
 
-public class BiomeHandler {
-    private final BiomeInterpreter interpreter;
+public class StructureHandler {
+    private final StructureInterpreter interpreter;
 
     private final List<String> structureKeys = new ArrayList<String>();
     private final ListMultimap<String, jas.common.spawner.creature.entry.SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap
             .create();
 
-    public BiomeHandler(BiomeInterpreter interpreter) {
+    public StructureHandler(StructureInterpreter interpreter) {
         this.interpreter = interpreter;
         for (String structureKey : interpreter.getStructureKeys()) {
             structureKeys.add(structureKey);

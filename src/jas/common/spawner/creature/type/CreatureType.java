@@ -210,7 +210,7 @@ public class CreatureType {
 
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
-     * to Proposed Entity Registry or BiomeInterpreter. How will end-users fix issue? Does End User Need to?
+     * to Proposed Entity Registry or StructureInterpreter. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.
