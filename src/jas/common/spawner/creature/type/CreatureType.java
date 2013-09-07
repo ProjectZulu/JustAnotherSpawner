@@ -3,7 +3,7 @@ package jas.common.spawner.creature.type;
 import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.config.EntityCategoryConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
@@ -114,8 +114,8 @@ public class CreatureType {
      * @param entity Entity that is being Checked
      * @return
      */
-    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Entity entity) {
-        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity.getClass());
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Entity entity) {
+        LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(entity.getClass());
         return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 
@@ -125,8 +125,8 @@ public class CreatureType {
      * @param entity
      * @return
      */
-    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Class<? extends EntityLiving> entity) {
-        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity);
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Class<? extends EntityLiving> entity) {
+        LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(entity);
         return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
     }
 

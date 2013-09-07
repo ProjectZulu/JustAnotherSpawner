@@ -8,7 +8,7 @@ import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.MobSpecificConfigCache;
 import jas.common.spawner.creature.type.CreatureType;
@@ -41,9 +41,9 @@ public class BiomeSpawnListRegistry {
     private final Table<String, String, Set<SpawnListEntry>> invalidSpawnListEntries = HashBasedTable.create();
 
     public boolean addSpawn(SpawnListEntry spawnListEntry) {
-        LivingHandler handler = creatureHandlerRegistry.getLivingHandler(spawnListEntry.livingClass);
+        LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnListEntry.livingClass);
         if (spawnListEntry.itemWeight > 0
-                && creatureHandlerRegistry.getLivingHandler(spawnListEntry.livingClass).shouldSpawn) {
+                && livingHandlerRegistry.getLivingHandler(spawnListEntry.livingClass).shouldSpawn) {
             logSpawning(spawnListEntry, handler, true);
             Set<SpawnListEntry> spawnList = validSpawnListEntries.get(spawnListEntry.pckgName, handler.creatureTypeID);
             if (spawnList == null) {
@@ -115,14 +115,14 @@ public class BiomeSpawnListRegistry {
 
     private WorldProperties worldProperties;
     private BiomeGroupRegistry biomeGroupRegistry;
-    private CreatureHandlerRegistry creatureHandlerRegistry;
+    private LivingHandlerRegistry livingHandlerRegistry;
     private BiomeHandlerRegistry biomeHandlerRegistry;
 
     public BiomeSpawnListRegistry(WorldProperties worldProperties, BiomeGroupRegistry biomeGroupRegistry,
-            CreatureTypeRegistry creatureTypeRegistry, CreatureHandlerRegistry creatureHandlerRegistry,
+            CreatureTypeRegistry creatureTypeRegistry, LivingHandlerRegistry livingHandlerRegistry,
             BiomeHandlerRegistry biomeHandlerRegistry) {
         this.worldProperties = worldProperties;
-        this.creatureHandlerRegistry = creatureHandlerRegistry;
+        this.livingHandlerRegistry = livingHandlerRegistry;
         this.biomeGroupRegistry = biomeGroupRegistry;
         this.biomeHandlerRegistry = biomeHandlerRegistry;
     }
@@ -143,7 +143,7 @@ public class BiomeSpawnListRegistry {
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
                     structureSpawnList);
-            return creatureType.isEntityOfType(creatureHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry
+            return creatureType.isEntityOfType(livingHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry
                     : null;
         }
         ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
@@ -196,7 +196,7 @@ public class BiomeSpawnListRegistry {
 
         MobSpecificConfigCache confgiCache = new MobSpecificConfigCache(worldProperties);
 
-        Collection<LivingHandler> livingHandlers = creatureHandlerRegistry.getLivingHandlers();
+        Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
         for (LivingHandler handler : livingHandlers) {
             Class<? extends EntityLiving> livingClass = handler.entityClass;
             if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
@@ -252,5 +252,6 @@ public class BiomeSpawnListRegistry {
                 spawnEntry.saveToConfig(config, worldProperties);
             }
         }
+        configCache.saveAndCloseConfigs();
     }
 }

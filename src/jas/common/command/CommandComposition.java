@@ -68,7 +68,7 @@ public class CommandComposition extends CommandJasBase {
                 Iterator<? extends Entity> creatureIterator = targetPlayer.worldObj.loadedEntityList.iterator();
                 while (creatureIterator.hasNext()) {
                     Entity entity = creatureIterator.next();
-                    LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                    LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                             .getLivingHandler(entity.getClass());
                     if (livingHandler != null && entity instanceof EntityLiving
                             && livingHandler.creatureTypeID.equals(creatureType.typeID)) {

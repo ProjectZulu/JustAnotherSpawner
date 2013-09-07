@@ -74,7 +74,7 @@ public class SpawnListEntry extends WeightedRandomItem {
     }
 
     public LivingHandler getLivingHandler() {
-        return JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(livingClass);
+        return JustAnotherSpawner.worldSettings().livingHandlerRegistry().getLivingHandler(livingClass);
     }
 
     public static void setupConfigCategory(Configuration config) {

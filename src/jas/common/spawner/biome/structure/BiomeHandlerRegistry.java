@@ -4,7 +4,7 @@ import jas.api.BiomeInterpreter;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 public class BiomeHandlerRegistry {
     private static final ArrayList<BiomeInterpreter> biomeInterpreters = new ArrayList<BiomeInterpreter>();
     private final ArrayList<BiomeHandler> biomeHandlers = new ArrayList<BiomeHandler>();
-    public final CreatureHandlerRegistry creatureHandlerRegistry;
+    public final LivingHandlerRegistry livingHandlerRegistry;
     public final WorldProperties worldProperties;
 
     static {
@@ -32,8 +32,8 @@ public class BiomeHandlerRegistry {
         biomeInterpreters.add(biomeInterpreter);
     }
 
-    public BiomeHandlerRegistry(CreatureHandlerRegistry creatureHandlerRegistry, WorldProperties worldProperties) {
-        this.creatureHandlerRegistry = creatureHandlerRegistry;
+    public BiomeHandlerRegistry(LivingHandlerRegistry livingHandlerRegistry, WorldProperties worldProperties) {
+        this.livingHandlerRegistry = livingHandlerRegistry;
         this.worldProperties = worldProperties;
     }
 
@@ -45,7 +45,7 @@ public class BiomeHandlerRegistry {
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
         structureConfig.load();
         for (BiomeHandler biomeHandler : biomeHandlers) {
-            biomeHandler.readFromConfig(creatureHandlerRegistry, structureConfig, world, worldProperties);
+            biomeHandler.readFromConfig(livingHandlerRegistry, structureConfig, world, worldProperties);
         }
         structureConfig.save();
     }

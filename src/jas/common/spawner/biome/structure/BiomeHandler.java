@@ -4,7 +4,7 @@ import jas.api.BiomeInterpreter;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class BiomeHandler {
      * @param configDirectory
      * @param world
      */
-    public final void readFromConfig(CreatureHandlerRegistry creatureHandlerRegistry,
+    public final void readFromConfig(LivingHandlerRegistry livingHandlerRegistry,
             StructureConfiguration worldConfig, World world, WorldProperties worldProperties) {
         /*
          * For Every Structure Key; Generate Two Configuration Categories: One to list Entities, the Other to Generate
@@ -104,15 +104,15 @@ public class BiomeHandler {
              */
             for (Class<? extends EntityLiving> livingClass : classList) {
                 String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-                if (!creatureHandlerRegistry.getLivingHandler(livingClass).creatureTypeID
+                if (!livingHandlerRegistry.getLivingHandler(livingClass).creatureTypeID
                         .equals(CreatureTypeRegistry.NONE)) {
                     jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = createDefaultJASSpawnEntry(
                             livingClass, structureKey).createFromConfig(worldConfig, worldProperties);
 
                     if (spawnListEntry.itemWeight > 0
-                            && creatureHandlerRegistry.getLivingHandler(livingClass).shouldSpawn) {
+                            && livingHandlerRegistry.getLivingHandler(livingClass).shouldSpawn) {
                         JASLog.info("Adding SpawnListEntry %s of type %s to StructureKey %s", mobName,
-                                creatureHandlerRegistry.getLivingHandler(spawnListEntry.livingClass).creatureTypeID,
+                                livingHandlerRegistry.getLivingHandler(spawnListEntry.livingClass).creatureTypeID,
                                 structureKey);
                         structureKeysToSpawnList.get(structureKey).add(spawnListEntry);
                     } else {
@@ -120,12 +120,12 @@ public class BiomeHandler {
                                 Level.INFO,
                                 "Not adding Structure SpawnListEntry of %s to StructureKey %s due to Weight %s or ShouldSpawn %s.",
                                 mobName, structureKey, spawnListEntry.itemWeight,
-                                creatureHandlerRegistry.getLivingHandler(livingClass).shouldSpawn);
+                                livingHandlerRegistry.getLivingHandler(livingClass).shouldSpawn);
                     }
                 } else {
                     JASLog.debug(Level.INFO,
                             "Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", structureKey,
-                            mobName, creatureHandlerRegistry.getLivingHandler(livingClass).creatureTypeID);
+                            mobName, livingHandlerRegistry.getLivingHandler(livingClass).creatureTypeID);
                 }
             }
         }

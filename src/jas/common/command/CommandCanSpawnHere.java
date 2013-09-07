@@ -53,7 +53,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                 .getLivingHandler(entity.getClass());
 
         CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()

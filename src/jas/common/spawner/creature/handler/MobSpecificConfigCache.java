@@ -24,7 +24,7 @@ public class MobSpecificConfigCache {
     }
 
     public LivingConfiguration getLivingEntityConfig(File configDir, Class<? extends EntityLiving> livingClass) {
-        boolean universalCFG = worldProperties.universalDirectory;
+        boolean universalCFG = worldProperties.savedUniversalDirectory;
         if (universalCFG) {
             if (modConfigCache.get(worldProperties.saveName + "Universal") == null) {
                 LivingConfiguration config = new LivingConfiguration(configDir, "Universal", worldProperties);

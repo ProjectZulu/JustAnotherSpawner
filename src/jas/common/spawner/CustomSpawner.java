@@ -80,7 +80,7 @@ public class CustomSpawner {
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(entity.getClass());
             if (livingHandler != null) {
                 creatureType.incrementOrPutIfAbsent(livingHandler.creatureTypeID, 1);
@@ -164,7 +164,7 @@ public class CustomSpawner {
                                             }
                                             livingCount = creatureCount.getOrPutIfAbsent(
                                                     spawnlistentry.livingClass.getSimpleName(), 0);
-                                            livingCap = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                                            livingCap = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                                                     .getLivingHandler(spawnlistentry.livingClass).getLivingCap();
 
                                             if (typeCount.get() > entityTypeCap) {
@@ -238,7 +238,7 @@ public class CustomSpawner {
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            if (creatureType.isEntityOfType(JustAnotherSpawner.worldSettings().creatureHandlerRegistry(), entity)) {
+            if (creatureType.isEntityOfType(JustAnotherSpawner.worldSettings().livingHandlerRegistry(), entity)) {
                 count++;
             }
         }

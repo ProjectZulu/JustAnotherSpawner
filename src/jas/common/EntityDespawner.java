@@ -13,7 +13,7 @@ public class EntityDespawner {
     public void despawner(LivingUpdateEvent event) {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
-            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(event.entityLiving.getClass());
 
             if (livingHandler != null && livingHandler.getDespawning() != null

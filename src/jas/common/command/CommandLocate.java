@@ -54,7 +54,7 @@ public class CommandLocate extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+            LivingHandler handler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(entity.getClass());
             if (handler != null && (entityTarget.equals("*") || handler.creatureTypeID.equals(entityTarget))
                     || entityTarget.equals(EntityList.classToStringMapping.get(entity.getClass()))) {

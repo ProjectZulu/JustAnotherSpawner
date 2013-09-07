@@ -3,7 +3,7 @@ package jas.common;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
@@ -17,7 +17,7 @@ public final class WorldSettings {
     private WorldProperties worldProperties;
     private BiomeGroupRegistry biomeGroupRegistry;
     private CreatureTypeRegistry creatureTypeRegistry;
-    private CreatureHandlerRegistry creatureHandlerRegistry;
+    private LivingHandlerRegistry livingHandlerRegistry;
     private BiomeHandlerRegistry biomeHandlerRegistry;
     private BiomeSpawnListRegistry biomeSpawnListRegistry;
 
@@ -28,10 +28,21 @@ public final class WorldSettings {
         loadWorldSettings(modConfigDirectoryFile, world);
     }
 
-    public void saveWorldSettings(File configDirectory) {
+    public void saveWorldSettings(File configDirectory, World world) {
+        if (worldProperties.savedUniversalDirectory != worldProperties.loadedUniversalDirectory
+                || worldProperties.savedSortCreatureByBiome != worldProperties.loadedSortCreatureByBiome) {
+            worldProperties.savedUniversalDirectory = worldProperties.loadedUniversalDirectory;
+            worldProperties.savedSortCreatureByBiome = worldProperties.loadedSortCreatureByBiome;
+            File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName
+                    + "/" + DefaultProps.ENTITYSUBDIR);
+            for (File file : entityFolder.listFiles()) {
+                file.delete();
+            }
+        }
+        worldProperties.saveCurrentToConfig(configDirectory, world);
         biomeGroupRegistry.saveCurrentToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
-        creatureHandlerRegistry.saveCurrentToConfig(configDirectory);
+        livingHandlerRegistry.saveToConfig(configDirectory);
         biomeHandlerRegistry.saveCurrentToConfig(configDirectory);
         biomeSpawnListRegistry.saveToConfig(configDirectory);
     }
@@ -45,15 +56,16 @@ public final class WorldSettings {
         creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
         creatureTypeRegistry.initializeFromConfig(modConfigDirectoryFile);
 
-        creatureHandlerRegistry = new CreatureHandlerRegistry(biomeGroupRegistry, creatureTypeRegistry, worldProperties);
-        creatureHandlerRegistry.serverStartup(modConfigDirectoryFile, world, importedSpawnList);
+        livingHandlerRegistry = new LivingHandlerRegistry(creatureTypeRegistry, worldProperties);
+        livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world, importedSpawnList);
 
-        biomeHandlerRegistry = new BiomeHandlerRegistry(creatureHandlerRegistry, worldProperties);
+        biomeHandlerRegistry = new BiomeHandlerRegistry(livingHandlerRegistry, worldProperties);
         biomeHandlerRegistry.setupHandlers(modConfigDirectoryFile, world);
 
         biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, creatureTypeRegistry,
-                creatureHandlerRegistry, biomeHandlerRegistry);
+                livingHandlerRegistry, biomeHandlerRegistry);
         biomeSpawnListRegistry.loadFromConfig(modConfigDirectoryFile, importedSpawnList);
+        saveWorldSettings(modConfigDirectoryFile, world);
     }
 
     public WorldProperties worldProperties() {
@@ -68,8 +80,8 @@ public final class WorldSettings {
         return creatureTypeRegistry;
     }
 
-    public CreatureHandlerRegistry creatureHandlerRegistry() {
-        return creatureHandlerRegistry;
+    public LivingHandlerRegistry livingHandlerRegistry() {
+        return livingHandlerRegistry;
     }
 
     public BiomeHandlerRegistry biomeHandlerRegistry() {
