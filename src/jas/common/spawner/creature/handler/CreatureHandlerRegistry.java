@@ -7,20 +7,16 @@ import jas.common.JustAnotherSpawner;
 import jas.common.WorldProperties;
 import jas.common.config.LivingConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -31,6 +27,7 @@ import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -71,7 +68,6 @@ public class CreatureHandlerRegistry {
     public void serverStartup(File configDirectory, World world, ImportedSpawnList spawnList) {
         initializeLivingHandlers(world);
         configLivingHandlers(configDirectory, world);
-        generateSpawnListEntries(configDirectory, world, spawnList);
         saveAndCloseConfigs();
         if (worldProperties.universalDirectory != worldProperties.loadedUniversalDirectory
                 || worldProperties.savedSortCreatureByBiome != worldProperties.loadedSortCreatureByBiome) {
@@ -104,30 +100,8 @@ public class CreatureHandlerRegistry {
             if (handler.getValue().creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
                 continue;
             }
-
-            for (SpawnListEntry spawnEntry : creatureTypeRegistry.getCreatureType(handler.getValue().creatureTypeID)
-                    .getAllRejectedSpawns()) {
-                if (spawnEntry.livingClass.equals(handler.getKey())) {
-                    spawnEntry.saveToConfig(config, worldProperties);
-                }
-            }
-
-            for (SpawnListEntry spawnEntry : creatureTypeRegistry.getCreatureType(handler.getValue().creatureTypeID)
-                    .getAllSpawns()) {
-                if (spawnEntry.livingClass.equals(handler.getKey())) {
-                    spawnEntry.saveToConfig(config, worldProperties);
-                }
-            }
         }
         saveAndCloseConfigs();
-    }
-
-    public void clearSpawnLists() {
-        Iterator<CreatureType> iterator = creatureTypeRegistry.getCreatureTypes();
-        while (iterator.hasNext()) {
-            CreatureType type = iterator.next();
-            type.resetSpawns();
-        }
     }
 
     private void saveAndCloseConfigs() {
@@ -161,49 +135,13 @@ public class CreatureHandlerRegistry {
         }
     }
 
-    /**
-     * Generates SpawnListEntries for LivingHandlers which have been enabled to Spawn
-     */
-    public void generateSpawnListEntries(File configDirectory, World world, ImportedSpawnList spawnList) {
-        clearSpawnLists();
-        for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
-            String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-
-            LivingConfiguration worldConfig = getLoadedConfigurationFile(configDirectory, livingClass);
-            LivingHandler handler = livingHandlers.get(livingClass);
-            if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
-                for (BiomeGroup group : biomeGroupRegistry.getBiomeGroups()) {
-
-                    SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livingClass, spawnList)
-                            .createFromConfig(worldConfig, worldProperties);
-                    CreatureType creatureType = creatureTypeRegistry.getCreatureType(handler.creatureTypeID);
-                    if (spawnListEntry.itemWeight > 0 && handler.shouldSpawn) {
-                        JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", mobName,
-                                handler.creatureTypeID, spawnListEntry.pckgName);
-                        creatureType.addSpawn(spawnListEntry);
-                    } else {
-                        creatureType.addInvalidSpawn(spawnListEntry);
-                        JASLog.debug(
-                                Level.INFO,
-                                "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
-                                mobName, spawnListEntry.itemWeight, handler.shouldSpawn, group.groupID);
-                    }
-                }
-            } else {
-                JASLog.debug(Level.INFO,
-                        "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
-                        mobName, handler.creatureTypeID);
-            }
-        }
-    }
-
     private LivingConfiguration getLoadedConfigurationFile(File configDirectory,
             Class<? extends EntityLiving> entityClass) {
         return getLoadedConfigurationFile(configDirectory, entityClass, worldProperties.universalDirectory);
     }
 
     /**
-     * Caches and Retrieves Configration Files for Individual modIDs. The ModID is inferred from the entity name in the
+     * Caches and Retrieves configuration files for individual modIDs. The ModID is inferred from the entity name in the
      * form ModID:EntityName
      * 
      * @param configDirectory
@@ -260,30 +198,6 @@ public class CreatureHandlerRegistry {
                 entityList.add((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(classKey));
             }
         }
-    }
-
-    /**
-     * Searches For a Vanilla SpawnListEntry. Generates using defaults values (spawn rate == 0) if one doesn't exist.
-     * 
-     * @param biome
-     * @param livingClass
-     * @return
-     */
-    public SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, Class<? extends EntityLiving> livingClass,
-            ImportedSpawnList importedSpawnList) {
-        for (String pckgNames : group.getBiomeNames()) {
-            for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID.get(pckgNames)) {
-                Collection<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = importedSpawnList
-                        .getSpawnableCreatureList(biomeID);
-                for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
-                    if (spawnListEntry.entityClass.equals(livingClass)) {
-                        return new SpawnListEntry(livingClass, group.groupID, spawnListEntry.itemWeight, 4,
-                                spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount, "");
-                    }
-                }
-            }
-        }
-        return new SpawnListEntry(livingClass, group.groupID, 0, 4, 0, 4, "");
     }
 
     /**
@@ -350,6 +264,10 @@ public class CreatureHandlerRegistry {
      */
     public LivingHandler getLivingHandler(Class<? extends Entity> entityClass) {
         return livingHandlers.get(entityClass);
+    }
+
+    public ImmutableList<LivingHandler> getLivingHandlers() {
+        return ImmutableList.copyOf(livingHandlers.values());
     }
 
     /**

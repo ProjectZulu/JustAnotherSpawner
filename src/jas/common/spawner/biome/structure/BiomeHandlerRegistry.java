@@ -3,10 +3,13 @@ package jas.common.spawner.biome.structure;
 import jas.api.BiomeInterpreter;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
+import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
 import com.google.common.collect.ImmutableList;
@@ -67,5 +70,20 @@ public class BiomeHandlerRegistry {
             handler.saveToConfig(structureConfig, worldProperties);
         }
         structureConfig.save();
+    }
+
+    public Collection<SpawnListEntry> getSpawnListAt(World world, int xCoord, int yCoord, int zCoord) {
+        Iterator<BiomeHandler> iterator = this.getHandlers();
+        while (iterator.hasNext()) {
+            BiomeHandler handler = iterator.next();
+            if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
+                Collection<SpawnListEntry> spawnEntryList = handler
+                        .getStructureSpawnList(world, xCoord, yCoord, zCoord);
+                if (!spawnEntryList.isEmpty()) {
+                    return spawnEntryList;
+                }
+            }
+        }
+        return Collections.emptyList();
     }
 }

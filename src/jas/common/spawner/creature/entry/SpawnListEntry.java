@@ -46,6 +46,16 @@ public class SpawnListEntry extends WeightedRandomItem {
     public SpawnListEntry(Class<? extends EntityLiving> livingClass, String pckgName, int weight, int packSize,
             int minChunkPack, int maxChunkPack, String optionalParameters) {
         super(weight);
+        assert livingClass != null;
+        assert pckgName != null;
+        if (livingClass == null) {
+            throw new IllegalArgumentException("Entity Class BiomeGroupID canot be null.");
+        }
+
+        if (pckgName == null || pckgName.trim().equals("")) {
+            throw new IllegalArgumentException("BiomeGroupID canot be " + pckgName != null ? "empty." : "null.");
+        }
+
         this.livingClass = livingClass;
         this.packSize = packSize;
         this.pckgName = pckgName;
@@ -139,24 +149,14 @@ public class SpawnListEntry extends WeightedRandomItem {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
-        if (obj == null)
+        } else if (other == null || getClass() != other.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SpawnListEntry other = (SpawnListEntry) obj;
-        if (pckgName == null) {
-            if (other.pckgName != null)
-                return false;
-        } else if (!pckgName.equals(other.pckgName))
-            return false;
-        if (livingClass == null) {
-            if (other.livingClass != null)
-                return false;
-        } else if (!livingClass.equals(other.livingClass))
-            return false;
-        return true;
+        }
+
+        SpawnListEntry otherEntry = (SpawnListEntry) other;
+        return pckgName.equals(otherEntry.pckgName) && livingClass.equals(otherEntry.livingClass);
     }
 }

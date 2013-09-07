@@ -1,9 +1,7 @@
 package jas.common.network.packet;
 
-import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketManager;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.type.CreatureType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -60,17 +58,17 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
     @Override
     @SuppressWarnings("unchecked")
     public boolean processPacket(DataInputStream dataStream, Player player) {
-        try {
-            setPacketData((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(dataStream.readUTF()),
-                    dataStream.readUTF(), dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(),
-                    dataStream.readInt(), dataStream.readInt(), dataStream.readUTF());
-            CreatureType type = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(creatureType);
-            type.updateOrAddSpawn(new SpawnListEntry((Class<? extends EntityLiving>) EntityList.stringToClassMapping
-                    .get(mobName), biomeName, spawnWeight, packSize, minChunkPack, maxChunkPack, optionalParameters));
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            setPacketData((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(dataStream.readUTF()),
+//                    dataStream.readUTF(), dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(),
+//                    dataStream.readInt(), dataStream.readInt(), dataStream.readUTF());
+//            CreatureType type = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(creatureType);
+//            type.updateOrAddSpawn(new SpawnListEntry((Class<? extends EntityLiving>) EntityList.stringToClassMapping
+//                    .get(mobName), biomeName, spawnWeight, packSize, minChunkPack, maxChunkPack, optionalParameters));
+//            return true;
+//        } catch (IOException e) {
+//            e.printStackTrace();
             return false;
-        }
+//        }
     }
 }

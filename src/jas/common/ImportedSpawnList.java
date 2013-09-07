@@ -18,15 +18,13 @@ import com.google.common.collect.Multimap;
 public class ImportedSpawnList {
 
     private SpawnList[] spawnLists = new SpawnList[BiomeGenBase.biomeList.length];
-    private BiomeBlacklist blacklist;
 
     private static class SpawnList {
         public Multimap<EnumCreatureType, SpawnListEntry> spawnLists = ArrayListMultimap.create();
     }
 
+    @SuppressWarnings("unchecked")
     public ImportedSpawnList(BiomeBlacklist blacklist, boolean clearVanilla) {
-        this.blacklist = blacklist;
-
         JASLog.info("Importing ".concat(clearVanilla ? "and clearing " : "").concat("vanilla spawn lists."));
         for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
             BiomeGenBase biome = BiomeGenBase.biomeList[i];

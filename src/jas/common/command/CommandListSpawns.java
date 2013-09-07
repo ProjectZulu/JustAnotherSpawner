@@ -3,6 +3,7 @@ package jas.common.command;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -130,7 +131,10 @@ public class CommandListSpawns extends CommandJasBase {
                     biomeContents.append(", ");
                 }
                 biomeContents.append("\u00A71").append(entityType.typeID).append("\u00A7r| ");
-                Iterator<SpawnListEntry> spawnListIterator = entityType.getSpawnList(biomeStructureName).iterator();
+                BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings()
+                        .biomeSpawnListRegistry();
+                Iterator<SpawnListEntry> spawnListIterator = biomeSpawnListRegistry.getSpawnListFor(entityType.typeID,
+                        biomeStructureName).iterator();
                 while (spawnListIterator.hasNext()) {
                     entityMatch = true;
                     SpawnListEntry entry = spawnListIterator.next();

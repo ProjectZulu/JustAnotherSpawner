@@ -3,6 +3,7 @@ package jas.common.command;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHelper;
@@ -52,10 +53,11 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(entity.getClass());
+        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                .getLivingHandler(entity.getClass());
 
-        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(
-                livingHandler.creatureTypeID);
+        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                .getCreatureType(livingHandler.creatureTypeID);
         if (livingType == null) {
             commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
                     "Entity %s is of type NONE and thus will never spawn.", entityName)));
@@ -164,7 +166,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
         BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
-        for (SpawnListEntry spawnListEntry : livingType.getSpawnList(packageBiome)) {
+        BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+        for (SpawnListEntry spawnListEntry : biomeSpawnListRegistry.getSpawnListFor(livingType.typeID, packageBiome)) {
             if (spawnListEntry.livingClass.equals(entity.getClass())) {
                 matchingSpawnListEntries.add(spawnListEntry);
             }

@@ -2,6 +2,7 @@ package jas.common;
 
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
+import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -18,9 +19,10 @@ public final class WorldSettings {
     private CreatureTypeRegistry creatureTypeRegistry;
     private CreatureHandlerRegistry creatureHandlerRegistry;
     private BiomeHandlerRegistry biomeHandlerRegistry;
-    
+    private BiomeSpawnListRegistry biomeSpawnListRegistry;
+
     private ImportedSpawnList importedSpawnList;
-    
+
     protected WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
         this.importedSpawnList = importedSpawnList;
         loadWorldSettings(modConfigDirectoryFile, world);
@@ -31,8 +33,9 @@ public final class WorldSettings {
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
         creatureHandlerRegistry.saveCurrentToConfig(configDirectory);
         biomeHandlerRegistry.saveCurrentToConfig(configDirectory);
+        biomeSpawnListRegistry.saveToConfig(configDirectory);
     }
-    
+
     public void loadWorldSettings(File modConfigDirectoryFile, World world) {
         worldProperties = new WorldProperties(modConfigDirectoryFile, world);
 
@@ -47,6 +50,10 @@ public final class WorldSettings {
 
         biomeHandlerRegistry = new BiomeHandlerRegistry(creatureHandlerRegistry, worldProperties);
         biomeHandlerRegistry.setupHandlers(modConfigDirectoryFile, world);
+
+        biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, creatureTypeRegistry,
+                creatureHandlerRegistry, biomeHandlerRegistry);
+        biomeSpawnListRegistry.loadFromConfig(modConfigDirectoryFile, importedSpawnList);
     }
 
     public WorldProperties worldProperties() {
@@ -67,5 +74,9 @@ public final class WorldSettings {
 
     public BiomeHandlerRegistry biomeHandlerRegistry() {
         return biomeHandlerRegistry;
+    }
+
+    public BiomeSpawnListRegistry biomeSpawnListRegistry() {
+        return biomeSpawnListRegistry;
     }
 }

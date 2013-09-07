@@ -39,46 +39,46 @@ public class PacketManagerServerSync extends PacketManager {
 
     @Override
     public boolean processPacket(DataInputStream dataStream, Player player) {
-        try {
-            setPacketData(dataStream.readBoolean());
-            // TODO: Lock/Unlock Server
-
-            /* Sync CreatureType To Client */
-            Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-                    .getCreatureTypes();
-            while (typeIterator.hasNext()) {
-                CreatureType creatureType = typeIterator.next();
-                PacketManagerUpdateCreatureType creaturePacketManager = (PacketManagerUpdateCreatureType) PacketID.CREATURE_TYPE
-                        .createPacketManager();
-                creaturePacketManager.setPacketData(creatureType);
-                PacketDispatcher.sendPacketToPlayer(creaturePacketManager.createPacket(), player);
-
-                /* Sync SpawnListEntries To Client */
-                Iterator<SpawnListEntry> spawnIterator = creatureType.getAllSpawns().iterator();
-                while (spawnIterator.hasNext()) {
-                    SpawnListEntry entry = spawnIterator.next();
-                    PacketManagerUpdateSpawnListEntry spawnPacketManager = (PacketManagerUpdateSpawnListEntry) PacketID.SPAWN_ENTRY
-                            .createPacketManager();
-                    spawnPacketManager.setPacketData(creatureType.typeID, entry);
-                    PacketDispatcher.sendPacketToPlayer(spawnPacketManager.createPacket(), player);
-                }
-            }
-
-            /* Sync LivingHandler To Client */
-            Iterator<Class<? extends EntityLiving>> handlerIterator = JustAnotherSpawner.worldSettings()
-                    .creatureHandlerRegistry().getLivingKeys();
-            while (handlerIterator.hasNext()) {
-                Class<? extends EntityLiving> livingClass = handlerIterator.next();
-                PacketManagerUpdateLivingHandler packetManager = (PacketManagerUpdateLivingHandler) PacketID.LIVING_HANDLER
-                        .createPacketManager();
-                packetManager.setPacketData(JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                        .getLivingHandler(livingClass));
-                PacketDispatcher.sendPacketToPlayer(packetManager.createPacket(), player);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+//        try {
+//            setPacketData(dataStream.readBoolean());
+//            // TODO: Lock/Unlock Server
+//
+//            /* Sync CreatureType To Client */
+//            Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+//                    .getCreatureTypes();
+//            while (typeIterator.hasNext()) {
+//                CreatureType creatureType = typeIterator.next();
+//                PacketManagerUpdateCreatureType creaturePacketManager = (PacketManagerUpdateCreatureType) PacketID.CREATURE_TYPE
+//                        .createPacketManager();
+//                creaturePacketManager.setPacketData(creatureType);
+//                PacketDispatcher.sendPacketToPlayer(creaturePacketManager.createPacket(), player);
+//
+//                /* Sync SpawnListEntries To Client */
+//                Iterator<SpawnListEntry> spawnIterator = creatureType.getAllSpawns().iterator();
+//                while (spawnIterator.hasNext()) {
+//                    SpawnListEntry entry = spawnIterator.next();
+//                    PacketManagerUpdateSpawnListEntry spawnPacketManager = (PacketManagerUpdateSpawnListEntry) PacketID.SPAWN_ENTRY
+//                            .createPacketManager();
+//                    spawnPacketManager.setPacketData(creatureType.typeID, entry);
+//                    PacketDispatcher.sendPacketToPlayer(spawnPacketManager.createPacket(), player);
+//                }
+//            }
+//
+//            /* Sync LivingHandler To Client */
+//            Iterator<Class<? extends EntityLiving>> handlerIterator = JustAnotherSpawner.worldSettings()
+//                    .creatureHandlerRegistry().getLivingKeys();
+//            while (handlerIterator.hasNext()) {
+//                Class<? extends EntityLiving> livingClass = handlerIterator.next();
+//                PacketManagerUpdateLivingHandler packetManager = (PacketManagerUpdateLivingHandler) PacketID.LIVING_HANDLER
+//                        .createPacketManager();
+//                packetManager.setPacketData(JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+//                        .getLivingHandler(livingClass));
+//                PacketDispatcher.sendPacketToPlayer(packetManager.createPacket(), player);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
         return true;
     }
 }
