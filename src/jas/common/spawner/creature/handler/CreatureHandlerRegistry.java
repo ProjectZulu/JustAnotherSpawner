@@ -91,11 +91,10 @@ public class CreatureHandlerRegistry {
                 worldProperties);
         tempSettings.load();
         Property byBiome = tempSettings
-                .getSavedSortByBiome(JustAnotherSpawner.worldSettings().worldProperties().savedSortCreatureByBiome);
-        byBiome.set(JustAnotherSpawner.worldSettings().worldProperties().savedSortCreatureByBiome);
-        Property isUniversal = tempSettings.getSavedUseUniversalConfig(JustAnotherSpawner.worldSettings()
-                .worldProperties().universalDirectory);
-        isUniversal.set(JustAnotherSpawner.worldSettings().worldProperties().universalDirectory);
+                .getSavedSortByBiome(worldProperties.savedSortCreatureByBiome);
+        byBiome.set(worldProperties.savedSortCreatureByBiome);
+        Property isUniversal = tempSettings.getSavedUseUniversalConfig(worldProperties.universalDirectory);
+        isUniversal.set(worldProperties.universalDirectory);
         tempSettings.save();
 
         for (Entry<Class<? extends EntityLiving>, LivingHandler> handler : livingHandlers.entrySet()) {

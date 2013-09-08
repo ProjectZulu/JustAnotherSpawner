@@ -65,9 +65,10 @@ public final class WorldProperties {
 
         /* Load Save Sort Creature By Biome */
         loadedSortCreatureByBiome = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting", true,
+                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting",
+                        JustAnotherSpawner.globalSettings().globalSortCreatureByBiome,
                         "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.")
-                .getBoolean(true);
+                .getBoolean(JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
 
         /* Load Save/Use Universal Entity Directory */
         loadedUniversalDirectory = worldGloablConfig.get("Save_Configuration." + curWorldName,
@@ -98,9 +99,8 @@ public final class WorldProperties {
     private void loadFileSaveConfiguration(File configDirectory) {
         LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
         livingTempSettings.load();
-        savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(
-                JustAnotherSpawner.globalSettings().globalSortCreatureByBiome).getBoolean(
-                JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
+        savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome).getBoolean(
+                loadedSortCreatureByBiome);
         universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
                 loadedUniversalDirectory);
         livingTempSettings.save();
@@ -147,7 +147,8 @@ public final class WorldProperties {
 
         /* Load Save Sort Creature By Biome */
         Property loadedSortCreatureByBiomeProp = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting", true,
+                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting",
+                        JustAnotherSpawner.globalSettings().globalSortCreatureByBiome,
                         "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.");
         loadedSortCreatureByBiomeProp.set(loadedSortCreatureByBiome);
 
@@ -162,8 +163,7 @@ public final class WorldProperties {
     private void saveFileSaveConfiguration(File configDirectory) {
         LivingConfiguration livingTempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings", this);
         livingTempSettings.load();
-        Property savedSortCreatureByBiomeProp = livingTempSettings
-                .getSavedSortByBiome(JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
+        Property savedSortCreatureByBiomeProp = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome);
         savedSortCreatureByBiomeProp.set(savedSortCreatureByBiome);
         Property universalDirectoryProp = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory);
         universalDirectoryProp.set(universalDirectory);
