@@ -23,14 +23,14 @@ public class KeyParserLocation extends KeyParserBase {
         String[] pieces = parseable.split(",");
         Operand operand = parseOperand(pieces);
 
-        if (pieces.length == 6) {
-            int targetX = ParsingHelper.parseFilteredInteger(pieces[0], 0, "tagetX " + key.key);
-            int targetY = ParsingHelper.parseFilteredInteger(pieces[1], 0, "tagetY " + key.key);
-            int targetZ = ParsingHelper.parseFilteredInteger(pieces[2], 0, "tagetZ " + key.key);
+        if (pieces.length == 7) {
+            int targetX = ParsingHelper.parseFilteredInteger(pieces[1], 0, "targetX " + key.key);
+            int targetY = ParsingHelper.parseFilteredInteger(pieces[2], 0, "targetY " + key.key);
+            int targetZ = ParsingHelper.parseFilteredInteger(pieces[3], 0, "targetZ " + key.key);
 
-            int varX = ParsingHelper.parseFilteredInteger(pieces[3], 1, "varX " + key.key);
-            int varY = ParsingHelper.parseFilteredInteger(pieces[4], 1, "varY " + key.key);
-            int varZ = ParsingHelper.parseFilteredInteger(pieces[5], 1, "varZ " + key.key);
+            int varX = ParsingHelper.parseFilteredInteger(pieces[4], 1, "varX " + key.key);
+            int varY = ParsingHelper.parseFilteredInteger(pieces[5], 1, "varY " + key.key);
+            int varZ = ParsingHelper.parseFilteredInteger(pieces[6], 1, "varZ " + key.key);
             TypeValuePair typeValue = new TypeValuePair(key, new Object[] { isInverted(pieces[0]), targetX, targetY,
                     targetZ, varX, varY, varZ });
             parsedChainable.add(typeValue);

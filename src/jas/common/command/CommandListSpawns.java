@@ -151,7 +151,7 @@ public class CommandListSpawns extends CommandJasBase {
         if (!structureMatch) {
             throw new WrongUsageException("commands.jaslistspawns.biomenotfound", new Object[0]);
         } else if (!entityMatch) {
-            biomeContents.append("No Entries Found");
+//            biomeContents.append("No Entries Found");
         }
         return biomeContents.toString();
     }
