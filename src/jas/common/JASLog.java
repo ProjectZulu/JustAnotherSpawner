@@ -107,8 +107,6 @@ public class JASLog {
             }
 
             JASLog.log(LogType.SPAWNING, Level.INFO, sb.toString());
-        } else {
-            info("Spawning Disabled");
         }
     }
 }
