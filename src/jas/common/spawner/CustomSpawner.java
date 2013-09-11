@@ -2,7 +2,6 @@ package jas.common.spawner;
 
 import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
-import jas.common.JASLog.LogType;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
@@ -201,20 +200,13 @@ public class CustomSpawner {
                                                     spawnY, spawnZ)) {
                                                 entitylivingdata = entityliving.func_110161_a(entitylivingdata);
                                             }
-                                            try {
-                                                JASLog.log(LogType.SPAWNING, Level.INFO,
-                                                        "Spawning %s type Entity %s aka %s at %s, %s, %s ",
-                                                        spawnlistentry.getLivingHandler().creatureTypeID,
-                                                        EntityList.classToStringMapping.get(entityliving.getClass()),
-                                                        entityliving.getEntityName(), entityliving.posX,
-                                                        entityliving.posY, entityliving.posZ);
-                                            } catch (Exception e) {
-                                                JASLog.log(LogType.SPAWNING, Level.INFO,
-                                                        "Spawning %s type Entity %s at %s, %s, %s ",
-                                                        spawnlistentry.getLivingHandler().creatureTypeID,
-                                                        EntityList.classToStringMapping.get(entityliving.getClass()),
-                                                        entityliving.posX, entityliving.posY, entityliving.posZ);
-                                            }
+                                            JASLog.logSpawn(false, (String) EntityList.classToStringMapping
+                                                    .get(entityliving.getClass()),
+                                                    spawnlistentry.getLivingHandler().creatureTypeID,
+                                                    (int) entityliving.posX, (int) entityliving.posY,
+                                                    (int) entityliving.posZ, BiomeHelper
+                                                            .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+                                                                    (int) entityliving.posX, (int) entityliving.posX)));
                                             typeCount.increment();
                                             livingCount.increment();
 
@@ -288,11 +280,13 @@ public class CustomSpawner {
                         }
 
                         entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-                        JASLog.log(LogType.SPAWNING, Level.INFO,
-                                "Chunk Spawned %s type Entity %s aka %s of  at %s, %s, %s ",
+                        JASLog.logSpawn(true, (String) EntityList.classToStringMapping
+                                .get(entityliving.getClass()),
                                 spawnListEntry.getLivingHandler().creatureTypeID,
-                                EntityList.classToStringMapping.get(entityliving.getClass()),
-                                entityliving.getEntityName(), entityliving.posX, entityliving.posY, entityliving.posZ);
+                                (int) entityliving.posX, (int) entityliving.posY,
+                                (int) entityliving.posZ, BiomeHelper
+                                        .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+                                                (int) entityliving.posX, (int) entityliving.posX)));
                         world.spawnEntityInWorld(entityliving);
                         if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
                             entitylivingdata = entityliving.func_110161_a(entitylivingdata);

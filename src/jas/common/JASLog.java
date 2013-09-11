@@ -13,8 +13,25 @@ public class JASLog {
     // private static boolean isDebug;
 
     public enum LogType {
-        SPAWNING, DEBUG;
-        public boolean isEnabled = false;
+        SPAWNING(true), DEBUG(), SPAWNING_NAME(true), SPAWNING_TYPE(true), SPAWNING_POS(true), SPAWNING_BIOME(true);
+        public final boolean defaultEnabled;
+        private boolean isEnabled = false;
+
+        public void setEnabled(boolean isEnabled) {
+            this.isEnabled = isEnabled;
+        }
+
+        LogType() {
+            defaultEnabled = false;
+        }
+
+        LogType(boolean defaultEnabled) {
+            this.defaultEnabled = defaultEnabled;
+        }
+
+        public static boolean isEnabled(LogType logType) {
+            return logType.isEnabled ? true : LogType.DEBUG.isEnabled;
+        }
     }
 
     public static void configureLogging(File configDirectory) {
@@ -27,11 +44,11 @@ public class JASLog {
             config.load();
             for (LogType type : LogType.values()) {
                 if (type == LogType.DEBUG) {
-                    type.isEnabled = config.get("Properties.Logging", type.toString() + " Logging", false,
-                            "Master Switch For All Debug Printing").getBoolean(false);
+                    type.setEnabled(config.get("Properties.Logging", type.toString() + " Logging", type.defaultEnabled,
+                            "Master Switch For All Debug Printing").getBoolean(type.defaultEnabled));
                 } else {
-                    type.isEnabled = config.get("Properties.Logging", type.toString() + " Logging", true,
-                            "Enables " + type + " Logging").getBoolean(true);
+                    type.setEnabled(config.get("Properties.Logging", type.toString() + " Logging", type.defaultEnabled,
+                            "Enables " + type + " Logging").getBoolean(type.defaultEnabled));
                 }
             }
             config.save();
@@ -55,14 +72,43 @@ public class JASLog {
     }
 
     public static void debug(Level level, String format, Object... data) {
-        if (LogType.DEBUG.isEnabled) {
+        if (LogType.isEnabled(LogType.DEBUG)) {
             log(level, format, data);
         }
     }
 
     public static void log(LogType type, Level level, String format, Object... data) {
-        if (type.isEnabled || LogType.DEBUG.isEnabled) {
+        if (LogType.isEnabled(type)) {
             log(level, format, data);
+        }
+    }
+
+    public static void logSpawn(boolean chunkSpawn, String entityName, String creatureType, int xCoord, int yCoord,
+            int zCoord, String biomeName) {
+        if (LogType.isEnabled(LogType.SPAWNING)) {
+            StringBuilder sb = new StringBuilder(90);
+
+            sb.append(chunkSpawn ? "Chunk spawning entity" : "Passive Spawning entity");
+
+            if (LogType.isEnabled(LogType.SPAWNING_NAME)) {
+                sb.append(" ").append(entityName);
+            }
+
+            if (LogType.isEnabled(LogType.SPAWNING_TYPE)) {
+                sb.append(" of type ").append(creatureType);
+            }
+
+            if (LogType.isEnabled(LogType.SPAWNING_POS)) {
+                sb.append(" at ").append(xCoord).append(", ").append(yCoord).append(", ").append(zCoord);
+            }
+
+            if (LogType.isEnabled(LogType.SPAWNING_BIOME)) {
+                sb.append(" (").append(biomeName).append(")");
+            }
+
+            JASLog.log(LogType.SPAWNING, Level.INFO, sb.toString());
+        } else {
+            info("Spawning Disabled");
         }
     }
 }
