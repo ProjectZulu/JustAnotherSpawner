@@ -39,20 +39,20 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
     @Override
     @SuppressWarnings("unchecked")
     public boolean processPacket(DataInputStream dataStream, Player player) {
-        try {
-            entityName = dataStream.readUTF();
-            creatureTypeID = dataStream.readUTF();
-            shouldSpawn = dataStream.readBoolean();
-            JustAnotherSpawner
-                    .worldSettings()
-                    .creatureHandlerRegistry()
-                    .updateLivingHandler(
-                            (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName),
-                            creatureTypeID, shouldSpawn);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            entityName = dataStream.readUTF();
+//            creatureTypeID = dataStream.readUTF();
+//            shouldSpawn = dataStream.readBoolean();
+//            JustAnotherSpawner
+//                    .worldSettings()
+//                    .creatureHandlerRegistry()
+//                    .updateLivingHandler(
+//                            (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName),
+//                            creatureTypeID, shouldSpawn);
+//            return true;
+//        } catch (IOException e) {
+//            e.printStackTrace();
             return false;
-        }
+//        }
     }
 }

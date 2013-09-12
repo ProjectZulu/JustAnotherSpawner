@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.ReflectionHelper;
 
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
 
-public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
+public class StructureInterpreterOverworldStructures implements StructureInterpreter {
 
     public static final String STRONGHOLD_KEY = "Stronghold";
     public static final String MINESHAFT_KEY = "Mineshaft";
@@ -32,7 +32,7 @@ public class BiomeInterpreterOverworldStructures implements BiomeInterpreter {
 
     @Override
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        ChunkProviderGenerate chunkProviderGenerate = BiomeInterpreterHelper.getInnerChunkProvider(world,
+        ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderGenerate.class);
         if (chunkProviderGenerate != null) {
             MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, ChunkProviderGenerate.class, chunkProviderGenerate,

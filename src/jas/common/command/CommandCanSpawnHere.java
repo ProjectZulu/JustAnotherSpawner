@@ -2,7 +2,8 @@ package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.biome.group.BiomeHelper;
-import jas.common.spawner.biome.structure.BiomeHandler;
+import jas.common.spawner.biome.structure.StructureHandler;
+import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHelper;
@@ -52,10 +53,11 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(entity.getClass());
+        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                .getLivingHandler(entity.getClass());
 
-        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(
-                livingHandler.creatureTypeID);
+        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                .getCreatureType(livingHandler.creatureTypeID);
         if (livingType == null) {
             commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
                     "Entity %s is of type NONE and thus will never spawn.", entityName)));
@@ -140,13 +142,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (BiomeHandler biomeHandler : JustAnotherSpawner.worldSettings().biomeHandlerRegistry().handlers()) {
-            structureName = biomeHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
+        for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()) {
+            structureName = StructureHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
             if (structureName != null) {
-                for (String structureKey : biomeHandler.getStructureKeys()) {
+                for (String structureKey : StructureHandler.getStructureKeys()) {
                     if (structureName.equals(structureKey)) {
-                        for (SpawnListEntry entry : biomeHandler.getStructureSpawnList(structureKey)) {
+                        for (SpawnListEntry entry : StructureHandler.getStructureSpawnList(structureKey)) {
                             if (entity.getClass().equals(entry.getClass())) {
                                 matchingSpawnListEntries.add(entry);
                             }
@@ -164,7 +166,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
         BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
-        for (SpawnListEntry spawnListEntry : livingType.getSpawnList(packageBiome)) {
+        BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+        for (SpawnListEntry spawnListEntry : biomeSpawnListRegistry.getSpawnListFor(livingType.typeID, packageBiome)) {
             if (spawnListEntry.livingClass.equals(entity.getClass())) {
                 matchingSpawnListEntries.add(spawnListEntry);
             }

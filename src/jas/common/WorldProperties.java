@@ -12,7 +12,7 @@ import net.minecraftforge.common.Property;
 public final class WorldProperties {
 
     /* Functional Universal Directory Settings, marks the Way the System should Sort */
-    public boolean universalDirectory;
+    public boolean savedUniversalDirectory;
     /* Placeholder used to determine if the current directory needs to be deleted and changed */
     public boolean loadedUniversalDirectory;
 
@@ -101,7 +101,7 @@ public final class WorldProperties {
         livingTempSettings.load();
         savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome).getBoolean(
                 loadedSortCreatureByBiome);
-        universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
+        savedUniversalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
                 loadedUniversalDirectory);
         livingTempSettings.save();
     }
@@ -114,16 +114,16 @@ public final class WorldProperties {
         worldConfig.save();
     }
 
-    public void saveCurrentToConfig(File configDirectory) {
-        saveWorldSaveConfiguration(configDirectory);
+    public void saveCurrentToConfig(File configDirectory, World world) {
+        saveWorldSaveConfiguration(configDirectory, world);
         saveFileSaveConfiguration(configDirectory);
         saveWorldProperties(configDirectory);
     }
 
-    private void saveWorldSaveConfiguration(File configDirectory) {
+    private void saveWorldSaveConfiguration(File configDirectory, World world) {
         Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + "SaveConfig.cfg"));
-        String curWorldName = "Doesn't Matter as we are overwriting saved data";
+        String curWorldName = world.getWorldInfo().getWorldName();
         worldGloablConfig.load();
 
         /* Load Save Use Import_Name */
@@ -166,7 +166,7 @@ public final class WorldProperties {
         Property savedSortCreatureByBiomeProp = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome);
         savedSortCreatureByBiomeProp.set(savedSortCreatureByBiome);
         Property universalDirectoryProp = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory);
-        universalDirectoryProp.set(universalDirectory);
+        universalDirectoryProp.set(savedUniversalDirectory);
         livingTempSettings.save();
     }
 

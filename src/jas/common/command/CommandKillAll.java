@@ -59,7 +59,7 @@ public class CommandKillAll extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+            LivingHandler handler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(entity.getClass());
             if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
                     && isEntityFiltered(entity, entityFilter)) {

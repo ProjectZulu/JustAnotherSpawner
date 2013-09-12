@@ -5,6 +5,7 @@ import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
+import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
@@ -79,7 +80,7 @@ public class CustomSpawner {
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(entity.getClass());
             if (livingHandler != null) {
                 creatureType.incrementOrPutIfAbsent(livingHandler.creatureTypeID, 1);
@@ -154,16 +155,16 @@ public class CustomSpawner {
                                         }
 
                                         if (spawnlistentry == null) {
-                                            spawnlistentry = creatureType.getSpawnListEntryToSpawn(JustAnotherSpawner
-                                                    .worldSettings().creatureHandlerRegistry(), JustAnotherSpawner
-                                                    .worldSettings().biomeHandlerRegistry(), worldServer, blockSpawnX,
-                                                    blockSpawnY, blockSpawnZ);
+                                            BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner
+                                                    .worldSettings().biomeSpawnListRegistry();
+                                            spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(
+                                                    worldServer, creatureType, blockSpawnX, blockSpawnY, blockSpawnZ);
                                             if (spawnlistentry == null) {
                                                 continue;
                                             }
                                             livingCount = creatureCount.getOrPutIfAbsent(
                                                     spawnlistentry.livingClass.getSimpleName(), 0);
-                                            livingCap = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+                                            livingCap = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                                                     .getLivingHandler(spawnlistentry.livingClass).getLivingCap();
 
                                             if (typeCount.get() > entityTypeCap) {
@@ -230,7 +231,7 @@ public class CustomSpawner {
         Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
         while (creatureIterator.hasNext()) {
             Entity entity = creatureIterator.next();
-            if (creatureType.isEntityOfType(JustAnotherSpawner.worldSettings().creatureHandlerRegistry(), entity)) {
+            if (creatureType.isEntityOfType(JustAnotherSpawner.worldSettings().livingHandlerRegistry(), entity)) {
                 count++;
             }
         }
@@ -247,9 +248,9 @@ public class CustomSpawner {
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;
             int i2 = k1;
-            SpawnListEntry spawnListEntry = creatureType.getSpawnListEntryToSpawn(JustAnotherSpawner.worldSettings()
-                    .creatureHandlerRegistry(), JustAnotherSpawner.worldSettings().biomeHandlerRegistry(), world,
-                    BiomeHelper.getPackageName(biome), j1, world.getTopSolidOrLiquidBlock(j1, k1), k1);
+            BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+            SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
+                    world.getTopSolidOrLiquidBlock(j1, k1), k1);
             EntityLivingData entitylivingdata = null;
             if (spawnListEntry == null) {
                 JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);

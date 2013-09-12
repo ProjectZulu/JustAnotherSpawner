@@ -1,5 +1,6 @@
 package jas.compatability;
 
+import jas.api.CompatibilityRegistrationEvent;
 import jas.common.JASLog;
 import jas.compatability.tf.TFLoadInfo;
 
@@ -19,20 +20,19 @@ import cpw.mods.fml.common.network.NetworkMod;
 @NetworkMod(clientSideRequired = false, serverSideRequired = false)
 public class JASCompatability {
 
-    private final List<LoadInfo> modulesInfo = new ArrayList<LoadInfo>();
+	private final List<LoadInfo> modulesInfo = new ArrayList<LoadInfo>();
 
-    @Instance(CompatibilityProps.MODID)
-    public static JASCompatability modInstance;
+	@Instance(CompatibilityProps.MODID)
+	public static JASCompatability modInstance;
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        modulesInfo.add(new TFLoadInfo());
-        MinecraftForge.EVENT_BUS.register(this);
-    }
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		modulesInfo.add(new TFLoadInfo());
+		MinecraftForge.EVENT_BUS.register(this);
+	}
 
 	@ForgeSubscribe
-	public void CompatibilityRegistration(
-			jas.api.CompatibilityRegistrationEvent event) {
+	public void CompatibilityRegistration(CompatibilityRegistrationEvent event) {
 		for (LoadInfo moduleInfo : modulesInfo) {
 			try {
 				if (shouldLoadModule(moduleInfo)) {
@@ -49,12 +49,12 @@ public class JASCompatability {
 		}
 	}
 
-    private boolean shouldLoadModule(LoadInfo moduleInfo) {
-        for (String modID : moduleInfo.getRequiredModIDs()) {
-            if (!Loader.isModLoaded(modID)) {
-                return false;
-            }
-        }
-        return true;
-    }
+	private boolean shouldLoadModule(LoadInfo moduleInfo) {
+		for (String modID : moduleInfo.getRequiredModIDs()) {
+			if (!Loader.isModLoaded(modID)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

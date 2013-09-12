@@ -27,7 +27,7 @@ public class ChunkSpawner {
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
-            if (JustAnotherSpawner.worldSettings() == null || JustAnotherSpawner.worldSettings().creatureHandlerRegistry() == null) {
+            if (JustAnotherSpawner.worldSettings() == null || JustAnotherSpawner.worldSettings().livingHandlerRegistry() == null) {
                 return;
             }
             CreatureTypeRegistry creatureTypeRegistry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
