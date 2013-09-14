@@ -10,6 +10,7 @@ import jas.common.spawner.SpawnerTicker;
 
 import java.io.File;
 
+import net.minecraft.entity.EntityList;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;

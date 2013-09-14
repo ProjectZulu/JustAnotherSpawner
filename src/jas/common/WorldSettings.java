@@ -3,6 +3,7 @@ package jas.common;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.structure.StructureHandlerRegistry;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -20,6 +21,7 @@ public final class WorldSettings {
     private LivingHandlerRegistry livingHandlerRegistry;
     private StructureHandlerRegistry structureHandlerRegistry;
     private BiomeSpawnListRegistry biomeSpawnListRegistry;
+    private LivingGroupRegistry livingGroupRegistry;
 
     private ImportedSpawnList importedSpawnList;
 
@@ -41,6 +43,7 @@ public final class WorldSettings {
         }
         worldProperties.saveCurrentToConfig(configDirectory, world);
         biomeGroupRegistry.saveCurrentToConfig(configDirectory);
+        livingGroupRegistry.saveToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
         livingHandlerRegistry.saveToConfig(configDirectory);
         structureHandlerRegistry.saveCurrentToConfig(configDirectory);
@@ -52,6 +55,9 @@ public final class WorldSettings {
 
         biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
         biomeGroupRegistry.createBiomeGroups(modConfigDirectoryFile);
+
+        livingGroupRegistry = new LivingGroupRegistry(worldProperties);
+        livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 
         creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
         creatureTypeRegistry.initializeFromConfig(modConfigDirectoryFile);
