@@ -62,7 +62,7 @@ public class KeyParserLocation extends KeyParserBase {
 
         boolean isValid = false;
         if (isWithinTargetRange(xCoord, targetX, varX) && isWithinTargetRange(yCoord, targetY, varY)
-                || isWithinTargetRange(zCoord, targetZ, varZ)) {
+                && isWithinTargetRange(zCoord, targetZ, varZ)) {
             isValid = true;
         }
         return isInverted ? isValid : !isValid;

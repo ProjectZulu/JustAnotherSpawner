@@ -232,11 +232,11 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String canSpawnListSpawnHere(EntityPlayer targetPlayer, EntityLiving entity, LivingHandler livingHandler,
             SpawnListEntry spawnListEntry, String locationName, boolean isBiome) {
         if (spawnListEntry == null) {
-            return "\u00A7b".concat("Entity not in B:").concat(locationName).concat(" spawnlist").concat("\u00A7r");
+            return "\u00A7c".concat("Entity not in B:").concat(locationName).concat(" spawnlist").concat("\u00A7r");
         }
 
         if (!spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
-            return "\u00A7b".concat("No ").concat(isBiome ? "B:" : "S:").concat(locationName).concat(" tags.")
+            return "\u00A7a".concat("No ").concat(isBiome ? "B:" : "S:").concat(locationName).concat(" tags.")
                     .concat("\u00A7r");
         }
 
