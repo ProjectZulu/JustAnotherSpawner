@@ -1,12 +1,18 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.JASLog;
+import jas.common.TopologicalSort;
+import jas.common.TopologicalSort.DirectedGraph;
+import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.config.LivingGroupConfiguration;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -23,6 +29,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ListMultimap;
+
+import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 public class LivingGroupRegistry {
 
@@ -55,6 +63,8 @@ public class LivingGroupRegistry {
     public static class LivingGroup {
         public final String groupID;
         private final Set<String> entityJASNames = new HashSet<String>();
+        /* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
+        private final Set<String> contents = new HashSet<String>();
         /* How Group should be saved in the config file. Periods '.' mark categories. Last segment is the prop key */
         public final String saveFormat;
 
@@ -89,13 +99,31 @@ public class LivingGroupRegistry {
 
         @Override
         public String toString() {
-            return groupID.concat(" containing ").concat(contentsToString());
+            return groupID.concat(" contains ").concat(jasNamesToString().concat(" from ").concat(contentsToString()));
         }
 
         public String contentsToString() {
+            StringBuilder builder = new StringBuilder(contents.size() * 10);
+            Iterator<String> iterator = contents.iterator();
+            while (iterator.hasNext()) {
+                String contentComponent = iterator.next();
+                builder.append(contentComponent);
+                if (iterator.hasNext()) {
+                    builder.append(",");
+                }
+            }
+            return builder.toString();
+        }
+
+        public String jasNamesToString() {
             StringBuilder builder = new StringBuilder(entityJASNames.size() * 10);
-            for (String jasName : entityJASNames) {
+            Iterator<String> iterator = entityJASNames.iterator();
+            while (iterator.hasNext()) {
+                String jasName = iterator.next();
                 builder.append(jasName);
+                if (iterator.hasNext()) {
+                    builder.append(",");
+                }
             }
             return builder.toString();
         }
@@ -138,6 +166,7 @@ public class LivingGroupRegistry {
             }
         }
 
+        /* Create Groups */
         ConfigCategory configCategory = config.getEntityGroups();
         Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
@@ -146,12 +175,8 @@ public class LivingGroupRegistry {
             for (LivingGroup livingGroup : getDefaultGroups(JASNametoFMLName)) {
                 Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
                 LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
-                JASLog.info("XXX default group %s", livingGroup.groupID);
                 for (String jasName : prop.getString().split(",")) {
-                    if (!jasName.trim().equals("") && JASNametoFMLName.containsKey(jasName)) {
-                        JASLog.info("XXX adding %s to %s", jasName, newlivingGroup.groupID);
-                        newlivingGroup.entityJASNames.add(jasName);
-                    }
+                    newlivingGroup.contents.add(jasName);
                 }
                 livingGroups.add(newlivingGroup);
             }
@@ -163,7 +188,29 @@ public class LivingGroupRegistry {
                 livingGroups.addAll(getGroupsFromCategory(child));
             }
         }
-        for (LivingGroup livingGroup : livingGroups) {
+
+        List<LivingGroup> sortedList = getSortedGroups(livingGroups);
+
+        for (LivingGroup livingGroup : sortedList) {
+            /* Evaluate contents and fill in jasNames */
+            for (String contentComponent : livingGroup.contents) {
+                if (contentComponent.startsWith("G|")) {
+                    LivingGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
+                    if (groupToAdd != null) {
+                        livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
+                        continue;
+                    }
+                } else if (contentComponent.startsWith("A|")) {
+                    JASLog.severe(
+                            "Error processing %s content from %s. Attribute groups do not exist for entities yet.",
+                            livingGroup.groupID, livingGroup.contentsToString());
+                } else if (JASNametoFMLName.containsKey(contentComponent)) {
+                    livingGroup.entityJASNames.add(contentComponent);
+                    continue;
+                }
+                JASLog.severe("Error processing %s content from %s. The component %s does not exist.",
+                        livingGroup.groupID, livingGroup.contentsToString(), contentComponent);
+            }
             registerGroup(livingGroup);
         }
         config.save();
@@ -200,12 +247,7 @@ public class LivingGroupRegistry {
                     + groupName);
             String[] entityNames = entry.getValue().getString().split(",");
             for (String entityName : entityNames) {
-                if (JASNametoFMLName.containsKey(entityName)) {
-                    livingGroup.entityJASNames.add(entityName);
-                } else {
-                    JASLog.severe("Error while reading entity group %s. Entity name %s does not exist", groupName,
-                            entityName);
-                }
+                livingGroup.contents.add(entityName);
             }
             groups.add(livingGroup);
         }
@@ -242,10 +284,43 @@ public class LivingGroupRegistry {
         Set<LivingGroup> livinggroups = new HashSet<LivingGroup>();
         for (String jasName : JASNametoFMLName.keySet()) {
             LivingGroup livingGroup = new LivingGroup(jasName);
-            livingGroup.entityJASNames.add(jasName);
+            livingGroup.contents.add(jasName);
             livinggroups.add(livingGroup);
         }
         return livinggroups;
+    }
+
+    private List<LivingGroup> getSortedGroups(Collection<LivingGroup> livingGroups) {
+        /* Evaluate each group, ensuring entries are valid mappings or Groups and */
+        DirectedGraph<LivingGroup> groupGraph = new DirectedGraph<LivingGroup>();
+        for (LivingGroup livingGroup : livingGroups) {
+            groupGraph.addNode(livingGroup);
+        }
+        for (LivingGroup currentGroup : livingGroups) {
+            for (String contentComponent : currentGroup.contents) {
+                for (LivingGroup possibleGroup : livingGroups) {
+                    // Reminder: substring(2) is to remove mandatory A| and G| for groups
+                    if (contentComponent.substring(2).equals(possibleGroup.groupID)) {
+                        groupGraph.addEdge(possibleGroup, currentGroup);
+                    }
+                }
+            }
+        }
+
+        List<LivingGroup> sortedList;
+        try {
+            sortedList = TopologicalSort.topologicalSort(groupGraph);
+        } catch (TopologicalSortingException sortException) {
+            SortingExceptionData<LivingGroup> exceptionData = sortException.getExceptionData();
+            JASLog.severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
+            int i = 1;
+            for (LivingGroup invalidGroups : exceptionData.getVisitedNodes()) {
+                JASLog.severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
+                        invalidGroups.contentsToString());
+            }
+            throw sortException;
+        }
+        return sortedList;
     }
 
     public void saveToConfig(File configDirectory) {
