@@ -246,8 +246,15 @@ public class LivingGroupRegistry {
             if (propMap.isEmpty()) {
                 continue;
             }
-            String groupName = shortConfigName != null && entry.getValue().getName().equals("AtrributeList") ? shortConfigName
-                    : entry.getKey();
+
+            String groupName;
+            if (shortConfigName != null && entry.getValue().getName().equals("AtrributeList")
+                    || entry.getValue().getName().equals("BiomeList")) {
+                groupName = shortConfigName;
+            } else {
+                groupName = entry.getKey();
+            }
+
             if (groupName == null || groupName.trim().equals("")) {
                 continue;
             }
