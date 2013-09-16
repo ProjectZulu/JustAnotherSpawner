@@ -14,6 +14,7 @@ public class LivingGroupConfiguration extends Configuration {
     public static final String ConfigName = "LivingGroups.cfg";
     public static final String ConfigCategory = "livinggroups";
     public static final String GroupListCategory = ConfigCategory + ".livinggroups";
+    public static final String AttributeListCategory = ConfigCategory + ".attributegroups";
     public static final String EntityMappingCategory = ConfigCategory + ".customentityname";
 
     public LivingGroupConfiguration(File configDirectory, WorldProperties worldProperties) {
@@ -25,8 +26,12 @@ public class LivingGroupConfiguration extends Configuration {
         return get(EntityMappingCategory, nameKey, nameValue);
     }
 
+    public ConfigCategory getEntityAttributes() {
+        return this.getCategory(AttributeListCategory);
+    }
+
     public ConfigCategory getEntityGroups() {
-        return this.getCategory(ConfigCategory + ".livinggroups");
+        return this.getCategory(GroupListCategory);
     }
 
     public Property getEntityGroupList(String saveFormat, String groupContents) {

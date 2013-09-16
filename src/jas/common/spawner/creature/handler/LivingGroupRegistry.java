@@ -49,6 +49,9 @@ public class LivingGroupRegistry {
     /** Reverse Look-up Map to Get All Groups a Particular Entity is In */
     private final ListMultimap<String, String> entityIDToGroupIDList = ArrayListMultimap.create();
 
+    /** Group Identifier to Group Instance */
+    private final HashMap<String, LivingGroup> iDToAttribute = new HashMap<String, LivingGroup>();
+
     /* Mapping From Entity Name (via EntityList.classToString) to JAS Name */
     public final BiMap<String, String> FMLNametoJASName = HashBiMap.create();
     /* Mapping From JAS Name to Entity Name (via EntityList.classToString) */
@@ -166,9 +169,24 @@ public class LivingGroupRegistry {
             }
         }
 
-        /* Create Groups */
-        ConfigCategory configCategory = config.getEntityGroups();
+        /* Create / Get Base Attributes */
+        ConfigCategory configAttribute = config.getEntityAttributes();
+        Set<LivingGroup> attributeGroups = new HashSet<LivingGroup>();
+        if (configAttribute.getChildren().isEmpty() && configAttribute.isEmpty()) {
+            config.removeCategory(configAttribute);
+            /* There are no default entity attributes */
+        } else {
+            /* Have Children, so don't generate defaults, read settings */
+            Map<String, Property> propMap = configAttribute.getValues();
+            attributeGroups.addAll(getGroupsFromProps(propMap, (String) null, configAttribute.getQualifiedName()));
+            for (ConfigCategory child : configAttribute.getChildren()) {
+                attributeGroups.addAll(getGroupsFromCategory(child));
+            }
+        }
+
+        /* Create / Get Base Groups */
         Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
+        ConfigCategory configCategory = config.getEntityGroups();
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
             config.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
@@ -189,28 +207,18 @@ public class LivingGroupRegistry {
             }
         }
 
-        List<LivingGroup> sortedList = getSortedGroups(livingGroups);
+        /* Sort Groups */
+        List<LivingGroup> sortedAttributes = getSortedGroups(attributeGroups);
+        List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
 
-        for (LivingGroup livingGroup : sortedList) {
-            /* Evaluate contents and fill in jasNames */
-            for (String contentComponent : livingGroup.contents) {
-                if (contentComponent.startsWith("G|")) {
-                    LivingGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
-                    if (groupToAdd != null) {
-                        livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
-                        continue;
-                    }
-                } else if (contentComponent.startsWith("A|")) {
-                    JASLog.severe(
-                            "Error processing %s content from %s. Attribute groups do not exist for entities yet.",
-                            livingGroup.groupID, livingGroup.contentsToString());
-                } else if (JASNametoFMLName.containsKey(contentComponent)) {
-                    livingGroup.entityJASNames.add(contentComponent);
-                    continue;
-                }
-                JASLog.severe("Error processing %s content from %s. The component %s does not exist.",
-                        livingGroup.groupID, livingGroup.contentsToString(), contentComponent);
-            }
+        /* Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual entity names jasNames */
+        for (LivingGroup livingGroup : sortedAttributes) {
+            parseGroupContents(livingGroup);
+            iDToAttribute.put(livingGroup.groupID, livingGroup);
+        }
+
+        for (LivingGroup livingGroup : sortedGroups) {
+            parseGroupContents(livingGroup);
             registerGroup(livingGroup);
         }
         config.save();
@@ -321,6 +329,33 @@ public class LivingGroupRegistry {
             throw sortException;
         }
         return sortedList;
+    }
+
+    /**
+     * Evaluate build instructions (i.e. A|allbiomes,&Jungle) of group and evalute them into jasNames
+     */
+    private void parseGroupContents(LivingGroup livingGroup) {
+        /* Evaluate contents and fill in jasNames */
+        for (String contentComponent : livingGroup.contents) {
+            if (contentComponent.startsWith("G|")) {
+                LivingGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
+                if (groupToAdd != null) {
+                    livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
+                    continue;
+                }
+            } else if (contentComponent.startsWith("A|")) {
+                LivingGroup groupToAdd = iDToAttribute.get(contentComponent.substring(2));
+                if (groupToAdd != null) {
+                    livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
+                    continue;
+                }
+            } else if (JASNametoFMLName.containsKey(contentComponent)) {
+                livingGroup.entityJASNames.add(contentComponent);
+                continue;
+            }
+            JASLog.severe("Error processing %s content from %s. The component %s does not exist.", livingGroup.groupID,
+                    livingGroup.contentsToString(), contentComponent);
+        }
     }
 
     public void saveToConfig(File configDirectory) {
