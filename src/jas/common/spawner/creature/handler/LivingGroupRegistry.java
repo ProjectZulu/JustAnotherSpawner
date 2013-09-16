@@ -73,7 +73,7 @@ public class LivingGroupRegistry {
         public final String saveFormat;
 
         public LivingGroup(String groupID) {
-            this(groupID, LivingGroupConfiguration.GroupListCategory + Configuration.CATEGORY_SPLITTER + groupID);
+            this(groupID, LivingGroupConfiguration.defaultGroupCategory(groupID));
         }
 
         public LivingGroup(String groupID, String saveFormat) {

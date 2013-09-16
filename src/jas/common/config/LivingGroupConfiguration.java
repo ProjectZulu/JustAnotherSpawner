@@ -39,4 +39,14 @@ public class LivingGroupConfiguration extends Configuration {
         return this.get(saveFormat.substring(0, last), saveFormat.substring(last + 1, saveFormat.length()),
                 groupContents);
     }
+    
+    public static String defaultGroupCategory(String groupID) {
+        String[] parts = groupID.split(":");
+        if (parts.length > 1) {
+            return LivingGroupConfiguration.GroupListCategory + Configuration.CATEGORY_SPLITTER + parts[0]
+                    + Configuration.CATEGORY_SPLITTER + groupID;
+        } else {
+            return LivingGroupConfiguration.GroupListCategory + Configuration.CATEGORY_SPLITTER + groupID;
+        }
+    }
 }
