@@ -8,6 +8,7 @@ import jas.common.WorldProperties;
 import jas.common.config.LivingGroupConfiguration;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -151,7 +152,8 @@ public class LivingGroupRegistry {
         @SuppressWarnings("unchecked")
         Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
         for (Entry<Class<?>, String> entry : fmlNames) {
-            if (!EntityLiving.class.isAssignableFrom(entry.getKey())) {
+            if (!EntityLiving.class.isAssignableFrom(entry.getKey())
+                    || Modifier.isAbstract(entry.getKey().getModifiers())) {
                 continue;
             }
 
