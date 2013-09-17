@@ -121,18 +121,6 @@ public class SpawnListEntry extends WeightedRandomItem {
         Property resultValue = getSpawnEntryProperty(config, defaultValue, worldProperties);
         resultValue.set(defaultValue);
     }
-    
-    public Class<? extends EntityLiving> getRandomEntity(LivingGroupRegistry livingGroupRegistry, Random random) {
-        LivingGroup livingGroup = livingGroupRegistry.getLivingGroup(livingGroupID);
-        int selectedEntry = random.nextInt(1 + livingGroup.entityJASNames().size());
-        int i = 0;
-        for (String jasName : livingGroup.entityJASNames()) {
-            if (++i == selectedEntry) {
-                return livingGroupRegistry.JASNametoEntityClass.get(jasName);
-            }
-        }
-        return null;
-    }
 
     private Property getSpawnEntryProperty(Configuration config, String defaultValue, WorldProperties worldProperties) {
         Property resultValue;

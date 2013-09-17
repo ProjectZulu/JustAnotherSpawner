@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -43,16 +44,28 @@ public class LivingGroupRegistry {
     public static final HashMap<String, String> entityPackageToPrefix;
     public static final String UNKNOWN_PREFIX;
     static {
-        UNKNOWN_PREFIX = "Vanilla";
+        UNKNOWN_PREFIX = "unknown";
         entityPackageToPrefix = new HashMap<String, String>(5);
-        entityPackageToPrefix.put("net.minecraft.entity.monster", UNKNOWN_PREFIX);
-        entityPackageToPrefix.put("net.minecraft.entity.passive", UNKNOWN_PREFIX);
+        entityPackageToPrefix.put("net.minecraft.entity.monster", "");
+        entityPackageToPrefix.put("net.minecraft.entity.passive", "");
+        entityPackageToPrefix.put("net.minecraft.entity.boss", "");
     }
 
     /** Group Identifier to Group Instance */
     private final HashMap<String, LivingGroup> iDToGroup = new HashMap<String, LivingGroup>();
     /** Reverse Look-up Map to Get All Groups a Particular Entity is In */
     private final ListMultimap<String, String> entityIDToGroupIDList = ArrayListMultimap.create();
+
+    /**
+     * Should Only Be Used to Register BiomeGroups when they finished and valid
+     */
+    public void registerGroup(LivingGroup group) {
+        JASLog.info("Registering EntityGroup %s", group.toString());
+        iDToGroup.put(group.groupID, group);
+        for (String jasName : group.entityJASNames) {
+            entityIDToGroupIDList.get(jasName).add(group.groupID);
+        }
+    }
 
     public List<LivingGroup> getEntityGroups(Class<? extends EntityLiving> entityClass) {
         String jasName = EntityClasstoJASName.get(entityClass);
@@ -62,11 +75,23 @@ public class LivingGroupRegistry {
         }
         return list;
     }
-    
+
+    public Class<? extends EntityLiving> getRandomEntity(String livingGroupID, Random random) {
+        LivingGroup livingGroup = this.getLivingGroup(livingGroupID);
+        int selectedEntry = random.nextInt(1 + livingGroup.entityJASNames.size());
+        int i = 0;
+        for (String jasName : livingGroup.entityJASNames) {
+            if (++i == selectedEntry) {
+                return this.JASNametoEntityClass.get(jasName);
+            }
+        }
+        return null;
+    }
+
     public LivingGroup getLivingGroup(String groupID) {
         return iDToGroup.get(groupID);
     }
-    
+
     /**
      * @return Immutable view of all registered livinggroups
      */
@@ -165,17 +190,6 @@ public class LivingGroupRegistry {
         }
     }
 
-    /**
-     * Should Only Be Used to Register BiomeGroups when they finished and valid
-     */
-    public void registerGroup(LivingGroup group) {
-        JASLog.info("Registering EntityGroup %s", group.toString());
-        iDToGroup.put(group.groupID, group);
-        for (String jasName : group.entityJASNames) {
-            entityIDToGroupIDList.get(jasName).add(group.groupID);
-        }
-    }
-
     public void loadFromConfig(File configDirectory) {
         LivingGroupConfiguration config = new LivingGroupConfiguration(configDirectory, worldProperties);
         config.load();
@@ -190,10 +204,11 @@ public class LivingGroupRegistry {
             }
 
             String jasName;
-            if (entry.getValue().contains(":")) {
+            if (entry.getValue().contains(".")) {
                 jasName = entry.getValue();
             } else {
-                jasName = guessPrefix(entry.getKey(), fmlNames) + ":" + entry.getValue();
+                String prefix = guessPrefix(entry.getKey(), fmlNames);
+                jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
             }
             Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
             @SuppressWarnings("unchecked")
@@ -226,6 +241,7 @@ public class LivingGroupRegistry {
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
             config.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
+            JASLog.info("Creating Default EntityGroups");
             for (LivingGroup livingGroup : getDefaultGroups(JASNametoEntityClass)) {
                 Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
                 LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
@@ -234,6 +250,7 @@ public class LivingGroupRegistry {
                 }
                 livingGroups.add(newlivingGroup);
             }
+            JASLog.info("Finished Default EntityGroups");
         } else {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();
@@ -260,14 +277,14 @@ public class LivingGroupRegistry {
         config.save();
     }
 
-    private Set<LivingGroup> getGroupsFromCategory(ConfigCategory configCategory) {
+    private Set<LivingGroup> getGroupsFromCategory(ConfigCategory parentConfig) {
         Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
-        for (ConfigCategory child : configCategory.getChildren()) {
-            Map<String, Property> childPropMap = child.getValues();
-            String configName = child.getQualifiedName().substring(
-                    child.getQualifiedName().lastIndexOf(Configuration.CATEGORY_SPLITTER) + 1,
-                    child.getQualifiedName().length());
-            livingGroups.addAll(getGroupsFromProps(childPropMap, (String) configName, child.getQualifiedName()));
+        Map<String, Property> childPropMap = parentConfig.getValues();
+        String configName = parentConfig.getQualifiedName().substring(
+                parentConfig.getQualifiedName().lastIndexOf(Configuration.CATEGORY_SPLITTER) + 1,
+                parentConfig.getQualifiedName().length());
+        livingGroups.addAll(getGroupsFromProps(childPropMap, (String) configName, parentConfig.getQualifiedName()));
+        for (ConfigCategory child : parentConfig.getChildren()) {
             livingGroups.addAll(getGroupsFromCategory(child));
         }
         return livingGroups;
@@ -282,8 +299,9 @@ public class LivingGroupRegistry {
             }
 
             String groupName;
-            if (shortConfigName != null && entry.getValue().getName().equals("AtrributeList")
-                    || entry.getValue().getName().equals("BiomeList")) {
+            if (shortConfigName != null
+                    && (entry.getValue().getName().equals("AtrributeList") || entry.getValue().getName()
+                            .equals("BiomeList"))) {
                 groupName = shortConfigName;
             } else {
                 groupName = entry.getKey();
@@ -294,7 +312,7 @@ public class LivingGroupRegistry {
             }
             JASLog.debug(Level.INFO, "Parsing entity group %s with %s", groupName, entry.getValue().getString());
 
-            LivingGroup livingGroup = new LivingGroup(groupName, fillConfigName + Configuration.CATEGORY_SPLITTER
+            LivingGroup livingGroup = new LivingGroup(groupName, fillConfigName + Configuration.CATEGORY_SPLITTER + ":"
                     + groupName);
             String[] entityNames = entry.getValue().getString().split(",");
             for (String entityName : entityNames) {
@@ -313,22 +331,26 @@ public class LivingGroupRegistry {
     private String guessPrefix(Class<?> entity, Set<Entry<Class<?>, String>> fmlNames) {
         String currentPackage = entity.getName();
 
-        if (currentPackage.lastIndexOf(Configuration.CATEGORY_SPLITTER) != -1) {
-            currentPackage = currentPackage.substring(0, currentPackage.lastIndexOf(Configuration.CATEGORY_SPLITTER));
+        if (currentPackage.lastIndexOf(".") != -1) {
+            currentPackage = currentPackage.substring(0, currentPackage.lastIndexOf("."));
         }
 
         for (Entry<Class<?>, String> entry : fmlNames) {
             String packageName = entry.getKey().getName();
-            if (packageName.lastIndexOf(Configuration.CATEGORY_SPLITTER) != -1) {
-                packageName.substring(0, packageName.lastIndexOf(Configuration.CATEGORY_SPLITTER));
+            if (packageName.lastIndexOf(".") != -1) {
+                packageName = packageName.substring(0, packageName.lastIndexOf("."));
             }
 
-            if (currentPackage.equals(packageName) && entry.getValue().contains(":")) {
-                return entry.getValue().split(":")[0];
+            if (currentPackage.equals(packageName) && entry.getValue().contains(".")) {
+                return entry.getValue().split(".")[0];
             }
         }
-        String[] currentParsts = currentPackage.split(Configuration.CATEGORY_SPLITTER);
-        return currentParsts.length > 1 ? currentParsts[0] : UNKNOWN_PREFIX;
+        String manualPrefix = entityPackageToPrefix.get(currentPackage);
+        if (manualPrefix != null) {
+            return manualPrefix;
+        }
+        String[] currentParts = currentPackage.split(".");
+        return currentParts.length > 1 ? currentParts[0] : UNKNOWN_PREFIX;
     }
 
     private Set<LivingGroup> getDefaultGroups(BiMap<String, Class<? extends EntityLiving>> JASNametoFMLName) {

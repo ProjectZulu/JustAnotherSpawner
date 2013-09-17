@@ -188,9 +188,10 @@ public class CustomSpawner {
                                             if (spawnlistentry == null) {
                                                 continue;
                                             }
-                                            livingToSpawn = spawnlistentry.getRandomEntity(livingGroupRegistry,
-                                                    worldServer.rand);
+                                            livingToSpawn = livingGroupRegistry.getRandomEntity(
+                                                    spawnlistentry.livingGroupID, worldServer.rand);
                                             if (livingToSpawn == null) {
+                                                spawnlistentry = null;
                                                 continue;
                                             }
 
@@ -209,8 +210,14 @@ public class CustomSpawner {
                                                 continue;
                                             }
                                         } else {
-                                            livingToSpawn = spawnlistentry.getRandomEntity(livingGroupRegistry,
-                                                    worldServer.rand);
+                                            livingToSpawn = livingGroupRegistry.getRandomEntity(
+                                                    spawnlistentry.livingGroupID, worldServer.rand);
+                                            if (livingToSpawn == null) {
+                                                spawnlistentry = null;
+                                                continue;
+                                            }
+                                            livingCount = creatureCount.getOrPutIfAbsent(livingToSpawn.getSimpleName(),
+                                                    0);
                                         }
 
                                         EntityLiving entityliving;
@@ -285,8 +292,8 @@ public class CustomSpawner {
                     + random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
             for (int j2 = 0; j2 < i1; ++j2) {
                 boolean flag = false;
-                Class<? extends EntityLiving> livingToSpawn = spawnListEntry.getRandomEntity(livingGroupRegistry,
-                        world.rand);
+                Class<? extends EntityLiving> livingToSpawn = livingGroupRegistry.getRandomEntity(
+                        spawnListEntry.livingGroupID, world.rand);
                 for (int k2 = 0; !flag && k2 < 4; ++k2) {
                     int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
 

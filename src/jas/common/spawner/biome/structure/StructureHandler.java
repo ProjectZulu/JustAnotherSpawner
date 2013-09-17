@@ -81,27 +81,35 @@ public class StructureHandler {
          * SpawnListEntry Settings
          */
         for (String structureKey : structureKeys) {
-            String livingHandlerIDs = "";
+            StringBuilder livingHandlerIDs = new StringBuilder();
             Iterator<SpawnListEntry> iterator = interpreter.getStructureSpawnList(structureKey).iterator();
             while (iterator.hasNext()) {
                 SpawnListEntry spawnListEntry = iterator.next();
                 @SuppressWarnings("unchecked")
                 List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);
                 if (!handlers.isEmpty()) {
-                    livingHandlerIDs.concat(handlers.get(0).groupID);
+                    JASLog.info("LivingHandlers %s", handlers);
+                    JASLog.info("LivingHandler0 %s", handlers.get(0).groupID);
+                    livingHandlerIDs.append(handlers.get(0).groupID);
                     if (iterator.hasNext()) {
-                        livingHandlerIDs = livingHandlerIDs.concat(",");
+                        livingHandlerIDs.append(",");
                     }
+                } else {
+                    JASLog.warning(
+                            "Default entity %s that should spawn in structure %s does not appear to belong to an entity group.",
+                            spawnListEntry.entityClass.getSimpleName(), structureKey);
                 }
             }
             /* Under StructureSpawns.SpawnList have List of Entities that are Spawnable. */
-            Property resultNames = worldConfig.getStructureSpawns(structureKey, livingHandlerIDs);
+            JASLog.severe("XXX %s", livingHandlerIDs);
+            Property resultNames = worldConfig.getStructureSpawns(structureKey, livingHandlerIDs.toString());
 
             for (String groupID : resultNames.getString().split(",")) {
                 LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(groupID);
                 if (livingHandler == null) {
                     JASLog.severe("Error parsing EntityGroup from Structure %s spawnlist %s. The key %s is unknown.",
                             structureKey, resultNames.getString(), groupID);
+                    continue;
                 }
 
                 if (!livingHandler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
