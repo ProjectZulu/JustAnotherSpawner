@@ -3,8 +3,8 @@ package jas.common.spawner.creature.type;
 import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.config.EntityCategoryConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
 import net.minecraft.block.Block;
@@ -115,8 +115,10 @@ public class CreatureType {
      * @return
      */
     public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Entity entity) {
-        LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(entity.getClass());
-        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
+        if (entity instanceof EntityLiving) {
+            return isEntityOfType(livingHandlerRegistry, ((EntityLiving) entity).getClass());
+        }
+        return false;
     }
 
     /**
@@ -126,8 +128,17 @@ public class CreatureType {
      * @return
      */
     public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Class<? extends EntityLiving> entity) {
-        LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(entity);
-        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
+        for (LivingHandler handler : livingHandlerRegistry.getLivingHandlers(entity)) {
+            if (handler.creatureTypeID.equals(this.typeID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, String groupID) {
+        LivingHandler handler = livingHandlerRegistry.getLivingHandler(groupID);
+        return handler != null ? handler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**

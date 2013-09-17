@@ -5,6 +5,7 @@ import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.StructureHandler;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHelper;
 import jas.common.spawner.creature.type.CreatureType;
@@ -16,11 +17,14 @@ import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.biome.BiomeGenBase;
+
+import com.google.common.collect.ImmutableCollection;
 
 public class CommandCanSpawnHere extends CommandJasBase {
     public String getCommandName() {
@@ -53,65 +57,75 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
-                .getLivingHandler(entity.getClass());
-
-        CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-                .getCreatureType(livingHandler.creatureTypeID);
-        if (livingType == null) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
-                    "Entity %s is of type NONE and thus will never spawn.", entityName)));
-            return;
-        }
-
-        /* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
-        boolean isBiome = false;
-        List<SpawnListEntry> spawnlistentries = new ArrayList<SpawnListEntry>(3);
-        String locationName = getMatchingStructureSpawnListEntries(entity, spawnlistentries);
-        String structureName = locationName;
-        if (spawnlistentries.isEmpty()) {
-            isBiome = true;
-            locationName = getMatchingBiomeSpawnListEntries(entity, livingType, spawnlistentries);
-        }
-
-        if (spawnlistentries.isEmpty()) {
-            spawnlistentries.add(null);
-        }
-
-        StringBuilder resultMessage = new StringBuilder();
-        Iterator<SpawnListEntry> iterator = spawnlistentries.iterator();
-        while (iterator.hasNext()) {
-            SpawnListEntry spawnListEntry = iterator.next();
-            if (spawnlistentries.size() > 1) {
-                resultMessage.append("{");
+        LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+        ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
+                .get(entity.getClass()));
+        for (String groupID : groupIDs) {
+            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                    .getLivingHandler(groupID);
+            CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+                    .getCreatureType(livingHandler.creatureTypeID);
+            if (livingType == null) {
+                commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
+                        "Entity %s is of type NONE and thus will never spawn.", entityName)));
+                return;
             }
-            resultMessage.append(
-                    canEntitySpawnHere(targetPlayer, entity, livingHandler, livingType, spawnListEntry, entityName))
-                    .append(": ");
-            resultMessage.append(canEntityTypeSpawnHere(targetPlayer, entity, livingType)).append(" ");
-            resultMessage.append(canLivingHandlerSpawnHere(targetPlayer, entity, livingHandler)).append(" ");
 
-            if (!isBiome) {
-                resultMessage.append(canSpawnListSpawnHere(targetPlayer, entity, livingHandler, spawnListEntry,
-                        locationName, false));
-            } else {
-                /* If structureName is !null a structure is present but the spawnlist was empty so default to biome */
-                if (structureName != null) {
-                    resultMessage.append("\u00A7b").append("Empty S: ").append(structureName)
-                            .append(" spawnlist defaults to biome. ").append("\u00A7r");
+            /* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
+            boolean isBiome = false;
+            List<SpawnListEntry> spawnlistentries = new ArrayList<SpawnListEntry>(3);
+            String locationName = getMatchingStructureSpawnListEntries(entity, spawnlistentries);
+            String structureName = locationName;
+            if (spawnlistentries.isEmpty()) {
+                isBiome = true;
+                locationName = getMatchingBiomeSpawnListEntries(groupID, entity, livingType, spawnlistentries);
+            }
+
+            if (spawnlistentries.isEmpty()) {
+                spawnlistentries.add(null);
+            }
+
+            StringBuilder resultMessage = new StringBuilder();
+            if (groupIDs.size() > 1) {
+                resultMessage.append("{Group ").append(groupID).append(": ");
+            }
+            Iterator<SpawnListEntry> iterator = spawnlistentries.iterator();
+            while (iterator.hasNext()) {
+                SpawnListEntry spawnListEntry = iterator.next();
+                if (spawnlistentries.size() > 1) {
+                    resultMessage.append("{");
                 }
-                resultMessage.append(canSpawnListSpawnHere(targetPlayer, entity, livingHandler, spawnListEntry,
-                        locationName, true));
-            }
+                resultMessage
+                        .append(canEntitySpawnHere(targetPlayer, entity, livingHandler, livingType, spawnListEntry,
+                                entityName)).append(": ");
+                resultMessage.append(canEntityTypeSpawnHere(targetPlayer, entity, livingType)).append(" ");
+                resultMessage.append(canLivingHandlerSpawnHere(targetPlayer, entity, livingHandler)).append(" ");
 
-            if (spawnlistentries.size() > 1) {
+                if (!isBiome) {
+                    resultMessage.append(canSpawnListSpawnHere(targetPlayer, entity, livingHandler, spawnListEntry,
+                            locationName, false));
+                } else {
+                    /* If structureName is !null a structure is present but the spawnlist was empty so default to biome */
+                    if (structureName != null) {
+                        resultMessage.append("\u00A7b").append("Empty S: ").append(structureName)
+                                .append(" spawnlist defaults to biome. ").append("\u00A7r");
+                    }
+                    resultMessage.append(canSpawnListSpawnHere(targetPlayer, entity, livingHandler, spawnListEntry,
+                            locationName, true));
+                }
+
+                if (spawnlistentries.size() > 1) {
+                    resultMessage.append("}");
+                    if (iterator.hasNext()) {
+                        resultMessage.append(" ");
+                    }
+                }
+            }
+            if (groupIDs.size() > 1) {
                 resultMessage.append("}");
-                if (iterator.hasNext()) {
-                    resultMessage.append(" ");
-                }
             }
+            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(resultMessage.toString()));
         }
-        commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(resultMessage.toString()));
     }
 
     private boolean isValidEntityName(String entityName) {
@@ -142,7 +156,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()) {
+        for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+                .handlers()) {
             structureName = StructureHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
             if (structureName != null) {
@@ -161,18 +176,17 @@ public class CommandCanSpawnHere extends CommandJasBase {
         return null;
     }
 
-    private String getMatchingBiomeSpawnListEntries(EntityLiving entity, CreatureType livingType,
+    private String getMatchingBiomeSpawnListEntries(String livingGroupID, Entity entity, CreatureType livingType,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
         BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
         for (SpawnListEntry spawnListEntry : biomeSpawnListRegistry.getSpawnListFor(livingType.typeID, packageBiome)) {
-            if (spawnListEntry.livingClass.equals(entity.getClass())) {
+            if (spawnListEntry.livingGroupID.equals(livingGroupID)) {
                 matchingSpawnListEntries.add(spawnListEntry);
             }
         }
-
         String shortName = JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping.get(packageBiome);
         return shortName == null ? biome.biomeName : shortName;
     }

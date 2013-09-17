@@ -45,7 +45,7 @@ public class StructureHandlerRegistry {
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
         structureConfig.load();
         for (StructureHandler structureHandler : structureHandlers) {
-            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, world, worldProperties);
+            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, worldProperties);
         }
         structureConfig.save();
     }

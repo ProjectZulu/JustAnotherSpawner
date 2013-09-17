@@ -1,21 +1,18 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.ImportedSpawnList;
-import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.config.LivingConfiguration;
+import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
@@ -24,10 +21,20 @@ import net.minecraftforge.common.Property;
 import com.google.common.collect.ImmutableList;
 
 public class LivingHandlerRegistry {
-    private final HashMap<Class<? extends EntityLiving>, LivingHandler> livingHandlers = new HashMap<Class<? extends EntityLiving>, LivingHandler>();
+    /* Mapping from GroupID to LivingHandler */
+    private final HashMap<String, LivingHandler> livingHandlers = new HashMap<String, LivingHandler>();
 
-    public LivingHandler getLivingHandler(Class<? extends Entity> entityClass) {
-        return livingHandlers.get(entityClass);
+    public LivingHandler getLivingHandler(String groupID) {
+        return livingHandlers.get(groupID);
+    }
+    
+    public List<LivingHandler> getLivingHandlers(Class<? extends EntityLiving> entityClass) {
+        List<LivingHandler> list = new ArrayList<LivingHandler>();
+        for (String groupID : livingGroupRegistry.getGroupsWithEntity(livingGroupRegistry.EntityClasstoJASName
+                .get(entityClass))) {
+            list.add(livingHandlers.get(groupID));
+        }
+        return list;
     }
 
     /**
@@ -40,9 +47,12 @@ public class LivingHandlerRegistry {
     }
 
     private CreatureTypeRegistry creatureTypeRegistry;
+    private LivingGroupRegistry livingGroupRegistry;
     private WorldProperties worldProperties;
 
-    public LivingHandlerRegistry(CreatureTypeRegistry creatureTypeRegistry, WorldProperties worldProperties) {
+    public LivingHandlerRegistry(LivingGroupRegistry livingGroupRegistry, CreatureTypeRegistry creatureTypeRegistry,
+            WorldProperties worldProperties) {
+        this.livingGroupRegistry = livingGroupRegistry;
         this.creatureTypeRegistry = creatureTypeRegistry;
         this.worldProperties = worldProperties;
     }
@@ -54,32 +64,23 @@ public class LivingHandlerRegistry {
      * @param world
      * @param spawnList
      */
-    @SuppressWarnings("unchecked")
     public void loadFromConfig(File configDirectory, World world, ImportedSpawnList spawnList) {
         livingHandlers.clear();
-        List<Class<? extends EntityLiving>> entityList = new ArrayList<Class<? extends EntityLiving>>();
-        Iterator<?> entityIterator = EntityList.stringToClassMapping.keySet().iterator();
-        while (entityIterator.hasNext()) {
-            Object classKey = entityIterator.next();
-            if (EntityLiving.class.isAssignableFrom((Class<?>) EntityList.stringToClassMapping.get(classKey))
-                    && !Modifier.isAbstract(((Class<?>) EntityList.stringToClassMapping.get(classKey)).getModifiers())) {
-                JASLog.info("Found Entity %s", classKey);
-                entityList.add((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(classKey));
-            }
-        }
 
-        for (Class<? extends EntityLiving> livingClass : entityList) {
-            LivingHandler livingHandler = new LivingHandler(creatureTypeRegistry, livingClass,
-                    enumCreatureTypeToLivingType(livingClass, world), true, "");
-            livingHandlers.put(livingClass, livingHandler);
+        Collection<LivingGroup> livingGroups = livingGroupRegistry.getEntityGroups();
+
+        for (LivingGroup livingGroup : livingGroups) {
+            LivingHandler livingHandler = new LivingHandler(creatureTypeRegistry, livingGroup.groupID,
+                    guessCreatureTypeOfGroup(livingGroup, world), true, "");
+            livingHandlers.put(livingGroup.groupID, livingHandler);
         }
 
         MobSpecificConfigCache cache = new MobSpecificConfigCache(worldProperties);
-        for (Class<? extends EntityLiving> livingClass : livingHandlers.keySet()) {
-            LivingConfiguration worldConfig = cache.getLivingEntityConfig(configDirectory, livingClass);
+        for (String groupID : livingHandlers.keySet()) {
+            LivingConfiguration worldConfig = cache.getLivingEntityConfig(configDirectory, groupID);
 
-            LivingHandler resultLivingHandler = livingHandlers.get(livingClass).createFromConfig(worldConfig);
-            livingHandlers.put(livingClass, resultLivingHandler);
+            LivingHandler resultLivingHandler = livingHandlers.get(groupID).createFromConfig(worldConfig);
+            livingHandlers.put(groupID, resultLivingHandler);
         }
 
         cache.saveAndCloseConfigs();
@@ -91,13 +92,16 @@ public class LivingHandlerRegistry {
      * @param livingClass
      * @return
      */
-    private String enumCreatureTypeToLivingType(Class<? extends EntityLiving> livingClass, World world) {
-        EntityLiving creature = LivingHelper.createCreature(livingClass, world);
-        for (EnumCreatureType type : EnumCreatureType.values()) {
-            boolean isType = creature != null ? creature.isCreatureType(type, true) : type.getClass().isAssignableFrom(
-                    livingClass);
-            if (isType && creatureTypeRegistry.getCreatureType(type.toString()) != null) {
-                return type.toString();
+    private String guessCreatureTypeOfGroup(LivingGroup livingGroup, World world) {
+        for (String jasName : livingGroup.entityJASNames()) {
+            Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
+            EntityLiving creature = LivingHelper.createCreature(livingClass, world);
+            for (EnumCreatureType type : EnumCreatureType.values()) {
+                boolean isType = creature != null ? creature.isCreatureType(type, true) : type.getClass()
+                        .isAssignableFrom(livingClass);
+                if (isType && creatureTypeRegistry.getCreatureType(type.toString()) != null) {
+                    return type.toString();
+                }
             }
         }
         return CreatureTypeRegistry.NONE;
@@ -107,15 +111,14 @@ public class LivingHandlerRegistry {
         LivingConfiguration tempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings",
                 worldProperties);
         tempSettings.load();
-        Property byBiome = tempSettings
-                .getSavedSortByBiome(worldProperties.savedSortCreatureByBiome);
+        Property byBiome = tempSettings.getSavedSortByBiome(worldProperties.savedSortCreatureByBiome);
         byBiome.set(worldProperties.savedSortCreatureByBiome);
         Property isUniversal = tempSettings.getSavedUseUniversalConfig(worldProperties.savedUniversalDirectory);
         isUniversal.set(worldProperties.savedUniversalDirectory);
         tempSettings.save();
         MobSpecificConfigCache cache = new MobSpecificConfigCache(worldProperties);
 
-        for (Entry<Class<? extends EntityLiving>, LivingHandler> handler : livingHandlers.entrySet()) {
+        for (Entry<String, LivingHandler> handler : livingHandlers.entrySet()) {
             LivingConfiguration config = cache.getLivingEntityConfig(configDirectory, handler.getKey());
             handler.getValue().saveToConfig(config);
             if (handler.getValue().creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {

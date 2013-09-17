@@ -7,11 +7,9 @@ import jas.common.spawner.creature.entry.SpawnListEntry;
 import java.io.File;
 import java.util.HashMap;
 
-import com.google.common.base.CharMatcher;
-
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
 import net.minecraftforge.common.Configuration;
+
+import com.google.common.base.CharMatcher;
 
 public class MobSpecificConfigCache {
     /* Map of Entity modID to their Respective Configuration File, cleared immediately After Saving */
@@ -23,7 +21,7 @@ public class MobSpecificConfigCache {
         this.worldProperties = worldProperties;
     }
 
-    public LivingConfiguration getLivingEntityConfig(File configDir, Class<? extends EntityLiving> livingClass) {
+    public LivingConfiguration getLivingEntityConfig(File configDir, String groupID) {
         boolean universalCFG = worldProperties.savedUniversalDirectory;
         if (universalCFG) {
             if (modConfigCache.get(worldProperties.saveName + "Universal") == null) {
@@ -36,9 +34,8 @@ public class MobSpecificConfigCache {
             }
             return modConfigCache.get(worldProperties.saveName + "Universal");
         } else {
-            String fullMobName = (String) EntityList.classToStringMapping.get(livingClass);
             String modID;
-            String[] mobNameParts = fullMobName.split("\\.");
+            String[] mobNameParts = groupID.split("\\.");
             if (mobNameParts.length >= 2) {
                 String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
                 modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);

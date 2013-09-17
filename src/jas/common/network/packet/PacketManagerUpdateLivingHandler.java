@@ -24,9 +24,9 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
     }
 
     public void setPacketData(LivingHandler livingHandler) {
-        entityName = (String) EntityList.classToStringMapping.get(livingHandler.entityClass);
-        creatureTypeID = livingHandler.creatureTypeID;
-        shouldSpawn = livingHandler.shouldSpawn;
+//        entityName = (String) EntityList.classToStringMapping.get(livingHandler.entityClass);
+//        creatureTypeID = livingHandler.creatureTypeID;
+//        shouldSpawn = livingHandler.shouldSpawn;
     }
 
     @Override

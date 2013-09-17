@@ -13,7 +13,6 @@ import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -85,7 +84,8 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private String getTargetAtPlayer(EntityPlayerMP player) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+                .getHandlers();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             String target = handler.getStructure(player.worldObj, (int) player.posX, (int) player.posY,
@@ -138,8 +138,8 @@ public class CommandListSpawns extends CommandJasBase {
                 while (spawnListIterator.hasNext()) {
                     entityMatch = true;
                     SpawnListEntry entry = spawnListIterator.next();
-                    biomeContents.append(EntityList.classToStringMapping.get(entry.livingClass)).append("[\u00A74")
-                            .append(entry.itemWeight).append("\u00A7r");
+                    biomeContents.append(entry.livingGroupID).append("[\u00A74").append(entry.itemWeight)
+                            .append("\u00A7r");
                     if (expandedEntries) {
                         biomeContents.append("/").append(entry.packSize).append("/").append(entry.minChunkPack)
                                 .append("/").append(entry.maxChunkPack);
@@ -155,7 +155,7 @@ public class CommandListSpawns extends CommandJasBase {
         if (!structureMatch) {
             throw new WrongUsageException("commands.jaslistspawns.biomenotfound", new Object[0]);
         } else if (!entityMatch) {
-//            biomeContents.append("No Entries Found");
+            // biomeContents.append("No Entries Found");
         }
         return biomeContents.toString();
     }
@@ -165,7 +165,8 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+                .getHandlers();
         while (iterator.hasNext()) {
             StructureHandler type = iterator.next();
             for (String structureKey : type.getStructureKeys()) {
@@ -186,7 +187,8 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+                .getHandlers();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {
@@ -207,8 +209,8 @@ public class CommandListSpawns extends CommandJasBase {
                                 biomeContents.append(", ");
                             }
 
-                            biomeContents.append(EntityList.classToStringMapping.get(spawnEntry.livingClass))
-                                    .append("[\u00A74").append(spawnEntry.itemWeight).append("\u00A7r");
+                            biomeContents.append(spawnEntry.livingGroupID).append("[\u00A74")
+                                    .append(spawnEntry.itemWeight).append("\u00A7r");
                             if (expandedEntries) {
                                 biomeContents.append("/").append(spawnEntry.packSize).append("/")
                                         .append(spawnEntry.minChunkPack).append("/").append(spawnEntry.maxChunkPack);
@@ -266,7 +268,8 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addStructureNames(List<String> tabCompletions) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+                .getHandlers();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {

@@ -9,7 +9,9 @@ import jas.common.config.LivingGroupConfiguration;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,7 +30,9 @@ import net.minecraftforge.common.Property;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 
 import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
@@ -50,13 +54,41 @@ public class LivingGroupRegistry {
     /** Reverse Look-up Map to Get All Groups a Particular Entity is In */
     private final ListMultimap<String, String> entityIDToGroupIDList = ArrayListMultimap.create();
 
+    public List<LivingGroup> getEntityGroups(Class<? extends EntityLiving> entityClass) {
+        String jasName = EntityClasstoJASName.get(entityClass);
+        List<LivingGroup> list = new ArrayList<LivingGroup>();
+        for (String groupID : entityIDToGroupIDList.get(jasName)) {
+            list.add(iDToGroup.get(groupID));
+        }
+        return list;
+    }
+    
+    public LivingGroup getLivingGroup(String groupID) {
+        return iDToGroup.get(groupID);
+    }
+    
+    /**
+     * @return Immutable view of all registered livinggroups
+     */
+    public Collection<LivingGroup> getEntityGroups() {
+        return Collections.unmodifiableCollection(iDToGroup.values());
+    }
+
+    public ImmutableCollection<String> getGroupsWithEntity(String jasName) {
+        return ImmutableList.copyOf(entityIDToGroupIDList.get(jasName));
+    }
+
+    public ImmutableMultimap<String, String> getEntityIDToGroupIDList() {
+        return ImmutableMultimap.copyOf(entityIDToGroupIDList);
+    }
+
     /** Group Identifier to Group Instance */
     private final HashMap<String, LivingGroup> iDToAttribute = new HashMap<String, LivingGroup>();
 
     /* Mapping From Entity Name (via EntityList.classToString) to JAS Name */
-    public final BiMap<String, String> FMLNametoJASName = HashBiMap.create();
+    public final BiMap<Class<? extends EntityLiving>, String> EntityClasstoJASName = HashBiMap.create();
     /* Mapping From JAS Name to Entity Name (via EntityList.classToString) */
-    public final BiMap<String, String> JASNametoFMLName = FMLNametoJASName.inverse();
+    public final BiMap<String, Class<? extends EntityLiving>> JASNametoEntityClass = EntityClasstoJASName.inverse();
 
     private WorldProperties worldProperties;
 
@@ -84,8 +116,8 @@ public class LivingGroupRegistry {
             this.saveFormat = saveFormat;
         }
 
-        public ImmutableList<String> getEntityNames() {
-            return ImmutableList.copyOf(entityJASNames);
+        public Set<String> entityJASNames() {
+            return Collections.unmodifiableSet(entityJASNames);
         }
 
         @Override
@@ -164,7 +196,9 @@ public class LivingGroupRegistry {
                 jasName = guessPrefix(entry.getKey(), fmlNames) + ":" + entry.getValue();
             }
             Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
-            String prevKey = FMLNametoJASName.put(entry.getValue(), nameProp.getString());
+            @SuppressWarnings("unchecked")
+            String prevKey = EntityClasstoJASName.put((Class<? extends EntityLiving>) entry.getKey(),
+                    nameProp.getString());
             if (prevKey != null) {
                 JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
                         nameProp.getString());
@@ -192,7 +226,7 @@ public class LivingGroupRegistry {
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
             config.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
-            for (LivingGroup livingGroup : getDefaultGroups(JASNametoFMLName)) {
+            for (LivingGroup livingGroup : getDefaultGroups(JASNametoEntityClass)) {
                 Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
                 LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
                 for (String jasName : prop.getString().split(",")) {
@@ -297,7 +331,7 @@ public class LivingGroupRegistry {
         return currentParsts.length > 1 ? currentParsts[0] : UNKNOWN_PREFIX;
     }
 
-    private Set<LivingGroup> getDefaultGroups(BiMap<String, String> JASNametoFMLName) {
+    private Set<LivingGroup> getDefaultGroups(BiMap<String, Class<? extends EntityLiving>> JASNametoFMLName) {
         Set<LivingGroup> livinggroups = new HashSet<LivingGroup>();
         for (String jasName : JASNametoFMLName.keySet()) {
             LivingGroup livingGroup = new LivingGroup(jasName);
@@ -358,7 +392,7 @@ public class LivingGroupRegistry {
                     livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
                     continue;
                 }
-            } else if (JASNametoFMLName.containsKey(contentComponent)) {
+            } else if (JASNametoEntityClass.containsKey(contentComponent)) {
                 livingGroup.entityJASNames.add(contentComponent);
                 continue;
             }
@@ -370,8 +404,9 @@ public class LivingGroupRegistry {
     public void saveToConfig(File configDirectory) {
         LivingGroupConfiguration config = new LivingGroupConfiguration(configDirectory, worldProperties);
         config.load();
-        for (Entry<String, String> entry : FMLNametoJASName.entrySet()) {
-            Property prop = config.getEntityMapping(entry.getKey(), entry.getValue());
+        for (Entry<Class<? extends EntityLiving>, String> entry : EntityClasstoJASName.entrySet()) {
+            String entityName = (String) EntityList.classToStringMapping.get(entry.getKey());
+            Property prop = config.getEntityMapping(entityName, entry.getValue());
             prop.set(entry.getValue());
         }
 

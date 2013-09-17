@@ -26,9 +26,9 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
     }
 
     public void setPacketData(String creatureType, SpawnListEntry spawnListEntry) {
-        setPacketData(spawnListEntry.livingClass, creatureType, spawnListEntry.pckgName, spawnListEntry.itemWeight,
-                spawnListEntry.packSize, spawnListEntry.minChunkPack, spawnListEntry.maxChunkPack,
-                spawnListEntry.optionalParameters);
+//        setPacketData(spawnListEntry.livingClass, creatureType, spawnListEntry.pckgName, spawnListEntry.itemWeight,
+//                spawnListEntry.packSize, spawnListEntry.minChunkPack, spawnListEntry.maxChunkPack,
+//                spawnListEntry.optionalParameters);
     }
 
     public void setPacketData(Class<? extends EntityLiving> livingClass, String creatureType, String biomeName,
@@ -56,7 +56,6 @@ public class PacketManagerUpdateSpawnListEntry extends PacketManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean processPacket(DataInputStream dataStream, Player player) {
 //        try {
 //            setPacketData((Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(dataStream.readUTF()),

@@ -62,14 +62,14 @@ public final class WorldSettings {
         creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
         creatureTypeRegistry.initializeFromConfig(modConfigDirectoryFile);
 
-        livingHandlerRegistry = new LivingHandlerRegistry(creatureTypeRegistry, worldProperties);
+        livingHandlerRegistry = new LivingHandlerRegistry(livingGroupRegistry, creatureTypeRegistry, worldProperties);
         livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world, importedSpawnList);
 
         structureHandlerRegistry = new StructureHandlerRegistry(livingHandlerRegistry, worldProperties);
         structureHandlerRegistry.setupHandlers(modConfigDirectoryFile, world);
 
-        biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, creatureTypeRegistry,
-                livingHandlerRegistry, structureHandlerRegistry);
+        biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, livingGroupRegistry,
+                creatureTypeRegistry, livingHandlerRegistry, structureHandlerRegistry);
         biomeSpawnListRegistry.loadFromConfig(modConfigDirectoryFile, importedSpawnList);
         saveWorldSettings(modConfigDirectoryFile, world);
     }
@@ -80,6 +80,10 @@ public final class WorldSettings {
 
     public BiomeGroupRegistry biomeGroupRegistry() {
         return biomeGroupRegistry;
+    }
+
+    public LivingGroupRegistry livingGroupRegistry() {
+        return livingGroupRegistry;
     }
 
     public CreatureTypeRegistry creatureTypeRegistry() {
