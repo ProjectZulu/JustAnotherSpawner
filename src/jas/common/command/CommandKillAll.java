@@ -43,7 +43,7 @@ public class CommandKillAll extends CommandJasBase {
         }
 
         EntityPlayerMP targetPlayer;
-        if (stringArgs.length > 0) {
+        if (stringArgs.length > 1) {
             targetPlayer = func_82359_c(commandSender, stringArgs[0]);
         } else {
             targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());

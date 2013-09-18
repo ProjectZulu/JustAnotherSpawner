@@ -42,7 +42,7 @@ public class ChunkSpawner {
                 CreatureType creatureType = iterator.next();
                 if (creatureType.chunkSpawning) {
                     CustomSpawner.performWorldGenSpawning(event.world, creatureType, spawnBiome, k + 8, l + 8, 16, 16,
-                            event.world.rand);
+                            event.rand);
                 }
             }
         }
