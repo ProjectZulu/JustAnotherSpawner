@@ -13,7 +13,7 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
                 Key.blockRange, Key.spawnRange, Key.spawnRate, Key.sky, Key.despawnAge, Key.maxSpawnRange,
                 Key.minSpawnHeight, Key.maxSpawnHeight, Key.liquid, Key.opaque, Key.normal, Key.solidSide,
                 Key.difficulty, Key.torchLight, Key.ground, Key.top, Key.fill, Key.origin, Key.players, Key.entities,
-                Key.random, Key.istamed, Key.istameable, Key.location));
+                Key.random, Key.istamed, Key.istameable, Key.location, Key.dimension));
     }
 
     public int getRate() {
