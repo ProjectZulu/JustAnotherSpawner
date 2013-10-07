@@ -8,9 +8,11 @@ import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -77,12 +79,19 @@ public class CommandComposition extends CommandJasBase {
                     LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
                     ImmutableCollection<String> groupIDs = groupRegistry
                             .getGroupsWithEntity(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+                    /*
+                     * Used to ensure that if an entity is in multiple groups that are have the same type (i.e.
+                     * MONSTER), that it only counts once for each type
+                     */
+                    Set<String> typesCounted = new HashSet<String>();
                     for (String groupID : groupIDs) {
                         LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                                 .getLivingHandler(groupID);
-                        if (livingHandler.creatureTypeID.equals(creatureType.typeID)) {
+                        if (!typesCounted.contains(creatureType.typeID)
+                                && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
                             creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
                             totalTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
+                            typesCounted.add(creatureType.typeID);
                             if (livingHandler.canDespawn((EntityLiving) entity)) {
                                 despawnTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                                 despawnCreatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);

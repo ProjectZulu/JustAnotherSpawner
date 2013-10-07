@@ -27,6 +27,18 @@ import net.minecraft.world.biome.BiomeGenBase;
 import com.google.common.collect.ImmutableCollection;
 
 public class CommandCanSpawnHere extends CommandJasBase {
+
+    /*
+     * Number of trials to run canSpawnHere to rule out random chance of success/failure.
+     * 
+     * This was chosen such that to give a ~95% accuracy to the minimum accepted deviation in chance which is 1%. Any
+     * entity that spawns at least 1% of the time should be detected properly >=95% of the time.
+     * 
+     * CHANCE_OF_SUCCESS = 0.95 >= = 1-(1-TRIAL_CHANCE/100)^SIMULATION_TRIALS. TRIAL_CHANCE is chance out of 100 that
+     * the entity would spawn.
+     */
+    private static final int SIMULATION_TRIALS = 300;
+
     public String getCommandName() {
         return "canspawnhere";
     }
@@ -210,7 +222,15 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
-        boolean canSpawn = spawnListEntry == null ? false : livingHandler.getCanSpawnHere(entity, spawnListEntry);
+        boolean canSpawn = false;
+        if (spawnListEntry != null) {
+            for (int i = 0; i < SIMULATION_TRIALS; i++) {
+                if (livingHandler.getCanSpawnHere(entity, spawnListEntry)) {
+                    canSpawn = true;
+                    break;
+                }
+            }
+        }
         targetPlayer.preventEntitySpawning = tempSpawning;
         if (canSpawn) {
             return successMessage;
@@ -222,8 +242,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String canEntityTypeSpawnHere(EntityPlayer targetPlayer, EntityLiving entity, CreatureType livingType) {
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
-        boolean canSpawn = livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY,
-                (int) entity.posZ);
+        boolean canSpawn = false;
+        for (int i = 0; i < SIMULATION_TRIALS; i++) {
+            if (livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY, (int) entity.posZ)) {
+                canSpawn = true;
+                break;
+            }
+        }
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
@@ -236,7 +261,14 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String canLivingHandlerSpawnHere(EntityPlayer targetPlayer, EntityLiving entity, LivingHandler livingHandler) {
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
-        boolean canSpawn = livingHandler.isValidLiving(entity);
+
+        boolean canSpawn = false;
+        for (int i = 0; i < SIMULATION_TRIALS; i++) {
+            if (livingHandler.isValidLiving(entity)) {
+                canSpawn = true;
+                break;
+            }
+        }
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
@@ -259,7 +291,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
-        boolean canSpawn = livingHandler.isValidSpawnList(entity, spawnListEntry);
+        boolean canSpawn = false;
+        for (int i = 0; i < SIMULATION_TRIALS; i++) {
+            if (livingHandler.isValidSpawnList(entity, spawnListEntry)) {
+                canSpawn = true;
+                break;
+            }
+        }
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
