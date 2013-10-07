@@ -44,9 +44,9 @@ public class CommandKillAll extends CommandJasBase {
 
         EntityPlayerMP targetPlayer;
         if (stringArgs.length > 1) {
-            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+            targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
-            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
         }
 
         String entityCategName = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
@@ -82,7 +82,7 @@ public class CommandKillAll extends CommandJasBase {
             }
             deathMessage.append(entry.getValue().get()).append("-").append(entry.getKey());
         }
-        commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(deathMessage.toString()));
+        commandSender.sendChatToPlayer(new ChatMessageComponent().addText(deathMessage.toString()));
     }
 
     private boolean isEntityFiltered(Entity entity, String filter) {

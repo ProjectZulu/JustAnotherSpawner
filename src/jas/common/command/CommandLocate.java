@@ -40,9 +40,9 @@ public class CommandLocate extends CommandJasBase {
 
         EntityPlayerMP targetPlayer;
         if (stringArgs.length == 2) {
-            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+            targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
-            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
         }
 
         String entityTarget = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
@@ -74,7 +74,7 @@ public class CommandLocate extends CommandJasBase {
         if (!foundMatch) {
             throw new WrongUsageException("commands.jaslocate.typenotfound", new Object[0]);
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(countedContents.toString()));
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(countedContents.toString()));
         }
     }
 

@@ -50,16 +50,16 @@ public class CommandListSpawns extends CommandJasBase {
         String entityCategName;
         boolean expandedEntries = stringArgs.length == 3 ? stringArgs[2].equalsIgnoreCase("true") : false;
         if (stringArgs.length == 0) {
-            EntityPlayerMP targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
             targetBiomeStructure = getTargetAtPlayer(targetPlayer);
             entityCategName = "*";
         } else if (stringArgs.length == 1) {
-            EntityPlayerMP targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
             targetBiomeStructure = getTargetAtPlayer(targetPlayer);
             entityCategName = stringArgs[0];
         } else {
             try {
-                EntityPlayerMP targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+                EntityPlayerMP targetPlayer = getPlayer(commandSender, stringArgs[0]);
                 targetBiomeStructure = getTargetAtPlayer(targetPlayer);
             } catch (Exception e) {
                 targetBiomeStructure = stringArgs[0];
@@ -75,10 +75,10 @@ public class CommandListSpawns extends CommandJasBase {
         }
 
         if (isStructure) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(getStructureSpawnList(
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getStructureSpawnList(
                     targetBiomeStructure, entityCategName, expandedEntries)));
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(getBiomeSpawnList(
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getBiomeSpawnList(
                     targetBiomeStructure, entityCategName, expandedEntries)));
         }
     }

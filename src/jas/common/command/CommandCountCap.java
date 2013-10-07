@@ -59,7 +59,7 @@ public class CommandCountCap extends CommandJasBase {
         }
 
         if (targetWorld == null) {
-            targetWorld = func_82359_c(commandSender, commandSender.getCommandSenderName()).worldObj;
+            targetWorld = getPlayer(commandSender, commandSender.getCommandSenderName()).worldObj;
         }
 
         String typeName = stringArgs.length == 0 ? "*" : stringArgs[stringArgs.length == 1 ? 0 : 1];
@@ -106,14 +106,14 @@ public class CommandCountCap extends CommandJasBase {
             if (!foundMatch) {
                 throw new WrongUsageException("commands.jascountcap.typenotfound", new Object[0]);
             } else {
-                commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(worldTypeContents.toString()));
+                commandSender.sendChatToPlayer(new ChatMessageComponent().addText(worldTypeContents.toString()));
             }
         }
     }
 
     private World getTargetWorld(String arg, ICommandSender commandSender) {
         try {
-            EntityPlayerMP targetPlayer = func_82359_c(commandSender, arg);
+            EntityPlayerMP targetPlayer = getPlayer(commandSender, arg);
             return targetPlayer.worldObj;
         } catch (Exception e) {
 

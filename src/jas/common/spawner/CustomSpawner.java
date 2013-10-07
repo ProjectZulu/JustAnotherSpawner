@@ -198,7 +198,7 @@ public class CustomSpawner {
                                             worldServer.spawnEntityInWorld(entityliving);
                                             if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX,
                                                     spawnY, spawnZ)) {
-                                                entitylivingdata = entityliving.func_110161_a(entitylivingdata);
+                                                entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                                             }
                                             JASLog.logSpawn(false, (String) EntityList.classToStringMapping
                                                     .get(entityliving.getClass()),
@@ -289,7 +289,7 @@ public class CustomSpawner {
                                                 (int) entityliving.posX, (int) entityliving.posZ)));
                         world.spawnEntityInWorld(entityliving);
                         if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
-                            entitylivingdata = entityliving.func_110161_a(entitylivingdata);
+                            entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                         }
                         flag = true;
                     } else {

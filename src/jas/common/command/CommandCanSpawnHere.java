@@ -44,8 +44,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
             throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
         }
 
-        EntityPlayer targetPlayer = stringArgs.length == 1 ? func_82359_c(commandSender,
-                commandSender.getCommandSenderName()) : func_82359_c(commandSender, stringArgs[0]);
+        EntityPlayer targetPlayer = stringArgs.length == 1 ? getPlayer(commandSender,
+                commandSender.getCommandSenderName()) : getPlayer(commandSender, stringArgs[0]);
         String entityName = stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
         if (!isValidEntityName(entityName)) {
             throw new WrongUsageException("commands.jascanspawnhere.entitynotfound", new Object[0]);
@@ -57,7 +57,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
         CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(
                 livingHandler.creatureTypeID);
         if (livingType == null) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(String.format(
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(String.format(
                     "Entity %s is of type NONE and thus will never spawn.", entityName)));
             return;
         }
@@ -109,7 +109,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
                 }
             }
         }
-        commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(resultMessage.toString()));
+        commandSender.sendChatToPlayer(new ChatMessageComponent().addText(resultMessage.toString()));
     }
 
     private boolean isValidEntityName(String entityName) {
