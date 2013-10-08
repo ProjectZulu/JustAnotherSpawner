@@ -345,14 +345,14 @@ public class LivingGroupRegistry {
             }
 
             if (currentPackage.equals(packageName) && entry.getValue().contains(".")) {
-                return entry.getValue().split(".")[0];
+                return entry.getValue().split("\\.")[0];
             }
         }
         String manualPrefix = entityPackageToPrefix.get(currentPackage);
         if (manualPrefix != null) {
             return manualPrefix;
         }
-        String[] currentParts = currentPackage.split(".");
+        String[] currentParts = currentPackage.split("\\.");
         return currentParts.length > 1 ? currentParts[0] : UNKNOWN_PREFIX;
     }
 
