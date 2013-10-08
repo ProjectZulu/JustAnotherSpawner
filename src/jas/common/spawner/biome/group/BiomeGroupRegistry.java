@@ -190,6 +190,8 @@ public class BiomeGroupRegistry {
             }
         }
 
+        // Detect new mappings that are created. Used to detect if a new mapping biome group need to be added.
+        Set<String> newMappings = new HashSet<String>();
         /* Create Package Name Mappings that do not already exist */
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
             if (biome == null) {
@@ -211,9 +213,10 @@ public class BiomeGroupRegistry {
                     JASLog.info("Duplicate mapping %s and was renamed to %s.", biome.biomeName, defaultMapping);
                 }
 
-                Property nameMapping = biomeConfig.getBiomeMapping(packageName, biome.biomeName);
+                Property nameMapping = biomeConfig.getBiomeMapping(packageName, defaultMapping);
                 biomeMappingToPckg.put(nameMapping.getString(), packageName);
                 pckgNameToBiomeID.put(packageName, biome.biomeID);
+                newMappings.add(nameMapping.getString());
             }
         }
 
@@ -248,29 +251,28 @@ public class BiomeGroupRegistry {
         /* Create / Get Base Groups */
         Set<BiomeGroup> biomeGroups = new HashSet<BiomeGroup>();
         ConfigCategory configCategory = biomeConfig.getGroupsCategory();
-        if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
-            biomeConfig.removeCategory(configCategory);
-            /* Category was nonexistent or empty; time to create default settings */
-            JASLog.debug(Level.INFO, "Creating Default Biomegroups");
-            for (BiomeGroup biomeGroup : getDefaultGroups(biomePckgToMapping.values())) {
-                Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
-                BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
-                        BiomeGroupConfiguration.defaultGroupCategory(biomeGroup.groupID));
-                for (String jasName : prop.getString().split(",")) {
-                    if (!jasName.trim().equals("")) {
-                        newlivingGroup.contents.add(jasName);
-                    }
-                }
-                biomeGroups.add(newlivingGroup);
-            }
-            JASLog.debug(Level.INFO, "Finished Default Biomegroups");
-        } else {
+        if (!configCategory.getChildren().isEmpty() || !configCategory.isEmpty()) {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();
             biomeGroups.addAll(getGroupsFromProps(propMap, (String) null, configCategory.getQualifiedName()));
             for (ConfigCategory child : configCategory.getChildren()) {
                 biomeGroups.addAll(getGroupsFromCategory(child));
             }
+        } else {
+            biomeConfig.removeCategory(configCategory);
+        }
+
+        /* For any newly created BiomeMapping, we must create a new BiomeGroup to represent it */
+        for (BiomeGroup biomeGroup : getDefaultGroups(newMappings)) {
+            Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
+            BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
+                    BiomeGroupConfiguration.defaultGroupCategory(biomeGroup.groupID));
+            for (String jasName : prop.getString().split(",")) {
+                if (!jasName.trim().equals("")) {
+                    newlivingGroup.contents.add(jasName);
+                }
+            }
+            biomeGroups.add(newlivingGroup);
         }
 
         /* Sort Groups */
