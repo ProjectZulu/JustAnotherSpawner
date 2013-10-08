@@ -34,7 +34,7 @@ public class CommandPackageEntity extends CommandJasBase {
         String name = stringArgs[0];
         Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(name);
         if (entityClass != null) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(name.concat(" package is ").concat(
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(name.concat(" package is ").concat(
                     entityClass.getName())));
         } else {
             throw new WrongUsageException("commands.jasentitypackage.typenotfound", new Object[0]);

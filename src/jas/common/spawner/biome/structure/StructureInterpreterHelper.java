@@ -5,7 +5,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 
-public class BiomeInterpreterHelper {
+public class StructureInterpreterHelper {
 
     @SuppressWarnings("unchecked")
     public static <T> T getInnerChunkProvider(World world, Class<T> chunkClass) {

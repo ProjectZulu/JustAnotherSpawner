@@ -17,7 +17,7 @@ public class TFLoadInfo implements LoadInfo {
     @Override
     public List<Object> getObjectsToRegister() {
         List<Object> list = new ArrayList<Object>();
-        list.add(new BiomeInterpreterTwilightForest());
+        list.add(new StructureInterpreterTwilightForest());
         return list;
     }
 

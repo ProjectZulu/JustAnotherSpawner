@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.ReflectionHelper;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.feature.MapGenScatteredFeature;
 
-public class BiomeInterpreterSwamp implements BiomeInterpreter {
+public class StructureInterpreterSwamp implements StructureInterpreter {
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -38,7 +38,7 @@ public class BiomeInterpreterSwamp implements BiomeInterpreter {
     // TODO: Compile List of Fields we could make public for Coremod
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
         BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-        ChunkProviderGenerate chunkProviderGenerate = BiomeInterpreterHelper.getInnerChunkProvider(world,
+        ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderGenerate.class);
 
         if (biome instanceof BiomeGenSwamp && chunkProviderGenerate != null) {

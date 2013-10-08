@@ -24,9 +24,9 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
     }
 
     public void setPacketData(LivingHandler livingHandler) {
-        entityName = (String) EntityList.classToStringMapping.get(livingHandler.entityClass);
-        creatureTypeID = livingHandler.creatureTypeID;
-        shouldSpawn = livingHandler.shouldSpawn;
+//        entityName = (String) EntityList.classToStringMapping.get(livingHandler.entityClass);
+//        creatureTypeID = livingHandler.creatureTypeID;
+//        shouldSpawn = livingHandler.shouldSpawn;
     }
 
     @Override
@@ -39,20 +39,20 @@ public class PacketManagerUpdateLivingHandler extends PacketManager {
     @Override
     @SuppressWarnings("unchecked")
     public boolean processPacket(DataInputStream dataStream, Player player) {
-        try {
-            entityName = dataStream.readUTF();
-            creatureTypeID = dataStream.readUTF();
-            shouldSpawn = dataStream.readBoolean();
-            JustAnotherSpawner
-                    .worldSettings()
-                    .creatureHandlerRegistry()
-                    .updateLivingHandler(
-                            (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName),
-                            creatureTypeID, shouldSpawn);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            entityName = dataStream.readUTF();
+//            creatureTypeID = dataStream.readUTF();
+//            shouldSpawn = dataStream.readBoolean();
+//            JustAnotherSpawner
+//                    .worldSettings()
+//                    .creatureHandlerRegistry()
+//                    .updateLivingHandler(
+//                            (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(entityName),
+//                            creatureTypeID, shouldSpawn);
+//            return true;
+//        } catch (IOException e) {
+//            e.printStackTrace();
             return false;
-        }
+//        }
     }
 }

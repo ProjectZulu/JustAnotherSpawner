@@ -1,6 +1,10 @@
 package jas.common;
 
+import java.util.List;
+import java.util.Set;
+
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -13,12 +17,15 @@ public class EntityDespawner {
     public void despawner(LivingUpdateEvent event) {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
-            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                    .getLivingHandler(event.entityLiving.getClass());
-
-            if (livingHandler != null && livingHandler.getDespawning() != null
-                    && livingHandler.getDespawning().isOptionalEnabled()) {
-                livingHandler.despawnEntity((EntityLiving) event.entityLiving);
+            LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+            @SuppressWarnings("unchecked")
+            List<LivingHandler> livingHandlers = livingHandlerRegistry
+                    .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
+            for (LivingHandler livingHandler : livingHandlers) {
+                if (livingHandler != null && livingHandler.getDespawning() != null
+                        && livingHandler.getDespawning().isOptionalEnabled()) {
+                    livingHandler.despawnEntity((EntityLiving) event.entityLiving);
+                }
             }
         }
     }

@@ -1,42 +1,22 @@
 package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
-import jas.common.JASLog;
 import jas.common.config.EntityCategoryConfiguration;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.biome.group.BiomeHelper;
-import jas.common.spawner.biome.structure.BiomeHandler;
-import jas.common.spawner.biome.structure.BiomeHandlerRegistry;
-import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.CreatureHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Random;
-import java.util.logging.Level;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
 import net.minecraft.block.BlockStep;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ListMultimap;
 
 //TODO: Large Constructor could probably use Factory OR String optionalParameters to consolidate unused properties
 public class CreatureType {
@@ -45,21 +25,18 @@ public class CreatureType {
     public final int maxNumberOfCreature;
     public final boolean chunkSpawning;
     public final Material spawnMedium;
-    private final ListMultimap<String, SpawnListEntry> groupNameToSpawnEntry = ArrayListMultimap.create();
-    /* Contains the List of SpawnEntries which were Considered Invalid */
-    private final ListMultimap<String, SpawnListEntry> groupNameToRejectedSpawnEntry = ArrayListMultimap.create();
     public final String optionalParameters;
     protected OptionalSettingsCreatureTypeSpawn spawning;
     public final BiomeGroupRegistry biomeGroupRegistry;
-    
-    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning) {
+
+    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
+            Material spawnMedium, int spawnRate, boolean chunkSpawning) {
         this(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]}");
     }
 
-    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature, Material spawnMedium, int spawnRate,
-            boolean chunkSpawning, String optionalParameters) {
+    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
+            Material spawnMedium, int spawnRate, boolean chunkSpawning, String optionalParameters) {
         this.biomeGroupRegistry = biomeGroupRegistry;
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
@@ -116,205 +93,6 @@ public class CreatureType {
     }
 
     /**
-     * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
-     * 
-     * @param pckgName
-     * @param spawnListEntry
-     */
-    public void addSpawn(SpawnListEntry spawnListEntry) {
-        groupNameToSpawnEntry.get(spawnListEntry.pckgName).add(spawnListEntry);
-    }
-
-    /**
-     * Adds a SpawnlistEntry to the corresponding SpawnList using the biomeName as key
-     * 
-     * @param pckgName
-     * @param spawnListEntry
-     */
-    public void addInvalidSpawn(SpawnListEntry spawnListEntry) {
-        groupNameToRejectedSpawnEntry.get(spawnListEntry.pckgName).add(spawnListEntry);
-    }
-
-    /**
-     * Removes the SpawnListEntry defined by biomeName and LivingClass from the CreatureType.
-     * 
-     * @param pckgName
-     * @param livingClass
-     * @return
-     */
-    public boolean removeSpawn(String groupName, Class<? extends EntityLiving> livingClass) {
-        Iterator<SpawnListEntry> iterator = groupNameToSpawnEntry.get(groupName).iterator();
-        while (iterator.hasNext()) {
-            SpawnListEntry spawnListEntry = iterator.next();
-            if (livingClass.equals(spawnListEntry.livingClass) && spawnListEntry.pckgName.equals(groupName)) {
-                iterator.remove();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Get All Spawns For all Biomes that are of Type CreatureType
-     * 
-     * @return
-     */
-    public Collection<SpawnListEntry> getAllSpawns() {
-        return groupNameToSpawnEntry.values();
-    }
-
-    public Collection<SpawnListEntry> getAllRejectedSpawns() {
-        return groupNameToRejectedSpawnEntry.values();
-    }
-
-    public Collection<SpawnListEntry> getSpawnList(String biomePackageName) {
-        ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
-                biomePackageName);
-        ArrayList<SpawnListEntry> spawns = new ArrayList<SpawnListEntry>(groupIDList.size() * 7);
-
-        for (String groupID : groupIDList) {
-            spawns.addAll(groupNameToSpawnEntry.get(groupID));
-        }
-        return spawns;
-    }
-
-    /**
-     * Performs Remove and Add Spawn operation
-     * 
-     * @param pckgName
-     * @param livingClass
-     */
-    public void updateOrAddSpawn(SpawnListEntry spawnListEntry) {
-        ListIterator<SpawnListEntry> iterator = groupNameToSpawnEntry.get(spawnListEntry.pckgName).listIterator();
-        while (iterator.hasNext()) {
-            SpawnListEntry listEntry = iterator.next();
-            if (listEntry.livingClass.equals(spawnListEntry.livingClass)
-                    && listEntry.pckgName.equals(spawnListEntry.pckgName)) {
-                iterator.set(spawnListEntry);
-                return;
-            }
-        }
-        addSpawn(spawnListEntry);
-    }
-
-    /**
-     * Resets All Spawn Lists. This is used on World Change
-     */
-    public void resetSpawns() {
-        groupNameToSpawnEntry.clear();
-    }
-
-    /**
-     * Called by CustomSpawner for a Passive Spawn Entity
-     * 
-     * @param world
-     * @param xCoord Random xCoordinate nearby to Where Creature will spawn
-     * @param yCoord Random yCoordinate nearby to Where Creature will spawn
-     * @param zCoord Random zCoordinate nearby to Where Creature will spawn
-     * @return Creature to Spawn
-     */
-    @SuppressWarnings("unchecked")
-    public SpawnListEntry getSpawnListEntryToSpawn(CreatureHandlerRegistry creatureHandlerRegistry,
-            BiomeHandlerRegistry biomeHandlerRegistry, World world, int xCoord, int yCoord, int zCoord) {
-        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(biomeHandlerRegistry, world, xCoord,
-                yCoord, zCoord);
-        if (!structureSpawnList.isEmpty()) {
-
-            JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
-                    zCoord);
-            SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
-                    structureSpawnList);
-            return isEntityOfType(creatureHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry : null;
-        }
-        BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
-        if (biomegenbase != null) {
-            ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
-                    BiomeHelper.getPackageName(biomegenbase));
-            return getRandomEntry(world.rand, groupIDList);
-        }
-        return null;
-    }
-
-    /**
-     * Called by CustomSpawner for a Chunk Spawn Entity
-     * 
-     * @param pckgName Name of Biome SpawnList to get CreatureType From
-     * @return
-     */
-    public SpawnListEntry getSpawnListEntryToSpawn(CreatureHandlerRegistry creatureHandlerRegistry,
-            BiomeHandlerRegistry biomeHandlerRegistry, World world, String packgName, int xCoord, int yCoord, int zCoord) {
-        Collection<SpawnListEntry> structureSpawnList = getStructureSpawnList(biomeHandlerRegistry, world, xCoord,
-                yCoord, zCoord);
-        if (!structureSpawnList.isEmpty()) {
-            JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
-                    zCoord);
-            SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
-                    structureSpawnList);
-            return isEntityOfType(creatureHandlerRegistry, spawnListEntry.livingClass) ? spawnListEntry : null;
-        }
-
-        BiomeGenBase biomegenbase = world.getBiomeGenForCoords(xCoord, zCoord);
-        if (biomegenbase != null) {
-            ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
-                    BiomeHelper.getPackageName(biomegenbase));
-            return getRandomEntry(world.rand, groupIDList);
-        }
-        return null;
-    }
-
-    private Collection<SpawnListEntry> getStructureSpawnList(BiomeHandlerRegistry biomeHandlerRegistry, World world,
-            int xCoord, int yCoord, int zCoord) {
-        Iterator<BiomeHandler> iterator = biomeHandlerRegistry.getHandlers();
-        while (iterator.hasNext()) {
-            BiomeHandler handler = iterator.next();
-            if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
-                Collection<SpawnListEntry> spawnEntryList = handler
-                        .getStructureSpawnList(world, xCoord, yCoord, zCoord);
-                if (!spawnEntryList.isEmpty()) {
-                    return spawnEntryList;
-                }
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    /**
-     * Equivalent to WeightedRandom.getRandomItem but implemented for List of Lists
-     * 
-     * @param random
-     * @param spawnList
-     * @param weightList
-     * @return
-     */
-    private SpawnListEntry getRandomEntry(Random random, ImmutableCollection<String> groupIDList) {
-        int totalWeight = 0;
-
-        for (String groupID : groupIDList) {
-            for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
-                totalWeight += spawnListEntry.itemWeight;
-            }
-        }
-
-        if (totalWeight <= 0) {
-            return null;
-        } else {
-            int selectedWeight = random.nextInt(totalWeight);
-            SpawnListEntry resultEntry = null;
-
-            for (String groupID : groupIDList) {
-                for (SpawnListEntry spawnListEntry : groupNameToSpawnEntry.get(groupID)) {
-                    resultEntry = spawnListEntry;
-                    selectedWeight -= spawnListEntry.itemWeight;
-                    if (selectedWeight <= 0) {
-                        return resultEntry;
-                    }
-                }
-            }
-            return resultEntry;
-        }
-    }
-
-    /**
      * Called by CustomSpawner to get the base coordinate to spawn an Entity
      * 
      * @param world
@@ -336,9 +114,11 @@ public class CreatureType {
      * @param entity Entity that is being Checked
      * @return
      */
-    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Entity entity) {
-        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity.getClass());
-        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Entity entity) {
+        if (entity instanceof EntityLiving) {
+            return isEntityOfType(livingHandlerRegistry, ((EntityLiving) entity).getClass());
+        }
+        return false;
     }
 
     /**
@@ -347,9 +127,18 @@ public class CreatureType {
      * @param entity
      * @return
      */
-    public boolean isEntityOfType(CreatureHandlerRegistry creatureHandlerRegistry, Class<? extends EntityLiving> entity) {
-        LivingHandler livingHandler = creatureHandlerRegistry.getLivingHandler(entity);
-        return livingHandler != null ? livingHandler.creatureTypeID.equals(this.typeID) : false;
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, Class<? extends EntityLiving> entity) {
+        for (LivingHandler handler : livingHandlerRegistry.getLivingHandlers(entity)) {
+            if (handler.creatureTypeID.equals(this.typeID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isEntityOfType(LivingHandlerRegistry livingHandlerRegistry, String groupID) {
+        LivingHandler handler = livingHandlerRegistry.getLivingHandler(groupID);
+        return handler != null ? handler.creatureTypeID.equals(this.typeID) : false;
     }
 
     /**
@@ -432,7 +221,7 @@ public class CreatureType {
 
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
-     * to Proposed Entity Registry or BiomeInterpreter. How will end-users fix issue? Does End User Need to?
+     * to Proposed Entity Registry or StructureInterpreter. How will end-users fix issue? Does End User Need to?
      */
     /**
      * Custom Implementation of canCreatureSpawnMethod which Required EnumCreatureType. Cannot be Overrident.

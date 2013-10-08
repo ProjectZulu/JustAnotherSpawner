@@ -16,7 +16,6 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import java.util.Locale;
 import java.util.logging.Level;
 
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
@@ -29,7 +28,7 @@ public class LivingHandler {
     public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + DefaultProps.DELIMETER
             + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
 
-    public final Class<? extends EntityLiving> entityClass;
+    public final String groupID;
     public final String creatureTypeID;
     public final boolean shouldSpawn;
     public final String optionalParameters;
@@ -41,10 +40,10 @@ public class LivingHandler {
         return despawning;
     }
 
-    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, Class<? extends EntityLiving> entityClass,
-            String creatureTypeID, boolean shouldSpawn, String optionalParameters) {
+    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, String livingGroupID, String creatureTypeID,
+            boolean shouldSpawn, String optionalParameters) {
         this.creatureTypeRegistry = creatureTypeRegistry;
-        this.entityClass = entityClass;
+        this.groupID = livingGroupID;
         this.creatureTypeID = creatureTypeRegistry.getCreatureType(creatureTypeID) != null ? creatureTypeID
                 : CreatureTypeRegistry.NONE;
         this.shouldSpawn = shouldSpawn;
@@ -64,15 +63,15 @@ public class LivingHandler {
     }
 
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {
-        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
+        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
-        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
+        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final LivingHandler toOptionalParameters(String optionalParameters) {
-        return constructInstance(entityClass, creatureTypeID, shouldSpawn, optionalParameters);
+        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     /**
@@ -87,9 +86,9 @@ public class LivingHandler {
      * @param spawnRate
      * @param chunkSpawning
      */
-    protected LivingHandler constructInstance(Class<? extends EntityLiving> entityClass, String creatureTypeID,
-            boolean shouldSpawn, String optionalParameters) {
-        return new LivingHandler(creatureTypeRegistry, entityClass, creatureTypeID, shouldSpawn, optionalParameters);
+    protected LivingHandler constructInstance(String livingGroupID, String creatureTypeID, boolean shouldSpawn,
+            String optionalParameters) {
+        return new LivingHandler(creatureTypeRegistry, livingGroupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
     public final int getLivingCap() {
@@ -189,7 +188,6 @@ public class LivingHandler {
 
             if (canDespawn == false) {
                 entityProps.resetAge();
-                return;
             }
 
             boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
@@ -270,12 +268,12 @@ public class LivingHandler {
      * @return
      */
     protected LivingHandler createFromConfig(LivingConfiguration config) {
-        String mobName = (String) EntityList.classToStringMapping.get(entityClass);
+        // String mobName = (String) EntityList.classToStringMapping.get(entityClass);
 
         String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
                 + optionalParameters;
 
-        Property resultValue = config.getLivingHandler(mobName, defaultValue);
+        Property resultValue = config.getLivingHandler(groupID, defaultValue);
 
         String[] resultMasterParts = resultValue.getString().split("\\{", 2);
         String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
@@ -309,16 +307,15 @@ public class LivingHandler {
         } else {
             JASLog.severe(
                     "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
-                    mobName, creatureTypeID, shouldSpawn);
+                    groupID, creatureTypeID, shouldSpawn);
             resultValue.set(defaultValue);
-            return new LivingHandler(creatureTypeRegistry, entityClass, creatureTypeID, shouldSpawn, "");
+            return new LivingHandler(creatureTypeRegistry, groupID, creatureTypeID, shouldSpawn, "");
         }
     }
 
     public void saveToConfig(LivingConfiguration config) {
-        String mobName = (String) EntityList.classToStringMapping.get(entityClass);
         String currentValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
                 + optionalParameters;
-        config.getLivingHandler(mobName, currentValue).set(currentValue);
+        config.getLivingHandler(groupID, currentValue).set(currentValue);
     }
 }

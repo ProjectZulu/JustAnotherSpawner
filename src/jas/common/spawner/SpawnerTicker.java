@@ -2,6 +2,8 @@ package jas.common.spawner;
 
 import jas.common.BiomeBlacklist;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.EnumSet;
@@ -48,8 +50,11 @@ public class SpawnerTicker implements IScheduledTickHandler {
             while (typeIterator.hasNext()) {
                 CreatureType creatureType = typeIterator.next();
                 if (creatureType.isReady(world)) {
-                    CustomSpawner.spawnCreaturesInChunks(world, creatureType, eligibleChunksForSpawning,
-                            creatureTypeCount, creatureCount, blacklist);
+                    LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings()
+                            .livingHandlerRegistry();
+                    LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+                    CustomSpawner.spawnCreaturesInChunks(world, livingHandlerRegistry, livingGroupRegistry,
+                            creatureType, eligibleChunksForSpawning, creatureTypeCount, creatureCount, blacklist);
                 }
             }
         }

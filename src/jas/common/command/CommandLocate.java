@@ -1,11 +1,14 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.common.collect.ImmutableCollection;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -40,9 +43,9 @@ public class CommandLocate extends CommandJasBase {
 
         EntityPlayerMP targetPlayer;
         if (stringArgs.length == 2) {
-            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+            targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
-            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
         }
 
         String entityTarget = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
@@ -54,19 +57,25 @@ public class CommandLocate extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                    .getLivingHandler(entity.getClass());
-            if (handler != null && (entityTarget.equals("*") || handler.creatureTypeID.equals(entityTarget))
-                    || entityTarget.equals(EntityList.classToStringMapping.get(entity.getClass()))) {
-                foundMatch = true;
-                boolean canDespawn = handler.canDespawn((EntityLiving) entity);
-                countedContents.append(canDespawn ? "\u00A7a" : "\u00A7c")
-                        .append(EntityList.classToStringMapping.get(entity.getClass())).append("\u00A7r[");
-                countedContents.append("\u00A79").append((int) entity.posX).append("\u00A7r").append(",");
-                countedContents.append("\u00A79").append((int) entity.posY).append("\u00A7r").append(",");
-                countedContents.append("\u00A79").append((int) entity.posZ).append("\u00A7r");
-                if (iterator.hasNext()) {
-                    countedContents.append("] ");
+            LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+            ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
+                    .get(entity.getClass()));
+            for (String groupID : groupIDs) {
+                LivingHandler handler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                        .getLivingHandler(groupID);
+                if (handler != null && (entityTarget.equals("*") || handler.creatureTypeID.equals(entityTarget))
+                        || entityTarget.equals(EntityList.classToStringMapping.get(entity.getClass()))) {
+                    foundMatch = true;
+                    boolean canDespawn = handler.canDespawn((EntityLiving) entity);
+                    countedContents.append(canDespawn ? "\u00A7a" : "\u00A7c")
+                            .append(EntityList.classToStringMapping.get(entity.getClass())).append("\u00A7r[");
+                    countedContents.append("\u00A79").append((int) entity.posX).append("\u00A7r").append(",");
+                    countedContents.append("\u00A79").append((int) entity.posY).append("\u00A7r").append(",");
+                    countedContents.append("\u00A79").append((int) entity.posZ).append("\u00A7r");
+                    if (iterator.hasNext()) {
+                        countedContents.append("] ");
+                    }
+                    break;
                 }
             }
         }
@@ -74,7 +83,7 @@ public class CommandLocate extends CommandJasBase {
         if (!foundMatch) {
             throw new WrongUsageException("commands.jaslocate.typenotfound", new Object[0]);
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(countedContents.toString()));
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(countedContents.toString()));
         }
     }
 

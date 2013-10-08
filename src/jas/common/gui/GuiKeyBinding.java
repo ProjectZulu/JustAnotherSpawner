@@ -37,19 +37,19 @@ public class GuiKeyBinding extends KeyHandler {
 
     @Override
     public void keyUp(EnumSet<TickType> types, KeyBinding kb, boolean tickEnd) {
-        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
-        if (tickEnd && Minecraft.getMinecraft().currentScreen == null && player != null) {
-            JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                    .clientStartup(Minecraft.getMinecraft().theWorld);
-
-            PacketManagerServerSync packetManager = (PacketManagerServerSync) PacketID.SERVER_SYNC
-                    .createPacketManager();
-            packetManager.setPacketData(true);
-            PacketDispatcher.sendPacketToServer(packetManager.createPacket());
-
-            player.openGui(JustAnotherSpawner.modInstance, GuiID.Spawner.iD, Minecraft.getMinecraft().theWorld,
-                    (int) player.posX, (int) player.posY, (int) player.posZ);
-        }
+//        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+//        if (tickEnd && Minecraft.getMinecraft().currentScreen == null && player != null) {
+//            JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
+//                    .clientStartup(Minecraft.getMinecraft().theWorld);
+//
+//            PacketManagerServerSync packetManager = (PacketManagerServerSync) PacketID.SERVER_SYNC
+//                    .createPacketManager();
+//            packetManager.setPacketData(true);
+//            PacketDispatcher.sendPacketToServer(packetManager.createPacket());
+//
+//            player.openGui(JustAnotherSpawner.modInstance, GuiID.Spawner.iD, Minecraft.getMinecraft().theWorld,
+//                    (int) player.posX, (int) player.posY, (int) player.posZ);
+//        }
     }
 
     @Override

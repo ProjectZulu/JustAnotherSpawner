@@ -3,6 +3,7 @@ package jas.common.command;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+
+import com.google.common.collect.ImmutableCollection;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -44,9 +47,9 @@ public class CommandKillAll extends CommandJasBase {
 
         EntityPlayerMP targetPlayer;
         if (stringArgs.length > 1) {
-            targetPlayer = func_82359_c(commandSender, stringArgs[0]);
+            targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
-            targetPlayer = func_82359_c(commandSender, commandSender.getCommandSenderName());
+            targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
         }
 
         String entityCategName = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
@@ -59,14 +62,21 @@ public class CommandKillAll extends CommandJasBase {
         Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingHandler handler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                    .getLivingHandler(entity.getClass());
-            if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
-                    && isEntityFiltered(entity, entityFilter)) {
-                if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {
-                    entity.setDead();
-                    deathCount.incrementOrPutIfAbsent(handler.creatureTypeID, 0);
-                    totalDeaths++;
+            LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+            ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
+                    .get(entity.getClass()));
+            for (String groupID : groupIDs) {
+                LivingHandler handler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                        .getLivingHandler(groupID);
+                if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
+                        && isEntityFiltered(entity, entityFilter)) {
+                    if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {
+                        entity.setDead();
+                        deathCount.incrementOrPutIfAbsent(handler.creatureTypeID, 0);
+                        totalDeaths++;
+                        /* Break out of searching multiple GroupID such that same entity death is not counted twice */
+                        break;
+                    }
                 }
             }
         }
@@ -82,7 +92,7 @@ public class CommandKillAll extends CommandJasBase {
             }
             deathMessage.append(entry.getValue().get()).append("-").append(entry.getKey());
         }
-        commandSender.sendChatToPlayer(new ChatMessageComponent().func_111079_a(deathMessage.toString()));
+        commandSender.sendChatToPlayer(new ChatMessageComponent().addText(deathMessage.toString()));
     }
 
     private boolean isEntityFiltered(Entity entity, String filter) {
