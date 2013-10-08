@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.server.MinecraftServer;
 
 public class CommandSaveConfig extends CommandJasBase {
     public String getCommandName() {
@@ -29,7 +30,8 @@ public class CommandSaveConfig extends CommandJasBase {
         if (stringArgs.length > 0) {
             throw new WrongUsageException("commands.jassaveconfig.usage", new Object[0]);
         }
-        JustAnotherSpawner.worldSettings().saveWorldSettings(JustAnotherSpawner.getModConfigDirectory());
+        JustAnotherSpawner.worldSettings().saveWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
+                MinecraftServer.getServer().worldServers[0]);
     }
 
     /**

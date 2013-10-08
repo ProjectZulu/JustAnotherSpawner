@@ -1,6 +1,7 @@
 package jas.common;
 
 import jas.common.config.LivingConfiguration;
+import jas.common.config.SaveConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +13,7 @@ import net.minecraftforge.common.Property;
 public final class WorldProperties {
 
     /* Functional Universal Directory Settings, marks the Way the System should Sort */
-    public boolean universalDirectory;
+    public boolean savedUniversalDirectory;
     /* Placeholder used to determine if the current directory needs to be deleted and changed */
     public boolean loadedUniversalDirectory;
 
@@ -39,42 +40,31 @@ public final class WorldProperties {
      * Load data related to how and where the files are desired to be saved
      */
     private void loadWorldSaveConfiguration(File configDirectory, World world) {
-        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "SaveConfig.cfg"));
+        SaveConfiguration configuration = new SaveConfiguration(configDirectory);
         String curWorldName = world.getWorldInfo().getWorldName();
-        worldGloablConfig.load();
+        configuration.load();
 
         /* Load Save Use Import_Name */
-        Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
-                "Folder name to Copy Missing Files From. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property importProp = configuration.getImportName();
         importName = importProp.getString();
 
         /* Load Save Use Global Save_Name */
-        Property defaultsaveProp = worldGloablConfig
-                .get("Save_Configuration",
-                        "Default Save_Name",
-                        "{$world}",
-                        "Default name used for Save_Name. {$world} is replaced by world name. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property defaultsaveProp = configuration.getDefaultSaveName();
         saveName = defaultsaveProp.getString().replace("{$world}", curWorldName);
 
         /* Load Save Use Actual Save_Name */
-        Property saveProp = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Save_Name", saveName,
-                        "Folder name to look for and generate CFG files. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property saveProp = configuration.getLocalSaveName(curWorldName, saveName);
         saveName = saveProp.getString().trim().equals("") ? "default" : saveProp.getString();
 
         /* Load Save Sort Creature By Biome */
-        loadedSortCreatureByBiome = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting",
-                        JustAnotherSpawner.globalSettings().globalSortCreatureByBiome,
-                        "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.")
-                .getBoolean(JustAnotherSpawner.globalSettings().globalSortCreatureByBiome);
+        boolean globalSortByBiome = JustAnotherSpawner.globalSettings().globalSortCreatureByBiome;
+        Property sortByProp = configuration.getLocalSortByCreature(curWorldName, globalSortByBiome);
+        loadedSortCreatureByBiome = sortByProp.getBoolean(globalSortByBiome);
 
         /* Load Save/Use Universal Entity Directory */
-        loadedUniversalDirectory = worldGloablConfig.get("Save_Configuration." + curWorldName,
-                "Universal Entity CFG - Settings", false,
-                "Specifies if the User wants the Entity CFG to Combined into a Universal CFG.").getBoolean(false);
-        worldGloablConfig.save();
+        Property useUniProp = configuration.getLocalSortUseUniversal(curWorldName, false);
+        loadedUniversalDirectory = useUniProp.getBoolean(false);
+        configuration.save();
     }
 
     private void importDefaultFiles(File modConfigDirectoryFile) {
@@ -101,7 +91,7 @@ public final class WorldProperties {
         livingTempSettings.load();
         savedSortCreatureByBiome = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome).getBoolean(
                 loadedSortCreatureByBiome);
-        universalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
+        savedUniversalDirectory = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory).getBoolean(
                 loadedUniversalDirectory);
         livingTempSettings.save();
     }
@@ -114,50 +104,39 @@ public final class WorldProperties {
         worldConfig.save();
     }
 
-    public void saveCurrentToConfig(File configDirectory) {
-        saveWorldSaveConfiguration(configDirectory);
+    public void saveCurrentToConfig(File configDirectory, World world) {
+        saveWorldSaveConfiguration(configDirectory, world);
         saveFileSaveConfiguration(configDirectory);
         saveWorldProperties(configDirectory);
     }
 
-    private void saveWorldSaveConfiguration(File configDirectory) {
-        Configuration worldGloablConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                + "SaveConfig.cfg"));
-        String curWorldName = "Doesn't Matter as we are overwriting saved data";
-        worldGloablConfig.load();
+    private void saveWorldSaveConfiguration(File configDirectory, World world) {
+        SaveConfiguration configuration = new SaveConfiguration(configDirectory);
+        String curWorldName = world.getWorldInfo().getWorldName();
+        configuration.load();
 
         /* Load Save Use Import_Name */
-        Property importProp = worldGloablConfig.get("Save_Configuration", "Import_Name", "",
-                "Folder name to Copy Missing Files From. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property importProp = configuration.getImportName();
         importProp.set(importName);
 
         /* Load Save Use Global Save_Name */
-        Property defaultsaveProp = worldGloablConfig
-                .get("Save_Configuration",
-                        "Default Save_Name",
-                        "{$world}",
-                        "Default name used for Save_Name. {$world} is replaced by world name. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property defaultsaveProp = configuration.getDefaultSaveName();
         defaultsaveProp.set(saveName);
 
         /* Load Save Use Actual Save_Name */
-        Property saveProp = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Save_Name", saveName,
-                        "Folder name to look for and generate CFG files. Case Sensitive if OS allows. Beware invalid OS characters.");
+        Property saveProp = configuration.getLocalSaveName(curWorldName, saveName);
         saveProp.set(saveName);
 
         /* Load Save Sort Creature By Biome */
-        Property loadedSortCreatureByBiomeProp = worldGloablConfig
-                .get("Save_Configuration." + curWorldName, "Sort Creature By Biome - Setting",
-                        JustAnotherSpawner.globalSettings().globalSortCreatureByBiome,
-                        "Determines if Entity CFGs are sorted internally by Entity or Biome. Change from TRUE to FALSE to alter sorting.");
-        loadedSortCreatureByBiomeProp.set(loadedSortCreatureByBiome);
+        boolean globalSortByBiome = JustAnotherSpawner.globalSettings().globalSortCreatureByBiome;
+        Property sortByProp = configuration.getLocalSortByCreature(curWorldName, globalSortByBiome);
+        sortByProp.set(loadedSortCreatureByBiome);
 
         /* Load Save/Use Universal Entity Directory */
-        Property loadedUniversalDirectoryProp = worldGloablConfig.get("Save_Configuration." + curWorldName,
-                "Universal Entity CFG - Settings", false,
-                "Specifies if the User wants the Entity CFG to Combined into a Universal CFG.");
-        loadedUniversalDirectoryProp.set(loadedUniversalDirectory);
-        worldGloablConfig.save();
+        Property useUniProp = configuration.getLocalSortUseUniversal(curWorldName, false);
+        useUniProp.set(loadedUniversalDirectory);
+
+        configuration.save();
     }
 
     private void saveFileSaveConfiguration(File configDirectory) {
@@ -166,7 +145,7 @@ public final class WorldProperties {
         Property savedSortCreatureByBiomeProp = livingTempSettings.getSavedSortByBiome(loadedSortCreatureByBiome);
         savedSortCreatureByBiomeProp.set(savedSortCreatureByBiome);
         Property universalDirectoryProp = livingTempSettings.getSavedUseUniversalConfig(loadedUniversalDirectory);
-        universalDirectoryProp.set(universalDirectory);
+        universalDirectoryProp.set(savedUniversalDirectory);
         livingTempSettings.save();
     }
 

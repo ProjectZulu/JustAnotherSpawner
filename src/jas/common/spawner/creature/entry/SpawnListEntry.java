@@ -4,14 +4,16 @@ import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.WorldProperties;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
+import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
 
 import java.util.Locale;
+import java.util.Random;
 
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandomItem;
 import net.minecraftforge.common.ConfigCategory;
@@ -26,7 +28,7 @@ import net.minecraftforge.common.Property;
  */
 // TODO: Large Constructor could probably use Factory / Or Split packSize into Its Own Immutable Class
 public class SpawnListEntry extends WeightedRandomItem {
-    public final Class<? extends EntityLiving> livingClass;
+    public final String livingGroupID;
     public final int packSize;
     /* Auto-refactoring Fails, but pckgName refers to String identifier that represents the BiomeGroup or StructureGroup */
     public final String pckgName;
@@ -43,10 +45,18 @@ public class SpawnListEntry extends WeightedRandomItem {
             + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
             + "MaxChunkPackSize";
 
-    public SpawnListEntry(Class<? extends EntityLiving> livingClass, String pckgName, int weight, int packSize,
-            int minChunkPack, int maxChunkPack, String optionalParameters) {
+    public SpawnListEntry(String livingGroupID, String pckgName, int weight, int packSize, int minChunkPack,
+            int maxChunkPack, String optionalParameters) {
         super(weight);
-        this.livingClass = livingClass;
+        if (livingGroupID == null) {
+            throw new IllegalArgumentException("Entity Class BiomeGroupID canot be null.");
+        }
+
+        if (pckgName == null || pckgName.trim().equals("")) {
+            throw new IllegalArgumentException("BiomeGroupID canot be " + pckgName != null ? "empty." : "null.");
+        }
+
+        this.livingGroupID = livingGroupID;
         this.packSize = packSize;
         this.pckgName = pckgName;
         this.minChunkPack = minChunkPack;
@@ -63,8 +73,9 @@ public class SpawnListEntry extends WeightedRandomItem {
         spawning = spawning == null ? new OptionalSettingsSpawnListSpawning("") : spawning;
     }
 
+    // TODO: Remove This. Hidden static dependency bad. Unnecessary. Alternatively, pass in livingHandlerRegistry
     public LivingHandler getLivingHandler() {
-        return JustAnotherSpawner.worldSettings().creatureHandlerRegistry().getLivingHandler(livingClass);
+        return JustAnotherSpawner.worldSettings().livingHandlerRegistry().getLivingHandler(livingGroupID);
     }
 
     public static void setupConfigCategory(Configuration config) {
@@ -79,7 +90,6 @@ public class SpawnListEntry extends WeightedRandomItem {
      * @return
      */
     public SpawnListEntry createFromConfig(Configuration config, WorldProperties worldProperties) {
-        String mobName = (String) EntityList.classToStringMapping.get(livingClass);
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
                 + Integer.toString(maxChunkPack) + optionalParameters;
@@ -93,14 +103,14 @@ public class SpawnListEntry extends WeightedRandomItem {
             int resultMinChunkPack = ParsingHelper.parseFilteredInteger(resultParts[2], packSize, "minChunkPack");
             int resultMaxChunkPack = ParsingHelper.parseFilteredInteger(resultParts[3], packSize, "maxChunkPack");
             String optionalParameters = resultMasterParts.length == 2 ? "{" + resultMasterParts[1] : "";
-            return new SpawnListEntry(livingClass, pckgName, resultSpawnWeight, resultPackSize, resultMinChunkPack,
+            return new SpawnListEntry(livingGroupID, pckgName, resultSpawnWeight, resultPackSize, resultMinChunkPack,
                     resultMaxChunkPack, optionalParameters);
         } else {
             JASLog.severe(
                     "SpawnListEntry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
-                    mobName, packSize, itemWeight);
+                    livingGroupID, packSize, itemWeight);
             resultValue.set(defaultValue);
-            return new SpawnListEntry(livingClass, pckgName, itemWeight, packSize, minChunkPack, maxChunkPack, "");
+            return new SpawnListEntry(livingGroupID, pckgName, itemWeight, packSize, minChunkPack, maxChunkPack, "");
         }
     }
 
@@ -113,15 +123,13 @@ public class SpawnListEntry extends WeightedRandomItem {
     }
 
     private Property getSpawnEntryProperty(Configuration config, String defaultValue, WorldProperties worldProperties) {
-        String mobName = (String) EntityList.classToStringMapping.get(livingClass);
-
         Property resultValue;
         String categoryKey;
         if (worldProperties.savedSortCreatureByBiome) {
             categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
-            resultValue = config.get(categoryKey, mobName, defaultValue);
+            resultValue = config.get(categoryKey, livingGroupID, defaultValue);
         } else {
-            categoryKey = "CreatureSettings.SpawnListEntry." + mobName;
+            categoryKey = "CreatureSettings.SpawnListEntry." + livingGroupID;
             resultValue = config.get(categoryKey, pckgName, defaultValue);
         }
         ConfigCategory category = config.getCategory(categoryKey.toLowerCase(Locale.ENGLISH));
@@ -134,29 +142,19 @@ public class SpawnListEntry extends WeightedRandomItem {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((pckgName == null) ? 0 : pckgName.hashCode());
-        result = prime * result + ((livingClass == null) ? 0 : livingClass.hashCode());
+        result = prime * result + ((livingGroupID == null) ? 0 : livingGroupID.hashCode());
         return result;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(Object other) {
+        if (this == other) {
             return true;
-        if (obj == null)
+        } else if (other == null || getClass() != other.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SpawnListEntry other = (SpawnListEntry) obj;
-        if (pckgName == null) {
-            if (other.pckgName != null)
-                return false;
-        } else if (!pckgName.equals(other.pckgName))
-            return false;
-        if (livingClass == null) {
-            if (other.livingClass != null)
-                return false;
-        } else if (!livingClass.equals(other.livingClass))
-            return false;
-        return true;
+        }
+
+        SpawnListEntry otherEntry = (SpawnListEntry) other;
+        return pckgName.equals(otherEntry.pckgName) && livingGroupID.equals(otherEntry.livingGroupID);
     }
 }

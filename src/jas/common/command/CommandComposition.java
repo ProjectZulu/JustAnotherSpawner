@@ -3,13 +3,16 @@ package jas.common.command;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
@@ -17,6 +20,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatMessageComponent;
+
+import com.google.common.collect.ImmutableCollection;
 
 public class CommandComposition extends CommandJasBase {
     public String getCommandName() {
@@ -68,15 +73,29 @@ public class CommandComposition extends CommandJasBase {
                 Iterator<? extends Entity> creatureIterator = targetPlayer.worldObj.loadedEntityList.iterator();
                 while (creatureIterator.hasNext()) {
                     Entity entity = creatureIterator.next();
-                    LivingHandler livingHandler = JustAnotherSpawner.worldSettings().creatureHandlerRegistry()
-                            .getLivingHandler(entity.getClass());
-                    if (livingHandler != null && entity instanceof EntityLiving
-                            && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
-                        creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
-                        totalTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
-                        if (livingHandler.canDespawn((EntityLiving) entity)) {
-                            despawnTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
-                            despawnCreatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
+                    if (!(entity instanceof EntityLiving)) {
+                        continue;
+                    }
+                    LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+                    ImmutableCollection<String> groupIDs = groupRegistry
+                            .getGroupsWithEntity(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+                    /*
+                     * Used to ensure that if an entity is in multiple groups that are have the same type (i.e.
+                     * MONSTER), that it only counts once for each type
+                     */
+                    Set<String> typesCounted = new HashSet<String>();
+                    for (String groupID : groupIDs) {
+                        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                                .getLivingHandler(groupID);
+                        if (!typesCounted.contains(creatureType.typeID)
+                                && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
+                            creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
+                            totalTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
+                            typesCounted.add(creatureType.typeID);
+                            if (livingHandler.canDespawn((EntityLiving) entity)) {
+                                despawnTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
+                                despawnCreatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
+                            }
                         }
                     }
                 }

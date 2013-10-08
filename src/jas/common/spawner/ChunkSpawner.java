@@ -2,6 +2,7 @@ package jas.common.spawner;
 
 import jas.common.BiomeBlacklist;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -27,7 +28,8 @@ public class ChunkSpawner {
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
-            if (JustAnotherSpawner.worldSettings() == null || JustAnotherSpawner.worldSettings().creatureHandlerRegistry() == null) {
+            if (JustAnotherSpawner.worldSettings() == null
+                    || JustAnotherSpawner.worldSettings().livingHandlerRegistry() == null) {
                 return;
             }
             CreatureTypeRegistry creatureTypeRegistry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
@@ -41,8 +43,9 @@ public class ChunkSpawner {
             while (iterator.hasNext()) {
                 CreatureType creatureType = iterator.next();
                 if (creatureType.chunkSpawning) {
-                    CustomSpawner.performWorldGenSpawning(event.world, creatureType, spawnBiome, k + 8, l + 8, 16, 16,
-                            event.rand);
+                    LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+                    CustomSpawner.performWorldGenSpawning(event.world, creatureType, livingGroupRegistry, spawnBiome,
+                            k + 8, l + 8, 16, 16, event.rand);
                 }
             }
         }

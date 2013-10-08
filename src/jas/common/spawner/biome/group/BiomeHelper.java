@@ -13,4 +13,16 @@ public class BiomeHelper {
     public static String getPackageName(BiomeGenBase biome) {
         return biome.getClass().getName() + "." + biome.biomeName;
     }
+
+    /**
+     * Gets the a shortform of the package name. Usually used for display purposes to users when uniqueness is not
+     * required.
+     * 
+     * @return BiomeName in the form Package+Class+BiomeName
+     */
+    public static String getShortPackageName(BiomeGenBase biome) {
+        String[] currentParts = getPackageName(biome).split("\\.");
+        String prefix = currentParts.length > 1 ? currentParts[0] : "DUPLICATE";
+        return prefix + "." + biome.biomeName;
+    }
 }

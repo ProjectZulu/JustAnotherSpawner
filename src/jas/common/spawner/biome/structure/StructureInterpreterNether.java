@@ -1,6 +1,6 @@
 package jas.common.spawner.biome.structure;
 
-import jas.api.BiomeInterpreter;
+import jas.api.StructureInterpreter;
 import jas.common.ReflectionHelper;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 
-public class BiomeInterpreterNether implements BiomeInterpreter {
+public class StructureInterpreterNether implements StructureInterpreter {
 
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -43,7 +43,7 @@ public class BiomeInterpreterNether implements BiomeInterpreter {
     @Override
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
         BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-        ChunkProviderHell chunkProviderHell = BiomeInterpreterHelper.getInnerChunkProvider(world,
+        ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(world,
                 ChunkProviderHell.class);
         if (biome instanceof BiomeGenHell && chunkProviderHell != null) {
             MapGenNetherBridge genNetherBridge;
