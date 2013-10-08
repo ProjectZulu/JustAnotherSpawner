@@ -42,7 +42,7 @@ public final class WorldSettings {
             }
         }
         worldProperties.saveCurrentToConfig(configDirectory, world);
-        biomeGroupRegistry.saveCurrentToConfig(configDirectory);
+        biomeGroupRegistry.saveToConfig(configDirectory);
         livingGroupRegistry.saveToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
         livingHandlerRegistry.saveToConfig(configDirectory);
@@ -54,7 +54,7 @@ public final class WorldSettings {
         worldProperties = new WorldProperties(modConfigDirectoryFile, world);
 
         biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
-        biomeGroupRegistry.createBiomeGroups(modConfigDirectoryFile);
+        biomeGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 
         livingGroupRegistry = new LivingGroupRegistry(worldProperties);
         livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
