@@ -6,6 +6,8 @@ import jas.common.TopologicalSort.DirectedGraph;
 import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.config.LivingGroupConfiguration;
+import jas.common.math.SetAlgebra;
+import jas.common.math.SetAlgebra.OPERATION;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -35,6 +37,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 
 import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
@@ -402,20 +405,34 @@ public class LivingGroupRegistry {
     private void parseGroupContents(LivingGroup livingGroup) {
         /* Evaluate contents and fill in jasNames */
         for (String contentComponent : livingGroup.contents) {
+            OPERATION operation;
+            if (contentComponent.startsWith("-")) {
+                contentComponent = contentComponent.substring(1);
+                operation = OPERATION.COMPLEMENT;
+            } else if (contentComponent.startsWith("&")) {
+                contentComponent = contentComponent.substring(1);
+                operation = OPERATION.INTERSECT;
+            } else {
+                operation = OPERATION.UNION;
+                if (contentComponent.startsWith("+")) {
+                    contentComponent = contentComponent.substring(1);
+                }
+            }
+
             if (contentComponent.startsWith("G|")) {
                 LivingGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
                 if (groupToAdd != null) {
-                    livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
+                    SetAlgebra.operate(livingGroup.entityJASNames, groupToAdd.entityJASNames, operation);
                     continue;
                 }
             } else if (contentComponent.startsWith("A|")) {
                 LivingGroup groupToAdd = iDToAttribute.get(contentComponent.substring(2));
                 if (groupToAdd != null) {
-                    livingGroup.entityJASNames.addAll(groupToAdd.entityJASNames);
+                    SetAlgebra.operate(livingGroup.entityJASNames, groupToAdd.entityJASNames, operation);
                     continue;
                 }
             } else if (JASNametoEntityClass.containsKey(contentComponent)) {
-                livingGroup.entityJASNames.add(contentComponent);
+                SetAlgebra.operate(livingGroup.entityJASNames, Sets.newHashSet(contentComponent), operation);
                 continue;
             }
             JASLog.severe("Error processing %s content from %s. The component %s does not exist.", livingGroup.groupID,
