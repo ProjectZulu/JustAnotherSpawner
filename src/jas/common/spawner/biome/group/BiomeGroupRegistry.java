@@ -30,6 +30,8 @@ import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
@@ -44,9 +46,9 @@ public class BiomeGroupRegistry {
     private final ListMultimap<String, String> packgNameToGroupIDList = ArrayListMultimap.create();
 
     /** Cusom Biome Names: Mappings For CustomBiomeNames to PackageNames used to read from configuration */
-    private final HashMap<String, String> biomeMappingToPckg = new HashMap<String, String>();
+    public final BiMap<String, String> biomeMappingToPckg = HashBiMap.create();
     /** Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration */
-    public final HashMap<String, String> biomePckgToMapping = new HashMap<String, String>();
+    public final BiMap<String, String> biomePckgToMapping = biomeMappingToPckg.inverse();
     /** Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names */
     public ListMultimap<String, Integer> pckgNameToBiomeID = ArrayListMultimap.create();
 
@@ -175,18 +177,44 @@ public class BiomeGroupRegistry {
         BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
 
-        /* Create Package Name Mappings */
+        /* Load Package Name Mappings that have previously been saved */
         for (BiomeGenBase biome : BiomeGenBase.biomeList) {
             if (biome == null) {
                 continue;
             }
             String packageName = BiomeHelper.getPackageName(biome);
+            Property nameMapping = biomeConfig.getBiomeMapping(packageName, null);
+            if (nameMapping != null) {
+                biomeMappingToPckg.put(nameMapping.getString(), packageName);
+                pckgNameToBiomeID.put(packageName, biome.biomeID);
+            }
+        }
 
-            Property nameMapping = biomeConfig.getBiomeMapping(packageName, biome.biomeName);
+        /* Create Package Name Mappings that do not already exist */
+        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+            if (biome == null) {
+                continue;
+            }
+            String packageName = BiomeHelper.getPackageName(biome);
+            if (!pckgNameToBiomeID.containsKey(packageName)) {
+                String defaultMapping = biome.biomeName;
+                int attempts = 0;
+                while (biomeMappingToPckg.containsKey(defaultMapping)) {
+                    defaultMapping = BiomeHelper.getShortPackageName(biome);
+                    if (attempts > 0) {
+                        // For multiple tries, concat the number of the attempts to create a unique mapping
+                        defaultMapping = defaultMapping + "_" + attempts;
+                    }
+                    attempts++;
+                }
+                if (attempts > 0) {
+                    JASLog.info("Duplicate mapping %s and was renamed to %s.", biome.biomeName, defaultMapping);
+                }
 
-            biomeMappingToPckg.put(nameMapping.getString(), packageName);
-            biomePckgToMapping.put(packageName, nameMapping.getString());
-            pckgNameToBiomeID.put(packageName, biome.biomeID);
+                Property nameMapping = biomeConfig.getBiomeMapping(packageName, biome.biomeName);
+                biomeMappingToPckg.put(nameMapping.getString(), packageName);
+                pckgNameToBiomeID.put(packageName, biome.biomeID);
+            }
         }
 
         /* Create / Get Base Attributes */
@@ -315,7 +343,7 @@ public class BiomeGroupRegistry {
         return biomeGroups;
     }
 
-    private Set<BiomeGroup> getDefaultAttributeGroups(HashMap<String, String> biomePckgToMapping) {
+    private Set<BiomeGroup> getDefaultAttributeGroups(BiMap<String, String> biomePckgToMapping) {
         Set<BiomeGroup> attributeGroups = new HashSet<BiomeGroup>();
 
         /* Create AllBiomes Group */
