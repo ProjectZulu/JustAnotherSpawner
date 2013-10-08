@@ -6,14 +6,16 @@ import jas.common.TopologicalSort.DirectedGraph;
 import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.config.BiomeGroupConfiguration;
+import jas.common.math.SetAlgebra;
+import jas.common.math.SetAlgebra.OPERATION;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +33,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Sets;
 
 import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
@@ -100,9 +103,9 @@ public class BiomeGroupRegistry {
      */
     public static class BiomeGroup {
         public final String groupID;
-        private final List<String> pckgNames = new ArrayList<String>();
+        private final Set<String> pckgNames = new HashSet<String>();
         /* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-        private final Set<String> contents = new HashSet<String>();
+        private final LinkedHashSet<String> contents = new LinkedHashSet<String>();
         /* How Group should be saved in the config file. Periods '.' mark categories. Last segment is the prop key */
         public final String saveFormat;
 
@@ -386,20 +389,34 @@ public class BiomeGroupRegistry {
     private void parseGroupContents(BiomeGroup biomeGroup) {
         /* Evaluate contents and fill in jasNames */
         for (String contentComponent : biomeGroup.contents) {
+            OPERATION operation;
+            if (contentComponent.startsWith("-")) {
+                contentComponent = contentComponent.substring(1);
+                operation = OPERATION.COMPLEMENT;
+            } else if (contentComponent.startsWith("&")) {
+                contentComponent = contentComponent.substring(1);
+                operation = OPERATION.INTERSECT;
+            } else {
+                operation = OPERATION.UNION;
+                if (contentComponent.startsWith("+")) {
+                    contentComponent = contentComponent.substring(1);
+                }
+            }
+
             if (contentComponent.startsWith("G|")) {
                 BiomeGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
                 if (groupToAdd != null) {
-                    biomeGroup.pckgNames.addAll(groupToAdd.pckgNames);
+                    SetAlgebra.operate(biomeGroup.pckgNames, groupToAdd.pckgNames, operation);
                     continue;
                 }
             } else if (contentComponent.startsWith("A|")) {
                 BiomeGroup groupToAdd = iDToAttribute.get(contentComponent.substring(2));
                 if (groupToAdd != null) {
-                    biomeGroup.pckgNames.addAll(groupToAdd.pckgNames);
+                    SetAlgebra.operate(biomeGroup.pckgNames, groupToAdd.pckgNames, operation);
                     continue;
                 }
             } else if (biomeMappingToPckg.containsKey(contentComponent)) {
-                biomeGroup.pckgNames.add(contentComponent);
+                SetAlgebra.operate(biomeGroup.pckgNames, Sets.newHashSet(contentComponent), operation);
                 continue;
             }
             JASLog.severe("Error processing %s content from %s. The component %s does not exist.", biomeGroup.groupID,
