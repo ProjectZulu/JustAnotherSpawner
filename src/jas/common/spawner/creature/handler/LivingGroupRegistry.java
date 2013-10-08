@@ -244,7 +244,7 @@ public class LivingGroupRegistry {
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
             config.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
-            JASLog.info("Creating Default EntityGroups");
+            JASLog.debug(Level.INFO, "Creating Default EntityGroups");
             for (LivingGroup livingGroup : getDefaultGroups(JASNametoEntityClass)) {
                 Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
                 LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
@@ -253,7 +253,7 @@ public class LivingGroupRegistry {
                 }
                 livingGroups.add(newlivingGroup);
             }
-            JASLog.info("Finished Default EntityGroups");
+            JASLog.debug(Level.INFO, "Finished Default EntityGroups");
         } else {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();

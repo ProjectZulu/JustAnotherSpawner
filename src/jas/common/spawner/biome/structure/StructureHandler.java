@@ -88,8 +88,6 @@ public class StructureHandler {
                 @SuppressWarnings("unchecked")
                 List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);
                 if (!handlers.isEmpty()) {
-                    JASLog.info("LivingHandlers %s", handlers);
-                    JASLog.info("LivingHandler0 %s", handlers.get(0).groupID);
                     livingHandlerIDs.append(handlers.get(0).groupID);
                     if (iterator.hasNext()) {
                         livingHandlerIDs.append(",");
@@ -101,10 +99,13 @@ public class StructureHandler {
                 }
             }
             /* Under StructureSpawns.SpawnList have List of Entities that are Spawnable. */
-            JASLog.severe("XXX %s", livingHandlerIDs);
             Property resultNames = worldConfig.getStructureSpawns(structureKey, livingHandlerIDs.toString());
 
             for (String groupID : resultNames.getString().split(",")) {
+                if (groupID.trim().equals("")) {
+                    continue;
+                }
+
                 LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(groupID);
                 if (livingHandler == null) {
                     JASLog.severe("Error parsing EntityGroup from Structure %s spawnlist %s. The key %s is unknown.",

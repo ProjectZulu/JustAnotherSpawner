@@ -1,7 +1,6 @@
 package jas.common.config;
 
 import jas.common.DefaultProps;
-import jas.common.JASLog;
 import jas.common.WorldProperties;
 
 import java.io.File;
@@ -37,8 +36,6 @@ public class LivingGroupConfiguration extends Configuration {
 
     public Property getEntityGroupList(String saveFormat, String groupContents) {
         int last = saveFormat.lastIndexOf(":");
-        JASLog.info("Configuration is %s and value is %s", saveFormat.substring(0, last),
-                saveFormat.substring(last + 1, saveFormat.length()));
         return this.get(saveFormat.substring(0, last), saveFormat.substring(last + 1, saveFormat.length()),
                 groupContents);
     }
@@ -46,13 +43,9 @@ public class LivingGroupConfiguration extends Configuration {
     public static String defaultGroupCategory(String groupID) {
         String[] parts = groupID.split("\\.");
         if (parts.length > 1) {
-            JASLog.info("Default Save Format is Configuration is %s and value is %s",
-                    LivingGroupConfiguration.GroupListCategory + Configuration.CATEGORY_SPLITTER + parts[0], groupID);
             return LivingGroupConfiguration.GroupListCategory + Configuration.CATEGORY_SPLITTER + parts[0] + ":"
                     + groupID;
         } else {
-            JASLog.info("Defaulty Save Format is Configuration is %s and value is %s",
-                    LivingGroupConfiguration.GroupListCategory, groupID);
             return LivingGroupConfiguration.GroupListCategory + ":" + groupID;
         }
     }

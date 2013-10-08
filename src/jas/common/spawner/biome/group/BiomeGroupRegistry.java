@@ -194,6 +194,7 @@ public class BiomeGroupRegistry {
         Set<BiomeGroup> attributeGroups = new HashSet<BiomeGroup>();
         if (configAttribute.getChildren().isEmpty() && configAttribute.isEmpty()) {
             biomeConfig.removeCategory(configAttribute);
+            JASLog.debug(Level.INFO, "Creating Default Biome Attributes");
             // Load Default Entity Groups
             for (BiomeGroup biomeGroup : getDefaultAttributeGroups(biomePckgToMapping)) {
                 Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
@@ -206,6 +207,7 @@ public class BiomeGroupRegistry {
                 }
                 attributeGroups.add(newGroup);
             }
+            JASLog.debug(Level.INFO, "Finished Default Biome Attributes");
         } else {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configAttribute.getValues();
@@ -221,7 +223,7 @@ public class BiomeGroupRegistry {
         if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
             biomeConfig.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
-            JASLog.info("Creating Default EntityGroups");
+            JASLog.debug(Level.INFO, "Creating Default Biomegroups");
             for (BiomeGroup biomeGroup : getDefaultGroups(biomePckgToMapping.values())) {
                 Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
                 BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
@@ -233,7 +235,7 @@ public class BiomeGroupRegistry {
                 }
                 biomeGroups.add(newlivingGroup);
             }
-            JASLog.info("Finished Default EntityGroups");
+            JASLog.debug(Level.INFO, "Finished Default Biomegroups");
         } else {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();
