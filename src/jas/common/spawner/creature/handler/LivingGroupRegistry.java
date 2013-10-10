@@ -197,7 +197,7 @@ public class LivingGroupRegistry {
         LivingGroupConfiguration config = new LivingGroupConfiguration(configDirectory, worldProperties);
         config.load();
 
-        /* Create Mapping For Entities */
+        /* Load Mappings that already exist */
         @SuppressWarnings("unchecked")
         Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
         for (Entry<Class<?>, String> entry : fmlNames) {
@@ -205,6 +205,28 @@ public class LivingGroupRegistry {
                     || Modifier.isAbstract(entry.getKey().getModifiers())) {
                 continue;
             }
+            Property nameProp = config.getEntityMapping(entry.getValue(), null);
+            if (nameProp != null) {
+                @SuppressWarnings("unchecked")
+                String prevKey = EntityClasstoJASName.put((Class<? extends EntityLiving>) entry.getKey(),
+                        nameProp.getString());
+                if (prevKey != null) {
+                    JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
+                            nameProp.getString());
+                }
+            }
+        }
+
+        /* Create Mapping For Entities That do not already exist */
+        // Detect new mappings that are created. Used to detect if a new mapping living group needs to be added.
+        Set<String> newMappings = new HashSet<String>();
+        for (Entry<Class<?>, String> entry : fmlNames) {
+            if (!EntityLiving.class.isAssignableFrom(entry.getKey())
+                    || Modifier.isAbstract(entry.getKey().getModifiers())) {
+                continue;
+            }
+            @SuppressWarnings("unchecked")
+            Class<? extends EntityLiving> entityClass = (Class<? extends EntityLiving>) entry.getKey();
 
             String jasName;
             if (entry.getValue().contains(".")) {
@@ -213,13 +235,14 @@ public class LivingGroupRegistry {
                 String prefix = guessPrefix(entry.getKey(), fmlNames);
                 jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
             }
-            Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
-            @SuppressWarnings("unchecked")
-            String prevKey = EntityClasstoJASName.put((Class<? extends EntityLiving>) entry.getKey(),
-                    nameProp.getString());
-            if (prevKey != null) {
-                JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
-                        nameProp.getString());
+            if (!EntityClasstoJASName.containsKey(entityClass)) {
+                Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
+                String prevKey = EntityClasstoJASName.put(entityClass, nameProp.getString());
+                newMappings.add(nameProp.getString());
+                if (prevKey != null) {
+                    JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
+                            nameProp.getString());
+                }
             }
         }
 
@@ -245,7 +268,7 @@ public class LivingGroupRegistry {
             config.removeCategory(configCategory);
             /* Category was nonexistent or empty; time to create default settings */
             JASLog.debug(Level.INFO, "Creating Default EntityGroups");
-            for (LivingGroup livingGroup : getDefaultGroups(JASNametoEntityClass)) {
+            for (LivingGroup livingGroup : getDefaultGroups(JASNametoEntityClass.keySet())) {
                 Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
                 LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
                 for (String jasName : prop.getString().split(",")) {
@@ -255,6 +278,14 @@ public class LivingGroupRegistry {
             }
             JASLog.debug(Level.INFO, "Finished Default EntityGroups");
         } else {
+            for (LivingGroup livingGroup : getDefaultGroups(newMappings)) {
+                Property prop = config.getEntityGroupList(livingGroup.saveFormat, livingGroup.contentsToString());
+                LivingGroup newlivingGroup = new LivingGroup(livingGroup.groupID);
+                for (String jasName : prop.getString().split(",")) {
+                    newlivingGroup.contents.add(jasName);
+                }
+                livingGroups.add(newlivingGroup);
+            }
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();
             livingGroups.addAll(getGroupsFromProps(propMap, (String) null, configCategory.getQualifiedName()));
@@ -356,9 +387,9 @@ public class LivingGroupRegistry {
         return currentParts.length > 1 ? currentParts[0] : UNKNOWN_PREFIX;
     }
 
-    private Set<LivingGroup> getDefaultGroups(BiMap<String, Class<? extends EntityLiving>> JASNametoFMLName) {
+    private Set<LivingGroup> getDefaultGroups(Collection<String> jasNames) {
         Set<LivingGroup> livinggroups = new HashSet<LivingGroup>();
-        for (String jasName : JASNametoFMLName.keySet()) {
+        for (String jasName : jasNames) {
             LivingGroup livingGroup = new LivingGroup(jasName);
             livingGroup.contents.add(jasName);
             livinggroups.add(livingGroup);
