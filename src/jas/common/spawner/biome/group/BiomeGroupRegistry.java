@@ -459,7 +459,7 @@ public class BiomeGroupRegistry {
                     continue;
                 }
             } else if (biomeMappingToPckg.containsKey(contentComponent)) {
-                SetAlgebra.operate(biomeGroup.pckgNames, Sets.newHashSet(contentComponent), operation);
+                SetAlgebra.operate(biomeGroup.pckgNames, Sets.newHashSet(biomeMappingToPckg.get(contentComponent)), operation);
                 continue;
             }
             JASLog.severe("Error processing %s content from %s. The component %s does not exist.", biomeGroup.groupID,
