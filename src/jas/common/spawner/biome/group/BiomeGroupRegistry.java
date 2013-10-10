@@ -251,28 +251,39 @@ public class BiomeGroupRegistry {
         /* Create / Get Base Groups */
         Set<BiomeGroup> biomeGroups = new HashSet<BiomeGroup>();
         ConfigCategory configCategory = biomeConfig.getGroupsCategory();
-        if (!configCategory.getChildren().isEmpty() || !configCategory.isEmpty()) {
+        if (configCategory.getChildren().isEmpty() && configCategory.isEmpty()) {
+            biomeConfig.removeCategory(configCategory);
+            for (BiomeGroup biomeGroup : getDefaultGroups(biomeMappingToPckg.keySet())) {
+                Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
+                BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
+                        BiomeGroupConfiguration.defaultGroupCategory(biomeGroup.groupID));
+                for (String jasName : prop.getString().split(",")) {
+                    if (!jasName.trim().equals("")) {
+                        newlivingGroup.contents.add(jasName);
+                    }
+                }
+                biomeGroups.add(newlivingGroup);
+            }
+        } else {
             /* Have Children, so don't generate defaults, read settings */
             Map<String, Property> propMap = configCategory.getValues();
             biomeGroups.addAll(getGroupsFromProps(propMap, (String) null, configCategory.getQualifiedName()));
             for (ConfigCategory child : configCategory.getChildren()) {
                 biomeGroups.addAll(getGroupsFromCategory(child));
             }
-        } else {
-            biomeConfig.removeCategory(configCategory);
-        }
 
-        /* For any newly created BiomeMapping, we must create a new BiomeGroup to represent it */
-        for (BiomeGroup biomeGroup : getDefaultGroups(newMappings)) {
-            Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
-            BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
-                    BiomeGroupConfiguration.defaultGroupCategory(biomeGroup.groupID));
-            for (String jasName : prop.getString().split(",")) {
-                if (!jasName.trim().equals("")) {
-                    newlivingGroup.contents.add(jasName);
+            /* For any newly created BiomeMapping, we must create a new BiomeGroup to represent it */
+            for (BiomeGroup biomeGroup : getDefaultGroups(newMappings)) {
+                Property prop = biomeConfig.getEntityGroupList(biomeGroup.saveFormat, biomeGroup.contentsToString());
+                BiomeGroup newlivingGroup = new BiomeGroup(biomeGroup.groupID,
+                        BiomeGroupConfiguration.defaultGroupCategory(biomeGroup.groupID));
+                for (String jasName : prop.getString().split(",")) {
+                    if (!jasName.trim().equals("")) {
+                        newlivingGroup.contents.add(jasName);
+                    }
                 }
+                biomeGroups.add(newlivingGroup);
             }
-            biomeGroups.add(newlivingGroup);
         }
 
         /* Sort Groups */
