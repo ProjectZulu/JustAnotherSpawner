@@ -294,6 +294,10 @@ public class CustomSpawner {
                 boolean flag = false;
                 Class<? extends EntityLiving> livingToSpawn = livingGroupRegistry.getRandomEntity(
                         spawnListEntry.livingGroupID, world.rand);
+                if (livingToSpawn == null) {
+                    JASLog.severe("No EntityClasses appear to exist in %s", spawnListEntry.toString());
+                    continue;
+                }
                 for (int k2 = 0; !flag && k2 < 4; ++k2) {
                     int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
 

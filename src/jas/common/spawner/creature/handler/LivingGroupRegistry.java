@@ -81,11 +81,13 @@ public class LivingGroupRegistry {
 
     public Class<? extends EntityLiving> getRandomEntity(String livingGroupID, Random random) {
         LivingGroup livingGroup = this.getLivingGroup(livingGroupID);
-        int selectedEntry = random.nextInt(1 + livingGroup.entityJASNames.size());
-        int i = 0;
-        for (String jasName : livingGroup.entityJASNames) {
-            if (++i == selectedEntry) {
-                return this.JASNametoEntityClass.get(jasName);
+        if (!livingGroup.entityJASNames.isEmpty()) {
+            int selectedEntry = random.nextInt(livingGroup.entityJASNames.size());
+            int i = 0;
+            for (String jasName : livingGroup.entityJASNames) {
+                if (i++ == selectedEntry) {
+                    return this.JASNametoEntityClass.get(jasName);
+                }
             }
         }
         return null;
