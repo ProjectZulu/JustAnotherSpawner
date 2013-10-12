@@ -4,17 +4,13 @@ import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.WorldProperties;
-import jas.common.spawner.creature.handler.LivingGroupRegistry;
-import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
 
 import java.util.Locale;
-import java.util.Random;
 
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandomItem;
 import net.minecraftforge.common.ConfigCategory;
 import net.minecraftforge.common.Configuration;
@@ -48,12 +44,12 @@ public class SpawnListEntry extends WeightedRandomItem {
     public SpawnListEntry(String livingGroupID, String pckgName, int weight, int packSize, int minChunkPack,
             int maxChunkPack, String optionalParameters) {
         super(weight);
-        if (livingGroupID == null) {
-            throw new IllegalArgumentException("Entity Class BiomeGroupID canot be null.");
+        if (livingGroupID == null || livingGroupID.trim().equals("")) {
+            throw new IllegalArgumentException("LivingGroupID cannot be " + livingGroupID != null ? "empty." : "null.");
         }
 
         if (pckgName == null || pckgName.trim().equals("")) {
-            throw new IllegalArgumentException("BiomeGroupID canot be " + pckgName != null ? "empty." : "null.");
+            throw new IllegalArgumentException("BiomeGroupID cannot be " + pckgName != null ? "empty." : "null.");
         }
 
         this.livingGroupID = livingGroupID;
@@ -156,5 +152,16 @@ public class SpawnListEntry extends WeightedRandomItem {
 
         SpawnListEntry otherEntry = (SpawnListEntry) other;
         return pckgName.equals(otherEntry.pckgName) && livingGroupID.equals(otherEntry.livingGroupID);
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[SpawnListEntry: ID ").append(livingGroupID).append(",");
+        sb.append(" Biome ").append(pckgName).append(",");
+        sb.append(" Stats ").append(itemWeight).append("/").append(packSize).append("/").append(minChunkPack)
+                .append("/").append(maxChunkPack).append(",");
+        sb.append(" Tags ").append(optionalParameters).append("]");
+        return sb.toString();
     }
 }
