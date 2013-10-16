@@ -188,6 +188,7 @@ public class LivingHandler {
 
             if (canDespawn == false) {
                 entityProps.resetAge();
+                return;
             }
 
             boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
