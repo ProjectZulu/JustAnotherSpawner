@@ -1,6 +1,5 @@
 package jas.common.network.packet;
 
-import jas.common.JustAnotherSpawner;
 import jas.common.network.PacketManager;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -21,8 +20,8 @@ public class PacketManagerUpdateCreatureType extends PacketManager {
     }
 
     public void setPacketData(CreatureType creatureType) {
-        setPacketData(creatureType.typeID, creatureType.spawnRate, creatureType.maxNumberOfCreature,
-                creatureType.chunkSpawning);
+//        setPacketData(creatureType.typeID, creatureType.spawnRate, creatureType.maxNumberOfCreature,
+//                creatureType.chunkSpawnChance);
     }
 
     public void setPacketData(String typeID, int spawnRate, int maxNumberOfCreature, boolean chunkSpawning) {
@@ -42,14 +41,14 @@ public class PacketManagerUpdateCreatureType extends PacketManager {
 
     @Override
     public boolean processPacket(DataInputStream dataStream, Player player) {
-        try {
-            setPacketData(dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(), dataStream.readBoolean());
-            JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-                    .updateCreatureType(typeID, spawnRate, maxNumberOfCreature, chunkSpawning);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            setPacketData(dataStream.readUTF(), dataStream.readInt(), dataStream.readInt(), dataStream.readBoolean());
+//            JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+//                    .updateCreatureType(typeID, spawnRate, maxNumberOfCreature, chunkSpawning);
             return false;
-        }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return false;
+//        }
     }
 }

@@ -18,31 +18,33 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 
+import com.google.common.base.Optional;
+
 //TODO: Large Constructor could probably use Factory OR String optionalParameters to consolidate unused properties
 public class CreatureType {
     public final String typeID;
     public final int spawnRate;
     public final int maxNumberOfCreature;
-    public final boolean chunkSpawning;
+    public final float chunkSpawnChance;
     public final Material spawnMedium;
     public final String optionalParameters;
     protected OptionalSettingsCreatureTypeSpawn spawning;
     public final BiomeGroupRegistry biomeGroupRegistry;
 
     public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, boolean chunkSpawning) {
-        this(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+            Material spawnMedium, int spawnRate, float chunkSpawnChance) {
+        this(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]}");
     }
 
     public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, boolean chunkSpawning, String optionalParameters) {
+            Material spawnMedium, int spawnRate, float chunkSpawnChance, String optionalParameters) {
         this.biomeGroupRegistry = biomeGroupRegistry;
         this.typeID = typeID;
         this.maxNumberOfCreature = maxNumberOfCreature;
         this.spawnMedium = spawnMedium;
         this.spawnRate = spawnRate;
-        this.chunkSpawning = chunkSpawning;
+        this.chunkSpawnChance = chunkSpawnChance;
         this.optionalParameters = optionalParameters;
         for (String string : optionalParameters.split("\\{")) {
             String parsed = string.replace("}", "");
@@ -55,19 +57,23 @@ public class CreatureType {
     }
 
     public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
+                optionalParameters);
     }
 
     public final CreatureType spawnRateTo(int spawnRate) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
+                optionalParameters);
     }
 
-    public final CreatureType chunkSpawningTo(boolean chunkSpawning) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+    public final CreatureType chunkSpawningTo(float chunkSpawnChance) {
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
+                optionalParameters);
     }
 
     public final CreatureType optionalParametersTo(String optionalParameters) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning, optionalParameters);
+        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
+                optionalParameters);
     }
 
     public boolean isReady(WorldServer world) {
@@ -87,9 +93,9 @@ public class CreatureType {
      * @param chunkSpawning
      */
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, boolean chunkSpawning, String optionalParameters) {
-        return new CreatureType(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
-                optionalParameters);
+            int spawnRate, float chunkSpawnChance, String optionalParameters) {
+        return new CreatureType(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate,
+                chunkSpawnChance, optionalParameters);
     }
 
     /**
@@ -200,7 +206,12 @@ public class CreatureType {
     public CreatureType createFromConfig(EntityCategoryConfiguration config) {
         int resultSpawnRate = config.getSpawnRate(typeID, spawnRate).getInt();
         int resultMaxNumberOfCreature = config.getSpawnCap(typeID, maxNumberOfCreature).getInt();
-        boolean resultChunkSpawning = config.getChunkSpawning(typeID, chunkSpawning).getBoolean(chunkSpawning);
+
+        Optional<Boolean> chunkSpawn = config.isChunkSpawningPresent(typeID);
+        float defaultSpawnChance = chunkSpawn.isPresent() ? chunkSpawn.get() ? 0.10f : 0.0f : chunkSpawnChance;
+        float resultChunkSpawning = (float) config.getChunkSpawnChance(typeID, Float.toString(defaultSpawnChance))
+                .getDouble(defaultSpawnChance);
+
         String resultOptionalParameters = config.getOptionalTags(typeID, optionalParameters).getString();
         return this.maxNumberOfCreatureTo(resultMaxNumberOfCreature).spawnRateTo(resultSpawnRate)
                 .chunkSpawningTo(resultChunkSpawning).optionalParametersTo(resultOptionalParameters);
@@ -215,10 +226,10 @@ public class CreatureType {
     public void saveCurrentToConfig(EntityCategoryConfiguration config) {
         config.getSpawnRate(typeID, spawnRate).set(spawnRate);
         config.getSpawnCap(typeID, maxNumberOfCreature).set(maxNumberOfCreature);
-        config.getChunkSpawning(typeID, chunkSpawning).set(chunkSpawning);
+        config.getChunkSpawnChance(typeID, Float.toString(chunkSpawnChance)).set(Float.toString(chunkSpawnChance));
         config.getOptionalTags(typeID, optionalParameters).set(optionalParameters);
     }
-
+    
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
      * to Proposed Entity Registry or StructureInterpreter. How will end-users fix issue? Does End User Need to?
