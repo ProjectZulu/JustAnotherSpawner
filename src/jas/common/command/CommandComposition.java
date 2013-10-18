@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
@@ -69,10 +70,8 @@ public class CommandComposition extends CommandJasBase {
                 EntityCounter creatureCount = new EntityCounter();
                 EntityCounter despawnCreatureCount = new EntityCounter();
                 foundMatch = true;
-                @SuppressWarnings("unchecked")
-                Iterator<? extends Entity> creatureIterator = targetPlayer.worldObj.loadedEntityList.iterator();
-                while (creatureIterator.hasNext()) {
-                    Entity entity = creatureIterator.next();
+                
+                for (Entity entity : CustomSpawner.getLoadedEntities(targetPlayer.worldObj)) {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
                     }
