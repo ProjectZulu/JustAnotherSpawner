@@ -32,7 +32,10 @@ public class LivingHandlerRegistry {
         List<LivingHandler> list = new ArrayList<LivingHandler>();
         for (String groupID : livingGroupRegistry.getGroupsWithEntity(livingGroupRegistry.EntityClasstoJASName
                 .get(entityClass))) {
-            list.add(livingHandlers.get(groupID));
+            LivingHandler handler = livingHandlers.get(groupID);
+            if (handler != null) {
+                list.add(handler);
+            }
         }
         return list;
     }

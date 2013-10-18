@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 
@@ -53,8 +54,7 @@ public class CommandLocate extends CommandJasBase {
         StringBuilder countedContents = new StringBuilder();
         countedContents.append("Locations: ");
         boolean foundMatch = false;
-        @SuppressWarnings("unchecked")
-        Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
+        Iterator<Entity> iterator = CustomSpawner.getLoadedEntities(targetPlayer.worldObj).iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
             LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();

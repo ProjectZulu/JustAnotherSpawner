@@ -143,17 +143,13 @@ public class LivingHandler {
                 return false;
             }
 
-            boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().despawnDist);
             boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
                     .worldProperties().maxDespawnDist);
 
             if (instantDespawn) {
                 return true;
-            } else if (validDistance) {
+            } else {
                 return true;
-            } else if (!validDistance) {
-                return false;
             }
         }
         return false;
