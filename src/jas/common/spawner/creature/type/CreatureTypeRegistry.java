@@ -47,24 +47,24 @@ public class CreatureTypeRegistry {
         return types.get(typeID.toUpperCase());
     }
 
-    public void updateCreatureType(String typeID, int spawnRate, int maxNumberOfCreature, boolean chunkSpawning) {
+    public void updateCreatureType(String typeID, int spawnRate, int maxNumberOfCreature, float chunkSpawnChance) {
         CreatureType creatureType = types.get(typeID);
         types.put(typeID, creatureType.maxNumberOfCreatureTo(maxNumberOfCreature).spawnRateTo(spawnRate)
-                .chunkSpawningTo(chunkSpawning));
+                .chunkSpawningTo(chunkSpawnChance));
     }
 
     public CreatureTypeRegistry(BiomeGroupRegistry biomeGroupRegistry, WorldProperties worldProperties) {
         this.biomeGroupRegistry = biomeGroupRegistry;
         this.worldProperties = worldProperties;
-        addSpawnCategory(new CreatureType(biomeGroupRegistry, CREATURE, 10, Material.air, 400, true,
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, CREATURE, 10, Material.air, 400, 0.1f,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
-        addSpawnCategory(new CreatureTypeMonster(biomeGroupRegistry, MONSTER, 70, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(biomeGroupRegistry, AMBIENT, 15, Material.air, 1, false));
-        addSpawnCategory(new CreatureType(biomeGroupRegistry, WATERCREATURE, 15, Material.water, 1, false,
+        addSpawnCategory(new CreatureTypeMonster(biomeGroupRegistry, MONSTER, 70, Material.air, 1, 0.0f));
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, AMBIENT, 15, Material.air, 1, 0.0f));
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, WATERCREATURE, 15, Material.water, 1, 0.0f,
                 "{spawn:!liquid,0:!liquid,0,[0/-1/0]:normal,0,[0/1/0]}"));
-        addSpawnCategory(new CreatureType(biomeGroupRegistry, UNDERGROUND, 10, Material.air, 1, false,
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, UNDERGROUND, 10, Material.air, 1, 0.0f,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:sky}"));
-        addSpawnCategory(new CreatureType(biomeGroupRegistry, OPENSKY, 10, Material.air, 1, false,
+        addSpawnCategory(new CreatureType(biomeGroupRegistry, OPENSKY, 10, Material.air, 1, 0.0f,
                 "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}"));
     }
 
@@ -79,7 +79,7 @@ public class CreatureTypeRegistry {
         String[] pieces = customNames.split(",");
         for (String categoryName : pieces) {
             if (isValidName(categoryName)) {
-                types.put(categoryName, new CreatureType(biomeGroupRegistry, categoryName, 10, Material.air, 1, false)
+                types.put(categoryName, new CreatureType(biomeGroupRegistry, categoryName, 10, Material.air, 1, 0.0f)
                         .createFromConfig(config));
             }
         }

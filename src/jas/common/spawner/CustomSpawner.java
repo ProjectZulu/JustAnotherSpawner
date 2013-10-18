@@ -301,7 +301,7 @@ public class CustomSpawner {
     public static void performWorldGenSpawning(World world, CreatureType creatureType,
             LivingGroupRegistry livingGroupRegistry, BiomeGenBase biome, int par2, int par3, int par4, int par5,
             Random random) {
-        while (random.nextFloat() < biome.getSpawningChance()) {
+        if (random.nextFloat() < creatureType.chunkSpawnChance) {
             int j1 = par2 + random.nextInt(par4);
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;

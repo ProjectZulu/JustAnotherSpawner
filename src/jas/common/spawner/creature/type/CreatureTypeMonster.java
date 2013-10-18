@@ -7,21 +7,21 @@ import net.minecraft.world.WorldServer;
 public class CreatureTypeMonster extends CreatureType {
 
     public CreatureTypeMonster(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, boolean chunkSpawning) {
-        super(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning);
+            Material spawnMedium, int spawnRate, float chunkSpawnChance) {
+        super(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance);
     }
 
     public CreatureTypeMonster(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, boolean chunkSpawning, String optionalParameters) {
-        super(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawning,
+            Material spawnMedium, int spawnRate, float chunkSpawnChance, String optionalParameters) {
+        super(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
                 optionalParameters);
     }
 
     @Override
     protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, boolean chunkSpawning, String optionalParameters) {
+            int spawnRate, float chunkSpawnChance, String optionalParameters) {
         return new CreatureTypeMonster(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate,
-                chunkSpawning, optionalParameters);
+                chunkSpawnChance, optionalParameters);
     }
 
     @Override

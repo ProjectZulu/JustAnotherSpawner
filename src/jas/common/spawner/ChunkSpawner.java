@@ -42,7 +42,7 @@ public class ChunkSpawner {
 
             while (iterator.hasNext()) {
                 CreatureType creatureType = iterator.next();
-                if (creatureType.chunkSpawning) {
+                if (creatureType.chunkSpawnChance > 0.0f) {
                     LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
                     CustomSpawner.performWorldGenSpawning(event.world, creatureType, livingGroupRegistry, spawnBiome,
                             k + 8, l + 8, 16, 16, event.rand);
