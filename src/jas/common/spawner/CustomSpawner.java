@@ -36,6 +36,7 @@ import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -50,20 +51,19 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(World worldServer) {
+    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(World worldServer,
+            int chunkDistance) {
         HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
-        int i;
-        int j;
-        for (i = 0; i < worldServer.playerEntities.size(); ++i) {
+        for (int i = 0; i < worldServer.playerEntities.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) worldServer.playerEntities.get(i);
-            int k = MathHelper.floor_double(entityplayer.posX / 16.0D);
-            j = MathHelper.floor_double(entityplayer.posZ / 16.0D);
-            byte b0 = 8;
+            int posX = MathHelper.floor_double(entityplayer.posX / 16.0D);
+            int posZ = MathHelper.floor_double(entityplayer.posZ / 16.0D);
 
-            for (int l = -b0; l <= b0; ++l) {
-                for (int i1 = -b0; i1 <= b0; ++i1) {
-                    boolean flag3 = l == -b0 || l == b0 || i1 == -b0 || i1 == b0;
-                    ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(l + k, i1 + j);
+            for (int xOffset = -chunkDistance; xOffset <= chunkDistance; ++xOffset) {
+                for (int zOffset = -chunkDistance; zOffset <= chunkDistance; ++zOffset) {
+                    boolean flag3 = xOffset == -chunkDistance || xOffset == chunkDistance || zOffset == -chunkDistance
+                            || zOffset == chunkDistance;
+                    ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
 
                     if (!flag3) {
                         eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(false));
@@ -82,10 +82,10 @@ public class CustomSpawner {
      * @param worldServer
      */
     public static void countEntityInChunks(World worldServer, EntityCounter creatureType, EntityCounter creatureCount) {
-        @SuppressWarnings("unchecked")
-        Iterator<? extends Entity> creatureIterator = worldServer.loadedEntityList.iterator();
-        while (creatureIterator.hasNext()) {
-            Entity entity = creatureIterator.next();
+        for (Entity entity : getLoadedEntities(worldServer)) {
+            if (entity == null) {
+                continue;
+            }
             @SuppressWarnings("unchecked")
             List<LivingHandler> livingHandlers = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
@@ -95,6 +95,34 @@ public class CustomSpawner {
                 creatureType.incrementOrPutIfAbsent(creatureTypeID, 1);
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<Entity> getLoadedEntities(World world) {
+        List<Entity> entities = new ArrayList<Entity>();
+        if (JustAnotherSpawner.globalSettings().chunkCountDistance <= 0) {
+            return world.loadedEntityList;
+        }
+
+        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
+                world, JustAnotherSpawner.globalSettings().chunkCountDistance);
+        for (ChunkCoordIntPair pair : eligibleChunksForCounting.keySet()) {
+            Chunk chunk = world.getChunkFromChunkCoords(pair.chunkXPos, pair.chunkZPos);
+            if (chunk != null && chunk.entityLists != null) {
+                for (int i = 0; i < chunk.entityLists.length; i++) {
+                    @SuppressWarnings("rawtypes")
+                    List loadedEntities = chunk.entityLists[i];
+                    for (int j = 0; j < loadedEntities.size(); j++) {
+                        Entity entity = (Entity) loadedEntities.get(j);
+                        if (entity == null) {
+                            continue;
+                        }
+                        entities.add(entity);
+                    }
+                }
+            }
+        }
+        return entities;
     }
 
     /**

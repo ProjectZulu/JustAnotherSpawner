@@ -14,6 +14,9 @@ public class GlobalSettings {
     public boolean turnGameruleSpawningOff = false;
     public boolean emptyVanillaSpawnLists = true;
 
+    public int chunkspawnDistance = 8;
+    public int chunkCountDistance = 8;
+
     GlobalSettings(File configDirectory) {
         loadProperties(configDirectory);
     }
@@ -38,6 +41,14 @@ public class GlobalSettings {
         } else {
             spawnerTickSpacing = resultTickSpacing.getInt(spawnerTickSpacing);
         }
+
+        Property prop = config.get("Properties.Spawning", "Entity Chunk Spawn Distance", chunkspawnDistance);
+        if (prop.getInt() <= 0) {
+            prop.set(8);
+        }
+        chunkspawnDistance = prop.getInt();
+        chunkCountDistance = config.get("Properties.Spawning", "Entity Chunk Count Distance", chunkCountDistance)
+                .getInt(8);
         config.save();
     }
 }

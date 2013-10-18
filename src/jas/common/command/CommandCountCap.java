@@ -70,8 +70,8 @@ public class CommandCountCap extends CommandJasBase {
                 continue;
             }
             World world = worlds[i];
-            HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = CustomSpawner
-                    .determineChunksForSpawnering(world);
+            HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
+                    world, JustAnotherSpawner.globalSettings().chunkspawnDistance);
             EntityCounter creatureTypeCount = new EntityCounter();
             EntityCounter creatureCount = new EntityCounter();
             CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
