@@ -12,12 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import com.google.common.collect.ImmutableCollection;
-
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatMessageComponent;
@@ -39,6 +36,7 @@ public class CommandKillAll extends CommandJasBase {
         return "commands.jaskillall.usage";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void process(ICommandSender commandSender, String[] stringArgs) {
         if (stringArgs.length >= 4) {
@@ -58,24 +56,32 @@ public class CommandKillAll extends CommandJasBase {
 
         EntityCounter deathCount = new EntityCounter();
         int totalDeaths = 0;
-        @SuppressWarnings("unchecked")
         Iterator<Entity> iterator = targetPlayer.worldObj.loadedEntityList.iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
+            if (!(entity instanceof EntityLiving)) {
+                continue;
+            }
             LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-            ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
-                    .get(entity.getClass()));
-            for (String groupID : groupIDs) {
-                LivingHandler handler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
-                        .getLivingHandler(groupID);
-                if (handler != null && (entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
-                        && isEntityFiltered(entity, entityFilter)) {
-                    if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {
-                        entity.setDead();
-                        deathCount.incrementOrPutIfAbsent(handler.creatureTypeID, 0);
-                        totalDeaths++;
-                        /* Break out of searching multiple GroupID such that same entity death is not counted twice */
-                        break;
+            List<LivingHandler> handlers = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                    .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
+            if (handlers.isEmpty()) {
+                if (entityCategName.equals("*") && isEntityFiltered(entity, entityFilter, groupRegistry)) {
+                    entity.setDead();
+                    deathCount.incrementOrPutIfAbsent(CreatureTypeRegistry.NONE, 1);
+                    totalDeaths++;
+                }
+            } else {
+                for (LivingHandler handler : handlers) {
+                    if ((entityCategName.equals("*") || handler.creatureTypeID.equals(entityCategName))
+                            && isEntityFiltered(entity, entityFilter, groupRegistry)) {
+                        if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE) || entity instanceof EntityLiving) {
+                            entity.setDead();
+                            deathCount.incrementOrPutIfAbsent(handler.creatureTypeID, 1);
+                            totalDeaths++;
+                            /* Break out of searching multiple GroupID such that same entity death is not counted twice */
+                            break;
+                        }
                     }
                 }
             }
@@ -95,9 +101,9 @@ public class CommandKillAll extends CommandJasBase {
         commandSender.sendChatToPlayer(new ChatMessageComponent().addText(deathMessage.toString()));
     }
 
-    private boolean isEntityFiltered(Entity entity, String filter) {
-        String name = (String) EntityList.classToStringMapping.get(entity.getClass());
-        if (!filter.equals("") && name != null || name.contains(filter)) {
+    private boolean isEntityFiltered(Entity entity, String filter, LivingGroupRegistry groupRegistry) {
+        String name = groupRegistry.EntityClasstoJASName.get(entity.getClass());
+        if (filter.equals("") || name != null && name.contains(filter)) {
             return true;
         }
         return false;
