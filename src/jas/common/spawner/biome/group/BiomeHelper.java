@@ -3,6 +3,8 @@ package jas.common.spawner.biome.group;
 import net.minecraft.world.biome.BiomeGenBase;
 
 public class BiomeHelper {
+    // This is hacky, but neccesary, as It is what I get for relying on String names in an Integer ID system.
+    private static String[] packageNames = new String[BiomeGenBase.biomeList.length];
 
     /**
      * Convert a BiomeGenBase biomeName to a universal package Biome Name. This is to combat developers who are using
@@ -11,7 +13,14 @@ public class BiomeHelper {
      * @return BiomeName in the form Package+Class+BiomeName
      */
     public static String getPackageName(BiomeGenBase biome) {
-        return biome.getClass().getName() + "." + biome.biomeName;
+        String packageName = packageNames[biome.biomeID];
+        if (packageName != null) {
+            return packageName;
+        } else {
+            packageName = biome.getClass().getName() + "." + biome.biomeName;
+            packageNames[biome.biomeID] = packageName;
+            return packageName;
+        }
     }
 
     /**
