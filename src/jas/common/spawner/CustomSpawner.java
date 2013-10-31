@@ -4,6 +4,7 @@ import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter.CountableInt;
+import jas.common.spawner.biome.BiomeCaps;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -51,9 +52,9 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(World worldServer,
+    public static final HashMap<ChunkCoordIntPair, ChunkStat> determineChunksForSpawnering(World worldServer,
             int chunkDistance) {
-        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
+        HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, ChunkStat>();
         for (int i = 0; i < worldServer.playerEntities.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) worldServer.playerEntities.get(i);
             int posX = MathHelper.floor_double(entityplayer.posX / 16.0D);
@@ -65,15 +66,37 @@ public class CustomSpawner {
                             || zOffset == chunkDistance;
                     ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
 
+                    Chunk chunk = worldServer.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos,
+                            chunkcoordintpair.chunkZPos);
+                    int count = 0;
+                    for (@SuppressWarnings("rawtypes")
+                    List entityLists : chunk.entityLists) {
+                        for (Object object : entityLists) {
+                            if (object instanceof EntityLiving) {
+                                count++;
+                            }
+                        }
+                    }
+
                     if (!flag3) {
-                        eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(false));
+                        eligibleChunksForSpawning.put(chunkcoordintpair, new ChunkStat(false, count));
                     } else if (!eligibleChunksForSpawning.containsKey(chunkcoordintpair)) {
-                        eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(true));
+                        eligibleChunksForSpawning.put(chunkcoordintpair, new ChunkStat(true, count));
                     }
                 }
             }
         }
         return eligibleChunksForSpawning;
+    }
+
+    public static class ChunkStat {
+        public final boolean isEdge;
+        public final int entityCount;
+
+        public ChunkStat(boolean isEdge, int entityCount) {
+            this.isEdge = isEdge;
+            this.entityCount = entityCount;
+        }
     }
 
     /**
@@ -104,7 +127,7 @@ public class CustomSpawner {
             return world.loadedEntityList;
         }
 
-        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
+        HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
                 world, JustAnotherSpawner.globalSettings().chunkCountDistance);
         for (ChunkCoordIntPair pair : eligibleChunksForCounting.keySet()) {
             Chunk chunk = world.getChunkFromChunkCoords(pair.chunkXPos, pair.chunkZPos);
@@ -149,7 +172,7 @@ public class CustomSpawner {
      */
     public static final void spawnCreaturesInChunks(WorldServer worldServer,
             LivingHandlerRegistry livingHandlerRegistry, LivingGroupRegistry livingGroupRegistry,
-            CreatureType creatureType, HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning,
+            CreatureType creatureType, HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning,
             EntityCounter creatureTypeCount, EntityCounter creatureCount, BiomeBlacklist blacklist) {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
 
@@ -164,7 +187,14 @@ public class CustomSpawner {
 
             while (iterator.hasNext()) {
                 ChunkCoordIntPair chunkCoord = iterator.next();
-                if (!eligibleChunksForSpawning.get(chunkCoord).booleanValue()) {
+                ChunkStat chunkStat = eligibleChunksForSpawning.get(chunkCoord);
+                if (!chunkStat.isEdge) {
+                    BiomeCaps biomeCaps = JustAnotherSpawner.worldSettings().biomeCaps();
+                    int biomeCap = biomeCaps != null ? biomeCaps.getChunkCap(worldServer.getChunkFromChunkCoords(
+                            chunkCoord.chunkXPos, chunkCoord.chunkZPos)) : -1;
+                    if (biomeCap > -1 && chunkStat.entityCount >= biomeCap) {
+                        continue;
+                    }
                     ChunkPosition chunkposition = creatureType.getRandomSpawningPointInChunk(worldServer,
                             chunkCoord.chunkXPos, chunkCoord.chunkZPos);
                     int k1 = chunkposition.x;

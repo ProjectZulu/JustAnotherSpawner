@@ -2,6 +2,7 @@ package jas.common.spawner;
 
 import jas.common.BiomeBlacklist;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CustomSpawner.ChunkStat;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
@@ -38,7 +39,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
         WorldServer world = (WorldServer) tickData[0];
         if (!world.getGameRules().hasRule("doCustomMobSpawning")
                 || world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
-            HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
+            HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
                     world, JustAnotherSpawner.globalSettings().chunkspawnDistance);
 
             EntityCounter creatureTypeCount = new EntityCounter();
