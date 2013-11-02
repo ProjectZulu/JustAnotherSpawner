@@ -113,7 +113,7 @@ public class SpawnListEntry extends WeightedRandomItem {
     public void saveToConfig(Configuration config, WorldProperties worldProperties) {
         String defaultValue = Integer.toString(itemWeight) + DefaultProps.DELIMETER + Integer.toString(packSize)
                 + DefaultProps.DELIMETER + Integer.toString(minChunkPack) + DefaultProps.DELIMETER
-                + Integer.toString(maxChunkPack);
+                + Integer.toString(maxChunkPack) + optionalParameters;
         Property resultValue = getSpawnEntryProperty(config, defaultValue, worldProperties);
         resultValue.set(defaultValue);
     }
