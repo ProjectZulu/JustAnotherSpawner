@@ -1,6 +1,5 @@
 package jas.common;
 
-import jas.common.spawner.biome.BiomeCaps;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.structure.StructureHandlerRegistry;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -23,7 +22,6 @@ public final class WorldSettings {
     private StructureHandlerRegistry structureHandlerRegistry;
     private BiomeSpawnListRegistry biomeSpawnListRegistry;
     private LivingGroupRegistry livingGroupRegistry;
-    private BiomeCaps biomeCaps;
 
     private ImportedSpawnList importedSpawnList;
 
@@ -44,7 +42,6 @@ public final class WorldSettings {
             }
         }
         worldProperties.saveCurrentToConfig(configDirectory, world);
-        biomeCaps.saveToConfig(configDirectory);
         biomeGroupRegistry.saveToConfig(configDirectory);
         livingGroupRegistry.saveToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
@@ -55,9 +52,6 @@ public final class WorldSettings {
 
     public void loadWorldSettings(File modConfigDirectoryFile, World world) {
         worldProperties = new WorldProperties(modConfigDirectoryFile, world);
-
-        biomeCaps = new BiomeCaps(worldProperties);
-        biomeCaps.loadFromConfig(modConfigDirectoryFile);
 
         biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
         biomeGroupRegistry.loadFromConfig(modConfigDirectoryFile);
@@ -106,9 +100,5 @@ public final class WorldSettings {
 
     public BiomeSpawnListRegistry biomeSpawnListRegistry() {
         return biomeSpawnListRegistry;
-    }
-
-    public BiomeCaps biomeCaps() {
-        return biomeCaps;
     }
 }

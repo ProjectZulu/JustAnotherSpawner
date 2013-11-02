@@ -4,7 +4,6 @@ import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.EntityCounter.CountableInt;
-import jas.common.spawner.biome.BiomeCaps;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -77,7 +76,7 @@ public class CustomSpawner {
                             }
                         }
                     }
-
+                    
                     if (!flag3) {
                         eligibleChunksForSpawning.put(chunkcoordintpair, new ChunkStat(false, count));
                     } else if (!eligibleChunksForSpawning.containsKey(chunkcoordintpair)) {
@@ -189,9 +188,8 @@ public class CustomSpawner {
                 ChunkCoordIntPair chunkCoord = iterator.next();
                 ChunkStat chunkStat = eligibleChunksForSpawning.get(chunkCoord);
                 if (!chunkStat.isEdge) {
-                    BiomeCaps biomeCaps = JustAnotherSpawner.worldSettings().biomeCaps();
-                    int biomeCap = biomeCaps != null ? biomeCaps.getChunkCap(worldServer.getChunkFromChunkCoords(
-                            chunkCoord.chunkXPos, chunkCoord.chunkZPos)) : -1;
+                    int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
+                            chunkCoord.chunkZPos));
                     if (biomeCap > -1 && chunkStat.entityCount >= biomeCap) {
                         continue;
                     }
