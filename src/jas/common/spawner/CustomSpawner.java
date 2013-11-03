@@ -181,7 +181,7 @@ public class CustomSpawner {
 
         CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
         int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-        if (entityTypeCap < 0 || typeCount.get() <= entityTypeCap) {
+        if (entityTypeCap < 0 || typeCount.get() < entityTypeCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -332,19 +332,20 @@ public class CustomSpawner {
 
     private static int getClodEntityTotal(ChunkCoordIntPair chunkCoord,
             HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning, CreatureType creatureType) {
-        final int sizeX = 1;
-        final int sizeZ = 1;
+        final int clodSize = 2;
         int entityTotal = 0;
-        for (int i = -sizeX; i <= sizeX; i++) {
-            for (int k = -sizeZ; k <= sizeZ; k++) {
+        int chunksActiallyCounted = 0;
+        for (int i = -clodSize; i <= clodSize; i++) {
+            for (int k = -clodSize; k <= clodSize; k++) {
                 ChunkCoordIntPair coord = new ChunkCoordIntPair(chunkCoord.chunkXPos + i, chunkCoord.chunkZPos + k);
                 ChunkStat chunkStat = eligibleChunksForSpawning.get(coord);
                 if (chunkStat != null) {
                     entityTotal += chunkStat.entityTypeCount.getOrPutIfAbsent(creatureType.typeID, 0).get();
+                    chunksActiallyCounted++;
                 }
             }
         }
-        return entityTotal;
+        return (int) ((entityTotal) * (2f * clodSize + 1) * (2f * clodSize + 1) / chunksActiallyCounted);
     }
 
     /**
