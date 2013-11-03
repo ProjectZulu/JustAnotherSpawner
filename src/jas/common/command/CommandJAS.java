@@ -23,6 +23,7 @@ public final class CommandJAS extends CommandJasBase {
         addCommand(new CommandPackageEntity());
         addCommand(new CommandSaveConfig());
         addCommand(new CommandLoadConfig());
+        addCommand(new CommandCanDespawnHere());
     }
 
     public void addCommand(CommandBase base) {
