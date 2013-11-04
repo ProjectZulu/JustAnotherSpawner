@@ -26,7 +26,7 @@ public enum Key {
             KeyParserPlayers.class), entities("entities", KeyParserEntities.class), random("random",
             KeyParserRandom.class), writenbt("writenbt", KeyParserWriteNBT.class), istamed("isTamed",
             KeyParserIsTamed.class), istameable("isTameable", KeyParserIsTameable.class), location("location",
-            KeyParserLocation.class), dimension("dim", KeyParserDimension.class),
+            KeyParserLocation.class), dimension("dim", KeyParserDimension.class), biome("biome", KeyParserBiome.class),
 
     /* Sub Tags */
     blockRangeX("blockRangeX", null), blockRangeY("blockRangeY", null), blockRangeZ("blockRangeZ", null),
