@@ -8,7 +8,8 @@ import java.util.HashMap;
  */
 public enum Key {
     /* Category Tags */
-    spawn("spawn", KeyParserSpawn.class), despawn("despawn", KeyParserDespawn.class),
+    spawn("spawn", KeyParserSpawn.class), despawn("despawn", KeyParserDespawn.class), postspawn("postspawn",
+            KeyParserPostSpawn.class),
 
     /* Properties */
     sky("sky", KeyParserSky.class), block("block", KeyParserBlock.class), blockFoot("blockFoot",

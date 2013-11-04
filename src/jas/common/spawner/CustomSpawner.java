@@ -311,6 +311,8 @@ public class CustomSpawner {
                                                     (int) entityliving.posZ, BiomeHelper
                                                             .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
                                                                     (int) entityliving.posX, (int) entityliving.posZ)));
+                                            spawnlistentry.getLivingHandler().postSpawnEntity(entityliving,
+                                                    spawnlistentry);
                                             typeCount.increment();
                                             livingCount.increment();
                                             chunkStat.entityClassCount.incrementOrPutIfAbsent(
@@ -406,6 +408,8 @@ public class CustomSpawner {
                         if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
                             entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                         }
+                        spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry);
+
                         flag = true;
                     } else {
                         JASLog.debug(Level.INFO,
