@@ -51,9 +51,9 @@ public class CustomSpawner {
      * @param par2 should Spawn spawnPeacefulMobs
      * @param par3 worldInfo.getWorldTotalTime() % 400L == 0L
      */
-    public static final HashMap<ChunkCoordIntPair, Boolean> determineChunksForSpawnering(World worldServer,
+    public static final HashMap<ChunkCoordIntPair, ChunkStat> determineChunksForSpawnering(World worldServer,
             int chunkDistance) {
-        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, Boolean>();
+        HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, ChunkStat>();
         for (int i = 0; i < worldServer.playerEntities.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) worldServer.playerEntities.get(i);
             int posX = MathHelper.floor_double(entityplayer.posX / 16.0D);
@@ -64,16 +64,42 @@ public class CustomSpawner {
                     boolean flag3 = xOffset == -chunkDistance || xOffset == chunkDistance || zOffset == -chunkDistance
                             || zOffset == chunkDistance;
                     ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
-
-                    if (!flag3) {
-                        eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(false));
-                    } else if (!eligibleChunksForSpawning.containsKey(chunkcoordintpair)) {
-                        eligibleChunksForSpawning.put(chunkcoordintpair, Boolean.valueOf(true));
+                    ChunkStat chunkStat = new ChunkStat(flag3);
+                    Chunk chunk = worldServer.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos,
+                            chunkcoordintpair.chunkZPos);
+                    for (@SuppressWarnings("rawtypes")
+                    List entityLists : chunk.entityLists) {
+                        for (Object object : entityLists) {
+                            if (object == null || !(object instanceof EntityLiving)) {
+                                continue;
+                            }
+                            EntityLiving entity = (EntityLiving) object;
+                            List<LivingHandler> livingHandlers = JustAnotherSpawner.worldSettings()
+                                    .livingHandlerRegistry()
+                                    .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
+                            Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
+                            chunkStat.entityClassCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
+                            for (String creatureTypeID : livingTypes) {
+                                chunkStat.entityTypeCount.incrementOrPutIfAbsent(creatureTypeID, 1);
+                            }
+                        }
                     }
+
+                    eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);
                 }
             }
         }
         return eligibleChunksForSpawning;
+    }
+
+    public static class ChunkStat {
+        public final boolean isEdge;
+        public final EntityCounter entityClassCount = new EntityCounter();
+        public final EntityCounter entityTypeCount = new EntityCounter();
+
+        public ChunkStat(boolean isEdge) {
+            this.isEdge = isEdge;
+        }
     }
 
     /**
@@ -104,7 +130,7 @@ public class CustomSpawner {
             return world.loadedEntityList;
         }
 
-        HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
+        HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
                 world, JustAnotherSpawner.globalSettings().chunkCountDistance);
         for (ChunkCoordIntPair pair : eligibleChunksForCounting.keySet()) {
             Chunk chunk = world.getChunkFromChunkCoords(pair.chunkXPos, pair.chunkZPos);
@@ -149,13 +175,13 @@ public class CustomSpawner {
      */
     public static final void spawnCreaturesInChunks(WorldServer worldServer,
             LivingHandlerRegistry livingHandlerRegistry, LivingGroupRegistry livingGroupRegistry,
-            CreatureType creatureType, HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning,
+            CreatureType creatureType, HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning,
             EntityCounter creatureTypeCount, EntityCounter creatureCount, BiomeBlacklist blacklist) {
         ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
 
         CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
         int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-        if (typeCount.get() <= entityTypeCap) {
+        if (entityTypeCap < 0 || typeCount.get() < entityTypeCap) {
             Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
             ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
             Collections.shuffle(tmp);
@@ -164,7 +190,14 @@ public class CustomSpawner {
 
             while (iterator.hasNext()) {
                 ChunkCoordIntPair chunkCoord = iterator.next();
-                if (!eligibleChunksForSpawning.get(chunkCoord).booleanValue()) {
+                ChunkStat chunkStat = eligibleChunksForSpawning.get(chunkCoord);
+                if (!chunkStat.isEdge) {
+                    int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
+                            chunkCoord.chunkZPos));
+                    if (biomeCap > -1
+                            && getClodEntityTotal(chunkCoord, eligibleChunksForSpawning, creatureType) >= biomeCap) {
+                        continue;
+                    }
                     ChunkPosition chunkposition = creatureType.getRandomSpawningPointInChunk(worldServer,
                             chunkCoord.chunkXPos, chunkCoord.chunkZPos);
                     int k1 = chunkposition.x;
@@ -278,9 +311,13 @@ public class CustomSpawner {
                                                     (int) entityliving.posZ, BiomeHelper
                                                             .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
                                                                     (int) entityliving.posX, (int) entityliving.posZ)));
+                                            spawnlistentry.getLivingHandler().postSpawnEntity(entityliving,
+                                                    spawnlistentry);
                                             typeCount.increment();
                                             livingCount.increment();
-
+                                            chunkStat.entityClassCount.incrementOrPutIfAbsent(
+                                                    livingToSpawn.getSimpleName(), 1);
+                                            chunkStat.entityTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                                             if (j2 >= spawnlistentry.packSize) {
                                                 continue labelChunkStart;
                                             }
@@ -293,6 +330,24 @@ public class CustomSpawner {
                 }
             }
         }
+    }
+
+    private static int getClodEntityTotal(ChunkCoordIntPair chunkCoord,
+            HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning, CreatureType creatureType) {
+        final int clodSize = 2;
+        int entityTotal = 0;
+        int chunksActiallyCounted = 0;
+        for (int i = -clodSize; i <= clodSize; i++) {
+            for (int k = -clodSize; k <= clodSize; k++) {
+                ChunkCoordIntPair coord = new ChunkCoordIntPair(chunkCoord.chunkXPos + i, chunkCoord.chunkZPos + k);
+                ChunkStat chunkStat = eligibleChunksForSpawning.get(coord);
+                if (chunkStat != null) {
+                    entityTotal += chunkStat.entityTypeCount.getOrPutIfAbsent(creatureType.typeID, 0).get();
+                    chunksActiallyCounted++;
+                }
+            }
+        }
+        return (int) ((entityTotal) * (2f * clodSize + 1) * (2f * clodSize + 1) / chunksActiallyCounted);
     }
 
     /**
@@ -353,6 +408,8 @@ public class CustomSpawner {
                         if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
                             entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                         }
+                        spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry);
+
                         flag = true;
                     } else {
                         JASLog.debug(Level.INFO,

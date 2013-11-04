@@ -10,6 +10,7 @@ import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -35,6 +36,7 @@ public class LivingHandler {
     public final CreatureTypeRegistry creatureTypeRegistry;
     protected OptionalSettingsSpawning spawning;
     protected OptionalSettingsDespawning despawning;
+    protected OptionalSettingsPostSpawning postspawning;
 
     public OptionalSettingsDespawning getDespawning() {
         return despawning;
@@ -56,10 +58,13 @@ public class LivingHandler {
                 spawning = new OptionalSettingsSpawning(parsed);
             } else if (Key.despawn.keyParser.isMatch(titletag)) {
                 despawning = new OptionalSettingsDespawning(parsed);
+            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
+                postspawning = new OptionalSettingsPostSpawning(parsed);
             }
         }
         spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
         despawning = despawning == null ? new OptionalSettingsDespawning("") : despawning;
+        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
     }
 
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {
@@ -251,6 +256,24 @@ public class LivingHandler {
 
         return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
                 && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+    }
+
+    public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry) {
+        if (postspawning.isOptionalEnabled()) {
+            int xCoord = MathHelper.floor_double(entity.posX);
+            int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+            int zCoord = MathHelper.floor_double(entity.posZ);
+
+            postspawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
+        }
+
+        if (spawnListEntry.getOptionalPostSpawning().isOptionalEnabled()) {
+            int xCoord = MathHelper.floor_double(entity.posX);
+            int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+            int zCoord = MathHelper.floor_double(entity.posZ);
+
+            spawnListEntry.getOptionalPostSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
+        }
     }
 
     public static void setupConfigCategory(Configuration config) {
