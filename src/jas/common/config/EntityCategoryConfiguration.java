@@ -34,6 +34,17 @@ public class EntityCategoryConfiguration extends Configuration {
         return this.get(configCategory + "." + typeID, "Creature Spawn Cap", maxNumberOfCreature);
     }
 
+    public Property getDefaultBiomeCap(String typeID, int defaultBiomeCap) {
+        return this.get(configCategory + "." + typeID, "Default Biome Cap", defaultBiomeCap,
+                "Biome Caps are disabled if default is equal to -1");
+    }
+
+    public ConfigCategory getBiomeCaps(String typeID) {
+        ConfigCategory category = getCategory((configCategory + "." + typeID + "." + "biomecaps").toLowerCase());
+        category.setComment("Format biomeMapping=Cap. See BiomeGroups.cfg for BiomeMappings.");
+        return category;
+    }
+
     public Optional<Boolean> isChunkSpawningPresent(String typeID) {
         ConfigCategory category = getCategory(configCategory.toLowerCase(Locale.ENGLISH) + "."
                 + typeID.toLowerCase(Locale.ENGLISH));

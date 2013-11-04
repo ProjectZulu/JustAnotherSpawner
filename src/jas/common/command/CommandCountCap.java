@@ -2,6 +2,7 @@ package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.CustomSpawner;
+import jas.common.spawner.CustomSpawner.ChunkStat;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.type.CreatureType;
@@ -70,7 +71,7 @@ public class CommandCountCap extends CommandJasBase {
                 continue;
             }
             World world = worlds[i];
-            HashMap<ChunkCoordIntPair, Boolean> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
+            HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
                     world, JustAnotherSpawner.globalSettings().chunkspawnDistance);
             EntityCounter creatureTypeCount = new EntityCounter();
             EntityCounter creatureCount = new EntityCounter();

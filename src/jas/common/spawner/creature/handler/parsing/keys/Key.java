@@ -8,7 +8,8 @@ import java.util.HashMap;
  */
 public enum Key {
     /* Category Tags */
-    spawn("spawn", KeyParserSpawn.class), despawn("despawn", KeyParserDespawn.class),
+    spawn("spawn", KeyParserSpawn.class), despawn("despawn", KeyParserDespawn.class), postspawn("postspawn",
+            KeyParserPostSpawn.class),
 
     /* Properties */
     sky("sky", KeyParserSky.class), block("block", KeyParserBlock.class), blockFoot("blockFoot",
@@ -25,7 +26,7 @@ public enum Key {
             KeyParserPlayers.class), entities("entities", KeyParserEntities.class), random("random",
             KeyParserRandom.class), writenbt("writenbt", KeyParserWriteNBT.class), istamed("isTamed",
             KeyParserIsTamed.class), istameable("isTameable", KeyParserIsTameable.class), location("location",
-            KeyParserLocation.class), dimension("dim", KeyParserDimension.class),
+            KeyParserLocation.class), dimension("dim", KeyParserDimension.class), biome("biome", KeyParserBiome.class),
 
     /* Sub Tags */
     blockRangeX("blockRangeX", null), blockRangeY("blockRangeY", null), blockRangeZ("blockRangeZ", null),

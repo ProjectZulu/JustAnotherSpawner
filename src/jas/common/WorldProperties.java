@@ -101,6 +101,8 @@ public final class WorldProperties {
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
         despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
+        maxDespawnDist = worldConfig.get("Properties.Spawning", "Instant Despawn Distance", maxDespawnDist).getInt(
+                maxDespawnDist);
         worldConfig.save();
     }
 
@@ -155,6 +157,9 @@ public final class WorldProperties {
         worldConfig.load();
         Property despawnDistProp = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist);
         despawnDistProp.set(despawnDist);
+        Property maxdespawnDistProp = worldConfig
+                .get("Properties.Spawning", "Instant Despawn Distance", maxDespawnDist);
+        maxdespawnDistProp.set(maxDespawnDist);
         worldConfig.save();
     }
 }

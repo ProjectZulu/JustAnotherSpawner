@@ -7,6 +7,7 @@ import jas.common.WorldProperties;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
 
 import java.util.Locale;
@@ -32,9 +33,14 @@ public class SpawnListEntry extends WeightedRandomItem {
     public final int maxChunkPack;
     public final String optionalParameters;
     protected OptionalSettingsSpawnListSpawning spawning;
+    protected OptionalSettingsPostSpawning postspawning;
 
     public OptionalSettingsSpawnListSpawning getOptionalSpawning() {
         return spawning;
+    }
+
+    public OptionalSettingsPostSpawning getOptionalPostSpawning() {
+        return postspawning;
     }
 
     public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
@@ -64,9 +70,12 @@ public class SpawnListEntry extends WeightedRandomItem {
             String titletag = parsed.split("\\:", 2)[0].toLowerCase();
             if (Key.spawn.keyParser.isMatch(titletag)) {
                 spawning = new OptionalSettingsSpawnListSpawning(parsed);
+            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
+                postspawning = new OptionalSettingsPostSpawning(parsed);
             }
         }
         spawning = spawning == null ? new OptionalSettingsSpawnListSpawning("") : spawning;
+        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
     }
 
     // TODO: Remove This. Hidden static dependency bad. Unnecessary. Alternatively, pass in livingHandlerRegistry
@@ -153,7 +162,7 @@ public class SpawnListEntry extends WeightedRandomItem {
         SpawnListEntry otherEntry = (SpawnListEntry) other;
         return pckgName.equals(otherEntry.pckgName) && livingGroupID.equals(otherEntry.livingGroupID);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
