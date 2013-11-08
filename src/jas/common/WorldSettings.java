@@ -27,6 +27,8 @@ public final class WorldSettings {
 
     protected WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
         this.importedSpawnList = importedSpawnList;
+        this.worldProperties = new WorldProperties();
+        biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
         loadWorldSettings(modConfigDirectoryFile, world);
     }
 
@@ -41,7 +43,7 @@ public final class WorldSettings {
                 file.delete();
             }
         }
-        worldProperties.saveCurrentToConfig(configDirectory, world);
+        worldProperties.saveToConfig(configDirectory, world);
         biomeGroupRegistry.saveToConfig(configDirectory);
         livingGroupRegistry.saveToConfig(configDirectory);
         creatureTypeRegistry.saveCurrentToConfig(configDirectory);
@@ -51,9 +53,7 @@ public final class WorldSettings {
     }
 
     public void loadWorldSettings(File modConfigDirectoryFile, World world) {
-        worldProperties = new WorldProperties(modConfigDirectoryFile, world);
-
-        biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
+        worldProperties.loadFromConfig(modConfigDirectoryFile, world);
         biomeGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 
         livingGroupRegistry = new LivingGroupRegistry(worldProperties);

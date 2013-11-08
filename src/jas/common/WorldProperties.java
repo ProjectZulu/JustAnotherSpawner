@@ -29,7 +29,10 @@ public final class WorldProperties {
     public String saveName = "";
     public String importName = "";
 
-    public WorldProperties(File configDirectory, World world) {
+    public WorldProperties() {
+    }
+
+    public void loadFromConfig(File configDirectory, World world) {
         loadWorldSaveConfiguration(configDirectory, world);
         importDefaultFiles(configDirectory);
         loadFileSaveConfiguration(configDirectory);
@@ -100,13 +103,12 @@ public final class WorldProperties {
         Configuration worldConfig = new Configuration(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                 + saveName + "/" + "WorldGlobalProperties" + ".cfg"));
         worldConfig.load();
-        despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", despawnDist).getInt(despawnDist);
-        maxDespawnDist = worldConfig.get("Properties.Spawning", "Instant Despawn Distance", maxDespawnDist).getInt(
-                maxDespawnDist);
+        despawnDist = worldConfig.get("Properties.Spawning", "Min Despawn Distance", 32).getInt(despawnDist);
+        maxDespawnDist = worldConfig.get("Properties.Spawning", "Instant Despawn Distance", 128).getInt(maxDespawnDist);
         worldConfig.save();
     }
 
-    public void saveCurrentToConfig(File configDirectory, World world) {
+    public void saveToConfig(File configDirectory, World world) {
         saveWorldSaveConfiguration(configDirectory, world);
         saveFileSaveConfiguration(configDirectory);
         saveWorldProperties(configDirectory);

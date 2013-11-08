@@ -208,7 +208,7 @@ public class BiomeSpawnListRegistry {
                 continue;
             }
 
-            for (BiomeGroup group : biomeGroupRegistry.getBiomeGroups()) {
+            for (BiomeGroup group : biomeGroupRegistry.getIDToGroup().values()) {
                 LivingConfiguration worldConfig = confgiCache.getLivingEntityConfig(configDirectory, handler.groupID);
                 SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group,
                         livingGroupRegistry.getLivingGroup(handler.groupID), spawnList).createFromConfig(worldConfig,
