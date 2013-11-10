@@ -117,9 +117,9 @@ public class CreatureTypeRegistry {
             if (isReservedName(typeName)) {
                 continue;
             }
-            typeName = nameString.concat(typeName);
+            nameString = nameString.concat(typeName);
             if (typeNames.hasNext()) {
-                typeName = nameString.concat(",");
+                nameString = nameString.concat(",");
             }
         }
         config.getCustomCategories(nameString).set(nameString);
