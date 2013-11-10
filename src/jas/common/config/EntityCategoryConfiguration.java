@@ -22,7 +22,7 @@ public class EntityCategoryConfiguration extends Configuration {
     }
 
     public Property getCustomCategories(String categoryString) {
-        return this.get("Extra Categories", "Additions", categoryString,
+        return this.get("Extra Categories".toString(), "Additions", categoryString,
                 "Format: category name seperated by commas i.e. <CategoryName1>,<CategoryName2>");
     }
 
