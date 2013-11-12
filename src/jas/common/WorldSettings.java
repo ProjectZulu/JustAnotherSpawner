@@ -28,7 +28,7 @@ public final class WorldSettings {
     protected WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
         this.importedSpawnList = importedSpawnList;
         this.worldProperties = new WorldProperties();
-        biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
+        this.biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
         loadWorldSettings(modConfigDirectoryFile, world);
     }
 
