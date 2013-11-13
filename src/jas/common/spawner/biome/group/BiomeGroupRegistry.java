@@ -31,7 +31,6 @@ import net.minecraftforge.common.Property;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableBiMap.Builder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
@@ -165,7 +164,8 @@ public class BiomeGroupRegistry {
     public void loadFromConfig(File configDirectory) {
         BiomeGroupConfiguration biomeConfig = new BiomeGroupConfiguration(configDirectory, worldProperties);
         biomeConfig.load();
-        Builder<String, String> biomeMappingToPckgBuilder = ImmutableBiMap.builder();
+        // Builder<String, String> biomeMappingToPckgBuilder = ImmutableBiMap.builder();
+        HashMap<String, String> biomeMappingToPckgBuilder = new HashMap<String, String>();
         ArrayListMultimap<String, Integer> pckgNameToBiomeIDBuilder = ArrayListMultimap.create();
 
         /* Load Package Name Mappings that have previously been saved */
@@ -192,7 +192,7 @@ public class BiomeGroupRegistry {
             if (!pckgNameToBiomeIDBuilder.containsKey(packageName)) {
                 String defaultMapping = biome.biomeName;
                 int attempts = 0;
-                while (biomeMappingToPckg.containsKey(defaultMapping)) {
+                while (biomeMappingToPckgBuilder.containsKey(defaultMapping)) {
                     defaultMapping = BiomeHelper.getShortPackageName(biome);
                     if (attempts > 0) {
                         // For multiple tries, concat the number of the attempts to create a unique mapping
@@ -211,7 +211,7 @@ public class BiomeGroupRegistry {
             }
         }
 
-        biomeMappingToPckg = biomeMappingToPckgBuilder.build();
+        biomeMappingToPckg = ImmutableBiMap.<String, String> builder().putAll(biomeMappingToPckgBuilder).build();
         biomePckgToMapping = biomeMappingToPckg.inverse();
         pckgNameToBiomeID = ImmutableListMultimap.<String, Integer> builder().putAll(pckgNameToBiomeIDBuilder).build();
 
