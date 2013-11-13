@@ -15,7 +15,8 @@ public class BiomeCapConfiguration extends Configuration {
     public static final String CapCategory = BaseCategory + ".caps";
 
     public BiomeCapConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/" + ConfigName));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + worldProperties.getFolderConfiguration().saveName + "/" + ConfigName));
     }
 
     public Property getIsEnabled(boolean defaultValue) {

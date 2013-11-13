@@ -33,12 +33,13 @@ public final class WorldSettings {
     }
 
     public void saveWorldSettings(File configDirectory, World world) {
-        if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.loadedUniversalDirectory()
-                || worldProperties.getSavedFileConfiguration().sortCreatureByBiome != worldProperties.loadedSortCreatureByBiome()) {
-            worldProperties.setSavedUniversalDirectory(worldProperties.loadedUniversalDirectory());
-            worldProperties.setSavedSortCreatureByBiome(worldProperties.loadedSortCreatureByBiome());
-            File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName()
-                    + "/" + DefaultProps.ENTITYSUBDIR);
+        if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.getFolderConfiguration().universalDirectory
+                || worldProperties.getSavedFileConfiguration().sortCreatureByBiome != worldProperties
+                        .getFolderConfiguration().sortCreatureByBiome) {
+            worldProperties.setSavedUniversalDirectory(worldProperties.getFolderConfiguration().universalDirectory);
+            worldProperties.setSavedSortCreatureByBiome(worldProperties.getFolderConfiguration().sortCreatureByBiome);
+            File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                    + worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSUBDIR);
             for (File file : entityFolder.listFiles()) {
                 file.delete();
             }

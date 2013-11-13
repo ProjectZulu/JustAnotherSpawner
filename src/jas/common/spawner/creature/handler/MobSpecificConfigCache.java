@@ -24,15 +24,15 @@ public class MobSpecificConfigCache {
     public LivingConfiguration getLivingEntityConfig(File configDir, String groupID) {
         boolean universalCFG = worldProperties.getSavedFileConfiguration().universalDirectory;
         if (universalCFG) {
-            if (modConfigCache.get(worldProperties.saveName() + "Universal") == null) {
+            if (modConfigCache.get(worldProperties.getFolderConfiguration().saveName + "Universal") == null) {
                 LivingConfiguration config = new LivingConfiguration(configDir, "Universal", worldProperties);
                 config.load();
                 LivingHandler.setupConfigCategory(config);
                 SpawnListEntry.setupConfigCategory(config);
-                modConfigCache.put(worldProperties.saveName() + "Universal", config);
+                modConfigCache.put(worldProperties.getFolderConfiguration().saveName + "Universal", config);
                 return config;
             }
-            return modConfigCache.get(worldProperties.saveName() + "Universal");
+            return modConfigCache.get(worldProperties.getFolderConfiguration().saveName + "Universal");
         } else {
             String modID;
             String[] mobNameParts = groupID.split("\\.");
@@ -43,14 +43,14 @@ public class MobSpecificConfigCache {
                 modID = "Vanilla";
             }
 
-            if (modConfigCache.get(worldProperties.saveName() + modID) == null) {
+            if (modConfigCache.get(worldProperties.getFolderConfiguration().saveName + modID) == null) {
                 LivingConfiguration config = new LivingConfiguration(configDir, modID, worldProperties);
                 config.load();
                 LivingHandler.setupConfigCategory(config);
                 SpawnListEntry.setupConfigCategory(config);
-                modConfigCache.put(worldProperties.saveName() + modID, config);
+                modConfigCache.put(worldProperties.getFolderConfiguration().saveName + modID, config);
             }
-            return modConfigCache.get(worldProperties.saveName() + modID);
+            return modConfigCache.get(worldProperties.getFolderConfiguration().saveName + modID);
         }
     }
 

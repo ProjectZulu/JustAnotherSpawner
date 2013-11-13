@@ -12,8 +12,8 @@ public class StructureConfiguration extends Configuration {
     public static final String StructureConfigName = "StructureSpawns.cfg";
 
     public StructureConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/"
-                + StructureConfigName));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + worldProperties.getFolderConfiguration().saveName + "/" + StructureConfigName));
     }
 
     public Property getStructureSpawns(String structureKey, String entityList) {

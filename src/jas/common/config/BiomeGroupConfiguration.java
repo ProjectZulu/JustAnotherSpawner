@@ -16,8 +16,8 @@ public class BiomeGroupConfiguration extends Configuration {
     public static final String AttributeListCategory = BiomeConfigCategory + ".attributebiomelists";
 
     public BiomeGroupConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/"
-                + BiomeConfigName));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + worldProperties.getFolderConfiguration().saveName + "/" + BiomeConfigName));
     }
 
     public ConfigCategory getAttributesCategory() {

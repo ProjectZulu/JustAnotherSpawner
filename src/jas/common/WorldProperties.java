@@ -1,5 +1,7 @@
 package jas.common;
 
+import jas.common.FolderConfiguration.WorldStats;
+
 import java.io.File;
 
 import net.minecraft.world.World;
@@ -9,26 +11,18 @@ import com.google.gson.GsonBuilder;
 
 public final class WorldProperties {
 
-    public boolean loadedUniversalDirectory() {
-        return folderConfiguration.getCurrentWorldStats(curWorldName).universalDirectory;
-    }
+    private String curWorldName;
+    private FolderConfiguration folderConfiguration;
+    private SavedFolderConfiguration savedConfguration;
+    private WorldGlobalSettings worldGlobalProperties;
 
-    public boolean loadedSortCreatureByBiome() {
-        return folderConfiguration.getCurrentWorldStats(curWorldName).sortCreatureByBiome;
-    }
-
-    public String saveName() {
-        return folderConfiguration.getCurrentWorldStats(curWorldName).saveName;
+    public WorldStats getFolderConfiguration() {
+        return folderConfiguration.getCurrentWorldStats(curWorldName);
     }
 
     public String importName() {
         return folderConfiguration.importName;
     }
-
-    private String curWorldName;
-    private FolderConfiguration folderConfiguration;
-    private SavedFolderConfiguration savedConfguration;
-    private WorldGlobalSettings worldGlobalProperties;
 
     public WorldGlobalSettings getGlobal() {
         return worldGlobalProperties;
@@ -51,7 +45,7 @@ public final class WorldProperties {
 
     public void loadFromConfig(File configDirectory, World world) {
         curWorldName = world.getWorldInfo().getWorldName();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
         folderConfiguration = GsonHelper.readFromGson(
                 FileUtilities.createReader(FolderConfiguration.getFile(configDirectory), false),
                 FolderConfiguration.class, gson);
@@ -60,22 +54,27 @@ public final class WorldProperties {
         importFilesIfNeccesary(configDirectory);
 
         savedConfguration = GsonHelper.readFromGson(
-                FileUtilities.createReader(SavedFolderConfiguration.getFile(configDirectory, saveName()), false),
+                FileUtilities.createReader(
+                        SavedFolderConfiguration.getFile(configDirectory, getFolderConfiguration().saveName), false),
                 SavedFolderConfiguration.class, gson);
 
         worldGlobalProperties = GsonHelper.readFromGson(
-                FileUtilities.createReader(WorldGlobalSettings.getFile(configDirectory, saveName()), false),
+                FileUtilities.createReader(
+                        WorldGlobalSettings.getFile(configDirectory, getFolderConfiguration().saveName), false),
                 WorldGlobalSettings.class, gson);
     }
 
     public void saveToConfig(File configDirectory) {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
         GsonHelper.writeToGson(FileUtilities.createWriter(FolderConfiguration.getFile(configDirectory), true),
                 folderConfiguration, gson);
         GsonHelper.writeToGson(
-                FileUtilities.createWriter(SavedFolderConfiguration.getFile(configDirectory, saveName()), true),
+                FileUtilities.createWriter(
+                        SavedFolderConfiguration.getFile(configDirectory, getFolderConfiguration().saveName), true),
                 savedConfguration, gson);
-        GsonHelper.writeToGson(FileUtilities.createWriter(WorldGlobalSettings.getFile(configDirectory, saveName()), true),
+        GsonHelper.writeToGson(
+                FileUtilities.createWriter(
+                        WorldGlobalSettings.getFile(configDirectory, getFolderConfiguration().saveName), true),
                 worldGlobalProperties, gson);
     }
 
@@ -83,7 +82,8 @@ public final class WorldProperties {
         if (importName().trim().equals("")) {
             return;
         }
-        File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + saveName());
+        File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR
+                + getFolderConfiguration().saveName);
         File importFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + importName());
         if (worldFolder.exists() || !importFolder.exists()) {
             return;

@@ -19,8 +19,9 @@ public class LivingConfiguration extends Configuration {
      * @param fileName Filename for this Configuration, typically modID
      */
     public LivingConfiguration(File configDirectory, String fileName, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/"
-                + DefaultProps.ENTITYSUBDIR + fileName + ".cfg"));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
+                + worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSUBDIR + fileName
+                + ".cfg"));
         this.filename = fileName;
     }
 
