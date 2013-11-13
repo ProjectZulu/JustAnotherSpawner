@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
-import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ImmutableList;
 
@@ -27,7 +26,7 @@ public class LivingHandlerRegistry {
     public LivingHandler getLivingHandler(String groupID) {
         return livingHandlers.get(groupID);
     }
-    
+
     public List<LivingHandler> getLivingHandlers(Class<? extends EntityLiving> entityClass) {
         List<LivingHandler> list = new ArrayList<LivingHandler>();
         for (String groupID : livingGroupRegistry.getGroupsWithEntity(livingGroupRegistry.EntityClasstoJASName
@@ -111,14 +110,7 @@ public class LivingHandlerRegistry {
     }
 
     public void saveToConfig(File configDirectory) {
-        LivingConfiguration tempSettings = new LivingConfiguration(configDirectory, "temporarySaveSettings",
-                worldProperties);
-        tempSettings.load();
-        Property byBiome = tempSettings.getSavedSortByBiome(worldProperties.savedSortCreatureByBiome);
-        byBiome.set(worldProperties.savedSortCreatureByBiome);
-        Property isUniversal = tempSettings.getSavedUseUniversalConfig(worldProperties.savedUniversalDirectory);
-        isUniversal.set(worldProperties.savedUniversalDirectory);
-        tempSettings.save();
+        worldProperties.saveToConfig(configDirectory);
         MobSpecificConfigCache cache = new MobSpecificConfigCache(worldProperties);
 
         for (Entry<String, LivingHandler> handler : livingHandlers.entrySet()) {

@@ -130,7 +130,7 @@ public class SpawnListEntry extends WeightedRandomItem {
     private Property getSpawnEntryProperty(Configuration config, String defaultValue, WorldProperties worldProperties) {
         Property resultValue;
         String categoryKey;
-        if (worldProperties.savedSortCreatureByBiome) {
+        if (worldProperties.getSavedFileConfiguration().sortCreatureByBiome) {
             categoryKey = "CreatureSettings.SpawnListEntry." + pckgName;
             resultValue = config.get(categoryKey, livingGroupID, defaultValue);
         } else {

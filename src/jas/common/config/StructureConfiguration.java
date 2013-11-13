@@ -12,7 +12,7 @@ public class StructureConfiguration extends Configuration {
     public static final String StructureConfigName = "StructureSpawns.cfg";
 
     public StructureConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/"
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/"
                 + StructureConfigName));
     }
 

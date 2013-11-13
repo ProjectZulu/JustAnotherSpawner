@@ -18,7 +18,7 @@ public class LivingGroupConfiguration extends Configuration {
     public static final String EntityMappingCategory = ConfigCategory + ".customentityname";
 
     public LivingGroupConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/" + ConfigName));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/" + ConfigName));
     }
 
     public Property getEntityMapping(String nameKey, String nameValue) {

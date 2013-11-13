@@ -149,7 +149,7 @@ public class LivingHandler {
             }
 
             boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().maxDespawnDist);
+                    .worldProperties().getGlobal().maxDespawnDist);
 
             if (instantDespawn) {
                 return true;
@@ -193,11 +193,11 @@ public class LivingHandler {
             }
 
             boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().despawnDist);
+                    .worldProperties().getGlobal().despawnDist);
             boolean isOfAge = despawning.isValidAge(entityProps.getAge(), JustAnotherSpawner.worldSettings()
-                    .worldProperties().minDespawnTime);
+                    .worldProperties().getGlobal().minDespawnTime);
             boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().maxDespawnDist);
+                    .worldProperties().getGlobal().maxDespawnDist);
 
             if (instantDespawn) {
                 entity.setDead();

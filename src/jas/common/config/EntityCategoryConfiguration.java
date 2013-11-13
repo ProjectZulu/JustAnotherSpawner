@@ -18,7 +18,7 @@ public class EntityCategoryConfiguration extends Configuration {
     public static final String configCategory = "LivingType";
 
     public EntityCategoryConfiguration(File configDirectory, WorldProperties worldProperties) {
-        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName + "/" + configName));
+        super(new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + worldProperties.saveName() + "/" + configName));
     }
 
     public Property getCustomCategories(String categoryString) {

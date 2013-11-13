@@ -165,7 +165,7 @@ public class OptionalParser {
     public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
         if (values.length == 2) {
             valueCache.put(Key.spawnRange.key, ParsingHelper.parseFilteredInteger(values[1], JustAnotherSpawner
-                    .worldSettings().worldProperties().despawnDist, Key.spawnRange.key));
+                    .worldSettings().worldProperties().getGlobal().despawnDist, Key.spawnRange.key));
         } else {
             JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
         }
