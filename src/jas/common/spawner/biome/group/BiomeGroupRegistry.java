@@ -58,7 +58,9 @@ public class BiomeGroupRegistry {
      * 
      * Neither Attribute ID and BiomeMappings are not allowed to be the same. They can be the same as BiomeGroups.
      */
-    private final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
+    public final HashMap<String, BiomeGroup> iDToAttribute = new HashMap<String, BiomeGroup>();
+    /** Reverse Look-up Map to Get All Groups a Particular Biome is In */
+    public final ListMultimap<String, String> packgNameToAttributeIDList = ArrayListMultimap.create();
 
     public final WorldProperties worldProperties;
 
@@ -296,6 +298,9 @@ public class BiomeGroupRegistry {
         for (BiomeGroup biomeGroup : sortedAttributes) {
             parseGroupContents(biomeGroup);
             iDToAttribute.put(biomeGroup.groupID, biomeGroup);
+            for (String pckgName : biomeGroup.pckgNames) {
+                packgNameToAttributeIDList.get(pckgName).add(biomeGroup.groupID);
+            }
         }
 
         for (BiomeGroup biomeGroup : sortedGroups) {
