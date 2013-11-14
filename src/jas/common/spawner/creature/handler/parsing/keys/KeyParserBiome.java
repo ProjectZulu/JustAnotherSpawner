@@ -2,6 +2,7 @@ package jas.common.spawner.creature.handler.parsing.keys;
 
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
@@ -9,12 +10,19 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 
+import com.google.common.collect.ImmutableMultimap;
+
 public class KeyParserBiome extends KeyParserBase {
+
+    private enum BiomeType {
+        MAPPING, ATTRIBUTE, GROUP;
+    }
 
     public KeyParserBiome(Key key) {
         super(key, true, KeyType.CHAINABLE);
@@ -61,6 +69,11 @@ public class KeyParserBiome extends KeyParserBase {
                 biomeName = pieces[1];
             }
 
+            if (biomeName.length() > 2 && biomeName.charAt(2) == '|' && !biomeName.startsWith("A|")
+                    && !biomeName.startsWith("G|")) {
+                JASLog.severe("Error Parsing %s. | operator detected. Only valid prefixed are A| or G|.", key.key);
+                return false;
+            }
             if (pieces.length == lengthFullForm) {
                 String[] offsetPieces = pieces[2].split("/");
                 int offsetX = 0;
@@ -122,13 +135,48 @@ public class KeyParserBiome extends KeyParserBase {
             } else {
                 biomeName = (String) values[3];
             }
+            BiomeType type = BiomeType.MAPPING;
+            if (biomeName.startsWith("A|")) {
+                type = BiomeType.ATTRIBUTE;
+                biomeName = biomeName.substring(2);
+            } else if (biomeName.startsWith("G|")) {
+                type = BiomeType.GROUP;
+                biomeName = biomeName.substring(2);
+            }
+
+            BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+            ImmutableMultimap<String, String> packgToBiomeGroupID = ImmutableMultimap.of();
+            if (type == BiomeType.GROUP) {
+                // Cache Group as our only current public access is a copy method. This is already changed in DEV14
+                // builds so is a temporary evil TODO
+                packgToBiomeGroupID = registry.getPackgNameToGroupIDList();
+            }
 
             for (int i = -rangeX; i <= rangeX; i++) {
                 for (int k = -rangeZ; k <= rangeZ; k++) {
                     BiomeGenBase biome = world.getBiomeGenForCoords(xCoord + offsetX + i, zCoord + offsetZ + k);
-                    boolean isBiome = biomeName
-                            .equals(JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping
-                                    .get(BiomeHelper.getPackageName(biome)));
+                    boolean isBiome = false;
+                    switch (type) {
+                    case MAPPING: {
+                        isBiome = biomeName.equals(registry.biomePckgToMapping.get(BiomeHelper.getPackageName(biome)));
+                        break;
+                    }
+                    case ATTRIBUTE: {
+                        List<String> attributeIDs = registry.packgNameToAttributeIDList.get(BiomeHelper
+                                .getPackageName(biome));
+                        if (attributeIDs.contains(biomeName)) {
+                            isBiome = true;
+                        }
+                        break;
+                    }
+                    case GROUP: {
+                        if (packgToBiomeGroupID.get(BiomeHelper.getPackageName(biome)).contains(biomeName)) {
+                            isBiome = true;
+                        }
+                        break;
+                    }
+                    }
+
                     if (!isInverted && isBiome || isInverted && !isBiome) {
                         return false;
                     }
