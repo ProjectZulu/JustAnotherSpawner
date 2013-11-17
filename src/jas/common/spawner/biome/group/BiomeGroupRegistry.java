@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
@@ -230,7 +231,7 @@ public class BiomeGroupRegistry {
     private void loadAttributes(BiomeGroupSaveObject savedStats) {
         Set<BiomeGroup> attributeGroups = new HashSet<BiomeGroup>();
         if (savedStats.configNameToAttributeGroups != null) {
-            for (HashMap<String, BiomeGroup> entries : savedStats.configNameToAttributeGroups.values()) {
+            for (TreeMap<String, BiomeGroup> entries : savedStats.configNameToAttributeGroups.values()) {
                 for (BiomeGroup attributeGroup : entries.values()) {
                     if (!"".equals(attributeGroup.groupID)) {
                         attributeGroups.add(attributeGroup);
@@ -260,7 +261,7 @@ public class BiomeGroupRegistry {
     private void loadBiomeGroups(BiomeGroupSaveObject savedStats, Set<String> newMappings) {
         Set<BiomeGroup> biomeGroups = new HashSet<BiomeGroup>();
         if (savedStats.configNameToBiomeGroups != null) {
-            for (HashMap<String, BiomeGroup> entries : savedStats.configNameToBiomeGroups.values()) {
+            for (TreeMap<String, BiomeGroup> entries : savedStats.configNameToBiomeGroups.values()) {
                 for (BiomeGroup biomeGroup : entries.values()) {
                     if (!"".equals(biomeGroup.groupID)) {
                         biomeGroups.add(biomeGroup);

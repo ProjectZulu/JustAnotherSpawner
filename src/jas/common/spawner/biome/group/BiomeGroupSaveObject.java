@@ -5,30 +5,34 @@ import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.google.gson.annotations.SerializedName;
 
 public class BiomeGroupSaveObject {
     @SerializedName("BiomeMappings")
-    public final Map<String, String> biomeMappings;
+    public final TreeMap<String, String> biomeMappings; // Use TreeMaps instad of Hashmaps EVERYWHERE to gaurantee sort
+                                                        // by keys
     @SerializedName("AttributeGroups")
-    public HashMap<String, HashMap<String, BiomeGroup>> configNameToAttributeGroups;
+    public TreeMap<String, TreeMap<String, BiomeGroup>> configNameToAttributeGroups;
     @SerializedName("BiomeGroups")
-    public HashMap<String, HashMap<String, BiomeGroup>> configNameToBiomeGroups;
+    public TreeMap<String, TreeMap<String, BiomeGroup>> configNameToBiomeGroups;
 
     public BiomeGroupSaveObject() {
-        this.biomeMappings = new HashMap<String, String>();
+        this.biomeMappings = new TreeMap<String, String>();
         this.configNameToAttributeGroups = null;
         this.configNameToBiomeGroups = null;
     }
 
     public BiomeGroupSaveObject(Map<String, String> biomeMappings, Collection<BiomeGroup> attributeGroups,
             Collection<BiomeGroup> biomeGroups) {
-        this.biomeMappings = biomeMappings;
-        this.configNameToBiomeGroups = new HashMap<String, HashMap<String, BiomeGroup>>();
-        this.configNameToAttributeGroups = new HashMap<String, HashMap<String, BiomeGroup>>();
+        this.biomeMappings = new TreeMap<String, String>(biomeMappings);
+        LinkedHashMap<String, String> sortedMap = new LinkedHashMap<String, String>();
+
+        this.configNameToBiomeGroups = new TreeMap<String, TreeMap<String, BiomeGroup>>();
+        this.configNameToAttributeGroups = new TreeMap<String, TreeMap<String, BiomeGroup>>();
         for (BiomeGroup group : attributeGroups) {
             getOrCreate(configNameToAttributeGroups, group.configName).put(group.groupID, group);
         }
@@ -41,10 +45,10 @@ public class BiomeGroupSaveObject {
         return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "BiomeGroups.cfg");
     }
 
-    private HashMap<String, BiomeGroup> getOrCreate(HashMap<String, HashMap<String, BiomeGroup>> map, String key) {
-        HashMap<String, BiomeGroup> group = map.get(key);
+    private TreeMap<String, BiomeGroup> getOrCreate(TreeMap<String, TreeMap<String, BiomeGroup>> map, String key) {
+        TreeMap<String, BiomeGroup> group = map.get(key);
         if (group == null) {
-            group = new HashMap<String, BiomeGroup>();
+            group = new TreeMap<String, BiomeGroup>();
             map.put(key, group);
         }
         return group;
