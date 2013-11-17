@@ -126,9 +126,8 @@ public class KeyParserBiome extends KeyParserBase {
             for (int i = -rangeX; i <= rangeX; i++) {
                 for (int k = -rangeZ; k <= rangeZ; k++) {
                     BiomeGenBase biome = world.getBiomeGenForCoords(xCoord + offsetX + i, zCoord + offsetZ + k);
-                    boolean isBiome = biomeName
-                            .equals(JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping
-                                    .get(BiomeHelper.getPackageName(biome)));
+                    boolean isBiome = biomeName.equals(JustAnotherSpawner.worldSettings().biomeGroupRegistry()
+                            .biomePckgToMapping().get(BiomeHelper.getPackageName(biome)));
                     if (!isInverted && isBiome || isInverted && !isBiome) {
                         return false;
                     }

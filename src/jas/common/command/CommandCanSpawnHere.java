@@ -199,7 +199,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
                 matchingSpawnListEntries.add(spawnListEntry);
             }
         }
-        String shortName = JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping.get(packageBiome);
+        String shortName = JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping().get(packageBiome);
         return shortName == null ? biome.biomeName : shortName;
     }
 

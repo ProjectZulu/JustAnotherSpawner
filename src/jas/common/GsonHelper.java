@@ -13,15 +13,16 @@ public class GsonHelper {
         if (reader.isPresent()) {
             T instance = gson.fromJson(reader.get(), object);
             reader.close();
-            return instance;
-        } else {
-            try {
-                return object.newInstance();
-            } catch (Exception e) {
-                JASLog.severe("This should never be possible. Failed to instantiate class %s.", object);
-                e.printStackTrace();
-                return null;
+            if (instance != null) {
+                return instance;
             }
+        }
+        try {
+            return object.newInstance();
+        } catch (Exception e) {
+            JASLog.severe("This should never be possible. Failed to instantiate class %s.", object);
+            e.printStackTrace();
+            return null;
         }
     }
 

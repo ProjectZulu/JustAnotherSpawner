@@ -283,11 +283,11 @@ public class CreatureType {
     private void loadBiomeCap(ConfigCategory category, CreatureTypeBuilder builder, final int defaultCap) {
         for (Entry<String, Property> entry : category.entrySet()) {
             String biomeIdentifier = entry.getKey();
-            String packageName = biomeGroupRegistry.biomeMappingToPckg.get(biomeIdentifier);
+            String packageName = biomeGroupRegistry.biomeMappingToPckg().get(biomeIdentifier);
             if (packageName == null) {
                 JASLog.severe("Error Parsing %s BiomeCap. %s is not a biome mapping.", typeID, biomeIdentifier);
             } else {
-                List<Integer> biomeIDs = biomeGroupRegistry.pckgNameToBiomeID.get(packageName);
+                List<Integer> biomeIDs = biomeGroupRegistry.pckgNameToBiomeID().get(packageName);
                 for (Integer biomeID : biomeIDs) {
                     int chunkCap = entry.getValue().getInt(defaultCap);
                     if (chunkCap < 0) {
@@ -322,7 +322,7 @@ public class CreatureType {
         for (Entry<Integer, Integer> entry : biomeCaps.entrySet()) {
             Integer biomeID = entry.getKey();
             Integer biomeCap = entry.getValue();
-            String mappingName = biomeGroupRegistry.biomePckgToMapping.get(BiomeHelper
+            String mappingName = biomeGroupRegistry.biomePckgToMapping().get(BiomeHelper
                     .getPackageName(BiomeGenBase.biomeList[biomeID]));
             if (mappingName != null) {
                 Property biomeCapProp = category.get(mappingName);

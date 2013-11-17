@@ -84,7 +84,7 @@ public class BiomeSpawnListRegistry {
      * @return Immutable copy of Collection of SpawnListEntries
      */
     public ImmutableCollection<SpawnListEntry> getSpawnListFor(String creatureType, String biomePackageName) {
-        ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(biomePackageName);
+        ImmutableCollection<String> groupIDList = biomeGroupRegistry.packgNameToGroupIDs().get(biomePackageName);
         ArrayList<SpawnListEntry> biomeSpawnList = new ArrayList<SpawnListEntry>(30);
         for (String groupID : groupIDList) {
             Collection<SpawnListEntry> spawnList = validSpawnListEntries.get(groupID, creatureType);
@@ -103,7 +103,7 @@ public class BiomeSpawnListRegistry {
      * @return Immutable copy of Collection of SpawnListEntries
      */
     public ImmutableCollection<SpawnListEntry> getSpawnListFor(String biomePackageName) {
-        ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(biomePackageName);
+        ImmutableCollection<String> groupIDList = biomeGroupRegistry.packgNameToGroupIDs().get(biomePackageName);
         ArrayList<SpawnListEntry> biomeSpawnList = new ArrayList<SpawnListEntry>(30);
         for (String groupID : groupIDList) {
             for (Set<SpawnListEntry> biomeIDtoSpawnList : validSpawnListEntries.row(groupID).values()) {
@@ -148,7 +148,7 @@ public class BiomeSpawnListRegistry {
             return creatureType.isEntityOfType(livingHandlerRegistry, spawnListEntry.livingGroupID) ? spawnListEntry
                     : null;
         }
-        ImmutableCollection<String> groupIDList = biomeGroupRegistry.getPackgNameToGroupIDList().get(
+        ImmutableCollection<String> groupIDList = biomeGroupRegistry.packgNameToGroupIDs().get(
                 BiomeHelper.getPackageName(world.getBiomeGenForCoords(xCoord, zCoord)));
         return getRandomValidEntry(world.rand, groupIDList, creatureType.typeID);
     }
@@ -208,7 +208,7 @@ public class BiomeSpawnListRegistry {
                 continue;
             }
 
-            for (BiomeGroup group : biomeGroupRegistry.getIDToGroup().values()) {
+            for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
                 LivingConfiguration worldConfig = confgiCache.getLivingEntityConfig(configDirectory, handler.groupID);
                 SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group,
                         livingGroupRegistry.getLivingGroup(handler.groupID), spawnList).createFromConfig(worldConfig,
@@ -226,7 +226,7 @@ public class BiomeSpawnListRegistry {
     private SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
             ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
-            for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID.get(pckgNames)) {
+            for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
                 Collection<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = importedSpawnList
                         .getSpawnableCreatureList(biomeID);
                 for (String jasName : livingGroup.entityJASNames()) {
