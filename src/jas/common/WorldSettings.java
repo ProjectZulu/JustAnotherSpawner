@@ -60,7 +60,7 @@ public final class WorldSettings {
         livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 
         creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
-        creatureTypeRegistry.initializeFromConfig(modConfigDirectoryFile);
+        creatureTypeRegistry.loadFromConfig(modConfigDirectoryFile);
 
         livingHandlerRegistry = new LivingHandlerRegistry(livingGroupRegistry, creatureTypeRegistry, worldProperties);
         livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world, importedSpawnList);

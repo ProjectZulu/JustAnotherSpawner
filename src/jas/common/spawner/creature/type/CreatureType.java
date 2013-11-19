@@ -1,17 +1,15 @@
 package jas.common.spawner.creature.type;
 
 import static net.minecraftforge.common.ForgeDirection.UP;
-import jas.common.JASLog;
-import jas.common.config.EntityCategoryConfiguration;
+import jas.common.DefaultProps;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
-import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
 
-import java.util.List;
-import java.util.Map.Entry;
+import java.io.File;
+import java.util.Map;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStairs;
@@ -22,13 +20,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.common.ConfigCategory;
-import net.minecraftforge.common.Property;
-import net.minecraftforge.common.Property.Type;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 
 //TODO: Large Constructor could probably use Factory OR String optionalParameters to consolidate unused properties
@@ -53,7 +46,9 @@ public class CreatureType {
         this.spawnMedium = builder.getSpawnMedium();
         this.chunkSpawnChance = builder.getChunkSpawnChance();
         this.defaultBiomeCap = builder.getDefaultBiomeCap();
-        this.biomeCaps = ImmutableMap.<Integer, Integer> builder().putAll(builder.getBiomeCaps()).build();
+        Map<Integer, Integer> biomeCaps = CreatureTypeBuilder.capMapMappingToBiomeId(builder.getBiomeCaps(),
+                biomeGroupRegistry.biomeMappingToPckg(), biomeGroupRegistry.pckgNameToBiomeID());
+        this.biomeCaps = ImmutableMap.<Integer, Integer> builder().putAll(biomeCaps).build();
         this.optionalParameters = builder.getOptionalParameters();
         for (String string : optionalParameters.split("\\{")) {
             String parsed = string.replace("}", "");
@@ -65,79 +60,8 @@ public class CreatureType {
         spawning = spawning == null ? new OptionalSettingsCreatureTypeSpawn("") : spawning;
     }
 
-    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, float chunkSpawnChance) {
-        this(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
-                "{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]}");
-    }
-
-    public CreatureType(BiomeGroupRegistry biomeGroupRegistry, String typeID, int maxNumberOfCreature,
-            Material spawnMedium, int spawnRate, float chunkSpawnChance, String optionalParameters) {
-        this.biomeGroupRegistry = biomeGroupRegistry;
-        this.typeID = typeID;
-        this.maxNumberOfCreature = maxNumberOfCreature;
-        this.spawnMedium = spawnMedium;
-        this.spawnRate = spawnRate;
-        this.chunkSpawnChance = chunkSpawnChance;
-        defaultBiomeCap = -1;
-        biomeCaps = ImmutableMap.of();
-        this.optionalParameters = optionalParameters;
-        for (String string : optionalParameters.split("\\{")) {
-            String parsed = string.replace("}", "");
-            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-            if (Key.spawn.keyParser.isMatch(titletag)) {
-                spawning = new OptionalSettingsCreatureTypeSpawn(parsed);
-            }
-        }
-        spawning = spawning == null ? new OptionalSettingsCreatureTypeSpawn("") : spawning;
-    }
-
-    @Deprecated
-    public final CreatureType maxNumberOfCreatureTo(int maxNumberOfCreature) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
-                optionalParameters);
-    }
-
-    @Deprecated
-    public final CreatureType spawnRateTo(int spawnRate) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
-                optionalParameters);
-    }
-
-    @Deprecated
-    public final CreatureType chunkSpawningTo(float chunkSpawnChance) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
-                optionalParameters);
-    }
-
-    @Deprecated
-    public final CreatureType optionalParametersTo(String optionalParameters) {
-        return constructInstance(typeID, maxNumberOfCreature, spawnMedium, spawnRate, chunkSpawnChance,
-                optionalParameters);
-    }
-
     public boolean isReady(WorldServer world) {
         return world.getWorldInfo().getWorldTotalTime() % spawnRate == 0L;
-    }
-
-    /**
-     * Used internally to create a new Instance of CreatureType. MUST be Overriden by Subclasses so that they are not
-     * replaced with Parent. Used to Allow subclasses to Include their own Logic, but maintain same data structure.
-     * 
-     * Should create a new instance of class using parameters provided in the constructor.
-     * 
-     * @param typeID
-     * @param maxNumberOfCreature
-     * @param spawnMedium
-     * @param spawnRate
-     * @param chunkSpawning
-     */
-    @Deprecated
-    // Use CreatureTypeBuilder
-    protected CreatureType constructInstance(String typeID, int maxNumberOfCreature, Material spawnMedium,
-            int spawnRate, float chunkSpawnChance, String optionalParameters) {
-        return new CreatureType(biomeGroupRegistry, typeID, maxNumberOfCreature, spawnMedium, spawnRate,
-                chunkSpawnChance, optionalParameters);
     }
 
     /**
@@ -256,86 +180,6 @@ public class CreatureType {
         return counter > 0 ? chunkCap / counter : -1;
     }
 
-    /**
-     * Creates a new instance of creature types from configuration using itself as the default
-     * 
-     * @param config
-     * @return
-     */
-    public CreatureType createFromConfig(EntityCategoryConfiguration config) {
-        int resultSpawnRate = config.getSpawnRate(typeID, spawnRate).getInt();
-        int resultMaxNumberOfCreature = config.getSpawnCap(typeID, maxNumberOfCreature).getInt();
-
-        Optional<Boolean> chunkSpawn = config.isChunkSpawningPresent(typeID);
-        float defaultSpawnChance = chunkSpawn.isPresent() ? chunkSpawn.get() ? 0.10f : 0.0f : chunkSpawnChance;
-        float resultChunkSpawning = (float) config.getChunkSpawnChance(typeID, Float.toString(defaultSpawnChance))
-                .getDouble(defaultSpawnChance);
-
-        String resultOptionalParameters = config.getOptionalTags(typeID, optionalParameters).getString();
-        CreatureTypeBuilder builder = new CreatureTypeBuilder(typeID, resultSpawnRate, resultMaxNumberOfCreature)
-                .withOptionalParameters(resultOptionalParameters).withChanceToChunkSpawn(resultChunkSpawning);
-        builder.withDefaultBiomeCap(config.getDefaultBiomeCap(typeID, defaultBiomeCap).getInt());
-        ConfigCategory category = config.getBiomeCaps(typeID);
-        loadBiomeCap(category, builder, defaultBiomeCap);
-        return builder.build(biomeGroupRegistry);
-    }
-
-    private void loadBiomeCap(ConfigCategory category, CreatureTypeBuilder builder, final int defaultCap) {
-        for (Entry<String, Property> entry : category.entrySet()) {
-            String biomeIdentifier = entry.getKey();
-            String packageName = biomeGroupRegistry.biomeMappingToPckg().get(biomeIdentifier);
-            if (packageName == null) {
-                JASLog.severe("Error Parsing %s BiomeCap. %s is not a biome mapping.", typeID, biomeIdentifier);
-            } else {
-                List<Integer> biomeIDs = biomeGroupRegistry.pckgNameToBiomeID().get(packageName);
-                for (Integer biomeID : biomeIDs) {
-                    int chunkCap = entry.getValue().getInt(defaultCap);
-                    if (chunkCap < 0) {
-                        if (defaultCap >= 0) {
-                            JASLog.severe("%s BiomeCap (%s) cannot be < 0. Using DefaultCap %s", typeID,
-                                    biomeIdentifier, defaultCap);
-                        } else {
-                            JASLog.severe("%s BiomeCap (%s) cannot be < 0. Using %s", typeID, biomeIdentifier, 0);
-                        }
-                        chunkCap = defaultCap;
-                    }
-                    builder.withBiomeCap(biomeID, chunkCap);
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates a new instance of creature types from configuration using itself as the default
-     * 
-     * @param config
-     * @return
-     */
-    public void saveCurrentToConfig(EntityCategoryConfiguration config) {
-        config.getSpawnRate(typeID, spawnRate).set(spawnRate);
-        config.getSpawnCap(typeID, maxNumberOfCreature).set(maxNumberOfCreature);
-        config.getChunkSpawnChance(typeID, Float.toString(chunkSpawnChance)).set(Float.toString(chunkSpawnChance));
-        config.getOptionalTags(typeID, optionalParameters).set(optionalParameters);
-        config.getDefaultBiomeCap(typeID, defaultBiomeCap).set(defaultBiomeCap);
-
-        ConfigCategory category = config.getBiomeCaps(this.typeID);
-        for (Entry<Integer, Integer> entry : biomeCaps.entrySet()) {
-            Integer biomeID = entry.getKey();
-            Integer biomeCap = entry.getValue();
-            String mappingName = biomeGroupRegistry.biomePckgToMapping().get(BiomeHelper
-                    .getPackageName(BiomeGenBase.biomeList[biomeID]));
-            if (mappingName != null) {
-                Property biomeCapProp = category.get(mappingName);
-                if (biomeCapProp != null) {
-                    biomeCapProp.set(biomeCap);
-                } else {
-                    biomeCapProp = new Property(mappingName, Integer.toString(biomeCap), Type.INTEGER);
-                    category.put(BiomeHelper.getPackageName(BiomeGenBase.biomeList[biomeID]), biomeCapProp);
-                }
-            }
-        }
-    }
-
     /*
      * TODO: Does not Belong Here. Possible Block Helper Class. Ideally Mods should be able to Register a Block. Similar
      * to Proposed Entity Registry or StructureInterpreter. How will end-users fix issue? Does End User Need to?
@@ -358,5 +202,9 @@ public class CreatureType {
             return ((meta & 4) != 0);
         }
         return block.isBlockSolidOnSide(world, xCoord, yCoord, zCoord, UP);
+    }
+
+    public static File getFile(File configDirectory, String saveName) {
+        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "CreatureType.cfg");
     }
 }
