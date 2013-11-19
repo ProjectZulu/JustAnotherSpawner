@@ -408,7 +408,15 @@ public class BiomeGroupRegistry {
             for (String contentComponent : currentGroup.contents) {
                 for (BiomeGroup possibleGroup : groupsToSort) {
                     // Reminder: substring(2) is to remove mandatory A| and G| for groups
-                    if (contentComponent.substring(2).equals(possibleGroup.groupID)) {
+                    // Reminder: substring(1) is to remove operator +,-,&?
+                    String nameWithoutOperators;
+                    if (contentComponent.startsWith("-") || contentComponent.startsWith("+")
+                            || contentComponent.startsWith("&")) {
+                        nameWithoutOperators = contentComponent.substring(3);
+                    } else {
+                        nameWithoutOperators = contentComponent.substring(2);
+                    }
+                    if (nameWithoutOperators.equals(possibleGroup.groupID)) {
                         groupGraph.addEdge(possibleGroup, currentGroup);
                     }
                 }
