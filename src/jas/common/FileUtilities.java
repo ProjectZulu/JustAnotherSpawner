@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
@@ -133,4 +134,16 @@ public class FileUtilities {
         }
     }
 
+    public static File[] getFileInDirectory(File directory, final String suffix) {
+        if (!directory.exists()) {
+            return new File[0];
+        }
+        directory.mkdirs();
+        return directory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(suffix);
+            }
+        });
+    }
 }

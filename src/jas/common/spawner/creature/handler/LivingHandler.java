@@ -14,6 +14,7 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPost
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.logging.Level;
 
@@ -42,6 +43,30 @@ public class LivingHandler {
         return despawning;
     }
 
+    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, LivingHandlerBuilder builder) {
+        this.creatureTypeRegistry = creatureTypeRegistry;
+        this.groupID = builder.getHandlerId();
+        this.creatureTypeID = creatureTypeRegistry.getCreatureType(builder.getCreatureTypeId()) != null ? builder
+                .getCreatureTypeId() : CreatureTypeRegistry.NONE;
+        this.shouldSpawn = builder.getShouldSpawn();
+        this.optionalParameters = builder.getOptionalParameters();
+        for (String string : optionalParameters.split("\\{")) {
+            String parsed = string.replace("}", "");
+            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+            if (Key.spawn.keyParser.isMatch(titletag)) {
+                spawning = new OptionalSettingsSpawning(parsed);
+            } else if (Key.despawn.keyParser.isMatch(titletag)) {
+                despawning = new OptionalSettingsDespawning(parsed);
+            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
+                postspawning = new OptionalSettingsPostSpawning(parsed);
+            }
+        }
+        spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
+        despawning = despawning == null ? new OptionalSettingsDespawning("") : despawning;
+        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
+    }
+
+    @Deprecated
     public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, String livingGroupID, String creatureTypeID,
             boolean shouldSpawn, String optionalParameters) {
         this.creatureTypeRegistry = creatureTypeRegistry;
@@ -67,14 +92,17 @@ public class LivingHandler {
         postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
     }
 
+    @Deprecated
     public final LivingHandler toCreatureTypeID(String creatureTypeID) {
         return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
+    @Deprecated
     public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
         return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
 
+    @Deprecated
     public final LivingHandler toOptionalParameters(String optionalParameters) {
         return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
     }
@@ -91,6 +119,7 @@ public class LivingHandler {
      * @param spawnRate
      * @param chunkSpawning
      */
+    @Deprecated
     protected LivingHandler constructInstance(String livingGroupID, String creatureTypeID, boolean shouldSpawn,
             String optionalParameters) {
         return new LivingHandler(creatureTypeRegistry, livingGroupID, creatureTypeID, shouldSpawn, optionalParameters);
@@ -337,5 +366,33 @@ public class LivingHandler {
         String currentValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
                 + optionalParameters;
         config.getLivingHandler(groupID, currentValue).set(currentValue);
+    }
+
+    public static File getFile(File configDirectory, String saveName, String fileName) {
+        String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYHANDLERDIR;
+        if (fileName != null && !fileName.equals("")) {
+            filePath = filePath.concat(fileName).concat(".cfg");
+        }
+        return new File(configDirectory, filePath);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        LivingHandler other = (LivingHandler) obj;
+        return groupID.equals(other.groupID);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((groupID == null) ? 0 : groupID.hashCode());
+        return result;
     }
 }

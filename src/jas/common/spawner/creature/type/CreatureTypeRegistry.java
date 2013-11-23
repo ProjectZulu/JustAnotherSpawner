@@ -58,7 +58,7 @@ public class CreatureTypeRegistry {
     }
 
     public void loadFromConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson();
+        Gson gson = GsonHelper.createGson(true);
         File creatureTypeFile = CreatureType
                 .getFile(configDirectory, worldProperties.getFolderConfiguration().saveName);
         Optional<HashMap<String, CreatureTypeBuilder>> read = GsonHelper.readFromGson(
@@ -106,7 +106,7 @@ public class CreatureTypeRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveCurrentToConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson();
+        Gson gson = GsonHelper.createGson(true);
         File creatureTypeFile = CreatureType
                 .getFile(configDirectory, worldProperties.getFolderConfiguration().saveName);
         HashMap<String, CreatureTypeBuilder> writeTypes = new HashMap<String, CreatureTypeBuilder>();

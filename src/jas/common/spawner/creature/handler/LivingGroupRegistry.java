@@ -283,7 +283,7 @@ public class LivingGroupRegistry {
     private void loadBiomes(LivingGroupSaveObject savedStats, List<String> newJASNames) {
         Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
         if (savedStats.configNameToLivingGroups != null) {
-            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToAttributeGroups.values();
+            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.values();
             for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
                 for (LivingGroup biomeGroup : treeMap.values()) {
                     if (!"".equals(biomeGroup.groupID)) {
