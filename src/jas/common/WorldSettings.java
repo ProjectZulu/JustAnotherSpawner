@@ -33,6 +33,7 @@ public final class WorldSettings {
         this.creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
         this.livingHandlerRegistry = new LivingHandlerRegistry(livingGroupRegistry, creatureTypeRegistry,
                 worldProperties);
+        structureHandlerRegistry = new StructureHandlerRegistry(livingHandlerRegistry, worldProperties);
         loadWorldSettings(modConfigDirectoryFile, world);
     }
 
@@ -63,8 +64,6 @@ public final class WorldSettings {
         livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
         creatureTypeRegistry.loadFromConfig(modConfigDirectoryFile);
         livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world);
-
-        structureHandlerRegistry = new StructureHandlerRegistry(livingHandlerRegistry, worldProperties);
         structureHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world);
 
         biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, livingGroupRegistry,

@@ -78,14 +78,14 @@ public class CommandListSpawns extends CommandJasBase {
             commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getStructureSpawnList(
                     targetBiomeStructure, entityCategName, expandedEntries)));
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getBiomeSpawnList(
-                    targetBiomeStructure, entityCategName, expandedEntries)));
+            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getBiomeSpawnList(targetBiomeStructure,
+                    entityCategName, expandedEntries)));
         }
     }
 
     private String getTargetAtPlayer(EntityPlayerMP player) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
-                .getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+                .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             String target = handler.getStructure(player.worldObj, (int) player.posX, (int) player.posY,
@@ -165,8 +165,8 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
-                .getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+                .iterator();
         while (iterator.hasNext()) {
             StructureHandler type = iterator.next();
             for (String structureKey : type.getStructureKeys()) {
@@ -187,8 +187,8 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
-                .getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+                .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {
@@ -268,8 +268,8 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addStructureNames(List<String> tabCompletions) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry()
-                .getHandlers();
+        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+                .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             for (String structureKey : handler.getStructureKeys()) {

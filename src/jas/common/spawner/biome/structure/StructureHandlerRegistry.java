@@ -24,9 +24,13 @@ import com.google.gson.Gson;
 
 public class StructureHandlerRegistry {
     private static final ArrayList<StructureInterpreter> structureInterpreters = new ArrayList<StructureInterpreter>();
-    private ImmutableList<StructureHandler> structureHandlers;
     public final LivingHandlerRegistry livingHandlerRegistry;
     public final WorldProperties worldProperties;
+    private ImmutableList<StructureHandler> structureHandlers;
+
+    public ImmutableList<StructureHandler> handlers() {
+        return structureHandlers;
+    }
 
     static {
         structureInterpreters.add(new StructureInterpreterSwamp());
@@ -66,14 +70,6 @@ public class StructureHandlerRegistry {
         this.structureHandlers = ImmutableList.<StructureHandler> builder().addAll(structureHandlers).build();
     }
 
-    public Iterator<StructureHandler> getHandlers() {
-        return structureHandlers.iterator();
-    }
-
-    public ImmutableList<StructureHandler> handlers() {
-        return ImmutableList.copyOf(structureHandlers);
-    }
-
     /**
      * Used to save the currently loaded settings into the Configuration Files
      * 
@@ -89,7 +85,7 @@ public class StructureHandlerRegistry {
     }
 
     public Collection<SpawnListEntry> getSpawnListAt(World world, int xCoord, int yCoord, int zCoord) {
-        Iterator<StructureHandler> iterator = this.getHandlers();
+        Iterator<StructureHandler> iterator = this.handlers().iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
             if (handler.doesHandlerApply(world, xCoord, yCoord, zCoord)) {
