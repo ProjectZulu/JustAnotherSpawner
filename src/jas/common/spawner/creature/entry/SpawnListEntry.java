@@ -47,6 +47,29 @@ public class SpawnListEntry extends WeightedRandomItem {
             + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
             + "MaxChunkPackSize";
 
+    public SpawnListEntry(SpawnListEntryBuilder builder) {
+        super(builder.getWeight());
+        this.livingGroupID = builder.getLivingGroupId();
+        this.packSize = builder.getPackSize();
+        this.pckgName = builder.getBiomeGroupId();
+        this.minChunkPack = builder.getMinChunkPack();
+        this.maxChunkPack = builder.getMaxChunkPack();
+        this.optionalParameters = builder.getOptionalParameters();
+
+        for (String string : optionalParameters.split("\\{")) {
+            String parsed = string.replace("}", "");
+            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+            if (Key.spawn.keyParser.isMatch(titletag)) {
+                spawning = new OptionalSettingsSpawnListSpawning(parsed);
+            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
+                postspawning = new OptionalSettingsPostSpawning(parsed);
+            }
+        }
+        spawning = spawning == null ? new OptionalSettingsSpawnListSpawning("") : spawning;
+        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
+    }
+
+    @Deprecated
     public SpawnListEntry(String livingGroupID, String pckgName, int weight, int packSize, int minChunkPack,
             int maxChunkPack, String optionalParameters) {
         super(weight);

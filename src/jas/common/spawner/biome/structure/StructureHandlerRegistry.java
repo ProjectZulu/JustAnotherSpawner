@@ -1,24 +1,30 @@
 package jas.common.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
+import jas.common.FileUtilities;
+import jas.common.GsonHelper;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
-
-import com.google.common.collect.ImmutableList;
 
 import net.minecraft.world.World;
 
+import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
+
 public class StructureHandlerRegistry {
     private static final ArrayList<StructureInterpreter> structureInterpreters = new ArrayList<StructureInterpreter>();
-    private final ArrayList<StructureHandler> structureHandlers = new ArrayList<StructureHandler>();
+    private ImmutableList<StructureHandler> structureHandlers;
     public final LivingHandlerRegistry livingHandlerRegistry;
     public final WorldProperties worldProperties;
 
@@ -37,17 +43,27 @@ public class StructureHandlerRegistry {
         this.worldProperties = worldProperties;
     }
 
-    public void setupHandlers(File configDirectory, World world) {
+    public void loadFromConfig(File configDirectory, World world) {
+        ArrayList<StructureHandler> structureHandlers = new ArrayList<StructureHandler>();
         for (StructureInterpreter interpreter : structureInterpreters) {
             structureHandlers.add(new StructureHandler(interpreter));
         }
 
+        File structureFile = StructureHandler.getFile(configDirectory,
+                worldProperties.getFolderConfiguration().saveName);
+        Gson gson = GsonHelper.createGson(true, new Type[] { StructureSaveObject.class },
+                new Object[] { new StructureSaveObject() });
+        StructureSaveObject saveObject = GsonHelper.readFromGson(FileUtilities.createReader(structureFile, true),
+                StructureSaveObject.class, gson);
+        HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists = saveObject.createKeyToSpawnList();
+
         StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
         structureConfig.load();
         for (StructureHandler structureHandler : structureHandlers) {
-            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, worldProperties);
+            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, readSpawnLists, worldProperties);
         }
         structureConfig.save();
+        this.structureHandlers = ImmutableList.<StructureHandler> builder().addAll(structureHandlers).build();
     }
 
     public Iterator<StructureHandler> getHandlers() {
@@ -64,12 +80,12 @@ public class StructureHandlerRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveCurrentToConfig(File configDirectory) {
-        StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
-        structureConfig.load();
-        for (StructureHandler handler : structureHandlers) {
-            handler.saveToConfig(structureConfig, worldProperties);
-        }
-        structureConfig.save();
+        File structureFile = StructureHandler.getFile(configDirectory,
+                worldProperties.getFolderConfiguration().saveName);
+        Gson gson = GsonHelper.createGson(true, new Type[] { StructureSaveObject.class },
+                new Object[] { new StructureSaveObject() });
+        GsonHelper.writeToGson(FileUtilities.createWriter(structureFile, true), new StructureSaveObject(
+                livingHandlerRegistry, structureHandlers), gson);
     }
 
     public Collection<SpawnListEntry> getSpawnListAt(World world, int xCoord, int yCoord, int zCoord) {

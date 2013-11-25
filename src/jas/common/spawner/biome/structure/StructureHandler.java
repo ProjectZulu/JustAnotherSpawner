@@ -1,49 +1,59 @@
 package jas.common.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
+import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.config.StructureConfiguration;
+import jas.common.spawner.creature.entry.SpawnListEntry;
+import jas.common.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.SpawnListEntry;
-import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 
 public class StructureHandler {
-    private final StructureInterpreter interpreter;
+    public final StructureInterpreter interpreter;
 
-    private final List<String> structureKeys = new ArrayList<String>();
-    private final ListMultimap<String, jas.common.spawner.creature.entry.SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap
-            .create();
+    private final ImmutableList<String> structureKeys;
+    private ImmutableListMultimap<String, SpawnListEntry> structureKeysToSpawnList;
+    /* Tracks valid entries that are currently ignore (weight ==0 or type==NONE) but need to be kept in the config */
+    private ImmutableListMultimap<String, SpawnListEntry> structureKeysToDisabledpawnList;
 
     public StructureHandler(StructureInterpreter interpreter) {
+        Builder<String> builder = ImmutableList.builder();
         this.interpreter = interpreter;
         for (String structureKey : interpreter.getStructureKeys()) {
-            structureKeys.add(structureKey);
+            builder.add(structureKey);
         }
+        structureKeys = builder.build();
     }
 
     public ImmutableList<String> getStructureKeys() {
-        return ImmutableList.copyOf(structureKeys);
+        return structureKeys;
     }
 
-    public ImmutableList<jas.common.spawner.creature.entry.SpawnListEntry> getStructureSpawnList(String structureKey) {
-        return ImmutableList.copyOf(structureKeysToSpawnList.get(structureKey));
+    public ImmutableList<SpawnListEntry> getStructureSpawnList(String structureKey) {
+        return structureKeysToSpawnList.get(structureKey);
+    }
+
+    public ImmutableList<SpawnListEntry> getStructureDisabledSpawnList(String structureKey) {
+        return structureKeysToDisabledpawnList.get(structureKey);
     }
 
     /**
@@ -51,8 +61,7 @@ public class StructureHandler {
      * 
      * @return Collection of JAS SpawnListEntries that should be spawn. Return Empty list if none.
      */
-    public Collection<jas.common.spawner.creature.entry.SpawnListEntry> getStructureSpawnList(World world, int xCoord,
-            int yCoord, int zCoord) {
+    public Collection<SpawnListEntry> getStructureSpawnList(World world, int xCoord, int yCoord, int zCoord) {
         String structureKey = interpreter.areCoordsStructure(world, xCoord, yCoord, zCoord);
         if (structureKey != null) {
             return structureKeysToSpawnList.get(structureKey);
@@ -75,114 +84,68 @@ public class StructureHandler {
      * @param world
      */
     public final void readFromConfig(LivingHandlerRegistry livingHandlerRegistry, StructureConfiguration worldConfig,
-            WorldProperties worldProperties) {
-        /*
-         * For Every Structure Key; Generate Two Configuration Categories: One to list Entities, the Other to Generate
-         * SpawnListEntry Settings
-         */
+            HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists, WorldProperties worldProperties) {
+
+        ListMultimap<String, SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap.create();
+        ListMultimap<String, SpawnListEntry> structureKeysToDisabledpawnList = ArrayListMultimap.create();
+
         for (String structureKey : structureKeys) {
-            StringBuilder livingHandlerIDs = new StringBuilder();
-            Iterator<SpawnListEntry> iterator = interpreter.getStructureSpawnList(structureKey).iterator();
-            while (iterator.hasNext()) {
-                SpawnListEntry spawnListEntry = iterator.next();
-                @SuppressWarnings("unchecked")
-                List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);
-                if (!handlers.isEmpty()) {
-                    livingHandlerIDs.append(handlers.get(0).groupID);
-                    if (iterator.hasNext()) {
-                        livingHandlerIDs.append(",");
+            Collection<SpawnListEntryBuilder> spawnList = readSpawnLists.get(structureKey);
+            if (spawnList == null) {
+                spawnList = new ArrayList<SpawnListEntryBuilder>();
+                for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : interpreter
+                        .getStructureSpawnList(structureKey)) {
+                    @SuppressWarnings("unchecked")
+                    List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);
+                    if (!handlers.isEmpty()) {
+                        SpawnListEntryBuilder builder = new SpawnListEntryBuilder(handlers.get(0).groupID, structureKey);
+                        builder.setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
+                                .setMaxChunkPack(spawnListEntry.maxGroupCount);
+                        spawnList.add(builder);
+                    } else {
+                        JASLog.warning(
+                                "Default entity %s that should spawn in structure %s does not appear to belong to an entity group.",
+                                spawnListEntry.entityClass.getSimpleName(), structureKey);
                     }
-                } else {
-                    JASLog.warning(
-                            "Default entity %s that should spawn in structure %s does not appear to belong to an entity group.",
-                            spawnListEntry.entityClass.getSimpleName(), structureKey);
                 }
             }
-            /* Under StructureSpawns.SpawnList have List of Entities that are Spawnable. */
-            Property resultNames = worldConfig.getStructureSpawns(structureKey, livingHandlerIDs.toString());
 
-            for (String groupID : resultNames.getString().split(",")) {
-                if (groupID.trim().equals("")) {
+            for (SpawnListEntryBuilder spawnBuilder : spawnList) {
+                SpawnListEntry spawnEntry = spawnBuilder.build();
+                LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnBuilder.getLivingGroupId());
+                if (handler == null) {
+                    JASLog.severe("Error loading structure %s. EntityGroup %s doesn not appear to exist.",
+                            structureKey, spawnEntry.livingGroupID);
                     continue;
                 }
 
-                LivingHandler livingHandler = livingHandlerRegistry.getLivingHandler(groupID);
-                if (livingHandler == null) {
-                    JASLog.severe("Error parsing EntityGroup from Structure %s spawnlist %s. The key %s is unknown.",
-                            structureKey, resultNames.getString(), groupID);
-                    continue;
-                }
-
-                if (!livingHandler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
-                    jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = createDefaultJASSpawnEntry(
-                            livingHandlerRegistry, livingHandler, structureKey).createFromConfig(worldConfig,
-                            worldProperties);
-
-                    if (spawnListEntry.itemWeight > 0 && livingHandler.shouldSpawn) {
-                        JASLog.info("Adding SpawnListEntry %s of type %s to StructureKey %s", livingHandler.groupID,
-                                livingHandler.creatureTypeID, structureKey);
-                        structureKeysToSpawnList.get(structureKey).add(spawnListEntry);
+                if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
+                    if (spawnEntry.itemWeight > 0 && handler.shouldSpawn) {
+                        JASLog.info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.groupID,
+                                handler.creatureTypeID, structureKey);
+                        structureKeysToSpawnList.put(structureKey, spawnEntry);
                     } else {
+                        structureKeysToDisabledpawnList.put(structureKey, spawnEntry);
                         JASLog.debug(
                                 Level.INFO,
                                 "Not adding Structure SpawnListEntry of %s to StructureKey %s due to Weight %s or ShouldSpawn %s.",
-                                livingHandler.groupID, structureKey, spawnListEntry.itemWeight,
-                                livingHandler.shouldSpawn);
+                                handler.groupID, structureKey, spawnEntry.itemWeight, handler.shouldSpawn);
                     }
                 } else {
                     JASLog.debug(Level.INFO,
                             "Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", structureKey,
-                            livingHandler.groupID, livingHandler.creatureTypeID);
+                            handler.groupID, handler.creatureTypeID);
                 }
             }
+
         }
+        this.structureKeysToSpawnList = ImmutableListMultimap.<String, SpawnListEntry> builder()
+                .putAll(structureKeysToSpawnList).build();
+        this.structureKeysToDisabledpawnList = ImmutableListMultimap.<String, SpawnListEntry> builder()
+                .putAll(structureKeysToDisabledpawnList).build();
     }
 
-    public void saveToConfig(StructureConfiguration config, WorldProperties worldProperties) {
-        for (Entry<String, Collection<jas.common.spawner.creature.entry.SpawnListEntry>> entry : structureKeysToSpawnList
-                .asMap().entrySet()) {
-            String entityListString = "";
-            Iterator<jas.common.spawner.creature.entry.SpawnListEntry> iterator = entry.getValue().iterator();
-            while (iterator.hasNext()) {
-                jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry = iterator.next();
-                spawnListEntry.saveToConfig(config, worldProperties);
-
-                entityListString = entityListString.concat(spawnListEntry.livingGroupID);
-                if (iterator.hasNext()) {
-                    entityListString = entityListString.concat(",");
-                }
-            }
-            config.getStructureSpawns(entry.getKey(), entityListString).set(entityListString);
-        }
-
-        for (jas.common.spawner.creature.entry.SpawnListEntry spawnListEntry : structureKeysToSpawnList.values()) {
-            spawnListEntry.saveToConfig(config, worldProperties);
-        }
-    }
-
-    /**
-     * Generates the Default JAS SpawnListEntry for the Given Entity by First Seach the Interpreter for The Mod Default
-     * and assigning 'regular default' values if one is not found
-     * 
-     * @param livingClass
-     * @param structureKey
-     * @param biome
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    private jas.common.spawner.creature.entry.SpawnListEntry createDefaultJASSpawnEntry(
-            LivingHandlerRegistry livingHandlerRegistry, LivingHandler livingHandler, String structureKey) {
-        Iterator<SpawnListEntry> iterator = interpreter.getStructureSpawnList(structureKey).iterator();
-        while (iterator.hasNext()) {
-            SpawnListEntry spawnListEntry = iterator.next();
-            for (LivingHandler spawnHandler : livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass)) {
-                if (spawnHandler.groupID.equals(livingHandler.groupID)) {
-                    return new jas.common.spawner.creature.entry.SpawnListEntry(livingHandler.groupID, structureKey,
-                            spawnListEntry.itemWeight, 4, spawnListEntry.minGroupCount, spawnListEntry.maxGroupCount,
-                            "");
-                }
-            }
-        }
-        return new jas.common.spawner.creature.entry.SpawnListEntry(livingHandler.groupID, structureKey, 0, 4, 0, 4, "");
+    public static File getFile(File configDirectory, String saveName) {
+        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "StructureSpawns.cfg");
     }
 }
