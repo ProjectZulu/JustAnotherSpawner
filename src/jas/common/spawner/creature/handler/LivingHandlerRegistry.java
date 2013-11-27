@@ -4,6 +4,7 @@ import jas.common.ImportedSpawnList;
 import jas.common.WorldProperties;
 import jas.common.config.LivingConfiguration;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
@@ -16,6 +17,8 @@ import java.util.Map.Entry;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraftforge.common.Property;
 
 import com.google.common.collect.ImmutableList;
@@ -27,7 +30,7 @@ public class LivingHandlerRegistry {
     public LivingHandler getLivingHandler(String groupID) {
         return livingHandlers.get(groupID);
     }
-    
+
     public List<LivingHandler> getLivingHandlers(Class<? extends EntityLiving> entityClass) {
         List<LivingHandler> list = new ArrayList<LivingHandler>();
         for (String groupID : livingGroupRegistry.getGroupsWithEntity(livingGroupRegistry.EntityClasstoJASName
@@ -74,7 +77,7 @@ public class LivingHandlerRegistry {
 
         for (LivingGroup livingGroup : livingGroups) {
             LivingHandler livingHandler = new LivingHandler(creatureTypeRegistry, livingGroup.groupID,
-                    guessCreatureTypeOfGroup(livingGroup, world), true, "");
+                    guessCreatureTypeOfGroup(livingGroup, world, spawnList), true, "");
             livingHandlers.put(livingGroup.groupID, livingHandler);
         }
 
@@ -95,7 +98,8 @@ public class LivingHandlerRegistry {
      * @param livingClass
      * @return
      */
-    private String guessCreatureTypeOfGroup(LivingGroup livingGroup, World world) {
+    private String guessCreatureTypeOfGroup(LivingGroup livingGroup, World world, ImportedSpawnList spawnList) {
+        /* Find entity and inquire as to type */
         for (String jasName : livingGroup.entityJASNames()) {
             Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
             EntityLiving creature = LivingHelper.createCreature(livingClass, world);
@@ -104,6 +108,25 @@ public class LivingHandlerRegistry {
                         .isAssignableFrom(livingClass);
                 if (isType && creatureTypeRegistry.getCreatureType(type.toString()) != null) {
                     return type.toString();
+                }
+            }
+        }
+        /* Search for matching spawnlist and assign type equivalent to Spawnlist */
+        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+            if (biome != null) {
+                for (EnumCreatureType creatureType : EnumCreatureType.values()) {
+                    for (SpawnListEntry entry : spawnList.getSpawnableCreatureList(biome, creatureType)) {
+                        for (String jasName : livingGroup.entityJASNames()) {
+                            Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass
+                                    .get(jasName);
+                            if (entry.entityClass.equals(livingClass)) {
+                                CreatureType type = creatureTypeRegistry.getCreatureType(creatureType.toString());
+                                if (type != null) {
+                                    return type.typeID;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
