@@ -16,6 +16,7 @@ public class GlobalSettings {
 
     public int chunkspawnDistance = 8;
     public int chunkCountDistance = 8;
+    public boolean loadChunksForCounting = false;
 
     GlobalSettings(File configDirectory) {
         loadProperties(configDirectory);
@@ -32,6 +33,9 @@ public class GlobalSettings {
 
         globalSortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome",
                 globalSortCreatureByBiome).getBoolean(globalSortCreatureByBiome);
+        loadChunksForCounting = config.get("Properties.Spawning", "loadCreateChunkForCounting", loadChunksForCounting)
+                .getBoolean(loadChunksForCounting);
+
         Property resultTickSpacing = config.get("Properties.Spawning", "Spawner Tick Spacing", spawnerTickSpacing);
         if (resultTickSpacing.getInt(spawnerTickSpacing) < 0) {
             JASLog.severe(

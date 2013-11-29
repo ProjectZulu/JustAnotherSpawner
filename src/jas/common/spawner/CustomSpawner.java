@@ -65,6 +65,13 @@ public class CustomSpawner {
                             || zOffset == chunkDistance;
                     ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
                     ChunkStat chunkStat = new ChunkStat(flag3);
+                    if (!JustAnotherSpawner.globalSettings().loadChunksForCounting
+                            && !worldServer.getChunkProvider().chunkExists(chunkcoordintpair.chunkXPos,
+                                    chunkcoordintpair.chunkZPos)) {
+                        JASLog.info("Chunk does not exist: {%s,  %s}, skipping", chunkcoordintpair.chunkXPos,
+                                chunkcoordintpair.chunkZPos);
+                        continue;
+                    }
                     Chunk chunk = worldServer.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos,
                             chunkcoordintpair.chunkZPos);
                     for (@SuppressWarnings("rawtypes")
