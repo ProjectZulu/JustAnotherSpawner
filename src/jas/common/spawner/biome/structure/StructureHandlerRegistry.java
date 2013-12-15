@@ -4,7 +4,6 @@ import jas.api.StructureInterpreter;
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.WorldProperties;
-import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
@@ -61,12 +60,9 @@ public class StructureHandlerRegistry {
                 StructureSaveObject.class, gson);
         HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists = saveObject.createKeyToSpawnList();
 
-        StructureConfiguration structureConfig = new StructureConfiguration(configDirectory, worldProperties);
-        structureConfig.load();
         for (StructureHandler structureHandler : structureHandlers) {
-            structureHandler.readFromConfig(livingHandlerRegistry, structureConfig, readSpawnLists, worldProperties);
+            structureHandler.readFromConfig(livingHandlerRegistry, readSpawnLists, worldProperties);
         }
-        structureConfig.save();
         this.structureHandlers = ImmutableList.<StructureHandler> builder().addAll(structureHandlers).build();
     }
 

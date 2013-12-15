@@ -26,10 +26,10 @@ public class FolderConfiguration {
         @SerializedName("World_Save_Folder_Name")
         public final String saveName;
         /* Marks how the Entity CFG settings should be saved */
-        @SerializedName("Sort_Creature_By_Biome")
+        @SerializedName("Use_Universal_Entity_CFG")
         public final Boolean universalDirectory;
         /* Marks how the Entity CFG settings should be saved */
-        @SerializedName("Use_Universal_Entity_CFG")
+        @SerializedName("Sort_Creature_By_Biome")
         public final Boolean sortCreatureByBiome;
 
         public WorldStats() {

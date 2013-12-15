@@ -38,11 +38,8 @@ public final class WorldSettings {
     }
 
     public void saveWorldSettings(File configDirectory, World world) {
-        if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.getFolderConfiguration().universalDirectory
-                || worldProperties.getSavedFileConfiguration().sortCreatureByBiome != worldProperties
-                        .getFolderConfiguration().sortCreatureByBiome) {
+        if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.getFolderConfiguration().universalDirectory) {
             worldProperties.setSavedUniversalDirectory(worldProperties.getFolderConfiguration().universalDirectory);
-            worldProperties.setSavedSortCreatureByBiome(worldProperties.getFolderConfiguration().sortCreatureByBiome);
             File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
                     + worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSUBDIR);
             for (File file : entityFolder.listFiles()) {

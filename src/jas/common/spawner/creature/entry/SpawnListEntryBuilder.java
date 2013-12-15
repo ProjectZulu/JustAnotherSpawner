@@ -2,7 +2,7 @@ package jas.common.spawner.creature.entry;
 
 public class SpawnListEntryBuilder {
     private String livingGroupId;
-    private String locationGroupId;
+    private String locationGroupId; // BiomeGroupId or StructureGroupId
     private int weight;
     private int packSize;
     private int minChunkPack;
@@ -31,7 +31,7 @@ public class SpawnListEntryBuilder {
 
     public SpawnListEntryBuilder(SpawnListEntry entry) {
         this.livingGroupId = entry.livingGroupID;
-        this.locationGroupId = entry.pckgName;
+        this.locationGroupId = entry.locationGroup;
         this.weight = entry.itemWeight;
         this.packSize = entry.packSize;
         this.minChunkPack = entry.minChunkPack;
@@ -48,7 +48,7 @@ public class SpawnListEntryBuilder {
         return this;
     }
 
-    public String getBiomeGroupId() {
+    public String getLocationGroupId() {
         return locationGroupId;
     }
 

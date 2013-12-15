@@ -33,11 +33,7 @@ public final class WorldProperties {
     }
 
     public void setSavedUniversalDirectory(boolean value) {
-        savedConfguration = new SavedFolderConfiguration(value, savedConfguration.sortCreatureByBiome);
-    }
-
-    public void setSavedSortCreatureByBiome(boolean value) {
-        savedConfguration = new SavedFolderConfiguration(savedConfguration.universalDirectory, value);
+        savedConfguration = new SavedFolderConfiguration(value);
     }
 
     public WorldProperties() {

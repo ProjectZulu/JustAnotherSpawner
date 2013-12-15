@@ -7,19 +7,15 @@ import com.google.gson.annotations.SerializedName;
 public class SavedFolderConfiguration {
     public final String _IMPORTANT = "# DO NOT TOUCH. Internally used to remember how the Configuration file was actually saved.";
     /* Marks how the Entity CFG settings should be saved */
-    @SerializedName("Sort_Creature_By_Biome")
-    public Boolean universalDirectory;
-    /* Marks how the Entity CFG settings should be saved */
     @SerializedName("Use_Universal_Entity_CFG")
-    public Boolean sortCreatureByBiome;
+    public Boolean universalDirectory;
 
     public SavedFolderConfiguration() {
-        this(false, true);
+        this(false);
     }
 
-    public SavedFolderConfiguration(boolean universalDirectory, boolean sortCreatureByBiome) {
+    public SavedFolderConfiguration(boolean universalDirectory) {
         this.universalDirectory = universalDirectory;
-        this.sortCreatureByBiome = sortCreatureByBiome;
     }
 
     public static File getFile(File configDirectory, String saveName) {

@@ -112,7 +112,7 @@ public class StructureSaveObject implements JsonSerializer<StructureSaveObject>,
                     JsonObject creatureNameObject = new JsonObject();
                     String stats = statsToString(nameEntry.getValue().getWeight(), nameEntry.getValue().getPackSize(),
                             nameEntry.getValue().getMinChunkPack(), nameEntry.getValue().getMaxChunkPack());
-                    creatureNameObject.addProperty("Weight-PackSize-MinChunkPack-MaxChunkPack", stats);
+                    creatureNameObject.addProperty("Weight-PassivePackMax-ChunkPackMin-ChunkPackMax", stats);
                     creatureNameObject.addProperty("Tags", nameEntry.getValue().getOptionalParameters());
                     livingTypeObject.add(creatureName, creatureNameObject);
                 }
@@ -185,7 +185,7 @@ public class StructureSaveObject implements JsonSerializer<StructureSaveObject>,
     }
 
     private void getSetStats(SpawnListEntryBuilder builder, JsonObject creatureNameObject) {
-        JsonElement element = creatureNameObject.get("Weight-PackSize-MinChunkPack-MaxChunkPack");
+        JsonElement element = creatureNameObject.get("Weight-PassivePackMax-ChunkPackMin-ChunkPackMax");
         int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
         builder.setWeight(stats[0]).setPackSize(stats[1]).setMinChunkPack(stats[2]).setMaxChunkPack(stats[2]);
     }

@@ -4,7 +4,6 @@ import jas.api.StructureInterpreter;
 import jas.common.DefaultProps;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
-import jas.common.config.StructureConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.common.spawner.creature.handler.LivingHandler;
@@ -83,7 +82,7 @@ public class StructureHandler {
      * @param configDirectory
      * @param world
      */
-    public final void readFromConfig(LivingHandlerRegistry livingHandlerRegistry, StructureConfiguration worldConfig,
+    public final void readFromConfig(LivingHandlerRegistry livingHandlerRegistry,
             HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists, WorldProperties worldProperties) {
 
         ListMultimap<String, SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap.create();
