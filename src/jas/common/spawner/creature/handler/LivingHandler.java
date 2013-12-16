@@ -4,9 +4,7 @@ import jas.common.DefaultProps;
 import jas.common.EntityProperties;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
-import jas.common.config.LivingConfiguration;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
@@ -15,15 +13,11 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpaw
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
-import java.util.Locale;
 import java.util.logging.Level;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
-import net.minecraftforge.common.ConfigCategory;
-import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
 
 public class LivingHandler {
 
@@ -303,69 +297,6 @@ public class LivingHandler {
 
             spawnListEntry.getOptionalPostSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
         }
-    }
-
-    public static void setupConfigCategory(Configuration config) {
-        ConfigCategory category = config.getCategory("CreatureSettings.LivingHandler".toLowerCase(Locale.ENGLISH));
-        category.setComment(LivingHandler.LivingHandlerCategoryComment);
-    }
-
-    /**
-     * Creates a new instance of this from configuration using itself as the default
-     * 
-     * @param config
-     * @return
-     */
-    protected LivingHandler createFromConfig(LivingConfiguration config) {
-        // String mobName = (String) EntityList.classToStringMapping.get(entityClass);
-
-        String defaultValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
-                + optionalParameters;
-
-        Property resultValue = config.getLivingHandler(groupID, defaultValue);
-
-        String[] resultMasterParts = resultValue.getString().split("\\{", 2);
-        String[] resultParts = resultMasterParts[0].split("\\" + DefaultProps.DELIMETER);
-
-        if (resultParts.length == 4) {
-            /* Legacy Converter To Convert Old Format Remove as of 1.0.0 or as soon as it becomes burdensome */
-            String resultCreatureType = ParsingHelper.parseCreatureTypeID(creatureTypeRegistry, resultParts[0],
-                    creatureTypeID, "creatureTypeID");
-            boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
-            boolean resultForceDespawn = ParsingHelper.parseBoolean(resultParts[2], false, "forceDespawn");
-            boolean resultLocationCheck = ParsingHelper.parseBoolean(resultParts[3], true, "LocationCheck");
-
-            String resultString = resultCreatureType + "-" + resultShouldSpawn;
-            if (resultLocationCheck == false) {
-                resultString = resultString.concat("{spawn}");
-            }
-            if (resultForceDespawn == true) {
-                resultString = resultString.concat("{despawn}");
-            }
-            resultValue.set(resultString);
-            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{"
-                    + resultValue.getString().split("\\{", 2)[1]) : resultHandler;
-        } else if (resultParts.length == 2) {
-            String resultCreatureType = ParsingHelper.parseCreatureTypeID(creatureTypeRegistry, resultParts[0],
-                    creatureTypeID, "creatureTypeID");
-            boolean resultShouldSpawn = ParsingHelper.parseBoolean(resultParts[1], shouldSpawn, "ShouldSpawn");
-            LivingHandler resultHandler = this.toCreatureTypeID(resultCreatureType).toShouldSpawn(resultShouldSpawn);
-            return resultMasterParts.length == 2 ? resultHandler.toOptionalParameters("{" + resultMasterParts[1])
-                    : resultHandler;
-        } else {
-            JASLog.severe(
-                    "LivingHandler Entry %s was invalid. Data is being ignored and loaded with default settings %s, %s",
-                    groupID, creatureTypeID, shouldSpawn);
-            resultValue.set(defaultValue);
-            return new LivingHandler(creatureTypeRegistry, groupID, creatureTypeID, shouldSpawn, "");
-        }
-    }
-
-    public void saveToConfig(LivingConfiguration config) {
-        String currentValue = creatureTypeID.toUpperCase() + DefaultProps.DELIMETER + Boolean.toString(shouldSpawn)
-                + optionalParameters;
-        config.getLivingHandler(groupID, currentValue).set(currentValue);
     }
 
     public static File getFile(File configDirectory, String saveName, String fileName) {
