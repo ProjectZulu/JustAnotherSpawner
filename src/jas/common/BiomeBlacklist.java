@@ -3,30 +3,59 @@ package jas.common;
 import jas.common.spawner.biome.group.BiomeHelper;
 
 import java.io.File;
+import java.lang.reflect.Type;
+import java.util.TreeMap;
 
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.Configuration;
+
+import com.google.common.base.Optional;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class BiomeBlacklist {
 
     private boolean[] blacklist;
 
     public BiomeBlacklist(File configDirectory) {
-        Configuration config = new Configuration(new File(configDirectory, DefaultProps.GLOBALSETTINGSDIR
-                + "GlobalProperties.cfg"));
-        config.load();
-        blacklist = new boolean[BiomeGenBase.biomeList.length];
-        for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
-            BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
-            if (biome != null
-                    && config.get("properties.biomeblacklist", BiomeHelper.getPackageName(biome), false).getBoolean(
-                            false)) {
-                blacklist[biomeID] = true;
-            } else {
-                blacklist[biomeID] = false;
+        Type blacklistType = new TypeToken<TreeMap<String, Boolean>>() {
+        }.getType();
+
+        Gson gson = GsonHelper.createGson(true);
+        File blackListFile = new File(configDirectory, DefaultProps.GLOBALSETTINGSDIR + "BiomeBlacklist.cfg");
+        /* Read Blacklist */
+        {
+            Optional<TreeMap<String, Boolean>> optBlackList = GsonHelper.readFromGson(
+                    FileUtilities.createReader(blackListFile, false), blacklistType, gson);
+            if (!optBlackList.isPresent()) {
+                optBlackList = Optional.of(new TreeMap<String, Boolean>());
+            }
+
+            /* Create Numeric Blacklist */
+            TreeMap<String, Boolean> namedBlacklist = optBlackList.get();
+            blacklist = new boolean[BiomeGenBase.biomeList.length];
+            for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
+                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
+                if (biome == null) {
+                    blacklist[biomeID] = false;
+                    continue;
+                }
+                Boolean isBlacklisted = namedBlacklist.get(BiomeHelper.getPackageName(biome));
+                blacklist[biomeID] = isBlacklisted != null ? isBlacklisted : false;
             }
         }
-        config.save();
+        {
+            /* Write Blacklist */
+            TreeMap<String, Boolean> namedBlacklist = new TreeMap<String, Boolean>();
+            for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
+                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
+                if (biome == null) {
+                    continue;
+                }
+                namedBlacklist.put(BiomeHelper.getPackageName(biome), blacklist[biomeID]);
+            }
+            GsonHelper
+                    .writeToGson(FileUtilities.createWriter(blackListFile, true), namedBlacklist, blacklistType, gson);
+        }
     }
 
     public boolean isBlacklisted(BiomeGenBase biome) {
