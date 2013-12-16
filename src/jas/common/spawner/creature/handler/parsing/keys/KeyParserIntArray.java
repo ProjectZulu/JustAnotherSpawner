@@ -34,7 +34,7 @@ public abstract class KeyParserIntArray extends KeyParserBase {
             operandvalue.add(operand);
             return true;
         } else {
-            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", key.key);
+            JASLog.log().severe("Error Parsing %s Parameter. Invalid Argument Length.", key.key);
             return false;
         }
     }

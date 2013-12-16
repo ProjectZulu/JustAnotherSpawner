@@ -41,7 +41,7 @@ public class GsonHelper {
         try {
             return object.newInstance();
         } catch (Exception e) {
-            JASLog.severe("This should never be possible. Failed to instantiate class %s.", object);
+            JASLog.log().severe("This should never be possible. Failed to instantiate class %s.", object);
             e.printStackTrace();
             return null;
         }

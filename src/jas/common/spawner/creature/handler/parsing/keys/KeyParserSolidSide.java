@@ -44,7 +44,7 @@ public class KeyParserSolidSide extends KeyParserBase {
                 rangeY = rangeX;
                 rangeZ = rangeX;
             } else {
-                JASLog.severe("Error Parsing Range of %s. Invalid Argument Length of %s.", key.key, rangePieces.length);
+                JASLog.log().severe("Error Parsing Range of %s. Invalid Argument Length of %s.", key.key, rangePieces.length);
             }
 
             if (pieces.length == 4) {
@@ -58,7 +58,7 @@ public class KeyParserSolidSide extends KeyParserBase {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, side, rangeX, rangeY, rangeZ });
             }
         } else {
-            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
+            JASLog.log().severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
             return false;
         }
 

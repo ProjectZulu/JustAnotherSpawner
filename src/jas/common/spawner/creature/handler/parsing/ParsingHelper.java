@@ -18,11 +18,11 @@ public class ParsingHelper {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for an integer. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
+                JASLog.log().warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
                         fallBack);
             }
             return fallBack;
@@ -37,11 +37,11 @@ public class ParsingHelper {
             return Integer.parseInt(value.replaceAll("[^\\d-]", ""));
         } catch (NumberFormatException e) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for an integer. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
+                JASLog.log().warning("Error Parsing %s for an integer. The Default value of %s will be used.", value,
                         fallBack);
             }
             return fallBack;
@@ -56,11 +56,11 @@ public class ParsingHelper {
             return Long.parseLong(value.replaceAll("[^\\d-]", ""));
         } catch (NumberFormatException e) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for an long. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for an long. The Default value of %s will be used.", value, fallBack);
+                JASLog.log().warning("Error Parsing %s for an long. The Default value of %s will be used.", value, fallBack);
             }
             return fallBack;
         }
@@ -74,11 +74,11 @@ public class ParsingHelper {
             return Float.parseFloat(value.replaceAll("[^\\d.-]", ""));
         } catch (NumberFormatException e) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for an double. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for an double. The Default value of %s will be used.", value, fallBack);
+                JASLog.log().warning("Error Parsing %s for an double. The Default value of %s will be used.", value, fallBack);
             }
             return fallBack;
         }
@@ -92,11 +92,11 @@ public class ParsingHelper {
             return Double.parseDouble(value.replaceAll("[^\\d.-]", ""));
         } catch (NumberFormatException e) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for an double. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for an double. The Default value of %s will be used.", value, fallBack);
+                JASLog.log().warning("Error Parsing %s for an double. The Default value of %s will be used.", value, fallBack);
             }
             return fallBack;
         }
@@ -113,11 +113,11 @@ public class ParsingHelper {
     public static boolean parseBoolean(String value, boolean fallBack, String fieldName) {
         if (!value.equalsIgnoreCase("true") && !value.equalsIgnoreCase("false")) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error Parsing %s for a boolean. %s was unreadable. The Default value of %s will be used.",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error Parsing %s for a boolean. The Default value of %s will be used.", value, fallBack);
+                JASLog.log().warning("Error Parsing %s for a boolean. The Default value of %s will be used.", value, fallBack);
             }
             return fallBack;
         } else {
@@ -137,11 +137,11 @@ public class ParsingHelper {
             String fieldName) {
         if (!CreatureTypeRegistry.NONE.equalsIgnoreCase(value) && creatureTypeRegistry.getCreatureType(value) == null) {
             if (fieldName != null) {
-                JASLog.warning(
+                JASLog.log().warning(
                         "Error parsing entry %s. CreatureType of %s was unreadable. Value will be set to default %s",
                         value, fieldName, fallBack);
             } else {
-                JASLog.warning("Error parsing entry %s. Value will be set to default %s", value, fallBack);
+                JASLog.log().warning("Error parsing entry %s. Value will be set to default %s", value, fallBack);
             }
             return fallBack;
         }

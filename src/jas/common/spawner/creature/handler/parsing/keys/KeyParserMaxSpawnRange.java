@@ -31,7 +31,7 @@ public class KeyParserMaxSpawnRange extends KeyParserBase {
                     ParsingHelper.parseFilteredInteger(pieces[1], 0, Key.maxSpawnRange.key));
             return true;
         } else {
-            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
             return false;
         }
     }

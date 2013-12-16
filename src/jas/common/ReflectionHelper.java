@@ -39,19 +39,19 @@ public class ReflectionHelper {
             method.setAccessible(true);
             return method.invoke(containterInstance, args);
         } catch (NoSuchMethodException e) {
-            JASLog.severe("Obfuscation needs updating to access method %s. Notify modmaker.", eclipseName);
+            JASLog.log().severe("Obfuscation needs updating to access method %s. Notify modmaker.", eclipseName);
             e.printStackTrace();
         } catch (SecurityException e) {
-            JASLog.severe("SecurityException accessing method %s. Notify modmaker.", eclipseName);
+            JASLog.log().severe("SecurityException accessing method %s. Notify modmaker.", eclipseName);
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            JASLog.severe("IllegalAccessException accessing method %s. Notify modmaker.", eclipseName);
+            JASLog.log().severe("IllegalAccessException accessing method %s. Notify modmaker.", eclipseName);
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            JASLog.severe("IllegalArgumentException accessing method %s. Notify modmaker.", eclipseName);
+            JASLog.log().severe("IllegalArgumentException accessing method %s. Notify modmaker.", eclipseName);
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-            JASLog.severe("InvocationTargetException accessing method %s. Notify modmaker.", eclipseName);
+            JASLog.log().severe("InvocationTargetException accessing method %s. Notify modmaker.", eclipseName);
             e.printStackTrace();
         }
         return null;
@@ -77,16 +77,16 @@ public class ReflectionHelper {
             }
             desiredField.set(containterInstance, value);
         }catch (NoSuchFieldException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
             e.printStackTrace();
         }catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
             e.printStackTrace();
         }catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
             e.printStackTrace();
         }catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.", fieldName);
             e.printStackTrace();
         }
     }
@@ -113,15 +113,15 @@ public class ReflectionHelper {
             }
             desiredField.set(containterInstance, value);
         } catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
                     fieldName);
             e.printStackTrace();
         } catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
                     fieldName);
             e.printStackTrace();
         } catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s. Please notify modmaker Immediately.",
                     fieldName);
             e.printStackTrace();
         }
@@ -139,16 +139,16 @@ public class ReflectionHelper {
             desiredField.setAccessible(true);
             return type.cast(desiredField.get(containterInstance));
         }catch (NoSuchFieldException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }
         return null;
@@ -166,16 +166,16 @@ public class ReflectionHelper {
             desiredField.setAccessible(true);
             return type.cast(desiredField.get(containterInstance));
         }catch (NoSuchFieldException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }
         return null;
@@ -193,13 +193,13 @@ public class ReflectionHelper {
             desiredField.setAccessible(true);
             return type.cast(desiredField.get(containterInstance));
         }catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }
         return null;
@@ -217,13 +217,13 @@ public class ReflectionHelper {
             desiredField.setAccessible(true);
             return type.cast(desiredField.get(containterInstance));
         }catch (IllegalArgumentException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (IllegalAccessException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }catch (SecurityException e) {
-            JASLog.severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
+            JASLog.log().severe("Obfuscation needs to be updated to access the %s %s. Please notify modmaker Immediately.", fieldName, type.getSimpleName());
             e.printStackTrace();
         }
         return null;

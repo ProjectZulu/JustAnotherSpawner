@@ -78,10 +78,10 @@ public final class BiomeSpawnListRegistry {
 
     private void logSpawning(SpawnListEntry spawnListEntry, LivingHandler handler, boolean success) {
         if (success) {
-            JASLog.info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", spawnListEntry.livingGroupID,
+            JASLog.log().info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", spawnListEntry.livingGroupID,
                     handler.creatureTypeID, spawnListEntry.locationGroup);
         } else {
-            JASLog.debug(Level.INFO,
+            JASLog.log().debug(Level.INFO,
                     "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
                     spawnListEntry.livingGroupID, spawnListEntry.itemWeight, handler, spawnListEntry.locationGroup);
         }
@@ -153,7 +153,7 @@ public final class BiomeSpawnListRegistry {
         Collection<SpawnListEntry> structureSpawnList = structureHandlerRegistry.getSpawnListAt(world, xCoord, yCoord,
                 zCoord);
         if (!structureSpawnList.isEmpty()) {
-            JASLog.debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
+            JASLog.log().debug(Level.INFO, "Structure SpawnListEntry found for ChunkSpawning at %s, %s, %s", xCoord, yCoord,
                     zCoord);
             SpawnListEntry spawnListEntry = (SpawnListEntry) WeightedRandom.getRandomItem(world.rand,
                     structureSpawnList);
@@ -224,17 +224,17 @@ public final class BiomeSpawnListRegistry {
             for (SpawnListEntryBuilder builder : builders) {
                 // isBiomeGroup&EntityGroupValid(SpawnListBuidler) ? addSpawn(build()) : ignore
                 if (biomeGroupRegistry.getBiomeGroup(builder.getLocationGroupId()) == null) {
-                    JASLog.severe("BiomeGroup %s does not exist. Entry will be ignored [%s].",
+                    JASLog.log().severe("BiomeGroup %s does not exist. Entry will be ignored [%s].",
                             builder.getLocationGroupId(), builder);
                 } else if (livingGroupRegistry.getLivingGroup(builder.getLivingGroupId()) == null) {
-                    JASLog.severe("LivingGroup %s does not exist. Entry will be ignored [%s].",
+                    JASLog.log().severe("LivingGroup %s does not exist. Entry will be ignored [%s].",
                             builder.getLivingGroupId(), builder);
                 } else {
                     SpawnListEntry spawnListEntry = null;
                     try {
                         spawnListEntry = builder.build();
                     } catch (Exception e) {
-                        JASLog.severe("Error building %s. Entry will be ignored [%s].", builder);
+                        JASLog.log().severe("Error building %s. Entry will be ignored [%s].", builder);
                     }
                     if (spawnListEntry != null) {
                         saveFilesProcessed.add(getSaveFileName(spawnListEntry.livingGroupID));
@@ -252,7 +252,7 @@ public final class BiomeSpawnListRegistry {
             }
             // String groupID = handler.groupID;
             if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
-                JASLog.debug(Level.INFO,
+                JASLog.log().debug(Level.INFO,
                         "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
                         handler.groupID, handler.creatureTypeID);
                 continue;

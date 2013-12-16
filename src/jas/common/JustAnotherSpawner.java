@@ -15,6 +15,9 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.WorldEvent;
+
+import com.google.gson.Gson;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -63,8 +66,18 @@ public class JustAnotherSpawner {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         modConfigDirectoryFile = event.getModConfigurationDirectory();
-        globalSettings = new GlobalSettings(modConfigDirectoryFile);
-        JASLog.configureLogging(modConfigDirectoryFile);
+        Gson gson = GsonHelper.createGson(true);
+
+        File globalSettingsFile = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "GlobalProperties.cfg");
+        globalSettings = GsonHelper.readFromGson(FileUtilities.createReader(globalSettingsFile, false),
+                GlobalSettings.class, gson);
+        GsonHelper.writeToGson(FileUtilities.createWriter(globalSettingsFile, true), globalSettings, gson);
+
+        File loggingSettings = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "LoggingProperties.cfg");
+        JASLog jasLog = GsonHelper.readFromGson(FileUtilities.createReader(loggingSettings, false), JASLog.class, gson);
+        JASLog.setLogger(jasLog);
+        GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
+
         MinecraftForge.EVENT_BUS.register(this);
         // proxy.registerKeyBinding();
     }
@@ -95,8 +108,8 @@ public class JustAnotherSpawner {
     public void worldLoad(WorldEvent.Load event) {
         GameRules gameRule = event.world.getGameRules();
         if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
-            JASLog.info("Setting GameRule doMobSpawning for %s-%s to false", event.world.getWorldInfo().getWorldName(),
-                    event.world.provider.dimensionId);
+            JASLog.log().info("Setting GameRule doMobSpawning for %s-%s to false",
+                    event.world.getWorldInfo().getWorldName(), event.world.provider.dimensionId);
             gameRule.setOrCreateGameRule("doMobSpawning", "false");
         }
 

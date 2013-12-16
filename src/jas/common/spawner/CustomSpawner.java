@@ -304,7 +304,7 @@ public class CustomSpawner {
                                                     spawnY, spawnZ)) {
                                                 entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                                             }
-                                            JASLog.logSpawn(false, (String) EntityList.classToStringMapping
+                                            JASLog.log().logSpawn(false, (String) EntityList.classToStringMapping
                                                     .get(entityliving.getClass()),
                                                     spawnlistentry.getLivingHandler().creatureTypeID,
                                                     (int) entityliving.posX, (int) entityliving.posY,
@@ -366,10 +366,10 @@ public class CustomSpawner {
                     world.getTopSolidOrLiquidBlock(j1, k1), k1);
             EntityLivingData entitylivingdata = null;
             if (spawnListEntry == null) {
-                JASLog.debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
+                JASLog.log().debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
             } else {
-                JASLog.debug(Level.INFO, "Evaluating if We Should spawn entity group %s", spawnListEntry.livingGroupID);
+                JASLog.log().debug(Level.INFO, "Evaluating if We Should spawn entity group %s", spawnListEntry.livingGroupID);
             }
             int i1 = spawnListEntry.minChunkPack
                     + random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
@@ -378,7 +378,7 @@ public class CustomSpawner {
                 Class<? extends EntityLiving> livingToSpawn = livingGroupRegistry.getRandomEntity(
                         spawnListEntry.livingGroupID, world.rand);
                 if (livingToSpawn == null) {
-                    JASLog.severe("No EntityClasses appear to exist in %s", spawnListEntry.toString());
+                    JASLog.log().severe("No EntityClasses appear to exist in %s", spawnListEntry.toString());
                     continue;
                 }
                 for (int k2 = 0; !flag && k2 < 4; ++k2) {
@@ -399,7 +399,7 @@ public class CustomSpawner {
                         }
 
                         entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-                        JASLog.logSpawn(true, (String) EntityList.classToStringMapping.get(entityliving.getClass()),
+                        JASLog.log().logSpawn(true, (String) EntityList.classToStringMapping.get(entityliving.getClass()),
                                 spawnListEntry.getLivingHandler().creatureTypeID, (int) entityliving.posX,
                                 (int) entityliving.posY, (int) entityliving.posZ, BiomeHelper
                                         .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
@@ -412,7 +412,7 @@ public class CustomSpawner {
 
                         flag = true;
                     } else {
-                        JASLog.debug(Level.INFO,
+                        JASLog.log().debug(Level.INFO,
                                 "Entity not Spawned due to invalid creatureType location. Creature Type was %s",
                                 creatureType.typeID);
                     }

@@ -72,7 +72,7 @@ public class KeyParserBiome extends KeyParserBase {
                     offsetX = ParsingHelper.parseFilteredInteger(offsetPieces[0], 0, key.key + "OffsetX");
                     offsetZ = ParsingHelper.parseFilteredInteger(offsetPieces[1], 0, key.key + "OffsetZ");
                 } else {
-                    JASLog.severe("Error Parsing Range of %s. Invalid Offset Argument Length of %s.", key.key,
+                    JASLog.log().severe("Error Parsing Range of %s. Invalid Offset Argument Length of %s.", key.key,
                             offsetPieces.length);
                 }
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeZ, offsetX, offsetZ,
@@ -81,7 +81,7 @@ public class KeyParserBiome extends KeyParserBase {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeZ, biomeName });
             }
         } else {
-            JASLog.severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
+            JASLog.log().severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
             return false;
         }
 

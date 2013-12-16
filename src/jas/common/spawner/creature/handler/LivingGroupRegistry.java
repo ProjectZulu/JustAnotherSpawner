@@ -308,7 +308,7 @@ public class LivingGroupRegistry {
         ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();
         for (LivingGroup livingGroup : sortedGroups) {
             parseGroupContents(livingGroup);
-            JASLog.info("Registering EntityGroup %s", livingGroup.toString());
+            JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
 
             iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
             for (String jasName : livingGroup.entityJASNames) {
@@ -373,10 +373,10 @@ public class LivingGroupRegistry {
             sortedList = TopologicalSort.topologicalSort(groupGraph);
         } catch (TopologicalSortingException sortException) {
             SortingExceptionData<LivingGroup> exceptionData = sortException.getExceptionData();
-            JASLog.severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
+            JASLog.log().severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
             int i = 1;
             for (LivingGroup invalidGroups : exceptionData.getVisitedNodes()) {
-                JASLog.severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
+                JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
                         invalidGroups.contentsToString());
             }
             throw sortException;
@@ -420,7 +420,7 @@ public class LivingGroupRegistry {
                 SetAlgebra.operate(livingGroup.entityJASNames, Sets.newHashSet(contentComponent), operation);
                 continue;
             }
-            JASLog.severe("Error processing %s content from %s. The component %s does not exist.", livingGroup.groupID,
+            JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.", livingGroup.groupID,
                     livingGroup.contentsToString(), contentComponent);
         }
     }

@@ -31,7 +31,7 @@ public class KeyParserDifficulty extends KeyParserBase {
 
         int difficulty = ParsingHelper.parseFilteredInteger(pieces[1], 0, key.key);
         if (difficulty < 0 || difficulty > 3) {
-            JASLog.info("Difficulty must be between 0 (Peaceful) and 3 (Hard)");
+            JASLog.log().info("Difficulty must be between 0 (Peaceful) and 3 (Hard)");
             return false;
         }
 

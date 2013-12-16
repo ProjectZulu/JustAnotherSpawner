@@ -1,9 +1,10 @@
 package jas.common.spawner.creature.handler;
 
-import java.lang.reflect.InvocationTargetException;
-
 import jas.common.JASLog;
 import jas.common.ReflectionHelper;
+
+import java.lang.reflect.InvocationTargetException;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
@@ -22,7 +23,7 @@ public class LivingHelper {
         try {
             return instantiateEntity(livingClass, world);
         } catch (Exception exception) {
-            JASLog.warning("Entity %s could not be initialized.", livingClass.getSimpleName());
+            JASLog.log().warning("Entity %s could not be initialized.", livingClass.getSimpleName());
         }
         return null;
     }

@@ -40,7 +40,7 @@ public class SpawnerTicker implements IScheduledTickHandler {
         if (!world.getGameRules().hasRule("doCustomMobSpawning")
                 || world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
-                    world, JustAnotherSpawner.globalSettings().chunkspawnDistance);
+                    world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
 
             EntityCounter creatureTypeCount = new EntityCounter();
             EntityCounter creatureCount = new EntityCounter();

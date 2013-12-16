@@ -1,54 +1,36 @@
 package jas.common;
 
-import java.io.File;
-
-import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
+import com.google.gson.annotations.SerializedName;
 
 public class GlobalSettings {
-    public boolean debugMode = false;
-    public int spawnerTickSpacing = 0;
-
-    public boolean globalSortCreatureByBiome = true;
-
+    public String fileVersion = "1.0";
+    @SerializedName("___VANILLA COMPATABILITY___")
+    public final String VANILLA_COMMENT = "These options are used to disable the vanilla spawning system in a friendly way";
+    @SerializedName("Turn gamerule spawning off on start")
     public boolean turnGameruleSpawningOff = false;
+    @SerializedName("Empty vanilla spawnlists")
     public boolean emptyVanillaSpawnLists = true;
 
-    public int chunkspawnDistance = 8;
+    @SerializedName("___SPAWNER SETTINGS___")
+    public final String SPAWNING_COMMENT = "These options set properties of the spawner";
+    @SerializedName("Spawner Tick Spacing")
+    public int spawnerTickSpacing = 0;
+    @SerializedName("Distance (in Chunks) to perform entity spawning")
+    public int chunkSpawnDistance = 8;
+    @SerializedName("Distance (in Chunks) to perform entity counting")
     public int chunkCountDistance = 8;
 
-    GlobalSettings(File configDirectory) {
-        loadProperties(configDirectory);
-    }
+    @SerializedName("___GLOBAL SETTINGS___")
+    public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
+    @SerializedName("Sort entities by biome")
+    public boolean globalSortCreatureByBiome = true;
 
-    public void loadProperties(File configDirectory) {
-        Configuration config = new Configuration(
-                new File(configDirectory, DefaultProps.MODDIR + "GlobalProperties.cfg"));
-        config.load();
-        turnGameruleSpawningOff = config.get("Properties.Vanilla Controls", "Gamerule doSpawning Off on Start",
-                turnGameruleSpawningOff).getBoolean(turnGameruleSpawningOff);
-        emptyVanillaSpawnLists = config.get("Properties.Vanilla Controls", "Empty Vanilla SpawnLists on Start", true)
-                .getBoolean(true);
-
-        globalSortCreatureByBiome = config.get("Properties.Spawning", "Sort Creature By Biome",
-                globalSortCreatureByBiome).getBoolean(globalSortCreatureByBiome);
-        Property resultTickSpacing = config.get("Properties.Spawning", "Spawner Tick Spacing", spawnerTickSpacing);
-        if (resultTickSpacing.getInt(spawnerTickSpacing) < 0) {
-            JASLog.severe(
-                    "Error with spawnerTickSpacing is %s. spawnerTickSpacing cannot be less than zero. Setting to 0.",
-                    resultTickSpacing.getInt(spawnerTickSpacing));
-            resultTickSpacing.set(spawnerTickSpacing);
-        } else {
-            spawnerTickSpacing = resultTickSpacing.getInt(spawnerTickSpacing);
-        }
-
-        Property prop = config.get("Properties.Spawning", "Entity Chunk Spawn Distance", chunkspawnDistance);
-        if (prop.getInt() <= 0) {
-            prop.set(8);
-        }
-        chunkspawnDistance = prop.getInt();
-        chunkCountDistance = config.get("Properties.Spawning", "Entity Chunk Count Distance", chunkCountDistance)
-                .getInt(8);
-        config.save();
+    public GlobalSettings() {
+        spawnerTickSpacing = 0;
+        globalSortCreatureByBiome = true;
+        turnGameruleSpawningOff = false;
+        emptyVanillaSpawnLists = true;
+        chunkSpawnDistance = 8;
+        chunkCountDistance = 8;
     }
 }

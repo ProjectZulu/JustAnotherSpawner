@@ -147,7 +147,7 @@ public class CreatureTypeBuilder {
                     biomeIDBiomeCaps.put(biomeID, entry.getValue());
                 }
             } else {
-                JASLog.severe("Error Parsing BiomeCap. %s is not a biome mapping.", entry.getKey());
+                JASLog.log().severe("Error Parsing BiomeCap. %s is not a biome mapping.", entry.getKey());
             }
         }
         return biomeIDBiomeCaps;

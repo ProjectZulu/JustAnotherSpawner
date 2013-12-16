@@ -138,13 +138,13 @@ public class TopologicalSort {
                 return;
             }
 
-            JASLog.severe("Topological Sorting failed.");
-            JASLog.severe("Visting node %s", node);
-            JASLog.severe("Current sorted list : %s", sortedResult);
-            JASLog.severe("Visited set for this node : %s", visitedNodes);
-            JASLog.severe("Explored node set : %s", expandedNodes);
+            JASLog.log().severe("Topological Sorting failed.");
+            JASLog.log().severe("Visting node %s", node);
+            JASLog.log().severe("Current sorted list : %s", sortedResult);
+            JASLog.log().severe("Visited set for this node : %s", visitedNodes);
+            JASLog.log().severe("Explored node set : %s", expandedNodes);
             SetView<T> cycleList = Sets.difference(visitedNodes, expandedNodes);
-            JASLog.severe("Likely cycle is in : %s", cycleList);
+            JASLog.log().severe("Likely cycle is in : %s", cycleList);
             throw new TopologicalSortingException(
                     "There was a cycle detected in the input graph, sorting is not possible", node, cycleList);
         }

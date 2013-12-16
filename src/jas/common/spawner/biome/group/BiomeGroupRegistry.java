@@ -216,7 +216,7 @@ public class BiomeGroupRegistry {
                     attempts++;
                 }
                 if (attempts > 0) {
-                    JASLog.info("Duplicate mapping %s and was renamed to %s.", biome.biomeName, defaultMapping);
+                    JASLog.log().info("Duplicate mapping %s and was renamed to %s.", biome.biomeName, defaultMapping);
                 }
                 biomePckgToMappingBuilder.put(packageName, defaultMapping);
                 newMappings.add(defaultMapping);
@@ -288,7 +288,7 @@ public class BiomeGroupRegistry {
         for (BiomeGroup biomeGroup : sortedGroups) {
             parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
             if (biomeGroup.pckgNames.size() > 0) {
-                JASLog.info("Registering BiomeGroup %s", biomeGroup.toString());
+                JASLog.log().info("Registering BiomeGroup %s", biomeGroup.toString());
                 iDToGroupBuilder.put(biomeGroup.groupID, biomeGroup);
                 for (String pckgName : biomeGroup.pckgNames) {
                     packgNameToGroupIDsBuilder.get(pckgName).add(biomeGroup.groupID);
@@ -323,10 +323,10 @@ public class BiomeGroupRegistry {
             sortedList = TopologicalSort.topologicalSort(groupGraph);
         } catch (TopologicalSortingException sortException) {
             SortingExceptionData<BiomeGroup> exceptionData = sortException.getExceptionData();
-            JASLog.severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
+            JASLog.log().severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
             int i = 1;
             for (BiomeGroup invalidGroups : exceptionData.getVisitedNodes()) {
-                JASLog.severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
+                JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
                         invalidGroups.contentsToString());
             }
             throw sortException;
@@ -372,7 +372,7 @@ public class BiomeGroupRegistry {
                         operation);
                 continue;
             }
-            JASLog.severe("Error processing %s content from %s. The component %s does not exist.", biomeGroup.groupID,
+            JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.", biomeGroup.groupID,
                     biomeGroup.contentsToString(), contentComponent);
         }
     }

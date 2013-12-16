@@ -102,7 +102,7 @@ public class StructureHandler {
                                 .setMaxChunkPack(spawnListEntry.maxGroupCount);
                         spawnList.add(builder);
                     } else {
-                        JASLog.warning(
+                        JASLog.log().warning(
                                 "Default entity %s that should spawn in structure %s does not appear to belong to an entity group.",
                                 spawnListEntry.entityClass.getSimpleName(), structureKey);
                     }
@@ -113,25 +113,25 @@ public class StructureHandler {
                 SpawnListEntry spawnEntry = spawnBuilder.build();
                 LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnBuilder.getLivingGroupId());
                 if (handler == null) {
-                    JASLog.severe("Error loading structure %s. EntityGroup %s doesn not appear to exist.",
+                    JASLog.log().severe("Error loading structure %s. EntityGroup %s doesn not appear to exist.",
                             structureKey, spawnEntry.livingGroupID);
                     continue;
                 }
 
                 if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                     if (spawnEntry.itemWeight > 0 && handler.shouldSpawn) {
-                        JASLog.info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.groupID,
+                        JASLog.log().info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.groupID,
                                 handler.creatureTypeID, structureKey);
                         structureKeysToSpawnList.put(structureKey, spawnEntry);
                     } else {
                         structureKeysToDisabledpawnList.put(structureKey, spawnEntry);
-                        JASLog.debug(
+                        JASLog.log().debug(
                                 Level.INFO,
                                 "Not adding Structure SpawnListEntry of %s to StructureKey %s due to Weight %s or ShouldSpawn %s.",
                                 handler.groupID, structureKey, spawnEntry.itemWeight, handler.shouldSpawn);
                     }
                 } else {
-                    JASLog.debug(Level.INFO,
+                    JASLog.log().debug(Level.INFO,
                             "Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", structureKey,
                             handler.groupID, handler.creatureTypeID);
                 }

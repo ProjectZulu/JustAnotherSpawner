@@ -68,18 +68,18 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
                         foundMatch = true;
                         if (key.keyParser.getKeyType() == KeyType.CHAINABLE) {
                             if (!key.keyParser.parseChainable(masterParts[i], parsedChainable, operandvalue)) {
-                                JASLog.severe("Failed to Parse Chainable from %s", masterParts[i]);
+                                JASLog.log().severe("Failed to Parse Chainable from %s", masterParts[i]);
                             }
                         } else if (key.keyParser.getKeyType() == KeyType.VALUE) {
                             if (!key.keyParser.parseValue(masterParts[i], valueCache)) {
-                                JASLog.severe("Failed to Parse Value from %s", masterParts[i]);
+                                JASLog.log().severe("Failed to Parse Value from %s", masterParts[i]);
                             }
                         }
                         break;
                     }
                 }
                 if (!foundMatch) {
-                    JASLog.severe("Could Not Recognize any valid %s properties from %s", this.getClass()
+                    JASLog.log().severe("Could Not Recognize any valid %s properties from %s", this.getClass()
                             .getSimpleName(), masterParts[i]);
                 }
             }

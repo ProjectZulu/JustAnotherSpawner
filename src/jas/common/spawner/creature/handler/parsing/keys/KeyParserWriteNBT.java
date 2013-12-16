@@ -31,7 +31,7 @@ public class KeyParserWriteNBT extends KeyParserBase {
             operandvalue.add(operand);
             return true;
         } else {
-            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", key.key);
+            JASLog.log().severe("Error Parsing %s Parameter. Invalid Argument Length.", key.key);
             return false;
         }
     }
@@ -52,10 +52,10 @@ public class KeyParserWriteNBT extends KeyParserBase {
             entity.readFromNBT(entityNBT);
             return false;
         } catch (IllegalFormatException e) {
-            JASLog.severe("Skipping NBT Write due to %s", e.getMessage());
+            JASLog.log().severe("Skipping NBT Write due to %s", e.getMessage());
             return true;
         } catch (IllegalArgumentException e) {
-            JASLog.severe("Skipping NBT Write due to %s", e.getMessage());
+            JASLog.log().severe("Skipping NBT Write due to %s", e.getMessage());
             return true;
         }
     }

@@ -18,7 +18,7 @@ public class OptionalParser {
         if (values.length == 2) {
             return ParsingHelper.parseFilteredInteger(values[1], defaultInt, parameter);
         } else {
-            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
+            JASLog.log().severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
             return null;
         }
     }
@@ -30,7 +30,7 @@ public class OptionalParser {
             integers[1] = ParsingHelper.parseFilteredInteger(values[2], defaultInts[1], "2nd " + parameter);
             return integers;
         } else {
-            JASLog.severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
+            JASLog.log().severe("Error Parsing %s Parameter. Invalid Argument Length.", parameter);
             return null;
         }
     }
@@ -50,7 +50,7 @@ public class OptionalParser {
             lights[1] = ParsingHelper.parseFilteredInteger(values[2], 16, "Max " + Key.light.key);
             return lights;
         } else {
-            JASLog.severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing deSpawn Light Parameter. Invalid Argument Length.");
             return null;
         }
     }
@@ -81,7 +81,7 @@ public class OptionalParser {
                         } else if (l == 1) {
                             maxID = ParsingHelper.parseFilteredInteger(rangeParts[l], maxID, "parseMaxBlockID");
                         } else {
-                            JASLog.warning("Block entry %s contains too many > elements.", values[j]);
+                            JASLog.log().warning("Block entry %s contains too many > elements.", values[j]);
                         }
                     }
                 } else if (k == 1) {
@@ -91,11 +91,11 @@ public class OptionalParser {
                         } else if (l == 1) {
                             maxMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMaxMetaID");
                         } else {
-                            JASLog.warning("Block entry %s contains too many > elements.", values[j]);
+                            JASLog.log().warning("Block entry %s contains too many > elements.", values[j]);
                         }
                     }
                 } else {
-                    JASLog.warning("Block entry %s contains too many - elements.", values[j]);
+                    JASLog.log().warning("Block entry %s contains too many - elements.", values[j]);
                 }
             }
 
@@ -106,7 +106,7 @@ public class OptionalParser {
             for (int id = minID; id <= maxID; id++) {
                 for (int meta = minMeta; meta <= maxMeta; meta++) {
                     if (id != -1) {
-                        JASLog.debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
+                        JASLog.log().debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
                         blockMeta.put(id, meta);
                     }
                 }
@@ -137,7 +137,7 @@ public class OptionalParser {
             valueCache.put(Key.blockRangeZ.key, ParsingHelper.parseFilteredInteger(values[1],
                     OptionalSettingsBase.defaultBlockRange, "blockRangeZ"));
         } else {
-            JASLog.severe("Error Parsing deSpawn block search range Parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing deSpawn block search range Parameter. Invalid Argument Length.");
         }
     }
 
@@ -152,7 +152,7 @@ public class OptionalParser {
             valueCache.put(Key.spawnRate.key, ParsingHelper.parseFilteredInteger(values[1],
                     OptionalSettingsBase.defaultSpawnRate, Key.spawnRate.key));
         } else {
-            JASLog.severe("Error Parsing deSpawn spawn rate Parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing deSpawn spawn rate Parameter. Invalid Argument Length.");
         }
     }
 
@@ -167,7 +167,7 @@ public class OptionalParser {
             valueCache.put(Key.spawnRange.key, ParsingHelper.parseFilteredInteger(values[1], JustAnotherSpawner
                     .worldSettings().worldProperties().getGlobal().despawnDist, Key.spawnRange.key));
         } else {
-            JASLog.severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
         }
     }
 
@@ -180,7 +180,7 @@ public class OptionalParser {
                 return Boolean.FALSE;
             }
         } else {
-            JASLog.severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Needs Sky parameter. Invalid Argument Length.");
             return null;
         }
     }
@@ -189,7 +189,7 @@ public class OptionalParser {
         if (values.length == 2) {
             valueCache.put(Key.entityCap.key, ParsingHelper.parseFilteredInteger(values[1], 0, Key.entityCap.key));
         } else {
-            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
     }
 
@@ -197,7 +197,7 @@ public class OptionalParser {
         if (values.length == 2) {
             valueCache.put(Key.despawnAge.key, ParsingHelper.parseFilteredInteger(values[1], 600, Key.despawnAge.key));
         } else {
-            JASLog.severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Needs EntityCap parameter. Invalid Argument Length.");
         }
     }
 
@@ -205,7 +205,7 @@ public class OptionalParser {
         if (values.length == 2) {
             return ParsingHelper.parseFilteredInteger(values[1], 256, Key.minSpawnHeight.key);
         } else {
-            JASLog.severe("Error Parsing Min Spawn Height parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Min Spawn Height parameter. Invalid Argument Length.");
             return null;
         }
     }
@@ -214,7 +214,7 @@ public class OptionalParser {
         if (values.length == 2) {
             return ParsingHelper.parseFilteredInteger(values[1], -1, Key.maxSpawnHeight.key);
         } else {
-            JASLog.severe("Error Parsing Max Spawn Height parameter. Invalid Argument Length.");
+            JASLog.log().severe("Error Parsing Max Spawn Height parameter. Invalid Argument Length.");
             return null;
         }
     }
