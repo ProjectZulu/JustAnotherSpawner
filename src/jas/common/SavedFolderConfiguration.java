@@ -19,7 +19,6 @@ public class SavedFolderConfiguration {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSUBDIR
-                + "temporarySaveSettings.cfg");
+        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "temporarySaveSettings.cfg");
     }
 }
