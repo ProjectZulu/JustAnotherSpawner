@@ -1,6 +1,5 @@
 package jas.common.spawner.biome.group;
 
-import jas.common.DefaultProps;
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.JASLog;
@@ -10,6 +9,7 @@ import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.math.SetAlgebra;
 import jas.common.math.SetAlgebra.OPERATION;
+import jas.common.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,7 +37,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
@@ -99,11 +98,12 @@ public class BiomeGroupRegistry {
         public final String configName;
         private final transient Set<String> pckgNames = new HashSet<String>();
         /* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-        private final ArrayList<String> contents = new ArrayList<String>();
+        private final ArrayList<String> contents;
 
         public BiomeGroup() {
             this.groupID = "";
             this.configName = "";
+            contents = new ArrayList<String>();
         }
 
         public BiomeGroup(String groupID) {
@@ -114,6 +114,13 @@ public class BiomeGroupRegistry {
             } else {
                 this.configName = "";
             }
+            contents = new ArrayList<String>();
+        }
+        
+        public BiomeGroup(String groupID, String configName, ArrayList<String> contents) {
+            this.groupID = groupID;
+            this.configName = configName;
+            this.contents = new ArrayList<String>(contents);
         }
 
         public List<String> getContents() {
@@ -170,7 +177,9 @@ public class BiomeGroupRegistry {
     }
 
     public void loadFromConfig(File configDirectory) {
-        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { BiomeGroupSaveObject.class },
+                new Object[] { new BiomeGroupSaveObjectSerializer() });
+//        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
         File gsonBiomeFile = BiomeGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
         BiomeGroupSaveObject savedStats = GsonHelper.readFromGson(FileUtilities.createReader(gsonBiomeFile, false),
@@ -383,7 +392,9 @@ public class BiomeGroupRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveToConfig(File configDirectory) {
-        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
+//        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { BiomeGroupSaveObject.class },
+                new Object[] { new BiomeGroupSaveObjectSerializer() });
         File gsonBiomeFile = BiomeGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
         BiomeGroupSaveObject biomeGroupAuthor = new BiomeGroupSaveObject(biomePckgToMapping, iDToAttribute.values(),
