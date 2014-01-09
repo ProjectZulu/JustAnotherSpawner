@@ -1,6 +1,5 @@
 package jas.common.spawner.creature.handler;
 
-import jas.common.DefaultProps;
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.JASLog;
@@ -10,6 +9,7 @@ import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.math.SetAlgebra;
 import jas.common.math.SetAlgebra.OPERATION;
+import jas.common.spawner.creature.handler.LivingGroupSaveObject.LivingGroupSaveObjectSerializer;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -39,7 +39,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
@@ -134,11 +133,12 @@ public class LivingGroupRegistry {
                                         // loading
         private final transient Set<String> entityJASNames = new HashSet<String>();
         /* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-        private final List<String> contents = new ArrayList<String>();
+        private final List<String> contents;
 
         public LivingGroup() {
             this.groupID = "";
             this.configName = "";
+            contents = new ArrayList<String>();
         }
 
         public LivingGroup(String groupID) {
@@ -152,6 +152,13 @@ public class LivingGroupRegistry {
             } else {
                 this.configName = "";
             }
+            contents = new ArrayList<String>();
+        }
+
+        public LivingGroup(String groupID, String configName, ArrayList<String> contents) {
+            this.groupID = groupID;
+            this.configName = configName;
+            this.contents = new ArrayList<String>(contents);
         }
 
         public Set<String> entityJASNames() {
@@ -208,7 +215,9 @@ public class LivingGroupRegistry {
     }
 
     public void loadFromConfig(File configDirectory) {
-        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
+                new Object[] { new LivingGroupSaveObjectSerializer() });
+
         File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
         LivingGroupSaveObject savedStats = GsonHelper.readFromGson(FileUtilities.createReader(gsonBiomeFile, false),
@@ -426,7 +435,9 @@ public class LivingGroupRegistry {
     }
 
     public void saveToConfig(File configDirectory) {
-        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
+                new Object[] { new LivingGroupSaveObjectSerializer() });
+
         File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
 

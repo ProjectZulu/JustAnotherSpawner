@@ -31,7 +31,8 @@ public class BiomeGroupSaveObject {
     @SerializedName("BiomeGroups")
     public TreeMap<String, TreeMap<String, BiomeGroup>> configNameToBiomeGroups;
 
-    private BiomeGroupSaveObject() {
+    /* For Serialization Only */
+    public BiomeGroupSaveObject() {
         this.biomeMappings = new TreeMap<String, String>();
         this.configNameToAttributeGroups = new TreeMap<>();
         this.configNameToBiomeGroups = new TreeMap<>();
