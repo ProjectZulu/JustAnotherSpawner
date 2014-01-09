@@ -7,6 +7,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class FolderConfiguration {
     public final String IMPORTANT = "# Folder names are case sensitive if OS allows it. Beware invalid OS characters.";
+	@SerializedName("FILE_VERSION")
+	public final String fileVersion = "1.0";
     @SerializedName("SaveFolderName_OnNewWorld")
     public final String defaultSaveName;
     @SerializedName("ImportFolder_OnNewWorld")
