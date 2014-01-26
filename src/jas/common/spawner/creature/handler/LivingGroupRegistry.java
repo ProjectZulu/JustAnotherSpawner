@@ -210,11 +210,17 @@ public class LivingGroupRegistry {
             Property nameProp = config.getEntityMapping(entry.getValue(), null);
             if (nameProp != null) {
                 @SuppressWarnings("unchecked")
-                String prevKey = EntityClasstoJASName.put((Class<? extends EntityLiving>) entry.getKey(),
-                        nameProp.getString());
-                if (prevKey != null) {
-                    JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
-                            nameProp.getString());
+                Class<? extends EntityLiving> entityClass = (Class<? extends EntityLiving>) entry.getKey();
+                if (EntityClasstoJASName.containsKey(entityClass)) {
+                    JASLog.severe(
+                            "Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for class, class %s",
+                            entry.getValue(), nameProp.getString(), entityClass);
+                } else if (EntityClasstoJASName.values().contains(nameProp.getString())) {
+                    JASLog.severe(
+                            "Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
+                            nameProp.getString(), entry.getValue(), entityClass);
+                } else {
+                    EntityClasstoJASName.forcePut(entityClass, nameProp.getString());
                 }
             }
         }
@@ -237,14 +243,18 @@ public class LivingGroupRegistry {
                 String prefix = guessPrefix(entry.getKey(), fmlNames);
                 jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
             }
-            if (!EntityClasstoJASName.containsKey(entityClass)) {
-                Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
-                String prevKey = EntityClasstoJASName.put(entityClass, nameProp.getString());
+            Property nameProp = config.getEntityMapping(entry.getValue(), jasName);
+            if (EntityClasstoJASName.containsKey(entityClass)) {
+                JASLog.debug(Level.INFO, "Entity already has a registered entry. "
+                        + "This is expected if it has an entity name mapping in the configuration files. "
+                        + "FMLName=JasName: Class [%s=%s: %s]", entry.getValue(), nameProp.getString(), entityClass);
+            } else if (EntityClasstoJASName.values().contains(nameProp.getString())) {
+                JASLog.severe(
+                        "Duplicate entity mapping generating new entities. Entity-FML mapping Mapping [%s] already exists. Iggnoring: [FMLname:class]=[%s:%s]",
+                        nameProp.getString(), entry.getValue(), entityClass);
+            } else {
+                EntityClasstoJASName.forcePut(entityClass, nameProp.getString());
                 newMappings.add(nameProp.getString());
-                if (prevKey != null) {
-                    JASLog.severe("Duplicate entity mapping. Pair at %s replaced by %s,%s", prevKey, entry.getValue(),
-                            nameProp.getString());
-                }
             }
         }
 
