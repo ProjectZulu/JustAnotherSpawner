@@ -274,6 +274,7 @@ public class CreatureType {
         String resultOptionalParameters = config.getOptionalTags(typeID, optionalParameters).getString();
         CreatureTypeBuilder builder = new CreatureTypeBuilder(typeID, resultSpawnRate, resultMaxNumberOfCreature)
                 .withOptionalParameters(resultOptionalParameters).withChanceToChunkSpawn(resultChunkSpawning);
+        builder.insideMedium(spawnMedium);
         builder.withDefaultBiomeCap(config.getDefaultBiomeCap(typeID, defaultBiomeCap).getInt());
         ConfigCategory category = config.getBiomeCaps(typeID);
         loadBiomeCap(category, builder, defaultBiomeCap);
