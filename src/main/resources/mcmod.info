@@ -1,0 +1,16 @@
+[
+{
+  "modid": "JustAnotherSpawner",
+  "name": "Just Another Spawner",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["Crudedragos"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
