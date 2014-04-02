@@ -21,7 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.biome.BiomeGenBase;
 
 import com.google.common.collect.ImmutableCollection;
@@ -78,7 +78,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
                     .getCreatureType(livingHandler.creatureTypeID);
             if (livingType == null) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(String.format(
+                commandSender.addChatMessage(new ChatComponentText(String.format(
                         "Entity %s is of type NONE and thus will never spawn.", entityName)));
                 return;
             }
@@ -136,7 +136,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             if (groupIDs.size() > 1) {
                 resultMessage.append("}");
             }
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(resultMessage.toString()));
+            commandSender.addChatMessage(new ChatComponentText(resultMessage.toString()));
         }
     }
 

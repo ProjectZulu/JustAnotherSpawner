@@ -9,9 +9,9 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpaw
 
 import java.util.Locale;
 
-import net.minecraft.util.WeightedRandomItem;
-import net.minecraftforge.common.ConfigCategory;
-import net.minecraftforge.common.Configuration;
+import net.minecraft.util.WeightedRandom;
+import net.minecraftforge.common.config.ConfigCategory;
+import net.minecraftforge.common.config.Configuration;
 
 /**
  * Every SpawnListEntry is assumed Unique for a EntityLivingClass given biome Spawn.
@@ -20,7 +20,7 @@ import net.minecraftforge.common.Configuration;
  * then f(Class, Biome) --> SpawnList
  */
 // TODO: Large Constructor could probably use Factory / Or Split packSize into Its Own Immutable Class
-public class SpawnListEntry extends WeightedRandomItem {
+public class SpawnListEntry extends WeightedRandom.Item {
     public final String livingGroupID;
     public final int packSize;
     /* Refers to BiomeGroup or StructureGroup */

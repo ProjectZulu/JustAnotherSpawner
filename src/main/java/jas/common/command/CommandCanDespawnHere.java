@@ -13,7 +13,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 
 public class CommandCanDespawnHere extends CommandJasBase {
 
@@ -49,7 +49,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
             resultMessage.append("\u00A7c").append("Entity ").append(entityName).append(" cannot despawn here.");
         }
         resultMessage.append("\u00A7r");
-        commandSender.sendChatToPlayer(new ChatMessageComponent().addText(resultMessage.toString()));
+        commandSender.addChatMessage(new ChatComponentText(resultMessage.toString()));
     }
 
     private boolean isValidEntityName(String entityName) {

@@ -9,10 +9,10 @@ import java.util.Collection;
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.biome.BiomeGenSwamp;
-import net.minecraft.world.biome.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
-import net.minecraft.world.gen.feature.MapGenScatteredFeature;
+import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 
 public class StructureInterpreterSwamp implements StructureInterpreter {
 

@@ -2,8 +2,6 @@ package jas.common;
 
 import jas.api.CompatibilityRegistrationEvent;
 import jas.common.command.CommandJAS;
-import jas.common.gui.GuiHandler;
-import jas.common.network.PacketHandler;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
@@ -13,11 +11,11 @@ import java.io.File;
 import net.minecraft.world.GameRules;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.WorldEvent;
 
 import com.google.gson.Gson;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -26,13 +24,10 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.network.NetworkMod;
-import cpw.mods.fml.common.network.NetworkRegistry;
-import cpw.mods.fml.common.registry.TickRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, version = DefaultProps.VERSION, dependencies = "after:*")
-@NetworkMod(clientSideRequired = false, serverSideRequired = false, channels = { DefaultProps.defaultChannel }, packetHandler = PacketHandler.class)
+@Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, dependencies = "after:*", useMetadata = true)
 public class JustAnotherSpawner {
 
     @Instance(DefaultProps.MODID)
@@ -85,7 +80,6 @@ public class JustAnotherSpawner {
     @EventHandler
     public void load(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new EntityDespawner());
-        NetworkRegistry.instance().registerGuiHandler(modInstance, new GuiHandler());
     }
 
     @EventHandler
@@ -93,7 +87,9 @@ public class JustAnotherSpawner {
         BiomeDictionary.registerAllBiomes();
         biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
-        TickRegistry.registerTickHandler(new SpawnerTicker(biomeBlacklist), Side.SERVER);
+        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {// TODO: Proxy
+            FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
+        }
         importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
         MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
     }
@@ -104,7 +100,7 @@ public class JustAnotherSpawner {
         event.registerServerCommand(new CommandJAS());
     }
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
         GameRules gameRule = event.world.getGameRules();
         if (gameRule != null && globalSettings.turnGameruleSpawningOff) {

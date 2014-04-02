@@ -322,11 +322,11 @@ public final class BiomeSpawnListRegistry {
             ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
             for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
-                Collection<net.minecraft.world.biome.SpawnListEntry> spawnListEntries = importedSpawnList
+                Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
                         .getSpawnableCreatureList(biomeID);
                 for (String jasName : livingGroup.entityJASNames()) {
                     Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
-                    for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : spawnListEntries) {
+                    for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
                         if (spawnListEntry.entityClass.equals(livingClass)) {
                             return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID)
                                     .setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
@@ -343,7 +343,7 @@ public final class BiomeSpawnListRegistry {
         Gson gson = GsonHelper.createGson(true, new Type[] { BiomeSpawnsSaveObject.class },
                 new Object[] { new BiomeSpawnsSaveObjectSerializer(
                         worldProperties.getFolderConfiguration().sortCreatureByBiome) });
-        HashMap<String, Table<String, String, Set<SpawnListEntry>>> saveFileToEntries = new HashMap<>();
+        HashMap<String, Table<String, String, Set<SpawnListEntry>>> saveFileToEntries = new HashMap<String, Table<String, String, Set<SpawnListEntry>>>();
         extractSaveEntriesFromSpawnList(saveFileToEntries, validSpawnListEntries);
         extractSaveEntriesFromSpawnList(saveFileToEntries, invalidSpawnListEntries);
         for (Entry<String, Table<String, String, Set<SpawnListEntry>>> entrySet : saveFileToEntries.entrySet()) {

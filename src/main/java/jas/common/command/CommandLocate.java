@@ -9,15 +9,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.common.collect.ImmutableCollection;
-
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
+
+import com.google.common.collect.ImmutableCollection;
 
 public class CommandLocate extends CommandJasBase {
     public String getCommandName() {
@@ -83,7 +83,7 @@ public class CommandLocate extends CommandJasBase {
         if (!foundMatch) {
             throw new WrongUsageException("commands.jaslocate.typenotfound", new Object[0]);
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(countedContents.toString()));
+            commandSender.addChatMessage(new ChatComponentText(countedContents.toString()));
         }
     }
 

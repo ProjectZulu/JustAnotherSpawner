@@ -20,7 +20,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 
 import com.google.common.collect.ImmutableCollection;
 
@@ -131,7 +131,7 @@ public class CommandComposition extends CommandJasBase {
         if (!foundMatch) {
             throw new WrongUsageException("commands.jascomposition.typenotfound", new Object[0]);
         } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(countedContents.toString()));
+            commandSender.addChatMessage(new ChatComponentText(countedContents.toString()));
         }
     }
 

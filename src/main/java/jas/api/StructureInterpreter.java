@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.SpawnListEntry;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
 /**
  * Used to add Support for Biome Structure Spawns. Instance must be registered by subscribing to the

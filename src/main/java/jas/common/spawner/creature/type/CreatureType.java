@@ -1,6 +1,5 @@
 package jas.common.spawner.creature.type;
 
-import static net.minecraftforge.common.ForgeDirection.UP;
 import jas.common.DefaultProps;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
@@ -12,15 +11,17 @@ import java.io.File;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockSlab;
 import net.minecraft.block.BlockStairs;
-import net.minecraft.block.BlockStep;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -123,8 +124,8 @@ public class CreatureType {
      * @return
      */
     public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord) {
-        return !world.isBlockNormalCube(xCoord, yCoord, zCoord)
-                && world.getBlockMaterial(xCoord, yCoord, zCoord) == spawnMedium;
+        return !world.getBlock(xCoord, yCoord, zCoord).isBlockNormalCube()
+                && world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium;
     }
 
     /**
@@ -147,18 +148,17 @@ public class CreatureType {
             return canSpawn;
         } else {
             if (spawnMedium == Material.water) {
-                return world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                        && world.getBlockMaterial(xCoord, yCoord - 1, zCoord).isLiquid()
-                        && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
-            } else if (!world.doesBlockHaveSolidTopSurface(xCoord, yCoord - 1, zCoord)) {
+                return world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
+                        && world.getBlock(xCoord, yCoord - 1, zCoord).getMaterial().isLiquid()
+                        && !world.getBlock(xCoord, yCoord + 1, zCoord).isBlockNormalCube();
+            } else if (!World.doesBlockHaveSolidTopSurface(world, xCoord, yCoord - 1, zCoord)) {
                 return false;
             } else {
-                int l = world.getBlockId(xCoord, yCoord - 1, zCoord);
-                boolean spawnBlock = (Block.blocksList[l] != null && canCreatureSpawn(Block.blocksList[l], world,
-                        xCoord, yCoord - 1, zCoord));
-                return spawnBlock && l != Block.bedrock.blockID && !world.isBlockNormalCube(xCoord, yCoord, zCoord)
-                        && !world.getBlockMaterial(xCoord, yCoord, zCoord).isLiquid()
-                        && !world.isBlockNormalCube(xCoord, yCoord + 1, zCoord);
+                Block l = world.getBlock(xCoord, yCoord - 1, zCoord);
+                boolean spawnBlock = (l != null && canCreatureSpawn(l, world, xCoord, yCoord - 1, zCoord));
+                return spawnBlock && l != Blocks.bedrock && !world.getBlock(xCoord, yCoord, zCoord).isBlockNormalCube()
+                        && !world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
+                        && !world.getBlock(xCoord, yCoord + 1, zCoord).isBlockNormalCube();
             }
         }
     }
@@ -196,12 +196,12 @@ public class CreatureType {
      */
     private boolean canCreatureSpawn(Block block, World world, int xCoord, int yCoord, int zCoord) {
         int meta = world.getBlockMetadata(xCoord, yCoord, zCoord);
-        if (block instanceof BlockStep) {
-            return (((meta & 8) == 8) || block.isOpaqueCube());
+        if (block instanceof BlockSlab) {
+            return (((meta & 8) == 8) || block.func_149730_j());
         } else if (block instanceof BlockStairs) {
             return ((meta & 4) != 0);
         }
-        return block.isBlockSolidOnSide(world, xCoord, yCoord, zCoord, UP);
+        return block.isSideSolid(world, xCoord, yCoord, zCoord, ForgeDirection.UP);
     }
 
     public static File getFile(File configDirectory, String saveName) {

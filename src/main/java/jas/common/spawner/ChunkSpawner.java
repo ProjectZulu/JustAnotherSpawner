@@ -9,8 +9,8 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import java.util.Iterator;
 
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ChunkSpawner {
 
@@ -20,7 +20,7 @@ public class ChunkSpawner {
         this.blacklist = blacklist;
     }
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void performChunkSpawning(PopulateChunkEvent.Populate event) {
 
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */

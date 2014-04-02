@@ -129,7 +129,7 @@ public class CreatureTypeBuilder {
             Map<String, String> biomePackageToMapping) {
         HashMap<String, Integer> mappingBiomeCaps = new HashMap<String, Integer>();
         for (Entry<Integer, Integer> entry : biomeCaps.entrySet()) {
-            String packageName = BiomeHelper.getPackageName(BiomeGenBase.biomeList[entry.getKey()]);
+            String packageName = BiomeHelper.getPackageName(BiomeGenBase.getBiomeGenArray()[entry.getKey()]);
             String mappingName = biomePackageToMapping.get(packageName);
             mappingBiomeCaps.put(mappingName, entry.getValue());
         }

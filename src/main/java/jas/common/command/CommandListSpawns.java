@@ -14,7 +14,7 @@ import java.util.List;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.biome.BiomeGenBase;
 
 public class CommandListSpawns extends CommandJasBase {
@@ -75,11 +75,11 @@ public class CommandListSpawns extends CommandJasBase {
         }
 
         if (isStructure) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getStructureSpawnList(
-                    targetBiomeStructure, entityCategName, expandedEntries)));
-        } else {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(getBiomeSpawnList(targetBiomeStructure,
+            commandSender.addChatMessage(new ChatComponentText(getStructureSpawnList(targetBiomeStructure,
                     entityCategName, expandedEntries)));
+        } else {
+            commandSender.addChatMessage(new ChatComponentText(getBiomeSpawnList(targetBiomeStructure, entityCategName,
+                    expandedEntries)));
         }
     }
 
@@ -102,8 +102,8 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
-            BiomeGenBase biome = BiomeGenBase.biomeList[i];
+        for (int i = 0; i < BiomeGenBase.getBiomeGenArray().length; i++) {
+            BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[i];
             if (biome != null && arg.equals(BiomeHelper.getPackageName(biome))) {
                 return true;
             }
@@ -260,7 +260,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addPackageBiomeNames(List<String> tabCompletions) {
-        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
             if (biome != null) {
                 tabCompletions.add(BiomeHelper.getPackageName(biome));
             }

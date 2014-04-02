@@ -225,7 +225,7 @@ public class LivingHandler {
             if (instantDespawn) {
                 entity.setDead();
             } else if (isOfAge && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0 && validDistance) {
-                JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getEntityName(),
+                JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getCommandSenderName(),
                         entityProps.getAge(), despawning.getRate());
                 entity.setDead();
             } else if (!validDistance) {

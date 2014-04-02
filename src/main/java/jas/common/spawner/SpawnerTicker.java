@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import cpw.mods.fml.common.IScheduledTickHandler;
-import cpw.mods.fml.common.TickType;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
 
-public class SpawnerTicker implements IScheduledTickHandler {
+public class SpawnerTicker {
 
     private BiomeBlacklist blacklist;
 
@@ -24,23 +25,13 @@ public class SpawnerTicker implements IScheduledTickHandler {
         this.blacklist = blacklist;
     }
 
-    @Override
-    public EnumSet<TickType> ticks() {
-        return EnumSet.of(TickType.WORLD);
-    }
-
-    @Override
-    public String getLabel() {
-        return "jasSpawner";
-    }
-
-    @Override
-    public void tickStart(EnumSet<TickType> type, Object... tickData) {
-        WorldServer world = (WorldServer) tickData[0];
+    @SubscribeEvent
+    public void tickStart(WorldTickEvent event) {
+        WorldServer world = (WorldServer) event.world;
         if (!world.getGameRules().hasRule("doCustomMobSpawning")
                 || world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
-            HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
-                    world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
+            HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner
+                    .determineChunksForSpawnering(world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
 
             EntityCounter creatureTypeCount = new EntityCounter();
             EntityCounter creatureCount = new EntityCounter();
@@ -59,15 +50,5 @@ public class SpawnerTicker implements IScheduledTickHandler {
                 }
             }
         }
-    }
-
-    @Override
-    public void tickEnd(EnumSet<TickType> type, Object... tickData) {
-
-    }
-
-    @Override
-    public int nextTickSpacing() {
-        return JustAnotherSpawner.globalSettings().spawnerTickSpacing;
     }
 }

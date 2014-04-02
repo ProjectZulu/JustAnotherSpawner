@@ -34,8 +34,8 @@ public class BiomeGroupSaveObject {
     /* For Serialization Only */
     public BiomeGroupSaveObject() {
         this.biomeMappings = new TreeMap<String, String>();
-        this.configNameToAttributeGroups = new TreeMap<>();
-        this.configNameToBiomeGroups = new TreeMap<>();
+        this.configNameToAttributeGroups = new TreeMap<String, TreeMap<String, BiomeGroup>>();
+        this.configNameToBiomeGroups = new TreeMap<String, TreeMap<String, BiomeGroup>>();
     }
 
     public BiomeGroupSaveObject(Map<String, String> biomeMappings, Collection<BiomeGroup> attributeGroups,
@@ -137,7 +137,7 @@ public class BiomeGroupSaveObject {
                 TreeMap<String, BiomeGroup> groupNameToBiomeGroup = saveObject.configNameToAttributeGroups
                         .get(configName);
                 if (groupNameToBiomeGroup == null) {
-                    groupNameToBiomeGroup = new TreeMap<>();
+                    groupNameToBiomeGroup = new TreeMap<String, BiomeGroup>();
                     saveObject.configNameToAttributeGroups.put(configName, groupNameToBiomeGroup);
                 }
                 JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
@@ -157,7 +157,7 @@ public class BiomeGroupSaveObject {
                 String configName = outerEntry.getKey();
                 TreeMap<String, BiomeGroup> groupNameToBiomeGroup = saveObject.configNameToBiomeGroups.get(configName);
                 if (groupNameToBiomeGroup == null) {
-                    groupNameToBiomeGroup = new TreeMap<>();
+                    groupNameToBiomeGroup = new TreeMap<String, BiomeGroup>();
                     saveObject.configNameToBiomeGroups.put(configName, groupNameToBiomeGroup);
                 }
                 JsonObject innerObject = outerEntry.getValue().getAsJsonObject();

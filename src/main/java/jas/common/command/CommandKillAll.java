@@ -17,7 +17,7 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 
 public class CommandKillAll extends CommandJasBase {
     public String getCommandName() {
@@ -98,7 +98,7 @@ public class CommandKillAll extends CommandJasBase {
             }
             deathMessage.append(entry.getValue().get()).append("-").append(entry.getKey());
         }
-        commandSender.sendChatToPlayer(new ChatMessageComponent().addText(deathMessage.toString()));
+        commandSender.addChatMessage(new ChatComponentText(deathMessage.toString()));
     }
 
     private boolean isEntityFiltered(Entity entity, String filter, LivingGroupRegistry groupRegistry) {

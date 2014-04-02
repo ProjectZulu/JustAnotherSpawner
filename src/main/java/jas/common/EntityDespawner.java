@@ -1,19 +1,19 @@
 package jas.common;
 
-import java.util.List;
-import java.util.Set;
-
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
+
+import java.util.List;
+
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class EntityDespawner {
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void despawner(LivingUpdateEvent event) {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
@@ -30,7 +30,7 @@ public class EntityDespawner {
         }
     }
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void entityConstructed(EntityConstructing event) {
         if (event.entity instanceof EntityLivingBase) {
             event.entity.registerExtendedProperties(EntityProperties.JAS_PROPERTIES, new EntityProperties());

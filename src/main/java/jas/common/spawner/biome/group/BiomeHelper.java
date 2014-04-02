@@ -4,7 +4,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 public class BiomeHelper {
     // This is hacky, but neccesary, as It is what I get for relying on String names in an Integer ID system.
-    private static String[] packageNames = new String[BiomeGenBase.biomeList.length];
+    private static String[] packageNames = new String[BiomeGenBase.getBiomeGenArray().length];
 
     /**
      * Convert a BiomeGenBase biomeName to a universal package Biome Name. This is to combat developers who are using

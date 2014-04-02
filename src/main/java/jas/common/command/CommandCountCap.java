@@ -17,7 +17,7 @@ import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -107,7 +107,7 @@ public class CommandCountCap extends CommandJasBase {
             if (!foundMatch) {
                 throw new WrongUsageException("commands.jascountcap.typenotfound", new Object[0]);
             } else {
-                commandSender.sendChatToPlayer(new ChatMessageComponent().addText(worldTypeContents.toString()));
+                commandSender.addChatMessage(new ChatComponentText(worldTypeContents.toString()));
             }
         }
     }

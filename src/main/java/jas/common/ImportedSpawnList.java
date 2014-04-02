@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.SpawnListEntry;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -17,7 +17,7 @@ import com.google.common.collect.Multimap;
  */
 public class ImportedSpawnList {
 
-    private SpawnList[] spawnLists = new SpawnList[BiomeGenBase.biomeList.length];
+    private SpawnList[] spawnLists = new SpawnList[BiomeGenBase.getBiomeGenArray().length];
 
     private static class SpawnList {
         public Multimap<EnumCreatureType, SpawnListEntry> spawnLists = ArrayListMultimap.create();
@@ -26,8 +26,8 @@ public class ImportedSpawnList {
     @SuppressWarnings("unchecked")
     public ImportedSpawnList(BiomeBlacklist blacklist, boolean clearVanilla) {
         JASLog.log().info("Importing ".concat(clearVanilla ? "and clearing " : "").concat("vanilla spawn lists."));
-        for (int i = 0; i < BiomeGenBase.biomeList.length; i++) {
-            BiomeGenBase biome = BiomeGenBase.biomeList[i];
+        for (int i = 0; i < BiomeGenBase.getBiomeGenArray().length; i++) {
+            BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[i];
             if (biome == null) {
                 continue;
             }
@@ -44,7 +44,7 @@ public class ImportedSpawnList {
     }
 
     public void clearImportedSpawnList() {
-        spawnLists = new SpawnList[BiomeGenBase.biomeList.length];
+        spawnLists = new SpawnList[BiomeGenBase.getBiomeGenArray().length];
     }
 
     public Collection<SpawnListEntry> getSpawnableCreatureList(BiomeGenBase biome, EnumCreatureType creatureType) {

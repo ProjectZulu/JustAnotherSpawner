@@ -186,7 +186,7 @@ public class BiomeGroupRegistry {
                 BiomeGroupSaveObject.class, gson);
         /* Build Reverse Lookup */
         ArrayListMultimap<String, Integer> pckgNameToBiomeIDBuilder = ArrayListMultimap.create();
-        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
             if (biome != null) {
                 pckgNameToBiomeIDBuilder.put(BiomeHelper.getPackageName(biome), biome.biomeID);
             }
@@ -207,7 +207,7 @@ public class BiomeGroupRegistry {
         BiMap<String, String> biomePckgToMappingBuilder = biomeMappingToPckgBuilder.inverse();
         biomePckgToMappingBuilder.putAll(savedStats.biomeMappings);
         // Check for Missing Mappings, keep track of them to create default groups
-        for (BiomeGenBase biome : BiomeGenBase.biomeList) {
+        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
             if (biome == null) {
                 continue;
             }

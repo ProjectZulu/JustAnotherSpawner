@@ -92,7 +92,7 @@ public class StructureHandler {
             Collection<SpawnListEntryBuilder> spawnList = readSpawnLists.get(structureKey);
             if (spawnList == null) {
                 spawnList = new ArrayList<SpawnListEntryBuilder>();
-                for (net.minecraft.world.biome.SpawnListEntry spawnListEntry : interpreter
+                for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : interpreter
                         .getStructureSpawnList(structureKey)) {
                     @SuppressWarnings("unchecked")
                     List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);

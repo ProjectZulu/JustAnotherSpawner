@@ -6,7 +6,7 @@ import java.util.List;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
-import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.ChatComponentText;
 
 public class CommandPackageEntity extends CommandJasBase {
     public String getCommandName() {
@@ -34,8 +34,8 @@ public class CommandPackageEntity extends CommandJasBase {
         String name = stringArgs[0];
         Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(name);
         if (entityClass != null) {
-            commandSender.sendChatToPlayer(new ChatMessageComponent().addText(name.concat(" package is ").concat(
-                    entityClass.getName())));
+            commandSender.addChatMessage(new ChatComponentText(name.concat(" package is ")
+                    .concat(entityClass.getName())));
         } else {
             throw new WrongUsageException("commands.jasentitypackage.typenotfound", new Object[0]);
         }

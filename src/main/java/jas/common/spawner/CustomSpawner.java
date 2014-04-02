@@ -26,7 +26,7 @@ import java.util.logging.Level;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingData;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -37,8 +37,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.event.Event.Result;
 import net.minecraftforge.event.ForgeEventFactory;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CustomSpawner {
 
@@ -200,9 +200,9 @@ public class CustomSpawner {
                     }
                     ChunkPosition chunkposition = creatureType.getRandomSpawningPointInChunk(worldServer,
                             chunkCoord.chunkXPos, chunkCoord.chunkZPos);
-                    int k1 = chunkposition.x;
-                    int l1 = chunkposition.y;
-                    int i2 = chunkposition.z;
+                    int k1 = chunkposition.chunkPosX;
+                    int l1 = chunkposition.chunkPosY;
+                    int i2 = chunkposition.chunkPosZ;
 
                     if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
                         int j2 = 0;
@@ -213,7 +213,7 @@ public class CustomSpawner {
                             byte variance = 6;
                             SpawnListEntry spawnlistentry = null;
                             Class<? extends EntityLiving> livingToSpawn = null;
-                            EntityLivingData entitylivingdata = null;
+                            IEntityLivingData entitylivingdata = null;
                             CountableInt livingCount = null;
                             int livingCap = 0;
                             for (int k3 = 0; k3 < 4; ++k3) {
@@ -304,13 +304,17 @@ public class CustomSpawner {
                                                     spawnY, spawnZ)) {
                                                 entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
                                             }
-                                            JASLog.log().logSpawn(false, (String) EntityList.classToStringMapping
-                                                    .get(entityliving.getClass()),
+                                            JASLog.log().logSpawn(
+                                                    false,
+                                                    (String) EntityList.classToStringMapping.get(entityliving
+                                                            .getClass()),
                                                     spawnlistentry.getLivingHandler().creatureTypeID,
-                                                    (int) entityliving.posX, (int) entityliving.posY,
-                                                    (int) entityliving.posZ, BiomeHelper
-                                                            .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
-                                                                    (int) entityliving.posX, (int) entityliving.posZ)));
+                                                    (int) entityliving.posX,
+                                                    (int) entityliving.posY,
+                                                    (int) entityliving.posZ,
+                                                    BiomeHelper.getPackageName(entityliving.worldObj
+                                                            .getBiomeGenForCoords((int) entityliving.posX,
+                                                                    (int) entityliving.posZ)));
                                             spawnlistentry.getLivingHandler().postSpawnEntity(entityliving,
                                                     spawnlistentry);
                                             typeCount.increment();
@@ -364,12 +368,13 @@ public class CustomSpawner {
             BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
             SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
                     world.getTopSolidOrLiquidBlock(j1, k1), k1);
-            EntityLivingData entitylivingdata = null;
+            IEntityLivingData entitylivingdata = null;
             if (spawnListEntry == null) {
                 JASLog.log().debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
                 return;
             } else {
-                JASLog.log().debug(Level.INFO, "Evaluating if We Should spawn entity group %s", spawnListEntry.livingGroupID);
+                JASLog.log().debug(Level.INFO, "Evaluating if We Should spawn entity group %s",
+                        spawnListEntry.livingGroupID);
             }
             int i1 = spawnListEntry.minChunkPack
                     + random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
@@ -399,11 +404,15 @@ public class CustomSpawner {
                         }
 
                         entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-                        JASLog.log().logSpawn(true, (String) EntityList.classToStringMapping.get(entityliving.getClass()),
-                                spawnListEntry.getLivingHandler().creatureTypeID, (int) entityliving.posX,
-                                (int) entityliving.posY, (int) entityliving.posZ, BiomeHelper
-                                        .getPackageName(entityliving.worldObj.getBiomeGenForCoords(
-                                                (int) entityliving.posX, (int) entityliving.posZ)));
+                        JASLog.log().logSpawn(
+                                true,
+                                (String) EntityList.classToStringMapping.get(entityliving.getClass()),
+                                spawnListEntry.getLivingHandler().creatureTypeID,
+                                (int) entityliving.posX,
+                                (int) entityliving.posY,
+                                (int) entityliving.posZ,
+                                BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+                                        (int) entityliving.posX, (int) entityliving.posZ)));
                         world.spawnEntityInWorld(entityliving);
                         if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
                             entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);

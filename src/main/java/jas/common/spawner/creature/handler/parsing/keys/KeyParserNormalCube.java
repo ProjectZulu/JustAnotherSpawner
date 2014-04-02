@@ -42,7 +42,8 @@ public class KeyParserNormalCube extends KeyParserBase {
                 rangeY = rangeX;
                 rangeZ = rangeX;
             } else {
-                JASLog.log().severe("Error Parsing Range of %s. Invalid Argument Length of %s.", key.key, rangePieces.length);
+                JASLog.log().severe("Error Parsing Range of %s. Invalid Argument Length of %s.", key.key,
+                        rangePieces.length);
             }
 
             if (pieces.length == 3) {
@@ -56,7 +57,8 @@ public class KeyParserNormalCube extends KeyParserBase {
                 typeValue = new TypeValuePair(key, new Object[] { isInverted, rangeX, rangeY, rangeZ });
             }
         } else {
-            JASLog.log().severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key, pieces.length);
+            JASLog.log().severe("Error Parsing %s Block Parameter. Invalid Argument Length of %s.", key.key,
+                    pieces.length);
             return false;
         }
 
@@ -95,8 +97,8 @@ public class KeyParserNormalCube extends KeyParserBase {
             for (int i = -rangeX; i <= rangeX; i++) {
                 for (int k = -rangeZ; k <= rangeZ; k++) {
                     for (int j = -rangeY; j <= rangeY; j++) {
-                        boolean isNormal = world.isBlockNormalCube(xCoord + offsetX + i, yCoord + offsetY + j, zCoord
-                                + offsetZ + k);
+                        boolean isNormal = world.getBlock(xCoord + offsetX + i, yCoord + offsetY + j,
+                                zCoord + offsetZ + k).isNormalCube();
                         if (!isInverted && isNormal || isInverted && !isNormal) {
                             return false;
                         }

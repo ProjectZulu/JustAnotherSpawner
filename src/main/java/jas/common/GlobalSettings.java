@@ -3,7 +3,7 @@ package jas.common;
 import com.google.gson.annotations.SerializedName;
 
 public class GlobalSettings {
-    public String fileVersion = "1.0";
+    public String FILE_VERSION = "1.0";
     @SerializedName("___VANILLA COMPATABILITY___")
     public final String VANILLA_COMMENT = "These options are used to disable the vanilla spawning system in a friendly way";
     @SerializedName("Turn gamerule spawning off on start")

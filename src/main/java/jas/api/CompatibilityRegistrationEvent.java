@@ -1,6 +1,6 @@
 package jas.api;
 
-import net.minecraftforge.event.Event;
+import cpw.mods.fml.common.eventhandler.Event;
 
 public class CompatibilityRegistrationEvent extends Event {
 

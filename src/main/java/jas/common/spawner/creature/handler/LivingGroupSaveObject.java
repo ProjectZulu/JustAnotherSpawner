@@ -150,7 +150,7 @@ public class LivingGroupSaveObject {
                 TreeMap<String, LivingGroup> groupNameToBiomeGroup = saveObject.configNameToAttributeGroups
                         .get(configName);
                 if (groupNameToBiomeGroup == null) {
-                    groupNameToBiomeGroup = new TreeMap<>();
+                    groupNameToBiomeGroup = new TreeMap<String, LivingGroup>();
                     saveObject.configNameToAttributeGroups.put(configName, groupNameToBiomeGroup);
                 }
                 JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
@@ -171,7 +171,7 @@ public class LivingGroupSaveObject {
                 TreeMap<String, LivingGroup> groupNameToBiomeGroup = saveObject.configNameToLivingGroups
                         .get(configName);
                 if (groupNameToBiomeGroup == null) {
-                    groupNameToBiomeGroup = new TreeMap<>();
+                    groupNameToBiomeGroup = new TreeMap<String, LivingGroup>();
                     saveObject.configNameToLivingGroups.put(configName, groupNameToBiomeGroup);
                 }
                 JsonObject innerObject = outerEntry.getValue().getAsJsonObject();

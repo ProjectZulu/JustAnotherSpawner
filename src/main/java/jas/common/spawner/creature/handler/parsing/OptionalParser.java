@@ -62,34 +62,25 @@ public class OptionalParser {
      * @param valueCache Cache used by OptionalSettings to hold values
      * @return Returns a ArrayListMultimap mapping BlockID to Meta values
      */
-    public static ListMultimap<Integer, Integer> parseBlock(String[] values) {
-        ListMultimap<Integer, Integer> blockMeta = ArrayListMultimap.create();
+    public static ListMultimap<String, Integer> parseBlock(String[] values) {
+        ListMultimap<String, Integer> blockMeta = ArrayListMultimap.create();
 
         for (int j = 1; j < values.length; j++) {
-            int minID = -1;
-            int maxID = -1;
             int minMeta = 0;
             int maxMeta = 0;
+            /* Parse Scenario: NAME-1>2 ADDS (Block,Meta)(NAME, 1)(NAME, 2) */
             /* Parse Scenario: 2>4-1>2 ADDS (Block,Meta)(2,1)(2,2)(3,1)(3,2)(4,1)(4,2) */
             String[] idMetaParts = values[j].split("-");
+            String blockID = idMetaParts[0];
             for (int k = 0; k < idMetaParts.length; k++) {
-                String[] rangeParts = idMetaParts[k].split(">");
                 if (k == 0) {
-                    for (int l = 0; l < rangeParts.length; l++) {
-                        if (l == 0) {
-                            minID = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMinBlockID");
-                        } else if (l == 1) {
-                            maxID = ParsingHelper.parseFilteredInteger(rangeParts[l], maxID, "parseMaxBlockID");
-                        } else {
-                            JASLog.log().warning("Block entry %s contains too many > elements.", values[j]);
-                        }
-                    }
                 } else if (k == 1) {
+                    String[] rangeParts = idMetaParts[k].split(">");
                     for (int l = 0; l < rangeParts.length; l++) {
                         if (l == 0) {
-                            minMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMinMetaID");
+                            minMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minMeta, "parseMinMetaID");
                         } else if (l == 1) {
-                            maxMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], minID, "parseMaxMetaID");
+                            maxMeta = ParsingHelper.parseFilteredInteger(rangeParts[l], maxMeta, "parseMaxMetaID");
                         } else {
                             JASLog.log().warning("Block entry %s contains too many > elements.", values[j]);
                         }
@@ -100,16 +91,11 @@ public class OptionalParser {
             }
 
             /* Gaurantee Max > Min. Auxillary Purpose: Gaurantees max is not -1 if only min is Set */
-            maxID = minID > maxID ? minID : maxID;
             maxMeta = minMeta > maxMeta ? minMeta : maxMeta;
 
-            for (int id = minID; id <= maxID; id++) {
-                for (int meta = minMeta; meta <= maxMeta; meta++) {
-                    if (id != -1) {
-                        JASLog.log().debug(Level.INFO, "Would be adding (%s,%s)", id, meta);
-                        blockMeta.put(id, meta);
-                    }
-                }
+            for (int meta = minMeta; meta <= maxMeta; meta++) {
+                JASLog.log().debug(Level.INFO, "Would be adding (%s,%s)", blockID, meta);
+                blockMeta.put(blockID, meta);
             }
         }
         return !blockMeta.isEmpty() ? blockMeta : null;

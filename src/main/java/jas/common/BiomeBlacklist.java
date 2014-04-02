@@ -32,9 +32,9 @@ public class BiomeBlacklist {
 
             /* Create Numeric Blacklist */
             TreeMap<String, Boolean> namedBlacklist = optBlackList.get();
-            blacklist = new boolean[BiomeGenBase.biomeList.length];
+            blacklist = new boolean[BiomeGenBase.getBiomeGenArray().length];
             for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
-                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
+                BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[biomeID];
                 if (biome == null) {
                     blacklist[biomeID] = false;
                     continue;
@@ -47,7 +47,7 @@ public class BiomeBlacklist {
             /* Write Blacklist */
             TreeMap<String, Boolean> namedBlacklist = new TreeMap<String, Boolean>();
             for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
-                BiomeGenBase biome = BiomeGenBase.biomeList[biomeID];
+                BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[biomeID];
                 if (biome == null) {
                     continue;
                 }

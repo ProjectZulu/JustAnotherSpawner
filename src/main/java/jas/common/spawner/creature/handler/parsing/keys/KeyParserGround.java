@@ -27,13 +27,11 @@ public class KeyParserGround extends KeyParserBoolean {
         par1 &= 15;
 
         for (par2 &= 15; k > 0; --k) {
-            int l = chunk.getBlockID(par1, k, par2);
+            Block block = chunk.getBlock(par1, k, par2);
 
-            if (l != 0 && Block.blocksList[l].blockMaterial.blocksMovement()
-                    && Block.blocksList[l].blockMaterial != Material.leaves
-                    && Block.blocksList[l].blockMaterial != Material.wood
-                    && Block.blocksList[l].blockMaterial != Material.glass
-                    && !Block.blocksList[l].isBlockFoliage(world, par1, k, par2)) {
+            if (block != null && block.getMaterial().blocksMovement() && block.getMaterial() != Material.leaves
+                    && block.getMaterial() != Material.wood && block.getMaterial() != Material.glass
+                    && !block.isFoliage(world, par1, k, par2)) {
                 return k + 1;
             }
         }

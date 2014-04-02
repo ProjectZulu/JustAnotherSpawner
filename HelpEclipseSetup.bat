@@ -1,1 +1,2 @@
 gradlew.bat eclipse
+PAUSE
