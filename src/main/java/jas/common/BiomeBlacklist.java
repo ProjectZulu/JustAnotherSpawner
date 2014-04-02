@@ -1,6 +1,8 @@
 package jas.common;
 
+import jas.common.spawner.biome.group.BiomeGroupSaveObject;
 import jas.common.spawner.biome.group.BiomeHelper;
+import jas.common.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -13,25 +15,21 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 public class BiomeBlacklist {
-
+    public final String FILE_VERSION = "1.0";
     private boolean[] blacklist;
 
     public BiomeBlacklist(File configDirectory) {
-        Type blacklistType = new TypeToken<TreeMap<String, Boolean>>() {
-        }.getType();
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { BiomeBlacklistSaveObject.class },
+                new Object[] { new BiomeBlacklistSaveObject.BlacklistSerializer() });
 
-        Gson gson = GsonHelper.createGson(true);
         File blackListFile = new File(configDirectory, DefaultProps.GLOBALSETTINGSDIR + "BiomeBlacklist.cfg");
         /* Read Blacklist */
         {
-            Optional<TreeMap<String, Boolean>> optBlackList = GsonHelper.readFromGson(
-                    FileUtilities.createReader(blackListFile, false), blacklistType, gson);
-            if (!optBlackList.isPresent()) {
-                optBlackList = Optional.of(new TreeMap<String, Boolean>());
-            }
+            BiomeBlacklistSaveObject optBlackList = GsonHelper.readFromGson(
+                    FileUtilities.createReader(blackListFile, false), BiomeBlacklistSaveObject.class, gson);
 
             /* Create Numeric Blacklist */
-            TreeMap<String, Boolean> namedBlacklist = optBlackList.get();
+            TreeMap<String, Boolean> namedBlacklist = optBlackList.getBlacklist();
             blacklist = new boolean[BiomeGenBase.getBiomeGenArray().length];
             for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
                 BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[biomeID];
@@ -45,16 +43,8 @@ public class BiomeBlacklist {
         }
         {
             /* Write Blacklist */
-            TreeMap<String, Boolean> namedBlacklist = new TreeMap<String, Boolean>();
-            for (int biomeID = 0; biomeID < blacklist.length; biomeID++) {
-                BiomeGenBase biome = BiomeGenBase.getBiomeGenArray()[biomeID];
-                if (biome == null) {
-                    continue;
-                }
-                namedBlacklist.put(BiomeHelper.getPackageName(biome), blacklist[biomeID]);
-            }
-            GsonHelper
-                    .writeToGson(FileUtilities.createWriter(blackListFile, true), namedBlacklist, blacklistType, gson);
+            BiomeBlacklistSaveObject saveObject = new BiomeBlacklistSaveObject(blacklist);
+            GsonHelper.writeToGson(FileUtilities.createWriter(blackListFile, true), saveObject, gson);
         }
     }
 
