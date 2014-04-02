@@ -269,8 +269,9 @@ public class LivingGroupRegistry {
 
     private void loadAttributes(LivingGroupSaveObject savedStats) {
         Set<LivingGroup> attributeGroups = new HashSet<LivingGroup>();
-        if (savedStats.configNameToAttributeGroups != null) {
-            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToAttributeGroups.values();
+        if (savedStats.configNameToAttributeGroups.isPresent()) {
+            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToAttributeGroups.get()
+                    .values();
             for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
                 for (LivingGroup attributeGroup : treeMap.values()) {
                     if (!"".equals(attributeGroup.groupID)) {
@@ -291,8 +292,8 @@ public class LivingGroupRegistry {
 
     private void loadBiomes(LivingGroupSaveObject savedStats, List<String> newJASNames) {
         Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
-        if (savedStats.configNameToLivingGroups != null) {
-            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.values();
+        if (savedStats.configNameToLivingGroups.isPresent()) {
+            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
             for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
                 for (LivingGroup biomeGroup : treeMap.values()) {
                     if (!"".equals(biomeGroup.groupID)) {
@@ -382,7 +383,8 @@ public class LivingGroupRegistry {
             sortedList = TopologicalSort.topologicalSort(groupGraph);
         } catch (TopologicalSortingException sortException) {
             SortingExceptionData<LivingGroup> exceptionData = sortException.getExceptionData();
-            JASLog.log().severe("A circular reference was detected when processing entity groups. Groups in the cycle were: ");
+            JASLog.log().severe(
+                    "A circular reference was detected when processing entity groups. Groups in the cycle were: ");
             int i = 1;
             for (LivingGroup invalidGroups : exceptionData.getVisitedNodes()) {
                 JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
@@ -429,8 +431,8 @@ public class LivingGroupRegistry {
                 SetAlgebra.operate(livingGroup.entityJASNames, Sets.newHashSet(contentComponent), operation);
                 continue;
             }
-            JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.", livingGroup.groupID,
-                    livingGroup.contentsToString(), contentComponent);
+            JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.",
+                    livingGroup.groupID, livingGroup.contentsToString(), contentComponent);
         }
     }
 
