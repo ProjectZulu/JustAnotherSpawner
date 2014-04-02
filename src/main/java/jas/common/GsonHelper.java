@@ -4,6 +4,7 @@ import jas.common.FileUtilities.OptionalCloseable;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 
 import com.google.common.base.Optional;
@@ -39,7 +40,9 @@ public class GsonHelper {
             }
         }
         try {
-            return object.newInstance();
+            Constructor<T> constructor = object.getConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
         } catch (Exception e) {
             JASLog.log().severe("This should never be possible. Failed to instantiate class %s.", object);
             e.printStackTrace();
