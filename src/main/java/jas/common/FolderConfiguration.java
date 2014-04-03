@@ -7,25 +7,22 @@ import com.google.gson.annotations.SerializedName;
 
 public class FolderConfiguration {
     public final String IMPORTANT = "# Folder names are case sensitive if OS allows it. Beware invalid OS characters.";
-	@SerializedName("FILE_VERSION")
-	public final String fileVersion = "1.0";
-    @SerializedName("SaveFolderName_OnNewWorld")
-    public final String defaultSaveName;
-    @SerializedName("ImportFolder_OnNewWorld")
-    public final String importName;
-    @SerializedName("WorldSettings")
+    @SerializedName("FILE_VERSION")
+    public final String fileVersion = "1.0";
+    @SerializedName("DefaultProfile")
+    private WorldStats defaultStats;
+    @SerializedName("WorldProfiles")
     private HashMap<String, WorldStats> worldNameToStats;
     private transient WorldStats currentStats;
 
     public FolderConfiguration() {
-        defaultSaveName = "DEFAULT";
-        importName = "";
+        defaultStats = new WorldStats();
         worldNameToStats = new HashMap<String, WorldStats>();
     }
 
     public static class WorldStats {
         /* Marks the folders should be saved */
-        @SerializedName("World_Save_Folder_Name")
+        @SerializedName("Save_Folder_Name")
         public final String saveName;
         /* Marks how the Entity CFG settings should be saved */
         @SerializedName("Use_Universal_Entity_CFG")
@@ -45,18 +42,13 @@ public class FolderConfiguration {
         }
     }
 
-    public void initializeCurrentWorldStats(String curWorldName) {
-        getCurrentWorldStats(curWorldName);
-    }
-
     public WorldStats getCurrentWorldStats(String curWorldName) {
         if (currentStats != null) {
             return currentStats;
         }
         WorldStats stats = worldNameToStats.get(curWorldName);
         if (stats == null) {
-            stats = new WorldStats(defaultSaveName.replace("{$world}", curWorldName));
-            worldNameToStats.put(curWorldName, stats);
+            return currentStats = defaultStats;
         }
         return currentStats = stats;
     }

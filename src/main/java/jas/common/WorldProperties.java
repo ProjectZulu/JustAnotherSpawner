@@ -20,10 +20,6 @@ public final class WorldProperties {
         return folderConfiguration.getCurrentWorldStats(curWorldName);
     }
 
-    public String importName() {
-        return folderConfiguration.importName;
-    }
-
     public WorldGlobalSettings getGlobal() {
         return worldGlobalProperties;
     }
@@ -46,9 +42,7 @@ public final class WorldProperties {
                 FileUtilities.createReader(FolderConfiguration.getFile(configDirectory), false),
                 FolderConfiguration.class, gson);
         folderConfiguration.getCurrentWorldStats(world.getWorldInfo().getWorldName());
-
-        importFilesIfNeccesary(configDirectory);
-
+        
         savedConfguration = GsonHelper.readFromGson(
                 FileUtilities.createReader(
                         SavedFolderConfiguration.getFile(configDirectory, getFolderConfiguration().saveName), false),
@@ -72,18 +66,5 @@ public final class WorldProperties {
                 FileUtilities.createWriter(
                         WorldGlobalSettings.getFile(configDirectory, getFolderConfiguration().saveName), true),
                 worldGlobalProperties, gson);
-    }
-
-    private void importFilesIfNeccesary(File modConfigDirectoryFile) {
-        if (importName().trim().equals("")) {
-            return;
-        }
-        File worldFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR
-                + getFolderConfiguration().saveName);
-        File importFolder = new File(modConfigDirectoryFile, DefaultProps.WORLDSETTINGSDIR + importName());
-        if (worldFolder.exists() || !importFolder.exists()) {
-            return;
-        }
-        FileUtilities.copy(importFolder, worldFolder);
     }
 }
