@@ -15,7 +15,9 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent.Phase;
 import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
+import cpw.mods.fml.relauncher.Side;
 
 public class SpawnerTicker {
 
@@ -27,6 +29,9 @@ public class SpawnerTicker {
 
     @SubscribeEvent
     public void tickStart(WorldTickEvent event) {
+        if (event.side != Side.SERVER || event.phase != Phase.END) {
+            return;
+        }
         WorldServer world = (WorldServer) event.world;
         if (!world.getGameRules().hasRule("doCustomMobSpawning")
                 || world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {

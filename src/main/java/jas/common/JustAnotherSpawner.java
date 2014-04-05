@@ -74,7 +74,6 @@ public class JustAnotherSpawner {
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 
         MinecraftForge.EVENT_BUS.register(this);
-        // proxy.registerKeyBinding();
     }
 
     @EventHandler
@@ -87,9 +86,7 @@ public class JustAnotherSpawner {
         BiomeDictionary.registerAllBiomes();
         biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
         MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
-        if (FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER) {// TODO: Proxy
-            FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
-        }
+        FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
         importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
         MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
     }
