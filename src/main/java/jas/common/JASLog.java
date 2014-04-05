@@ -1,7 +1,10 @@
 package jas.common;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
 public class JASLog {
     private static Logger myLog;
@@ -43,15 +46,13 @@ public class JASLog {
         SPAWNING_TYPE = new LogType(true);
         SPAWNING_POS = new LogType(true);
         SPAWNING_BIOME = new LogType(true);
-        jasLog = this;
     }
 
     public static void setLogger(JASLog log) {
         if (!isSetup) {
             JASLog.isSetup = true;
             JASLog.jasLog = log;
-            JASLog.myLog = Logger.getLogger("JAS");
-            JASLog.myLog.setParent(Logger.getLogger("ForgeModLoader"));
+            JASLog.myLog = LogManager.getLogger("JustAnotherSpawner");
         }
     }
 
@@ -64,11 +65,11 @@ public class JASLog {
     }
 
     public void warning(String format, Object... data) {
-        log(Level.WARNING, format, data);
+        log(Level.WARN, format, data);
     }
 
     public void severe(String format, Object... data) {
-        log(Level.SEVERE, format, data);
+        log(Level.ERROR, format, data);
     }
 
     public void debug(Level level, String format, Object... data) {

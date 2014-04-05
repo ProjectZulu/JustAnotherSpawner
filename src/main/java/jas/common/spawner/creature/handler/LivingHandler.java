@@ -13,11 +13,12 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpaw
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
-import java.util.logging.Level;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+
+import org.apache.logging.log4j.Level;
 
 public class LivingHandler {
 

@@ -6,7 +6,8 @@ import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import java.util.HashMap;
-import java.util.logging.Level;
+
+import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;

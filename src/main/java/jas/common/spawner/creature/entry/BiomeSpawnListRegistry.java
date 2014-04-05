@@ -28,12 +28,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+
+import org.apache.logging.log4j.Level;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;

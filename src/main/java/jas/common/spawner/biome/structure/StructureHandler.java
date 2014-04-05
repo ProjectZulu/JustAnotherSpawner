@@ -16,9 +16,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
 
 import net.minecraft.world.World;
+
+import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;

@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.logging.Level;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -38,6 +37,9 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
+
+import org.apache.logging.log4j.Level;
+
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CustomSpawner {
