@@ -21,6 +21,18 @@ version = "0.14.0"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
 
+repositories {
+	mavenCentral()
+	maven {
+		name = 'jeval'
+		url = "https://oss.sonatype.org/content/repositories/central-sync"
+	}
+}
+
+dependencies {
+	compile 'net.sourceforge.jeval:jeval:0.9.4'
+}
+
 minecraft {
 	version = "1.7.2-10.12.0.1047"
     assetDir = "eclipse/assets"
