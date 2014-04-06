@@ -3,9 +3,13 @@ package jas.common.spawner.creature.type;
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.WorldProperties;
+import jas.common.serializer.CreatureTypeSaveObject;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.spawner.biome.group.BiomeGroupSaveObject;
+import jas.common.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -17,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class CreatureTypeRegistry {
     public static final String NONE = "NONE";
@@ -58,16 +61,20 @@ public class CreatureTypeRegistry {
     }
 
     public void loadFromConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson(true);
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { CreatureTypeSaveObject.class },
+                new Object[] { new CreatureTypeSaveObject.CreatureTypeSaveObjectSerializer() });
+
         File creatureTypeFile = CreatureType
                 .getFile(configDirectory, worldProperties.getFolderConfiguration().saveName);
-        Optional<HashMap<String, CreatureTypeBuilder>> read = GsonHelper.readFromGson(
-                FileUtilities.createReader(creatureTypeFile, false),
-                new TypeToken<HashMap<String, CreatureTypeBuilder>>() {
-                }.getType(), gson);
+
+        CreatureTypeSaveObject saveObject = GsonHelper.readFromGson(
+                FileUtilities.createReader(creatureTypeFile, false), CreatureTypeSaveObject.class, gson);
+
+        Optional<Collection<CreatureTypeBuilder>> read = saveObject.getTypes();
+
         HashMap<String, CreatureTypeBuilder> readTypes = new HashMap<String, CreatureTypeBuilder>();
         if (read.isPresent()) {
-            for (CreatureTypeBuilder creatureBuilder : read.get().values()) {
+            for (CreatureTypeBuilder creatureBuilder : read.get()) {
                 if (creatureBuilder.typeID != null) {
                     readTypes.put(creatureBuilder.typeID, creatureBuilder);
                 }
@@ -106,13 +113,11 @@ public class CreatureTypeRegistry {
      * If config settings are already present, they will be overwritten
      */
     public void saveCurrentToConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson(true);
+        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { CreatureTypeSaveObject.class },
+                new Object[] { new CreatureTypeSaveObject.CreatureTypeSaveObjectSerializer() });
         File creatureTypeFile = CreatureType
                 .getFile(configDirectory, worldProperties.getFolderConfiguration().saveName);
-        HashMap<String, CreatureTypeBuilder> writeTypes = new HashMap<String, CreatureTypeBuilder>();
-        for (Entry<String, CreatureType> entry : types.entrySet()) {
-            writeTypes.put(entry.getKey(), new CreatureTypeBuilder(entry.getValue()));
-        }
-        GsonHelper.writeToGson(FileUtilities.createWriter(creatureTypeFile, true), writeTypes, gson);
+        GsonHelper.writeToGson(FileUtilities.createWriter(creatureTypeFile, true), new CreatureTypeSaveObject(this),
+                gson);
     }
 }

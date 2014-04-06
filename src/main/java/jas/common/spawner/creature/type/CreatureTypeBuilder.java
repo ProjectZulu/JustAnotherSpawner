@@ -73,6 +73,19 @@ public class CreatureTypeBuilder {
         }
     }
 
+    public String getRawSpawnMedium() {
+        return spawnMedium;
+    }
+
+    public CreatureTypeBuilder setRawMedium(String spawnMedium) {
+        if (spawnMedium.equalsIgnoreCase("water")) {
+            this.spawnMedium = "water";
+        } else {
+            this.spawnMedium = "air";
+        }
+        return this;
+    }
+
     public CreatureTypeBuilder insideMedium(Material spawnMedium) {
         if (spawnMedium == Material.water) {
             this.spawnMedium = "water";
