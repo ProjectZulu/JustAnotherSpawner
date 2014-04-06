@@ -10,6 +10,10 @@ import java.lang.reflect.Type;
 import com.google.common.base.Optional;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 public class GsonHelper {
 
@@ -74,4 +78,79 @@ public class GsonHelper {
             writer.close();
         }
     }
+
+    /**
+     * Helper for unwrapping JsonElements, returns empty JSON is provided element is not a JsonObject
+     */
+    public static JsonObject getAsJsonObject(JsonElement element) {
+        if (element != null && element.isJsonObject()) {
+            return element.getAsJsonObject();
+        }
+        return new JsonObject();
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static String getMemberOrDefault(JsonObject jsonObject, String memberName, String defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonPrimitive()) {
+            JsonPrimitive memberPrimitive = element.getAsJsonPrimitive();
+            if (memberPrimitive.isString()) {
+                return memberPrimitive.getAsString();
+            }
+        }
+        return defaultIfAbsent;
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static int getMemberOrDefault(JsonObject jsonObject, String memberName, int defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonPrimitive()) {
+            JsonPrimitive memberPrimitive = element.getAsJsonPrimitive();
+            if (memberPrimitive.isNumber()) {
+                return memberPrimitive.getAsInt();
+            }
+        }
+        return defaultIfAbsent;
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static boolean getMemberOrDefault(JsonObject jsonObject, String memberName, boolean defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonPrimitive()) {
+            JsonPrimitive memberPrimitive = element.getAsJsonPrimitive();
+            if (memberPrimitive.isBoolean()) {
+                return memberPrimitive.getAsBoolean();
+            }
+        }
+        return defaultIfAbsent;
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static JsonObject getMemberOrDefault(JsonObject jsonObject, String memberName, JsonObject defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonObject()) {
+            return element.getAsJsonObject();
+        }
+        return defaultIfAbsent;
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static JsonArray getMemberOrDefault(JsonObject jsonObject, String memberName, JsonArray defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonArray()) {
+            return element.getAsJsonArray();
+        }
+        return defaultIfAbsent;
+    }
+
 }
