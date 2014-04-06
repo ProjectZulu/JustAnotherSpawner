@@ -48,9 +48,9 @@ public class GsonHelper {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (Exception e) {
-            JASLog.log().severe("This should never be possible. Failed to instantiate class %s.", object);
             e.printStackTrace();
-            return null;
+            throw new IllegalArgumentException(String.format(
+                    "This should never be possible. Failed to instantiate class %s.", object));
         }
     }
 
@@ -83,10 +83,27 @@ public class GsonHelper {
      * Helper for unwrapping JsonElements, returns empty JSON is provided element is not a JsonObject
      */
     public static JsonObject getAsJsonObject(JsonElement element) {
+        return getAsOrDefault(element, new JsonObject());
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if element is absent or an invalid type
+     */
+    public static JsonObject getAsOrDefault(JsonElement element, JsonObject defaultValue) {
         if (element != null && element.isJsonObject()) {
             return element.getAsJsonObject();
         }
-        return new JsonObject();
+        return defaultValue;
+    }
+
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if element is absent or an invalid type
+     */
+    public static int getAsOrDefault(JsonElement element, int defaultValue) {
+        if (element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber()) {
+            return element.getAsJsonPrimitive().getAsInt();
+        }
+        return defaultValue;
     }
 
     /**
