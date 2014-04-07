@@ -5,7 +5,6 @@ import jas.common.GsonHelper;
 import jas.common.WorldProperties;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
-import jas.common.spawner.creature.type.LivingTypeSerializer;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -22,11 +21,9 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class LivingHandlerRegistry {
     /* Mapping from GroupID to LivingHandler */
@@ -76,22 +73,18 @@ public class LivingHandlerRegistry {
      */
     public void loadFromConfig(File configDirectory, World world) {
         Set<LivingHandler> livingHandlers = new HashSet<LivingHandler>();
-        Type livingType = new TypeToken<HashMap<String, LivingHandlerBuilder>>() {
-        }.getType();
-        Gson gson = GsonHelper
-                .createGson(false, new Type[] { livingType }, new Object[] { new LivingTypeSerializer() });
+        Gson gson = GsonHelper.createGson(false, new Type[] { LivingHandlerSaveObject.class },
+                new Object[] { new LivingHandlerSaveObject.Serializer() });
         File handlerFileFolder = LivingHandler.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName, "");
         File[] files = FileUtilities.getFileInDirectory(handlerFileFolder, ".cfg");
         for (File livingFile : files) {
-            Optional<HashMap<String, LivingHandlerBuilder>> read = GsonHelper.readFromGson(
-                    FileUtilities.createReader(livingFile, false), livingType, gson);
-            if (read.isPresent()) {
-                for (Entry<String, LivingHandlerBuilder> entry : read.get().entrySet()) {
-                    if (entry.getValue().getHandlerId() != null) {
-                        LivingHandler handler = entry.getValue().build(creatureTypeRegistry);
-                        livingHandlers.add(handler);
-                    }
+            LivingHandlerSaveObject read = GsonHelper.readFromGson(FileUtilities.createReader(livingFile, false),
+                    LivingHandlerSaveObject.class, gson);
+            if (read.getHandlers().isPresent()) {
+                for (LivingHandlerBuilder builder : read.getHandlers().get()) {
+                    LivingHandler handler = builder.build(creatureTypeRegistry);
+                    livingHandlers.add(handler);
                 }
             }
         }
@@ -159,13 +152,14 @@ public class LivingHandlerRegistry {
             }
             idToHandler.put(handler.groupID, new LivingHandlerBuilder(handler));
         }
-        Type livingType = new TypeToken<HashMap<String, LivingHandlerBuilder>>() {
-        }.getType();
-        Gson gson = GsonHelper.createGson(true, new Type[] { livingType }, new Object[] { new LivingTypeSerializer() });
+
+        Gson gson = GsonHelper.createGson(true, new Type[] { LivingHandlerSaveObject.class },
+                new Object[] { new LivingHandlerSaveObject.Serializer() });
         for (Entry<String, HashMap<String, LivingHandlerBuilder>> entry : fileNameToHandlerIdToHandler.entrySet()) {
             File livingfile = LivingHandler.getFile(configDirectory, worldProperties.getFolderConfiguration().saveName,
                     entry.getKey());
-            GsonHelper.writeToGson(FileUtilities.createWriter(livingfile, true), entry.getValue(), livingType, gson);
+            GsonHelper.writeToGson(FileUtilities.createWriter(livingfile, true), new LivingHandlerSaveObject(entry
+                    .getValue().values()), gson);
         }
     }
 }
