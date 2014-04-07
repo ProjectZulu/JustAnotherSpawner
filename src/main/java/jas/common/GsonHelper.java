@@ -44,7 +44,7 @@ public class GsonHelper {
             }
         }
         try {
-            Constructor<T> constructor = object.getConstructor();
+            Constructor<T> constructor = object.getDeclaredConstructor();
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (Exception e) {
