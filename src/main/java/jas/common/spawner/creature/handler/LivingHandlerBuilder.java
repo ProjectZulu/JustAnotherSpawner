@@ -38,38 +38,42 @@ public class LivingHandlerBuilder {
         this.optionalParameters = handler.optionalParameters;
     }
 
-    public void setHandlerId(String handlerId) {
+    public LivingHandlerBuilder setHandlerId(String handlerId) {
         this.handlerId = handlerId;
+        return this;
     }
 
     public String getHandlerId() {
         return handlerId;
     }
 
-    public void setCreatureTypeId(String creatureTypeId) {
+    public LivingHandlerBuilder setCreatureTypeId(String creatureTypeId) {
         if (creatureTypeId != null) {
             creatureTypeId = creatureTypeId.toUpperCase(Locale.ENGLISH);
         }
         this.creatureTypeId = creatureTypeId;
+        return this;
     }
 
     public String getCreatureTypeId() {
         return creatureTypeId;
     }
 
-    public void setShouldSpawn(boolean shouldSpawn) {
+    public LivingHandlerBuilder setShouldSpawn(boolean shouldSpawn) {
         this.shouldSpawn = shouldSpawn;
+        return this;
     }
 
     public boolean getShouldSpawn() {
         return shouldSpawn;
     }
 
-    public void setOptionalParameters(String optionalParameters) {
+    public LivingHandlerBuilder setOptionalParameters(String optionalParameters) {
         if (optionalParameters == null) {
             optionalParameters = "";
         }
         this.optionalParameters = optionalParameters;
+        return this;
     }
 
     public String getOptionalParameters() {
