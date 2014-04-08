@@ -184,7 +184,7 @@ public final class BiomeSpawnListRegistry {
         if (totalWeight <= 0) {
             return null;
         } else {
-            int selectedWeight = random.nextInt(totalWeight);
+            int selectedWeight = random.nextInt(totalWeight) + 1;
             SpawnListEntry resultEntry = null;
 
             for (String groupID : groupIDList) {
