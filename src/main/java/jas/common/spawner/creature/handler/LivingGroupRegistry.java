@@ -220,7 +220,7 @@ public class LivingGroupRegistry {
 
         File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
-        LivingGroupSaveObject savedStats = GsonHelper.readFromGson(FileUtilities.createReader(gsonBiomeFile, false),
+        LivingGroupSaveObject savedStats = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(gsonBiomeFile, false),
                 LivingGroupSaveObject.class, gson);
 
         List<String> newJASNames = loadMappings(savedStats);

@@ -219,8 +219,9 @@ public final class BiomeSpawnListRegistry {
                 worldProperties.getFolderConfiguration().saveName, "");
         File[] files = FileUtilities.getFileInDirectory(entriesDir, ".cfg");
         for (File entriesFile : files) {
-            BiomeSpawnsSaveObject saveObject = GsonHelper.readFromGson(FileUtilities.createReader(entriesFile, false),
-                    BiomeSpawnsSaveObject.class, gson);
+            BiomeSpawnsSaveObject saveObject = GsonHelper.readOrCreateFromGson(
+                    FileUtilities.createReader(entriesFile, false), BiomeSpawnsSaveObject.class, gson,
+                    worldProperties.getFolderConfiguration().sortCreatureByBiome);
             Set<SpawnListEntryBuilder> builders = saveObject.getBuilders();
             for (SpawnListEntryBuilder builder : builders) {
                 // isBiomeGroup&EntityGroupValid(SpawnListBuidler) ? addSpawn(build()) : ignore

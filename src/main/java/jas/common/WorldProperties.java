@@ -38,17 +38,17 @@ public final class WorldProperties {
     public void loadFromConfig(File configDirectory, World world) {
         curWorldName = world.getWorldInfo().getWorldName();
         Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
-        folderConfiguration = GsonHelper.readFromGson(
+        folderConfiguration = GsonHelper.readOrCreateFromGson(
                 FileUtilities.createReader(FolderConfiguration.getFile(configDirectory), false),
                 FolderConfiguration.class, gson);
         folderConfiguration.getCurrentWorldStats(world.getWorldInfo().getWorldName());
         
-        savedConfguration = GsonHelper.readFromGson(
+        savedConfguration = GsonHelper.readOrCreateFromGson(
                 FileUtilities.createReader(
                         SavedFolderConfiguration.getFile(configDirectory, getFolderConfiguration().saveName), false),
                 SavedFolderConfiguration.class, gson);
 
-        worldGlobalProperties = GsonHelper.readFromGson(
+        worldGlobalProperties = GsonHelper.readOrCreateFromGson(
                 FileUtilities.createReader(
                         WorldGlobalSettings.getFile(configDirectory, getFolderConfiguration().saveName), false),
                 WorldGlobalSettings.class, gson);

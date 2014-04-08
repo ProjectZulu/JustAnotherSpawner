@@ -182,7 +182,7 @@ public class BiomeGroupRegistry {
 //        Gson gson = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).setPrettyPrinting().create();
         File gsonBiomeFile = BiomeGroupSaveObject.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
-        BiomeGroupSaveObject savedStats = GsonHelper.readFromGson(FileUtilities.createReader(gsonBiomeFile, false),
+        BiomeGroupSaveObject savedStats = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(gsonBiomeFile, false),
                 BiomeGroupSaveObject.class, gson);
         /* Build Reverse Lookup */
         ArrayListMultimap<String, Integer> pckgNameToBiomeIDBuilder = ArrayListMultimap.create();

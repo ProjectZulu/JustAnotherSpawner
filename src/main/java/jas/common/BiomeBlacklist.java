@@ -25,7 +25,7 @@ public class BiomeBlacklist {
         File blackListFile = new File(configDirectory, DefaultProps.GLOBALSETTINGSDIR + "BiomeBlacklist.cfg");
         /* Read Blacklist */
         {
-            BiomeBlacklistSaveObject optBlackList = GsonHelper.readFromGson(
+            BiomeBlacklistSaveObject optBlackList = GsonHelper.readOrCreateFromGson(
                     FileUtilities.createReader(blackListFile, false), BiomeBlacklistSaveObject.class, gson);
 
             /* Create Numeric Blacklist */

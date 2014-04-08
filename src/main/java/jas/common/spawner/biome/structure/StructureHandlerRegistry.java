@@ -56,7 +56,7 @@ public class StructureHandlerRegistry {
                 worldProperties.getFolderConfiguration().saveName);
         Gson gson = GsonHelper.createGson(true, new Type[] { StructureSaveObject.class },
                 new Object[] { new StructureSaveObject() });
-        StructureSaveObject saveObject = GsonHelper.readFromGson(FileUtilities.createReader(structureFile, true),
+        StructureSaveObject saveObject = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(structureFile, true),
                 StructureSaveObject.class, gson);
         HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists = saveObject.createKeyToSpawnList();
 

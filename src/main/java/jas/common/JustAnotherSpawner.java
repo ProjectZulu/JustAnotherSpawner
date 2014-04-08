@@ -64,12 +64,12 @@ public class JustAnotherSpawner {
         Gson gson = GsonHelper.createGson(true);
 
         File globalSettingsFile = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "GlobalProperties.cfg");
-        globalSettings = GsonHelper.readFromGson(FileUtilities.createReader(globalSettingsFile, false),
+        globalSettings = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(globalSettingsFile, false),
                 GlobalSettings.class, gson);
         GsonHelper.writeToGson(FileUtilities.createWriter(globalSettingsFile, true), globalSettings, gson);
 
         File loggingSettings = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "LoggingProperties.cfg");
-        JASLog jasLog = GsonHelper.readFromGson(FileUtilities.createReader(loggingSettings, false), JASLog.class, gson);
+        JASLog jasLog = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(loggingSettings, false), JASLog.class, gson);
         JASLog.setLogger(jasLog);
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 

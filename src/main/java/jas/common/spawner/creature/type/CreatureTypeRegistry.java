@@ -67,7 +67,7 @@ public class CreatureTypeRegistry {
         File creatureTypeFile = CreatureType
                 .getFile(configDirectory, worldProperties.getFolderConfiguration().saveName);
 
-        CreatureTypeSaveObject saveObject = GsonHelper.readFromGson(
+        CreatureTypeSaveObject saveObject = GsonHelper.readOrCreateFromGson(
                 FileUtilities.createReader(creatureTypeFile, false), CreatureTypeSaveObject.class, gson);
 
         Optional<Collection<CreatureTypeBuilder>> read = saveObject.getTypes();

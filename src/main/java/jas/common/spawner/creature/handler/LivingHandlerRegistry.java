@@ -79,7 +79,7 @@ public class LivingHandlerRegistry {
                 worldProperties.getFolderConfiguration().saveName, "");
         File[] files = FileUtilities.getFileInDirectory(handlerFileFolder, ".cfg");
         for (File livingFile : files) {
-            LivingHandlerSaveObject read = GsonHelper.readFromGson(FileUtilities.createReader(livingFile, false),
+            LivingHandlerSaveObject read = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(livingFile, false),
                     LivingHandlerSaveObject.class, gson);
             if (read.getHandlers().isPresent()) {
                 for (LivingHandlerBuilder builder : read.getHandlers().get()) {

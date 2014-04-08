@@ -35,7 +35,8 @@ public class GsonHelper {
         return builder.create();
     }
 
-    public static <T> T readFromGson(OptionalCloseable<FileReader> reader, Class<T> object, Gson gson) {
+    public static <T> T readOrCreateFromGson(OptionalCloseable<FileReader> reader, Class<T> object, Gson gson,
+            Object... creationArgs) {
         if (reader.isPresent()) {
             T instance = gson.fromJson(reader.get(), object);
             reader.close();
@@ -44,14 +45,29 @@ public class GsonHelper {
             }
         }
         try {
-            Constructor<T> constructor = object.getDeclaredConstructor();
+            Class<?>[] classes = new Class<?>[creationArgs.length];
+            for (int i = 0; i < classes.length; i++) {
+                classes[i] = creationArgs[i].getClass();
+            }
+            Constructor<T> constructor = object.getDeclaredConstructor(classes);
             constructor.setAccessible(true);
-            return constructor.newInstance();
+            return constructor.newInstance(creationArgs);
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException(String.format(
                     "This should never be possible. Failed to instantiate class %s.", object));
         }
+    }
+    
+    public static <T> Optional<T> readFromGson(OptionalCloseable<FileReader> reader, Class<T> object, Gson gson) {
+        if (reader.isPresent()) {
+            T instance = gson.fromJson(reader.get(), object);
+            reader.close();
+            if (instance != null) {
+                return Optional.of(instance);
+            }
+        } 
+        return Optional.<T>absent();
     }
 
     public static <T> Optional<T> readFromGson(OptionalCloseable<FileReader> reader, Type type, Gson gson) {

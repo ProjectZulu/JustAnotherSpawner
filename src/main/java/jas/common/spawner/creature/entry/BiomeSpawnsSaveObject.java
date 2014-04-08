@@ -1,5 +1,7 @@
 package jas.common.spawner.creature.entry;
 
+import jas.common.GsonHelper;
+
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,19 +15,17 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 public class BiomeSpawnsSaveObject {
-    public static final String ENTITY_STAT_KEY = "Weight-PassivePackMax-ChunkPackMin-ChunkPackMax";
-    public static final String ENTITY_TAG_KEY = "Tags";
-
     // SortByBiome: <BiomeName, <CreatureType(MONSTER/AMBIENT), <CreatureName/HandlerId/LivingGroup, SpawnListEntry>>>
     // !SortByBiome:<CreatureType(MONSTER/AMBIENT), <CreatureName/HandlerId/LivingGroup, <BiomeName, SpawnListEntry>>>
     private final TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> biomeToTypeToCreature;
     private final boolean sortCreatureByBiome;
 
-    private BiomeSpawnsSaveObject(boolean sortCreatureByBiome) {
+    private BiomeSpawnsSaveObject(Boolean sortCreatureByBiome) {
         biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
         this.sortCreatureByBiome = sortCreatureByBiome;
     }
@@ -84,20 +84,31 @@ public class BiomeSpawnsSaveObject {
 
     public static class BiomeSpawnsSaveObjectSerializer implements JsonSerializer<BiomeSpawnsSaveObject>,
             JsonDeserializer<BiomeSpawnsSaveObject> {
+        public final String FILE_VERSION = "1.0";
+        public final String FILE_VERSION_KEY = "FILE_VERSION";
+        public final String SORT_MODE_KEY = "SORTED_BY_BIOME";
+        public final String SPAWN_LIST_KEY = "SPAWN_LIST_ENTRIES";
+        public final String ENTITY_STAT_KEY = "Weight-PassivePackMax-ChunkPackMin-ChunkPackMax";
+        public final String ENTITY_TAG_KEY = "Tags";
         private final boolean defaultSortByBiome;
-
-        public BiomeSpawnsSaveObjectSerializer() {
-            this(false);
-        }
 
         public BiomeSpawnsSaveObjectSerializer(boolean defaultSortByBiome) {
             this.defaultSortByBiome = defaultSortByBiome;
         }
 
+        /**
+         * Depending on SortMode the Key order varies (thus primKey, secKey, tertKey).
+         * 
+         * biomeToTypeToCreature == true is of the form <BIOME>:<TYPE>:<ENTITY> i.e. "Beach":"AMBIENT":"BAT"
+         * 
+         * biomeToTypeToCreature == false is of the form <ENTITY>:<BIOME>:<TYPE> i.e. "BAT":"Beach":"AMBIENT":
+         */
         @Override
         public JsonElement serialize(BiomeSpawnsSaveObject object, Type type, JsonSerializationContext context) {
+            JsonObject endObject = new JsonObject();
+            endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
+            endObject.addProperty(SORT_MODE_KEY, object.sortCreatureByBiome);
             JsonObject primObject = new JsonObject();
-            primObject.addProperty("SortedByBiome", object.sortCreatureByBiome);
             for (Entry<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primEnts : object.biomeToTypeToCreature
                     .entrySet()) {
                 String primKey = primEnts.getKey();
@@ -119,19 +130,21 @@ public class BiomeSpawnsSaveObject {
                 }
                 primObject.add(primKey, secObject);
             }
-            return primObject;
+            endObject.add(SPAWN_LIST_KEY, primObject);
+            return endObject;
         }
 
         @Override
         public BiomeSpawnsSaveObject deserialize(JsonElement object, Type type, JsonDeserializationContext context)
                 throws JsonParseException {
-            JsonObject primObject = object.getAsJsonObject();
-            JsonElement isSorted = primObject.get("SortedByBiome");
-            BiomeSpawnsSaveObject saveObject = new BiomeSpawnsSaveObject(isSorted != null ? isSorted.getAsBoolean()
-                    : defaultSortByBiome);
+            JsonObject endObject = object.getAsJsonObject();
+            String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
+            BiomeSpawnsSaveObject saveObject = new BiomeSpawnsSaveObject(GsonHelper.getMemberOrDefault(endObject,
+                    SORT_MODE_KEY, defaultSortByBiome));
+            JsonObject primObject = GsonHelper.getMemberOrDefault(endObject, SPAWN_LIST_KEY, new JsonObject());
             for (Entry<String, JsonElement> primEntries : primObject.entrySet()) {
-                String primKey = primEntries.getKey(); // biomeKey
-                if (primKey == null || primKey.trim().equals("") || primKey.equalsIgnoreCase("SortedByBiome")) {
+                String primKey = primEntries.getKey();
+                if (primKey == null || primKey.trim().equals("")) {
                     continue;
                 }
                 TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = saveObject.biomeToTypeToCreature
@@ -140,19 +153,21 @@ public class BiomeSpawnsSaveObject {
                     secMap = new TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>();
                     saveObject.biomeToTypeToCreature.put(primKey, secMap);
                 }
-                for (Entry<String, JsonElement> secEntries : primEntries.getValue().getAsJsonObject().entrySet()) {
-                    String secKey = secEntries.getKey(); // livingType
+                for (Entry<String, JsonElement> secEntries : GsonHelper.getAsJsonObject(primEntries.getValue())
+                        .entrySet()) {
+                    String secKey = secEntries.getKey();
                     if (secKey == null || secKey.trim().equals("")) {
                         continue;
                     }
-                    TreeMap<String, SpawnListEntryBuilder> tertMap = secMap.get(secKey); // livingTypeMap
+                    TreeMap<String, SpawnListEntryBuilder> tertMap = secMap.get(secKey);
                     if (tertMap == null) {
                         tertMap = new TreeMap<String, SpawnListEntryBuilder>();
                         secMap.put(secKey, tertMap);
                     }
-                    for (Entry<String, JsonElement> tertEntries : secEntries.getValue().getAsJsonObject().entrySet()) {
-                        String tertKey = tertEntries.getKey(); // livingGroup
-                        JsonObject entityValueObject = tertEntries.getValue().getAsJsonObject();
+                    for (Entry<String, JsonElement> tertEntries : GsonHelper.getAsJsonObject(secEntries.getValue())
+                            .entrySet()) {
+                        String tertKey = tertEntries.getKey();
+                        JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
                         SpawnListEntryBuilder builder = new SpawnListEntryBuilder(tertKey, primKey);
 
                         String biomeGroupId = saveObject.sortCreatureByBiome ? primKey : tertKey;
@@ -160,10 +175,8 @@ public class BiomeSpawnsSaveObject {
                         builder = new SpawnListEntryBuilder(livingGroup, biomeGroupId);
                         getSetStats(builder, entityValueObject);
 
-                        JsonElement element = entityValueObject.get(ENTITY_TAG_KEY);
-                        if (element != null) {
-                            builder.setOptionalParameters(element.getAsString());
-                        }
+                        builder.setOptionalParameters(GsonHelper.getMemberOrDefault(entityValueObject, ENTITY_TAG_KEY,
+                                ""));
                         tertMap.put(tertKey, builder);
                     }
                 }
