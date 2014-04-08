@@ -2,8 +2,10 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
+import jas.common.ImportedSpawnList;
 import jas.common.WorldProperties;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
@@ -19,6 +21,8 @@ import java.util.Set;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
@@ -71,7 +75,7 @@ public class LivingHandlerRegistry {
      * @param configDirectory
      * @param world
      */
-    public void loadFromConfig(File configDirectory, World world) {
+    public void loadFromConfig(File configDirectory, World world, ImportedSpawnList spawnList) {
         Set<LivingHandler> livingHandlers = new HashSet<LivingHandler>();
         Gson gson = GsonHelper.createGson(false, new Type[] { LivingHandlerSaveObject.class },
                 new Object[] { new LivingHandlerSaveObject.Serializer() });
@@ -79,8 +83,8 @@ public class LivingHandlerRegistry {
                 worldProperties.getFolderConfiguration().saveName, "");
         File[] files = FileUtilities.getFileInDirectory(handlerFileFolder, ".cfg");
         for (File livingFile : files) {
-            LivingHandlerSaveObject read = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(livingFile, false),
-                    LivingHandlerSaveObject.class, gson);
+            LivingHandlerSaveObject read = GsonHelper.readOrCreateFromGson(
+                    FileUtilities.createReader(livingFile, false), LivingHandlerSaveObject.class, gson);
             if (read.getHandlers().isPresent()) {
                 for (LivingHandlerBuilder builder : read.getHandlers().get()) {
                     LivingHandler handler = builder.build(creatureTypeRegistry);
@@ -92,7 +96,7 @@ public class LivingHandlerRegistry {
         Collection<LivingGroup> livingGroups = livingGroupRegistry.getEntityGroups();
         for (LivingGroup livingGroup : livingGroups) {
             LivingHandlerBuilder builder = new LivingHandlerBuilder(livingGroup.groupID, guessCreatureTypeOfGroup(
-                    livingGroup, world));
+                    livingGroup, world, spawnList));
             livingHandlers.add(builder.build(creatureTypeRegistry));
         }
         Builder<String, LivingHandler> builder = ImmutableMap.<String, LivingHandler> builder();
@@ -125,7 +129,8 @@ public class LivingHandlerRegistry {
      * @param livingClass
      * @return
      */
-    private String guessCreatureTypeOfGroup(LivingGroup livingGroup, World world) {
+    private String guessCreatureTypeOfGroup(LivingGroup livingGroup, World world, ImportedSpawnList spawnList) {
+        /* Find entity and inquire as to type */
         for (String jasName : livingGroup.entityJASNames()) {
             Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
             EntityLiving creature = LivingHelper.createCreature(livingClass, world);
@@ -134,6 +139,25 @@ public class LivingHandlerRegistry {
                         .isAssignableFrom(livingClass);
                 if (isType && creatureTypeRegistry.getCreatureType(type.toString()) != null) {
                     return type.toString();
+                }
+            }
+        }
+        /* If entity doesnt have type, Search for matching spawnlist and assign type equivalent to Spawnlist */
+        for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
+            if (biome != null) {
+                for (EnumCreatureType creatureType : EnumCreatureType.values()) {
+                    for (SpawnListEntry entry : spawnList.getSpawnableCreatureList(biome, creatureType)) {
+                        for (String jasName : livingGroup.entityJASNames()) {
+                            Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass
+                                    .get(jasName);
+                            if (entry.entityClass.equals(livingClass)) {
+                                CreatureType type = creatureTypeRegistry.getCreatureType(creatureType.toString());
+                                if (type != null) {
+                                    return type.typeID;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

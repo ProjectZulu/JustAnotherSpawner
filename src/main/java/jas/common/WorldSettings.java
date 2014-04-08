@@ -65,7 +65,7 @@ public final class WorldSettings {
         biomeGroupRegistry.loadFromConfig(modConfigDirectoryFile);
         livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
         creatureTypeRegistry.loadFromConfig(modConfigDirectoryFile);
-        livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world);
+        livingHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world, importedSpawnList);
         structureHandlerRegistry.loadFromConfig(modConfigDirectoryFile, world);
 
         biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, livingGroupRegistry,
