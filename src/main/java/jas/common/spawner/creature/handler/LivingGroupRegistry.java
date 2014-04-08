@@ -244,8 +244,7 @@ public class LivingGroupRegistry {
         Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
         for (Entry<Class<?>, String> entry : fmlNames) {
             if (!EntityLiving.class.isAssignableFrom(entry.getKey())
-                    || Modifier.isAbstract(entry.getKey().getModifiers())
-                    || entityClassToJASNameBuilder.containsKey(entry.getKey())) {
+                    || Modifier.isAbstract(entry.getKey().getModifiers())) {
                 continue;
             }
             @SuppressWarnings("unchecked")
@@ -257,8 +256,18 @@ public class LivingGroupRegistry {
                 String prefix = guessPrefix(entry.getKey(), fmlNames);
                 jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
             }
-            newJASNames.add(jasName);
-            entityClassToJASNameBuilder.put(livingClass, jasName);
+            if (entityClassToJASNameBuilder.containsKey(livingClass)) {
+                JASLog.log().severe(
+                        "Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for class, class %s",
+                        entry.getValue(), jasName, livingClass);
+            } else if (entityClassToJASNameBuilder.values().contains(jasName)) {
+                JASLog.log()
+                        .severe("Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
+                                jasName, entry.getValue(), livingClass);
+            } else {
+                newJASNames.add(jasName);
+                entityClassToJASNameBuilder.forcePut(livingClass, jasName);
+            }
         }
 
         EntityClasstoJASName = ImmutableBiMap.<Class<? extends EntityLiving>, String> builder()
