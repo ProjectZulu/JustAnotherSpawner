@@ -55,9 +55,9 @@ public class StructureHandlerRegistry {
         File structureFile = StructureHandler.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
         Gson gson = GsonHelper.createGson(true, new Type[] { StructureSaveObject.class },
-                new Object[] { new StructureSaveObject() });
-        StructureSaveObject saveObject = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(structureFile, true),
-                StructureSaveObject.class, gson);
+                new Object[] { new StructureSaveObject.Serializer() });
+        StructureSaveObject saveObject = GsonHelper.readOrCreateFromGson(
+                FileUtilities.createReader(structureFile, true), StructureSaveObject.class, gson);
         HashMap<String, Collection<SpawnListEntryBuilder>> readSpawnLists = saveObject.createKeyToSpawnList();
 
         for (StructureHandler structureHandler : structureHandlers) {
@@ -75,7 +75,7 @@ public class StructureHandlerRegistry {
         File structureFile = StructureHandler.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName);
         Gson gson = GsonHelper.createGson(true, new Type[] { StructureSaveObject.class },
-                new Object[] { new StructureSaveObject() });
+                new Object[] { new StructureSaveObject.Serializer() });
         GsonHelper.writeToGson(FileUtilities.createWriter(structureFile, true), new StructureSaveObject(
                 livingHandlerRegistry, structureHandlers), gson);
     }
