@@ -56,7 +56,9 @@ public class LivingHandlerSaveObject {
                 JsonObject handler = new JsonObject();
                 handler.addProperty(STATS_KEY,
                         builder.getCreatureTypeId().concat("-").concat(Boolean.toString(builder.getShouldSpawn())));
-                handler.addProperty(TAGS_KEY, builder.getOptionalParameters());
+                if (!"".equals(builder.getOptionalParameters())) {
+                    handler.addProperty(TAGS_KEY, builder.getOptionalParameters());
+                }
                 livingHandlers.add(builder.getHandlerId(), handler);
             }
             endObject.add(HANDLERS_KEY, livingHandlers);
@@ -77,7 +79,7 @@ public class LivingHandlerSaveObject {
                     String handlerId = entry.getKey();
                     JsonObject handler = GsonHelper.getAsJsonObject(entry.getValue());
                     LivingHandlerBuilder builder = getBuilder(handler, handlerId);
-                    saveObject.handlerIdToBuilder.get().put(builder.getCreatureTypeId(), builder);
+                    saveObject.handlerIdToBuilder.get().put(builder.getHandlerId(), builder);
                 }
             }
             return saveObject;

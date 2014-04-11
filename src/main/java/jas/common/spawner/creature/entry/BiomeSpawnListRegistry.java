@@ -259,10 +259,10 @@ public final class BiomeSpawnListRegistry {
                         handler.groupID, handler.creatureTypeID);
                 continue;
             }
-
+            
             for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
-                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group,
-                        livingGroupRegistry.getLivingGroup(handler.groupID), spawnList);
+                LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
+                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livGroup, spawnList);
                 addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
             }
         }

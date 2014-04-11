@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.google.gson.annotations.SerializedName;
 
+import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 public class LivingHandlerBuilder {
@@ -80,13 +81,23 @@ public class LivingHandlerBuilder {
         return optionalParameters;
     }
 
-    public LivingHandler build(CreatureTypeRegistry creatureTypeRegistry) {
-        if (handlerId == null) {
-            throw new IllegalArgumentException("Cannot build CreatureType instance with null name");
+    public LivingHandler build(CreatureTypeRegistry creatureTypeRegistry, LivingGroupRegistry livingGroupRegistry) {
+        if (handlerId == null || !isEntityGroupDeclared(livingGroupRegistry)) {
+            throw new IllegalArgumentException(
+                    "Cannot build CreatureType instance with " + handlerId == null ? "null name" : "non-existant group");
         }
         if (creatureTypeRegistry.getCreatureType(creatureTypeId) == null) {
             creatureTypeId = CreatureTypeRegistry.NONE;
         }
         return new LivingHandler(creatureTypeRegistry, this);
+    }
+
+    private boolean isEntityGroupDeclared(LivingGroupRegistry livingGroupRegistry) {
+        for (LivingGroup group : livingGroupRegistry.getEntityGroups()) {
+            if (group.groupID.equalsIgnoreCase(handlerId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
