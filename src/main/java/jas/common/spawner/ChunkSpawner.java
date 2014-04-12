@@ -24,8 +24,9 @@ public class ChunkSpawner {
     public void performChunkSpawning(PopulateChunkEvent.Populate event) {
 
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
-        if (event.type == PopulateChunkEvent.Populate.EventType.ICE
+        if (event.type == PopulateChunkEvent.Populate.EventType.ANIMALS
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
+            event.setCanceled(true);
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
             if (JustAnotherSpawner.worldSettings() == null
