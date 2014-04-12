@@ -233,7 +233,7 @@ public class LivingGroupRegistry {
         BiMap<Class<? extends EntityLiving>, String> entityClassToJASNameBuilder = HashBiMap.create();
         for (Entry<String, String> entry : savedStats.fmlToJASName.entrySet()) {
             Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entry.getKey());
-            if (!EntityLiving.class.isAssignableFrom(entityClass) || Modifier.isAbstract(entityClass.getModifiers())) {
+            if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass) || Modifier.isAbstract(entityClass.getModifiers())) {
                 continue;
             }
             @SuppressWarnings("unchecked")
@@ -328,7 +328,6 @@ public class LivingGroupRegistry {
         for (LivingGroup livingGroup : sortedGroups) {
             parseGroupContents(livingGroup);
             JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
-
             iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
             for (String jasName : livingGroup.entityJASNames) {
                 entityIDToGroupIDListBuild.get(jasName).add(livingGroup.groupID);

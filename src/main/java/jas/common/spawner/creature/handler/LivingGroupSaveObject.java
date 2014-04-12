@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
+import jas.common.GsonHelper;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 
 import java.io.File;
@@ -27,13 +28,8 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 
 public class LivingGroupSaveObject {
-    @SerializedName("File Version")
-    public final String fileVersion = "1.0";
-    @SerializedName("CustomEntityNames")
     public final TreeMap<String, String> fmlToJASName;
-    @SerializedName("AttributeGroups")
     public Optional<TreeMap<String, TreeMap<String, LivingGroup>>> configNameToAttributeGroups;
-    @SerializedName("EntityGroups")
     public Optional<TreeMap<String, TreeMap<String, LivingGroup>>> configNameToLivingGroups;
 
     /* For Serialization Only */
@@ -75,7 +71,8 @@ public class LivingGroupSaveObject {
 
     public static class LivingGroupSaveObjectSerializer implements JsonSerializer<LivingGroupSaveObject>,
             JsonDeserializer<LivingGroupSaveObject> {
-        public final static String VERSION_KEY = "File Version";
+        public final static String FILE_VERSION = "1.0";
+        public final static String FILE_VERSION_KEY = "File Version";
         public final static String ENTITY_MAP_KEY = "CustomEntityNames";
         public final static String ATTRIBUTE_KEY = "AttributeGroups";
         public final static String GROUP_KEY = "EntityGroups";
@@ -84,7 +81,7 @@ public class LivingGroupSaveObject {
         @Override
         public JsonElement serialize(LivingGroupSaveObject saveObject, Type type, JsonSerializationContext context) {
             JsonObject endObject = new JsonObject();
-            endObject.addProperty(VERSION_KEY, saveObject.fileVersion);
+            endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
 
             JsonObject mappingObject = new JsonObject();
             for (Entry<String, String> entry : saveObject.fmlToJASName.entrySet()) {
@@ -139,9 +136,9 @@ public class LivingGroupSaveObject {
                 throws JsonParseException {
             LivingGroupSaveObject saveObject = new LivingGroupSaveObject();
             JsonObject endObject = object.getAsJsonObject();
-            // JsonElement fileVersion = endObject.get("File Version");
+            String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
 
-            JsonObject mappingsObject = endObject.get(ENTITY_MAP_KEY).getAsJsonObject();
+            JsonObject mappingsObject = GsonHelper.getMemberOrDefault(endObject, ENTITY_MAP_KEY, new JsonObject());
             for (Entry<String, JsonElement> entry : mappingsObject.entrySet()) {
                 saveObject.fmlToJASName.put(entry.getKey(), entry.getValue().getAsString());
             }

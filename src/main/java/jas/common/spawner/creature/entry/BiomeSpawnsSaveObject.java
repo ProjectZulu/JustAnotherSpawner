@@ -123,7 +123,9 @@ public class BiomeSpawnsSaveObject {
                         String stats = statsToString(builder.getWeight(), builder.getPackSize(),
                                 builder.getMinChunkPack(), builder.getMaxChunkPack());
                         entityValueObject.addProperty(ENTITY_STAT_KEY, stats);
-                        entityValueObject.addProperty(ENTITY_TAG_KEY, builder.getOptionalParameters());
+                        if (!"".equals(builder.getOptionalParameters())) {
+                            entityValueObject.addProperty(ENTITY_TAG_KEY, builder.getOptionalParameters());
+                        }
                         tertObject.add(tertKey, entityValueObject);
                     }
                     secObject.add(secKey, tertObject);

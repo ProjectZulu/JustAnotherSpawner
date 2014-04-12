@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
@@ -22,14 +23,14 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 public class CreatureTypeSaveObject {
-    private Optional<HashMap<String, CreatureTypeBuilder>> types;
+    private Optional<TreeMap<String, CreatureTypeBuilder>> types;
 
     private CreatureTypeSaveObject() {
         types = Optional.absent();
     }
 
     public CreatureTypeSaveObject(CreatureTypeRegistry registry) {
-        HashMap<String, CreatureTypeBuilder> types = new HashMap<String, CreatureTypeBuilder>();
+        TreeMap<String, CreatureTypeBuilder> types = new TreeMap<String, CreatureTypeBuilder>();
         java.util.Iterator<CreatureType> iterator = registry.getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType type = iterator.next();
@@ -49,13 +50,13 @@ public class CreatureTypeSaveObject {
         public final String FILE_VERSION_KEY = "FILE_VERSION";
         public final String TYPE_KEY = "TYPES";
 
-        public final String SPAWN_RATE_KEY = "spawnRate";
-        public final String MAX_CREATURE_KEY = "maxNumberOfCreature";
-        public final String CHUNK_CHANCE_KEY = "chunkSpawnChance";
-        public final String SPAWN_MEDIUM_KEY = "spawnMedium";
-        public final String OPTIONAL_PARAM_KEY = "optionalParameters";
-        public final String DEFAULT_BIOME_CAP_KEY = "optionalParameters";
-        public final String MAPPING_TO_CAP = "optionalParameters";
+        public final String SPAWN_RATE_KEY = "Spawn Rate";
+        public final String MAX_CREATURE_KEY = "Spawn Cap";
+        public final String CHUNK_CHANCE_KEY = "Chunk Spawn Chance";
+        public final String SPAWN_MEDIUM_KEY = "Spawn Medium";
+        public final String OPTIONAL_PARAM_KEY = "Tags";
+        public final String DEFAULT_BIOME_CAP_KEY = "Default Biome Cap";
+        public final String MAPPING_TO_CAP = "Biome Caps";
 
         @Override
         public JsonElement serialize(CreatureTypeSaveObject src, Type typeOfSrc, JsonSerializationContext context) {
@@ -87,10 +88,10 @@ public class CreatureTypeSaveObject {
             CreatureTypeSaveObject saveObject = new CreatureTypeSaveObject();
             JsonObject endObject = GsonHelper.getAsJsonObject(json);
             String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
-            JsonElement jsonElement = endObject.get(MAPPING_TO_CAP);
+            JsonElement jsonElement = endObject.get(TYPE_KEY);
             if (jsonElement != null && jsonElement.isJsonObject()) {
                 JsonObject types = jsonElement.getAsJsonObject();
-                HashMap<String, CreatureTypeBuilder> typeMap = new HashMap<String, CreatureTypeBuilder>();
+                TreeMap<String, CreatureTypeBuilder> typeMap = new TreeMap<String, CreatureTypeBuilder>();
                 for (Entry<String, JsonElement> entry : types.entrySet()) {
                     JsonObject builderObject = GsonHelper.getAsJsonObject(entry.getValue());
                     CreatureTypeBuilder builder = new CreatureTypeBuilder(entry.getKey(),

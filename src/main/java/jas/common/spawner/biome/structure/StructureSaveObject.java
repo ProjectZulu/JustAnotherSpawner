@@ -25,7 +25,7 @@ import com.google.gson.JsonSerializer;
 
 public class StructureSaveObject {
     // <StructureKey, <CreatureType, <CreatureName, SpawnListEntry>>>
-    public final TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> interpreterToKeyToEntry;
+    private final TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> interpreterToKeyToEntry;
 
     /** For Serialization purposes only */
     public StructureSaveObject() {

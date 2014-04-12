@@ -246,8 +246,8 @@ public class BiomeGroupRegistry {
 
     private void loadAttributes(BiomeGroupSaveObject savedStats) {
         Set<BiomeGroup> attributeGroups = new HashSet<BiomeGroup>();
-        if (savedStats.configNameToAttributeGroups != null) {
-            for (TreeMap<String, BiomeGroup> entries : savedStats.configNameToAttributeGroups.values()) {
+        if (savedStats.getConfigNameToAttributeGroups().isPresent()) {
+            for (TreeMap<String, BiomeGroup> entries : savedStats.getConfigNameToAttributeGroups().get().values()) {
                 for (BiomeGroup attributeGroup : entries.values()) {
                     if (!"".equals(attributeGroup.groupID)) {
                         attributeGroups.add(attributeGroup);
@@ -284,8 +284,8 @@ public class BiomeGroupRegistry {
 
     private void loadBiomeGroups(BiomeGroupSaveObject savedStats, Set<String> newMappings) {
         Set<BiomeGroup> biomeGroups = new HashSet<BiomeGroup>();
-        if (savedStats.configNameToBiomeGroups != null) {
-            for (TreeMap<String, BiomeGroup> entries : savedStats.configNameToBiomeGroups.values()) {
+        if (savedStats.getConfigNameToBiomeGroups().isPresent()) {
+            for (TreeMap<String, BiomeGroup> entries : savedStats.getConfigNameToBiomeGroups().get().values()) {
                 for (BiomeGroup biomeGroup : entries.values()) {
                     if (!"".equals(biomeGroup.groupID)) {
                         biomeGroups.add(biomeGroup);
@@ -298,6 +298,7 @@ public class BiomeGroupRegistry {
                 biomeGroups.add(group);
             }
         } else {
+            /* Create default groups, Each Mapping corresponds to group */
             for (String mapping : biomeMappingToPckg.keySet()) {
                 BiomeGroup group = new BiomeGroup(mapping);
                 group.contents.add(mapping);

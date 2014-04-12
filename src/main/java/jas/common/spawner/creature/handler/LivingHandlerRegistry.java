@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler;
 import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.ImportedSpawnList;
+import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureType;
@@ -87,8 +88,10 @@ public class LivingHandlerRegistry {
                     FileUtilities.createReader(livingFile, false), LivingHandlerSaveObject.class, gson);
             if (read.getHandlers().isPresent()) {
                 for (LivingHandlerBuilder builder : read.getHandlers().get()) {
-                    LivingHandler handler = builder.build(creatureTypeRegistry);
-                    livingHandlers.add(handler);
+                    if (isHandlerValid(builder.getHandlerId(), livingGroupRegistry)) {
+                        LivingHandler handler = builder.build(creatureTypeRegistry, livingGroupRegistry);
+                        livingHandlers.add(handler);
+                    }
                 }
             }
         }
@@ -97,13 +100,22 @@ public class LivingHandlerRegistry {
         for (LivingGroup livingGroup : livingGroups) {
             LivingHandlerBuilder builder = new LivingHandlerBuilder(livingGroup.groupID, guessCreatureTypeOfGroup(
                     livingGroup, world, spawnList));
-            livingHandlers.add(builder.build(creatureTypeRegistry));
+            livingHandlers.add(builder.build(creatureTypeRegistry, livingGroupRegistry));
         }
         Builder<String, LivingHandler> builder = ImmutableMap.<String, LivingHandler> builder();
         for (LivingHandler handler : livingHandlers) {
             builder.put(handler.groupID, handler);
         }
         this.livingHandlers = builder.build();
+    }
+
+    private boolean isHandlerValid(String handlerId, LivingGroupRegistry registry) {
+        for (LivingGroup group : livingGroupRegistry.getEntityGroups()) {
+            if (group.groupID.equalsIgnoreCase(handlerId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private String getSaveFileName(String groupID) {
