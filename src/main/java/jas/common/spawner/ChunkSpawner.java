@@ -27,7 +27,6 @@ public class ChunkSpawner {
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
         if (event.type == PopulateChunkEvent.Populate.EventType.ANIMALS
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
-            event.setResult(Result.DENY);
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
             if (JustAnotherSpawner.worldSettings() == null
@@ -41,7 +40,9 @@ public class ChunkSpawner {
             if (spawnBiome == null || blacklist.isBlacklisted(spawnBiome)) {
                 return;
             }
-
+            if (JustAnotherSpawner.globalSettings().disabledVanillaChunkSpawning) {
+                event.setResult(Result.DENY);
+            }
             while (iterator.hasNext()) {
                 CreatureType creatureType = iterator.next();
                 if (creatureType.chunkSpawnChance > 0.0f) {

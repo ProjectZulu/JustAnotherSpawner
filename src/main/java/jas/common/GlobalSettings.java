@@ -7,9 +7,11 @@ public class GlobalSettings {
     @SerializedName("___VANILLA COMPATABILITY___")
     public final String VANILLA_COMMENT = "These options are used to disable the vanilla spawning system in a friendly way";
     @SerializedName("Turn gamerule spawning off on start")
-    public boolean turnGameruleSpawningOff = false;
+    public boolean turnGameruleSpawningOff;
     @SerializedName("Empty vanilla spawnlists")
-    public boolean emptyVanillaSpawnLists = true;
+    public boolean emptyVanillaSpawnLists;
+    @SerializedName("Disable Vanilla Chunk Spawning")
+    public boolean disabledVanillaChunkSpawning;
 
     @SerializedName("___SPAWNER SETTINGS___")
     public final String SPAWNING_COMMENT = "These options set properties of the spawner";
@@ -30,6 +32,7 @@ public class GlobalSettings {
         globalSortCreatureByBiome = true;
         turnGameruleSpawningOff = false;
         emptyVanillaSpawnLists = true;
+        disabledVanillaChunkSpawning = true;
         chunkSpawnDistance = 8;
         chunkCountDistance = 8;
     }
