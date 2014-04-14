@@ -223,7 +223,7 @@ public class BiomeGroupRegistry {
                 String defaultMapping = biome.biomeName;
                 // TODO: Method getUnusedMapping();
                 int attempts = 0;
-                while (biomeMappingToPckgBuilder.containsKey(defaultMapping)) {
+                while (defaultMapping == null || biomeMappingToPckgBuilder.containsKey(defaultMapping)) {
                     defaultMapping = BiomeHelper.getShortPackageName(biome);
                     if (attempts > 0) {
                         // For multiple tries, concat the number of the attempts to create a unique mapping
