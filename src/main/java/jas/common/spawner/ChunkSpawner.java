@@ -11,6 +11,7 @@ import java.util.Iterator;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class ChunkSpawner {
 
@@ -26,7 +27,7 @@ public class ChunkSpawner {
         /* ICE Event Type is Selected as it is Fired Immediately After Vanilla Chunk Creature Generation */
         if (event.type == PopulateChunkEvent.Populate.EventType.ANIMALS
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
-            event.setCanceled(true);
+            event.setResult(Result.DENY);
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
             if (JustAnotherSpawner.worldSettings() == null
