@@ -25,6 +25,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.Level;
+
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 
@@ -233,7 +235,9 @@ public class LivingGroupRegistry {
         BiMap<Class<? extends EntityLiving>, String> entityClassToJASNameBuilder = HashBiMap.create();
         for (Entry<String, String> entry : savedStats.fmlToJASName.entrySet()) {
             Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entry.getKey());
-            if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass) || Modifier.isAbstract(entityClass.getModifiers())) {
+            if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass)
+                    || Modifier.isAbstract(entityClass.getModifiers())) {
+                JASLog.log().warning("Read entity %s does not correspond to an valid FML entry entry", entry.getKey());
                 continue;
             }
             @SuppressWarnings("unchecked")
@@ -265,6 +269,8 @@ public class LivingGroupRegistry {
                         .severe("Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
                                 jasName, entry.getValue(), livingClass);
             } else {
+                JASLog.log()
+                        .debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
                 newJASNames.add(jasName);
                 entityClassToJASNameBuilder.forcePut(livingClass, jasName);
             }

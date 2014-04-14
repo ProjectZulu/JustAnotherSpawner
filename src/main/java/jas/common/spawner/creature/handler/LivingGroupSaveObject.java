@@ -2,6 +2,7 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.DefaultProps;
 import jas.common.GsonHelper;
+import jas.common.JASLog;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 
 import java.io.File;
@@ -143,7 +144,7 @@ public class LivingGroupSaveObject {
                 saveObject.fmlToJASName.put(entry.getKey(), entry.getValue().getAsString());
             }
 
-            JsonElement attribElement = endObject.get(GROUP_KEY);
+            JsonElement attribElement = endObject.get(ATTRIBUTE_KEY);
             if (attribElement != null && attribElement.isJsonObject()) {
                 JsonObject attributeObject = attribElement.getAsJsonObject();
                 for (Entry<String, JsonElement> outerEntry : attributeObject.entrySet()) {
@@ -173,21 +174,22 @@ public class LivingGroupSaveObject {
             JsonElement groupElement = endObject.get(GROUP_KEY);
             if (groupElement != null && groupElement.isJsonObject()) {
                 JsonObject biomeGroupObject = groupElement.getAsJsonObject();
+                saveObject.configNameToLivingGroups = Optional.of(new TreeMap<String, TreeMap<String, LivingGroup>>());
                 for (Entry<String, JsonElement> outerEntry : biomeGroupObject.entrySet()) {
                     String configName = outerEntry.getKey();
-                    saveObject.configNameToLivingGroups = Optional
-                            .of(new TreeMap<String, TreeMap<String, LivingGroup>>());
                     TreeMap<String, LivingGroup> groupNameToBiomeGroup = saveObject.configNameToLivingGroups.get().get(
                             configName);
                     if (groupNameToBiomeGroup == null) {
                         groupNameToBiomeGroup = new TreeMap<String, LivingGroup>();
                         saveObject.configNameToLivingGroups.get().put(configName, groupNameToBiomeGroup);
                     }
-                    JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
+
+                    JsonObject innerObject = GsonHelper.getAsJsonObject(outerEntry.getValue());
                     for (Entry<String, JsonElement> innerEntry : innerObject.entrySet()) {
                         String groupName = innerEntry.getKey();
-                        JsonArray contentsArray = innerEntry.getValue().getAsJsonObject().get(CONTENTS_KEY)
-                                .getAsJsonArray();
+
+                        JsonArray contentsArray = GsonHelper.getMemberOrDefault(
+                                GsonHelper.getAsJsonObject(innerEntry.getValue()), CONTENTS_KEY, new JsonArray());
                         ArrayList<String> contents = new ArrayList<String>();
                         for (JsonElement jsonElement : contentsArray) {
                             contents.add(jsonElement.getAsString());
