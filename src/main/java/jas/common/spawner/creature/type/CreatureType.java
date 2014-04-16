@@ -124,7 +124,7 @@ public class CreatureType {
      * @return
      */
     public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord) {
-        return !world.getBlock(xCoord, yCoord, zCoord).isBlockNormalCube()
+        return !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
                 && world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium;
     }
 
@@ -150,7 +150,7 @@ public class CreatureType {
             if (spawnMedium == Material.water) {
                 return world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
                         && world.getBlock(xCoord, yCoord - 1, zCoord).getMaterial().isLiquid()
-                        && !world.getBlock(xCoord, yCoord + 1, zCoord).isBlockNormalCube();
+                        && !world.getBlock(xCoord, yCoord + 1, zCoord).isNormalCube();
             } else if (!World.doesBlockHaveSolidTopSurface(world, xCoord, yCoord - 1, zCoord)) {
                 return false;
             } else {
