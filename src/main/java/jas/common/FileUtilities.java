@@ -2,7 +2,9 @@ package jas.common;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -81,14 +83,14 @@ public class FileUtilities {
         return OptionalCloseable.absent();
     }
 
-    public static OptionalCloseable<FileReader> createReader(File file, boolean createIfAbsent) {
+    public static OptionalCloseable<FileReaderPlus> createReader(File file, boolean createIfAbsent) {
         try {
             if (createIfAbsent && !file.exists()) {
                 file.getParentFile().mkdirs();
                 file.createNewFile();
             }
             if (file.exists()) {
-                return OptionalCloseable.of(new FileReader(file));
+                return OptionalCloseable.of(new FileReaderPlus(file));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,6 +136,18 @@ public class FileUtilities {
         }
     }
 
+	/**
+	 * FileWriter that provides access to the underlying File object
+	 */
+	public static class FileReaderPlus extends FileReader {
+		public final File file;
+
+		public FileReaderPlus(File file) throws FileNotFoundException {
+			super(file);
+			this.file = file;
+		}
+	}
+    
     public static File[] getFileInDirectory(File directory, final String suffix) {
         if (!directory.exists()) {
             return new File[0];

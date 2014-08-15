@@ -249,7 +249,7 @@ public final class BiomeSpawnListRegistry {
         /* Any files that were not Present/Processable should be created */
         Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
         for (LivingHandler handler : livingHandlers) {
-            if (saveFilesProcessed.contains(getSaveFileName(handler.creatureTypeID))) {
+            if (saveFilesProcessed.contains(getSaveFileName(handler.groupID))) {
                 continue;
             }
             // String groupID = handler.groupID;
