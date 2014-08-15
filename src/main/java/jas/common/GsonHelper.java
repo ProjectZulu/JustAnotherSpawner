@@ -1,5 +1,6 @@
 package jas.common;
 
+import jas.common.FileUtilities.FileReaderPlus;
 import jas.common.FileUtilities.OptionalCloseable;
 
 import java.io.FileReader;
@@ -14,6 +15,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 
 public class GsonHelper {
 
@@ -35,14 +37,22 @@ public class GsonHelper {
         return builder.create();
     }
 
-    public static <T> T readOrCreateFromGson(OptionalCloseable<FileReader> reader, Class<T> object, Gson gson,
+    public static <T> T readOrCreateFromGson(OptionalCloseable<FileReaderPlus> reader, Class<T> object, Gson gson,
             Object... creationArgs) {
         if (reader.isPresent()) {
-            T instance = gson.fromJson(reader.get(), object);
-            reader.close();
-            if (instance != null) {
-                return instance;
-            }
+        	try {
+                T instance = gson.fromJson(reader.get(), object);
+                reader.close();
+                if (instance != null) {
+                    return instance;
+                }
+        	} catch (JsonSyntaxException e) {
+        		JASLog.log().severe(" \n ************************************************************" +
+        				"\n Invalid JSON detected when processing file %s. Incoming Wall of text " +
+        				"\n ************************************************************ ",
+        				reader.get().file.getPath());
+        		throw e;
+        	}
         }
         try {
             Class<?>[] classes = new Class<?>[creationArgs.length];
