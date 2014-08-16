@@ -7,15 +7,17 @@ import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.Phase;
+import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
 import cpw.mods.fml.relauncher.Side;
 
@@ -28,11 +30,25 @@ public class SpawnerTicker {
     }
 
     @SubscribeEvent
-    public void tickStart(WorldTickEvent event) {
-        if (event.side != Side.SERVER || event.phase != Phase.END) {
-            return;
-        }
-        WorldServer world = (WorldServer) event.world;
+	public void serverTick(ServerTickEvent event) {
+		if (event.side != Side.SERVER || event.phase == Phase.END) {
+			return;
+		}
+		MinecraftServer server = MinecraftServer.getServer();
+		/** Perform Spawning*/
+		Integer[] ids = DimensionManager.getIDs(server.getTickCounter() % 200 == 0);
+		for (int x = 0; x < ids.length; x++) {
+            int id = ids[x];
+            long j = System.nanoTime();
+            if (id == 0 || server.getAllowNether()) {
+                WorldServer worldserver = DimensionManager.getWorld(id);
+                performSpawningInWorld(worldserver);
+            }
+		}
+		/** TODO: Perform Updates to WorldSettings Here */
+	}
+    
+	private void performSpawningInWorld(WorldServer world) {
         if (!world.getGameRules().hasRule("doCustomMobSpawning")
                 || world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner
@@ -55,5 +71,5 @@ public class SpawnerTicker {
                 }
             }
         }
-    }
+	}
 }
