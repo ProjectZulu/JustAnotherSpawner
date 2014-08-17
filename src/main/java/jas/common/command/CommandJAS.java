@@ -1,5 +1,7 @@
 package jas.common.command;
 
+import jas.common.command.mods.CommandModBiomeGroup;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,7 @@ public final class CommandJAS extends CommandJasBase {
         addCommand(new CommandSaveConfig());
         addCommand(new CommandLoadConfig());
         addCommand(new CommandCanDespawnHere());
+        addCommand(new CommandModBiomeGroup());
     }
 
     public void addCommand(CommandBase base) {
