@@ -2,27 +2,26 @@ package jas.common.command.mods;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.command.CommandJasBase;
-import jas.common.modification.ModAddBiomeGroup;
-import jas.common.modification.ModRemoveBiomeGroup;
-import jas.common.modification.ModSaveConfig;
-import jas.common.modification.ModUpdateBiomeGroup;
-import jas.common.spawner.biome.group.BiomeGroupRegistry;
+import jas.common.modification.ModAddLivingGroup;
+import jas.common.modification.ModRemoveLivingGroup;
+import jas.common.modification.ModUpdateLivingGroup;
+import jas.common.spawner.creature.handler.LivingGroupRegistry;
+import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
 
-public class CommandModBiomeGroup extends CommandJasBase {
+public class CommandModLivingGroup extends CommandJasBase {
 
 	public String getCommandName() {
-		return "modbiomegroup";
+		return "modlivinggroup";
 	}
 
 	private enum Ops {
-		//TODO Add RESET command to reset to default
+		// TODO Add RESET command to reset to default
 		ADD("add", "a", "+"), REMOVE("remove", "rem", "r", "-"), UPDATE("update", "upd", "u", "->"), NONE("");
 		public final String[] matchingWords; // Phrases that represent this
 												// operation
@@ -52,19 +51,19 @@ public class CommandModBiomeGroup extends CommandJasBase {
 
 	@Override
 	public String getCommandUsage(ICommandSender commandSender) {
-		return "commands.modbiomegroup.usage";
+		return "commands.modlivinggroup.usage";
 	}
 
 	@Override
 	public void process(ICommandSender commandSender, String[] stringArgs) {
 		if (stringArgs.length <= 1) {
-			throw new WrongUsageException("commands.modbiomegroup.usage", new Object[0]);
+			throw new WrongUsageException("commands.modlivinggroup.usage", new Object[0]);
 		}
 
-		// Format /jas addbgroup <add/remove/update> <biomeGroupID>
+		// Format /jas modlivinggroup <add/remove/update> <livingGroupID>
 		// <mapping/A|attribute/B|group#1>,
 		Ops operation = Ops.determineOp(stringArgs[0]);
-		String biomeGroupID = stringArgs[1];
+		String livingGroupID = stringArgs[1];
 		ArrayList<String> groupContents = new ArrayList<String>();
 		for (int i = 2; i < stringArgs.length; i++) {
 			if (stringArgs[i] == null || stringArgs[i].trim().isEmpty()) {
@@ -72,28 +71,27 @@ public class CommandModBiomeGroup extends CommandJasBase {
 			}
 			groupContents.add(stringArgs[i]);
 		}
-		if (biomeGroupID != null && !biomeGroupID.isEmpty()) {
+		if (livingGroupID != null && !livingGroupID.isEmpty()) {
 			switch (operation) {
 			case ADD:
-				JustAnotherSpawner.worldSettings().addChange(new ModAddBiomeGroup(biomeGroupID, groupContents));
+				JustAnotherSpawner.worldSettings().addChange(new ModAddLivingGroup(livingGroupID, groupContents));
 				break;
 			case REMOVE:
-				JustAnotherSpawner.worldSettings().addChange(new ModRemoveBiomeGroup(biomeGroupID));
+				JustAnotherSpawner.worldSettings().addChange(new ModRemoveLivingGroup(livingGroupID));
 				break;
 			case UPDATE:
-				JustAnotherSpawner.worldSettings().addChange(new ModUpdateBiomeGroup(biomeGroupID, groupContents));
+				JustAnotherSpawner.worldSettings().addChange(new ModUpdateLivingGroup(livingGroupID, groupContents));
 				break;
 			case NONE:
-				throw new WrongUsageException("commands.modbiomegroup.biomegroupoperatorundefined", new Object[0]);
+				throw new WrongUsageException("commands.modlivinggroup.livinggroupoperatorundefined", new Object[0]);
 			}
 		} else {
-			throw new WrongUsageException("commands.modbiomegroup.biomegroupundefined", new Object[0]);
+			throw new WrongUsageException("commands.modlivinggroup.livinggroupundefined", new Object[0]);
 		}
 	}
 
 	/**
-	 * Adds the strings available in this command to the given list of tab
-	 * completion options.
+	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
 	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
@@ -107,18 +105,19 @@ public class CommandModBiomeGroup extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 2) {
-			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
-			for (String iD : registry.iDToGroup().keySet()) {
+			LivingGroupRegistry registry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+			for (LivingGroup group : registry.getEntityGroups()) {
+				String iD = group.groupID;
 				if (iD.contains(" ")) {
 					tabCompletions.add("\"".concat(iD).concat("\""));
 				} else {
 					tabCompletions.add(iD);
 				}
 			}
-			return tabCompletions; // BiomeGroupID can be anything when adding
+			return tabCompletions; // livingGroupID can be anything when adding
 		} else {
-			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
-			for (String mapping : registry.biomeMappingToPckg().keySet()) {
+			LivingGroupRegistry registry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+			for (String mapping : registry.entityClasstoJASName().values()) {
 				if (mapping.contains(" ")) {
 					tabCompletions.add("\"".concat(mapping).concat("\""));
 				} else {
@@ -132,11 +131,12 @@ public class CommandModBiomeGroup extends CommandJasBase {
 					tabCompletions.add(("A|").concat(iD));
 				}
 			}
-			for (String iD : registry.iDToGroup().keySet()) {
+			for (LivingGroup group : registry.getEntityGroups()) {
+				String iD = group.groupID;
 				if (iD.contains(" ")) {
-					tabCompletions.add("\"".concat("B|").concat(iD).concat("\""));
+					tabCompletions.add("\"".concat(iD).concat("\""));
 				} else {
-					tabCompletions.add(("B|").concat(iD));
+					tabCompletions.add(iD);
 				}
 			}
 			return tabCompletions;
