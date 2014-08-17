@@ -1,0 +1,118 @@
+package jas.common.command.mods;
+
+import jas.common.JustAnotherSpawner;
+import jas.common.command.CommandJasBase;
+import jas.common.modification.ModAddBiomeGroup;
+import jas.common.modification.ModRemoveBiomeGroup;
+import jas.common.modification.ModSaveConfig;
+import jas.common.modification.ModUpdateBiomeGroup;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
+import net.minecraft.server.MinecraftServer;
+
+public class CommandModBiomeGroup extends CommandJasBase {
+
+	public String getCommandName() {
+		return "modbiomegroup";
+	}
+
+	private enum Ops {
+		ADD("add", "a", "+"), REMOVE("remove", "rem", "r", "-"), UPDATE("update", "upd", "u", "->"), NONE("");
+		private String[] matchingWords; // Phrases that represent this operation
+
+		Ops(String... matchingWords) {
+			this.matchingWords = matchingWords;
+		}
+
+		public static Ops determineOp(String potentialWord) {
+			for (Ops op : Ops.values()) {
+				for (String word : op.matchingWords) {
+					if (word.equalsIgnoreCase(potentialWord)) {
+						return op;
+					}
+				}
+			}
+			return NONE;
+		}
+	}
+
+	/**
+	 * Return the required permission level for this command.
+	 */
+	public int getRequiredPermissionLevel() {
+		return 2;
+	}
+
+	@Override
+	public String getCommandUsage(ICommandSender commandSender) {
+		return "commands.modbiomegroup.usage";
+	}
+
+	@Override
+	public void process(ICommandSender commandSender, String[] stringArgs) {
+		if (stringArgs.length <= 1) {
+			throw new WrongUsageException("commands.modbiomegroup.usage", new Object[0]);
+		}
+
+		// Format /jas addbgroup <add/remove/update> <biomeGroupID>
+		// <mapping/A|attribute/B|group#1>,
+		Ops operation = Ops.determineOp(stringArgs[0]);
+		String biomeGroupID = stringArgs[1];
+		ArrayList<String> groupContents = new ArrayList<String>();
+		for (int i = 2; i < stringArgs.length; i++) {
+			if (stringArgs[i] == null || stringArgs[i].trim().isEmpty()) {
+				continue;
+			}
+			groupContents.add(stringArgs[i]);
+		}
+		if (biomeGroupID != null && !biomeGroupID.isEmpty()) {
+			switch (operation) {
+			case ADD:
+				JustAnotherSpawner.worldSettings().addChange(new ModAddBiomeGroup(biomeGroupID, groupContents));
+				break;
+			case REMOVE:
+				JustAnotherSpawner.worldSettings().addChange(new ModRemoveBiomeGroup(biomeGroupID));
+				break;
+			case UPDATE:
+				JustAnotherSpawner.worldSettings().addChange(new ModUpdateBiomeGroup(biomeGroupID, groupContents));
+				break;
+			case NONE:
+				break;
+			}
+		} else {
+			throw new WrongUsageException("commands.modbiomegroup.biomegroupundefined", new Object[0]);
+		}
+	}
+
+	/**
+	 * Adds the strings available in this command to the given list of tab
+	 * completion options.
+	 */
+	@Override
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+		stringArgs = correctedParseArgs(stringArgs, false);
+		List<String> tabCompletions = new ArrayList<String>();
+		if (stringArgs.length == 1) {
+			return tabCompletions; // BiomeGroupID can be anything when adding
+		} else {
+			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+			tabCompletions.addAll(registry.biomeMappingToPckg().keySet());
+			for (String iD : registry.iDToAttribute().keySet()) {
+				if (iD.contains(" ")) {
+					tabCompletions.add("\"".concat("|A").concat(iD).concat("\""));
+				}
+			}
+			for (String iD : registry.iDToGroup().keySet()) {
+				if (iD.contains(" ")) {
+					tabCompletions.add("\"".concat("|B").concat(iD).concat("\""));
+				}
+			}
+		}
+		return null;
+	}
+}
