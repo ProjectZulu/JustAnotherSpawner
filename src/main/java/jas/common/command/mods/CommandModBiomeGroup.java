@@ -82,7 +82,7 @@ public class CommandModBiomeGroup extends CommandJasBase {
 				JustAnotherSpawner.worldSettings().addChange(new ModUpdateBiomeGroup(biomeGroupID, groupContents));
 				break;
 			case NONE:
-				break;
+				throw new WrongUsageException("commands.modbiomegroup.biomegroupoperatorundefined", new Object[0]);
 			}
 		} else {
 			throw new WrongUsageException("commands.modbiomegroup.biomegroupundefined", new Object[0]);
