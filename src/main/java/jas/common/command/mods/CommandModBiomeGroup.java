@@ -23,7 +23,8 @@ public class CommandModBiomeGroup extends CommandJasBase {
 
 	private enum Ops {
 		ADD("add", "a", "+"), REMOVE("remove", "rem", "r", "-"), UPDATE("update", "upd", "u", "->"), NONE("");
-		private String[] matchingWords; // Phrases that represent this operation
+		public final String[] matchingWords; // Phrases that represent this
+												// operation
 
 		Ops(String... matchingWords) {
 			this.matchingWords = matchingWords;
@@ -98,21 +99,46 @@ public class CommandModBiomeGroup extends CommandJasBase {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		List<String> tabCompletions = new ArrayList<String>();
 		if (stringArgs.length == 1) {
+			for (Ops operation : Ops.values()) {
+				for (String matchingWord : operation.matchingWords) {
+					tabCompletions.add(matchingWord);
+				}
+			}
+			return tabCompletions;
+		} else if (stringArgs.length == 2) {
+			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+			for (String iD : registry.iDToGroup().keySet()) {
+				if (iD.contains(" ")) {
+					tabCompletions.add("\"".concat(iD).concat("\""));
+				} else {
+					tabCompletions.add(iD);
+				}
+			}
 			return tabCompletions; // BiomeGroupID can be anything when adding
 		} else {
 			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
-			tabCompletions.addAll(registry.biomeMappingToPckg().keySet());
+			for (String mapping : registry.biomeMappingToPckg().keySet()) {
+				if (mapping.contains(" ")) {
+					tabCompletions.add("\"".concat(mapping).concat("\""));
+				} else {
+					tabCompletions.add(mapping);
+				}
+			}
 			for (String iD : registry.iDToAttribute().keySet()) {
 				if (iD.contains(" ")) {
-					tabCompletions.add("\"".concat("|A").concat(iD).concat("\""));
+					tabCompletions.add("\"".concat("A|").concat(iD).concat("\""));
+				} else {
+					tabCompletions.add(("A|").concat(iD));
 				}
 			}
 			for (String iD : registry.iDToGroup().keySet()) {
 				if (iD.contains(" ")) {
-					tabCompletions.add("\"".concat("|B").concat(iD).concat("\""));
+					tabCompletions.add("\"".concat("B|").concat(iD).concat("\""));
+				} else {
+					tabCompletions.add(("B|").concat(iD));
 				}
 			}
+			return tabCompletions;
 		}
-		return null;
 	}
 }
