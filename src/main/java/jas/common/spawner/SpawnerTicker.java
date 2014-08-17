@@ -46,6 +46,7 @@ public class SpawnerTicker {
             }
 		}
 		/** TODO: Perform Updates to WorldSettings Here */
+		JustAnotherSpawner.worldSettings().applyChanges();
 	}
     
 	private void performSpawningInWorld(WorldServer world) {
