@@ -3,6 +3,7 @@ package jas.common.command;
 import jas.common.command.mods.CommandModBiomeGroup;
 import jas.common.command.mods.CommandModCreatureType;
 import jas.common.command.mods.CommandModLivingGroup;
+import jas.common.command.mods.CommandModLivingHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public final class CommandJAS extends CommandJasBase {
 		addCommand(new CommandModBiomeGroup());
 		addCommand(new CommandModLivingGroup());
 		addCommand(new CommandModCreatureType());
+		addCommand(new CommandModLivingHandler());
 	}
 
     public void addCommand(CommandBase base) {

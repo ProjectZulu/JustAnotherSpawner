@@ -198,4 +198,32 @@ public class LivingHandlerRegistry {
                     .getValue().values()), gson);
         }
     }
+
+	public void addLivingHandler(LivingHandlerBuilder builder) {
+		LivingHandler handler = builder.build(creatureTypeRegistry, livingGroupRegistry);
+		HashMap<String, LivingHandler> map = new HashMap<String, LivingHandler>(livingHandlers);
+		if (!map.containsKey(handler.groupID)) {
+			map.put(handler.groupID, handler);
+		}
+		livingHandlers = ImmutableMap.<String, LivingHandler> builder().putAll(map).build();
+	}
+
+	public void removeLivingHandler(LivingHandlerBuilder builder) {
+		removeLivingHandler(builder.getHandlerId());
+	}
+
+	public void removeLivingHandler(String livingID) {
+		HashMap<String, LivingHandler> map = new HashMap<String, LivingHandler>(livingHandlers);
+		if (map.remove(livingID) != null) {
+			livingHandlers = ImmutableMap.<String, LivingHandler> builder().putAll(map).build();
+		}
+	}
+
+	public void updateLivingHandler(LivingHandlerBuilder builder) {
+		LivingHandler handler = builder.build(creatureTypeRegistry, livingGroupRegistry);
+		HashMap<String, LivingHandler> map = new HashMap<String, LivingHandler>(livingHandlers);
+		map.remove(handler.groupID);
+		map.put(handler.groupID, handler);
+		livingHandlers = ImmutableMap.<String, LivingHandler> builder().putAll(map).build();
+	}
 }
