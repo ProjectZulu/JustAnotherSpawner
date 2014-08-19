@@ -146,7 +146,7 @@ public class CommandModCreatureType extends CommandJasBase {
 					tabCompletions.add(iD);
 				}
 			}
-			return tabCompletions; // BiomeGroupID can be anything when adding
+			return tabCompletions;
 		} else if (stringArgs.length == 6) {
 			// String spawnMedium = stringArgs[5];
 			tabCompletions.add("Water");
