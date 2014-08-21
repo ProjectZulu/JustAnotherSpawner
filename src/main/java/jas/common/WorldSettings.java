@@ -126,7 +126,7 @@ public final class WorldSettings {
 				modification.applyModification(creatureTypeRegistry);
 				modification.applyModification(livingHandlerRegistry);
 				modification.applyModification(structureHandlerRegistry);
-				modification.applyModification(structureHandlerRegistry);
+				modification.applyModification(biomeSpawnListRegistry);
 				modification.applyModification(this);
 			}
 			
