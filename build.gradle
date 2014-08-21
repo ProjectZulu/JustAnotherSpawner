@@ -35,7 +35,7 @@ dependencies {
 
 minecraft {
 	version = "1.7.10-10.13.0.1180"
-    assetDir = "eclipse/assets"
+    assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
 }
 
 processResources
