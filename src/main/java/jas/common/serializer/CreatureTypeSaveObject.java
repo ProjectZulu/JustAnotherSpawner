@@ -97,7 +97,7 @@ public class CreatureTypeSaveObject {
                     CreatureTypeBuilder builder = new CreatureTypeBuilder(entry.getKey(),
                             GsonHelper.getMemberOrDefault(builderObject, SPAWN_RATE_KEY, 1),
                             GsonHelper.getMemberOrDefault(builderObject, MAX_CREATURE_KEY, 10));
-                    builder.withChanceToChunkSpawn(GsonHelper.getMemberOrDefault(builderObject, CHUNK_CHANCE_KEY, 0));
+                    builder.withChanceToChunkSpawn(GsonHelper.getMemberOrDefault(builderObject, CHUNK_CHANCE_KEY, 0f));
                     builder.setRawMedium(GsonHelper.getMemberOrDefault(builderObject, SPAWN_MEDIUM_KEY, "air"));
                     builder.withOptionalParameters(GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY, ""));
                     builder.withDefaultBiomeCap(GsonHelper.getMemberOrDefault(builderObject, DEFAULT_BIOME_CAP_KEY, -1));
