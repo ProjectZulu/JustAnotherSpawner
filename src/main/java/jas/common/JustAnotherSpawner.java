@@ -43,7 +43,12 @@ public class JustAnotherSpawner {
         return modConfigDirectoryFile;
     }
 
-    ImportedSpawnList importedSpawnList;
+	private static ImportedSpawnList importedSpawnList;
+
+	public static ImportedSpawnList importedSpawnList() {
+		return importedSpawnList;
+	}
+    
     BiomeBlacklist biomeBlacklist;
 
     private static GlobalSettings globalSettings;
