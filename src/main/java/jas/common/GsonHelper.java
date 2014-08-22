@@ -159,6 +159,20 @@ public class GsonHelper {
         }
         return defaultIfAbsent;
     }
+    
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
+     */
+    public static float getMemberOrDefault(JsonObject jsonObject, String memberName, float defaultIfAbsent) {
+        JsonElement element = jsonObject.get(memberName);
+        if (element != null && element.isJsonPrimitive()) {
+            JsonPrimitive memberPrimitive = element.getAsJsonPrimitive();
+            if (memberPrimitive.isNumber()) {
+                return memberPrimitive.getAsFloat();
+            }
+        }
+        return defaultIfAbsent;
+    }
 
     /**
      * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
