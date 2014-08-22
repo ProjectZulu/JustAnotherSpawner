@@ -10,6 +10,14 @@ import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+/**
+ * Interface for making changes to the spawn database structures. Must be called in the order implied by the
+ * dependencies i.e. BiomeGroupRegistry -> LivingGroupRegistry -> CreatureTypeRegistry -> LivingHandlerRegistry ->
+ * StructureHandlerRegistry -> BiomeSpawnListRegistry.
+ * 
+ * TODO A method to fetch all instances i.e. passSources(WorldSettings worldSettings, BiomeGroupRegistry registry,
+ * LivingGroupRegistry registry, etc.)
+ */
 public interface Modification {
 	public void applyModification(WorldSettings worldSettings);
 
