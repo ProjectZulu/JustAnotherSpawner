@@ -535,20 +535,20 @@ public class BiomeGroupRegistry {
 		iDToGroup = ImmutableMap.<String, BiomeGroup> builder().putAll(iDToGroupBuilder).build();
 	}
 
-	public void updateBiomeGroup(String groupName, ArrayList<String> contents) {
+	public void updateBiomeGroup(String prevBiomeGroupId, String groupName, ArrayList<String> contents) {
 		BiomeGroup newGroup = new BiomeGroup(groupName);
 		newGroup.contents.addAll(contents);
-		updateBiomeGroup(newGroup);
+		updateBiomeGroup(prevBiomeGroupId, newGroup);
 	}
 
-	public void updateBiomeGroup(String groupName, String configName, ArrayList<String> contents) {
-		updateBiomeGroup(new BiomeGroup(groupName, configName, contents));
+	public void updateBiomeGroup(String prevBiomeGroupId, String groupName, String configName, ArrayList<String> contents) {
+		updateBiomeGroup(prevBiomeGroupId, new BiomeGroup(groupName, configName, contents));
 	}
 
-	public void updateBiomeGroup(BiomeGroup newGroup) {
+	public void updateBiomeGroup(String prevBiomeGroupId, BiomeGroup newGroup) {
 		// BiomeGroups are equal if groupId are equal thus remove the 'new
 		// instance' to remove the old one
-		removeBiomeGroup(newGroup);
+		removeBiomeGroup(prevBiomeGroupId);
 		addBiomeGroup(newGroup);
 	}
 }
