@@ -135,11 +135,11 @@ public final class BiomeSpawnListRegistry {
         return ImmutableList.copyOf(biomeSpawnList);
     }
 
-    private WorldProperties worldProperties;
-    private BiomeGroupRegistry biomeGroupRegistry;
-    private LivingGroupRegistry livingGroupRegistry;
-    private LivingHandlerRegistry livingHandlerRegistry;
-    private StructureHandlerRegistry structureHandlerRegistry;
+    public final WorldProperties worldProperties;
+    public final BiomeGroupRegistry biomeGroupRegistry;
+    public final LivingGroupRegistry livingGroupRegistry;
+    public final LivingHandlerRegistry livingHandlerRegistry;
+    public final StructureHandlerRegistry structureHandlerRegistry;
 
     public BiomeSpawnListRegistry(WorldProperties worldProperties, BiomeGroupRegistry biomeGroupRegistry,
             LivingGroupRegistry livingGroupRegistry, CreatureTypeRegistry creatureTypeRegistry,

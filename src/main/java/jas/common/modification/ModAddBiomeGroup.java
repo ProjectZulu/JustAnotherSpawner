@@ -31,10 +31,6 @@ public class ModAddBiomeGroup extends BaseModification {
 	public final Optional<String> configName;
 	public final ArrayList<String> contents;
 
-	LivingHandlerRegistry livingHandlerRegistry;
-	BiomeGroupRegistry biomeGroupRegistry;
-	LivingGroupRegistry livingGroupRegistry;
-
 	public ModAddBiomeGroup(String groupName, ArrayList<String> contents) {
 		this(groupName, null, contents);
 	}
@@ -47,7 +43,6 @@ public class ModAddBiomeGroup extends BaseModification {
 
 	@Override
 	public void applyModification(BiomeGroupRegistry registry) {
-		this.biomeGroupRegistry = registry;
 		if (configName.isPresent()) {
 			registry.addBiomeGroup(groupName, configName.get(), contents);
 		} else {
@@ -55,19 +50,12 @@ public class ModAddBiomeGroup extends BaseModification {
 		}
 	}
 
-	// This feels ... dirty ... but should be valid
-	@Override
-	public void applyModification(LivingGroupRegistry registry) {
-		this.livingGroupRegistry = registry;
-	}
-
-	@Override
-	public void applyModification(LivingHandlerRegistry registry) {
-		this.livingHandlerRegistry = registry;
-	}
-
 	@Override
 	public void applyModification(BiomeSpawnListRegistry registry) {
+		LivingHandlerRegistry livingHandlerRegistry = registry.livingHandlerRegistry;
+		BiomeGroupRegistry biomeGroupRegistry = registry.biomeGroupRegistry;
+		LivingGroupRegistry livingGroupRegistry = registry.livingGroupRegistry;
+
 		ImportedSpawnList importedSpawnList = JustAnotherSpawner.importedSpawnList();
 
 		/* For all LivingGroups (that are not CreatureType NONE) */
@@ -79,13 +67,15 @@ public class ModAddBiomeGroup extends BaseModification {
 
 			BiomeGroup group = biomeGroupRegistry.getBiomeGroup(groupName);
 			LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
-			SpawnListEntryBuilder spawnListEntry = findVanillaSpawnListEntry(group, livGroup, importedSpawnList);
+			SpawnListEntryBuilder spawnListEntry = findVanillaSpawnListEntry(group, livGroup, importedSpawnList,
+					biomeGroupRegistry, livingGroupRegistry);
 			registry.addSpawnListEntry(spawnListEntry);
 		}
 	}
 
 	private SpawnListEntryBuilder findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
-			ImportedSpawnList importedSpawnList) {
+			ImportedSpawnList importedSpawnList, BiomeGroupRegistry biomeGroupRegistry,
+			LivingGroupRegistry livingGroupRegistry) {
 		for (String pckgNames : group.getBiomeNames()) {
 			for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
 				Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
