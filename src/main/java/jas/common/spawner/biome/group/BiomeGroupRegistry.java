@@ -69,8 +69,7 @@ public class BiomeGroupRegistry {
 	private ImmutableBiMap<String, String> biomeMappingToPckg;
 
 	/**
-	 * Cusom Biome Names: Mappings For CustomBiomeNames to PackageNames used to
-	 * read from configuration
+	 * Cusom Biome Names: Mappings For CustomBiomeNames to PackageNames used to read from configuration
 	 */
 	public ImmutableBiMap<String, String> biomeMappingToPckg() {
 		return biomeMappingToPckg;
@@ -79,8 +78,7 @@ public class BiomeGroupRegistry {
 	private ImmutableBiMap<String, String> biomePckgToMapping;
 
 	/**
-	 * Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to
-	 * write to configuration
+	 * Cusom Biome Names: Mappings For PackageNames to CustomBiomeNames used to write to configuration
 	 */
 	public ImmutableBiMap<String, String> biomePckgToMapping() {
 		return biomePckgToMapping;
@@ -89,8 +87,7 @@ public class BiomeGroupRegistry {
 	private ImmutableListMultimap<String, Integer> pckgNameToBiomeID;
 
 	/**
-	 * Reverse Look-up to get access the BiomeGenBase instances from the Biome
-	 * Package Names
+	 * Reverse Look-up to get access the BiomeGenBase instances from the Biome Package Names
 	 */
 	public ImmutableListMultimap<String, Integer> pckgNameToBiomeID() {
 		return pckgNameToBiomeID;
@@ -114,8 +111,7 @@ public class BiomeGroupRegistry {
 		public final String configName;
 		private final transient Set<String> pckgNames = new HashSet<String>();
 		/*
-		 * String Used to Build Group Content Names i.e.
-		 * {desert,A|Forest,glacier}
+		 * String Used to Build Group Content Names i.e. {desert,A|Forest,glacier}
 		 */
 		private final ArrayList<String> contents;
 
@@ -284,8 +280,7 @@ public class BiomeGroupRegistry {
 		ListMultimap<String, String> packgNameToAttribIDsBuilder = ArrayListMultimap.create();
 
 		/*
-		 * Evaluate and register groups. i.e. from group form
-		 * A|allbiomes,&Jungle to individual jasNames
+		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedAttributes) {
 			parseGroupContents(biomeGroup, null, iDToAttributeBuilder);
@@ -329,8 +324,7 @@ public class BiomeGroupRegistry {
 		ListMultimap<String, String> packgNameToGroupIDsBuilder = ArrayListMultimap.create();
 
 		/*
-		 * Evaluate and register groups. i.e. from group form
-		 * A|allbiomes,&Jungle to individual jasNames
+		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedGroups) {
 			parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
@@ -350,8 +344,7 @@ public class BiomeGroupRegistry {
 
 	private List<BiomeGroup> getSortedGroups(Collection<BiomeGroup> groupsToSort) {
 		/*
-		 * Evaluate each group, ensuring entries are valid mappings or Groups
-		 * and
+		 * Evaluate each group, ensuring entries are valid mappings or Groups and
 		 */
 		DirectedGraph<BiomeGroup> groupGraph = new DirectedGraph<BiomeGroup>();
 		for (BiomeGroup group : groupsToSort) {
@@ -395,8 +388,7 @@ public class BiomeGroupRegistry {
 	}
 
 	/**
-	 * Evaluate build instructions (i.e. A|allbiomes,&Jungle) of group and
-	 * evalute them into jasNames
+	 * Evaluate build instructions (i.e. A|allbiomes,&Jungle) of group and evalute them into jasNames
 	 */
 	private void parseGroupContents(BiomeGroup biomeGroup, Map<String, BiomeGroup> iDToGroupBuilder,
 			Map<String, BiomeGroup> iDToAttributeBuilder) {
@@ -484,8 +476,7 @@ public class BiomeGroupRegistry {
 		ListMultimap<String, String> packgNameToGroupIDsBuilder = ArrayListMultimap.create();
 
 		/*
-		 * Evaluate and register groups. i.e. from group form
-		 * A|allbiomes,&Jungle to individual jasNames
+		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedGroups) {
 			parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
@@ -516,8 +507,7 @@ public class BiomeGroupRegistry {
 		ListMultimap<String, String> packgNameToGroupIDsBuilder = ArrayListMultimap.create();
 
 		/*
-		 * Evaluate and register groups. i.e. from group form
-		 * A|allbiomes,&Jungle to individual jasNames
+		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedGroups) {
 			parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
@@ -541,13 +531,12 @@ public class BiomeGroupRegistry {
 		updateBiomeGroup(prevBiomeGroupId, newGroup);
 	}
 
-	public void updateBiomeGroup(String prevBiomeGroupId, String groupName, String configName, ArrayList<String> contents) {
+	public void updateBiomeGroup(String prevBiomeGroupId, String groupName, String configName,
+			ArrayList<String> contents) {
 		updateBiomeGroup(prevBiomeGroupId, new BiomeGroup(groupName, configName, contents));
 	}
 
 	public void updateBiomeGroup(String prevBiomeGroupId, BiomeGroup newGroup) {
-		// BiomeGroups are equal if groupId are equal thus remove the 'new
-		// instance' to remove the old one
 		removeBiomeGroup(prevBiomeGroupId);
 		addBiomeGroup(newGroup);
 	}
