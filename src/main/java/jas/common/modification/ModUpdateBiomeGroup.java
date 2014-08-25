@@ -2,6 +2,9 @@ package jas.common.modification;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import net.minecraft.entity.EntityLiving;
 
 import com.google.common.base.Optional;
 
@@ -41,5 +44,58 @@ public class ModUpdateBiomeGroup extends BaseModification {
 		} else {
 			registry.updateBiomeGroup(prevBiomeGroupId, groupName, contents);
 		}
+	}
+
+	@Override
+	public void applyModification(BiomeSpawnListRegistry registry) {
+		// If GroupID has changed or the group is now empty (invalid)
+		if (!prevBiomeGroupId.equalsIgnoreCase(groupName) || contents.isEmpty()) {
+			LivingHandlerRegistry livingHandlerRegistry = registry.livingHandlerRegistry;
+			BiomeGroupRegistry biomeGroupRegistry = registry.biomeGroupRegistry;
+			LivingGroupRegistry livingGroupRegistry = registry.livingGroupRegistry;
+
+			ImportedSpawnList importedSpawnList = JustAnotherSpawner.importedSpawnList();
+
+			/* For all LivingGroups (that are not CreatureType NONE) */
+			Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
+			Collection<SpawnListEntryBuilder> spawnListToAdd = new ArrayList<SpawnListEntryBuilder>();
+			for (LivingHandler handler : livingHandlers) {
+				if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
+					continue;
+				}
+				registry.removeSpawnListEntry(handler.groupID, prevBiomeGroupId);
+				// If BiomeGroup is empty there are no SpawnListEntries genereated for it
+				if (!contents.isEmpty()) {
+					BiomeGroup group = biomeGroupRegistry.getBiomeGroup(groupName);
+					LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
+					SpawnListEntryBuilder spawnListEntry = findVanillaSpawnListEntry(group, livGroup,
+							importedSpawnList, biomeGroupRegistry, livingGroupRegistry);
+					spawnListToAdd.add(spawnListEntry);
+				}
+			}
+			registry.addSpawnListEntry(spawnListToAdd);
+		}
+	}
+
+	private SpawnListEntryBuilder findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
+			ImportedSpawnList importedSpawnList, BiomeGroupRegistry biomeGroupRegistry,
+			LivingGroupRegistry livingGroupRegistry) {
+		for (String pckgNames : group.getBiomeNames()) {
+			for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
+				Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
+						.getSpawnableCreatureList(biomeID);
+				for (String jasName : livingGroup.entityJASNames()) {
+					Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
+					for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
+						if (spawnListEntry.entityClass.equals(livingClass)) {
+							return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID)
+									.setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
+									.setMaxChunkPack(spawnListEntry.maxGroupCount);
+						}
+					}
+				}
+			}
+		}
+		return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID);
 	}
 }

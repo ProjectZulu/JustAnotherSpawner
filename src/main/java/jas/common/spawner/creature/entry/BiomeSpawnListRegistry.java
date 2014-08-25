@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -41,7 +42,6 @@ import com.google.common.base.CharMatcher;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.google.gson.Gson;
@@ -375,32 +375,45 @@ public final class BiomeSpawnListRegistry {
     }
     
 	public void addSpawnListEntry(SpawnListEntryBuilder builder) {
-		SpawnListEntry newEntry = builder.build();
-		LivingHandler handler = livingHandlerRegistry.getLivingHandler(newEntry.livingGroupID);
-		String creatureTypeId = handler != null ? handler.creatureTypeID : CreatureTypeRegistry.NONE;
+		Collection<SpawnListEntryBuilder> list = new ArrayList<SpawnListEntryBuilder>(1);
+		list.add(builder);
+		addSpawnListEntry(list);
+	}
 
-		boolean isAlreadyPresent = false;
-		for (Set<SpawnListEntry> allSpawnLists : validSpawnListEntries.row(newEntry.locationGroup).values()) {
-			for (SpawnListEntry spawnListEntry : allSpawnLists) {
-				if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
-					isAlreadyPresent = true;
+	public void addSpawnListEntry(Collection<SpawnListEntryBuilder> builders) {
+		Collection<SpawnListEntry> newEntries = new ArrayList<SpawnListEntry>(builders.size());
+		for (SpawnListEntryBuilder builder : builders) {
+			newEntries.add(builder.build());
+		}
+
+		for (SpawnListEntry newEntry : newEntries) {
+			LivingHandler handler = livingHandlerRegistry.getLivingHandler(newEntry.livingGroupID);
+			String creatureTypeId = handler != null ? handler.creatureTypeID : CreatureTypeRegistry.NONE;
+
+			boolean isAlreadyPresent = false;
+			for (Set<SpawnListEntry> allSpawnLists : validSpawnListEntries.row(newEntry.locationGroup).values()) {
+				for (SpawnListEntry spawnListEntry : allSpawnLists) {
+					if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
+						isAlreadyPresent = true;
+					}
 				}
 			}
-		}
-		for (Set<SpawnListEntry> allSpawnLists : invalidSpawnListEntries.row(newEntry.locationGroup).values()) {
-			for (SpawnListEntry spawnListEntry : allSpawnLists) {
-				if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
-					isAlreadyPresent = true;
+			for (Set<SpawnListEntry> allSpawnLists : invalidSpawnListEntries.row(newEntry.locationGroup).values()) {
+				for (SpawnListEntry spawnListEntry : allSpawnLists) {
+					if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
+						isAlreadyPresent = true;
+					}
 				}
 			}
-		}
-		if (!isAlreadyPresent) {
-			if (isSpawnListValid(newEntry)) {
-				Set<SpawnListEntry> validList = validSpawnListEntries.get(newEntry.locationGroup, creatureTypeId);
-				validList.add(newEntry);
-			} else {
-				Set<SpawnListEntry> invalidList = invalidSpawnListEntries.get(newEntry.locationGroup, creatureTypeId);
-				invalidList.add(newEntry);
+			if (!isAlreadyPresent) {
+				if (isSpawnListValid(newEntry)) {
+					Set<SpawnListEntry> validList = validSpawnListEntries.get(newEntry.locationGroup, creatureTypeId);
+					validList.add(newEntry);
+				} else {
+					Set<SpawnListEntry> invalidList = invalidSpawnListEntries.get(newEntry.locationGroup,
+							creatureTypeId);
+					invalidList.add(newEntry);
+				}
 			}
 		}
 	}
@@ -408,7 +421,7 @@ public final class BiomeSpawnListRegistry {
 	public void removeSpawnListEntry(SpawnListEntryBuilder builder) {
 		removeSpawnListEntry(builder.getLivingGroupId(), builder.getLocationGroupId());
 	}
-	
+
 	public boolean removeSpawnListEntry(String livingGroupId, String biomeGroupId) {
 		ImmutableCollection<String> validSpawnListKeys = validSpawnListEntries.row(biomeGroupId).keySet();
 		boolean wasPresent = false;
