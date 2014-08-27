@@ -405,7 +405,7 @@ public final class BiomeSpawnListRegistry {
 					}
 				}
 			}
-			if (!isAlreadyPresent) {
+			if (!isAlreadyPresent && !creatureTypeId.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
 				if (isSpawnListValid(newEntry)) {
 					Set<SpawnListEntry> validList = validSpawnListEntries.get(newEntry.locationGroup, creatureTypeId);
 					validList.add(newEntry);
