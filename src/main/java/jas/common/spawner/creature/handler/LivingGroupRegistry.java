@@ -477,12 +477,13 @@ public class LivingGroupRegistry {
 		GsonHelper.writeToGson(FileUtilities.createWriter(gsonBiomeFile, true), biomeGroupAuthor, gson);
 	}
 
-	public void addLivingGroup(String groupName, ArrayList<String> contents) {
+	public boolean addLivingGroup(String groupName, ArrayList<String> contents) {
+		return addLivingGroup(new LivingGroup(groupName, contents));
 	}
 
-	public void addLivingGroup(LivingGroup newGroup) {
+	public boolean addLivingGroup(LivingGroup newGroup) {
 		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>(iDToGroup.values());
-		livingGroups.add(newGroup);
+		boolean wasAdded = livingGroups.add(newGroup);
 
 		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
 		HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
@@ -499,6 +500,7 @@ public class LivingGroupRegistry {
 				.build();
 		this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
 				.putAll(entityIDToGroupIDListBuild).build();
+		return wasAdded;
 	}
 
 	public void removeLivingGroup(String groupID) {
@@ -527,8 +529,12 @@ public class LivingGroupRegistry {
 	}
 
 	public void updateLivingGroup(LivingGroup newGroup) {
+		updateLivingGroup(newGroup.groupID, newGroup);
+	}
+
+	public void updateLivingGroup(String oldLivingID, LivingGroup newGroup) {
 		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>(iDToGroup.values());
-		livingGroups.remove(newGroup); // Groups are defined by unique groupID, other values may be different
+		livingGroups.remove(oldLivingID);
 		livingGroups.add(newGroup);
 
 		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
@@ -546,5 +552,6 @@ public class LivingGroupRegistry {
 				.build();
 		this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
 				.putAll(entityIDToGroupIDListBuild).build();
+
 	}
 }
