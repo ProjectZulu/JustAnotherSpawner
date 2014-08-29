@@ -133,6 +133,16 @@ public class GsonHelper {
     }
 
     /**
+     * Helper for unwrapping JsonObject members, returns default value if element is absent or an invalid type
+     */
+    public static String getAsOrDefault(JsonElement element, String defaultValue) {
+        if (element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+            return element.getAsJsonPrimitive().getAsString();
+        }
+        return defaultValue;
+    }
+    
+    /**
      * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
      */
     public static String getMemberOrDefault(JsonObject jsonObject, String memberName, String defaultIfAbsent) {

@@ -8,6 +8,8 @@ import jas.common.modification.ModUpdateSpawnListEntry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,9 +116,9 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 3) {
-			LivingGroupRegistry registry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-			for (LivingGroup group : registry.getEntityGroups()) {
-				String iD = group.groupID;
+			LivingHandlerRegistry registry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+			for (LivingHandler group : registry.getLivingHandlers()) {
+				String iD = group.livingID;
 				if (iD.contains(" ")) {
 					tabCompletions.add("\"".concat(iD).concat("\""));
 				} else {

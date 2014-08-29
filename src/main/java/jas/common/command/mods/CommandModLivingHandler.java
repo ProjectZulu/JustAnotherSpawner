@@ -2,14 +2,9 @@ package jas.common.command.mods;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.command.CommandJasBase;
-import jas.common.modification.ModAddLivingGroup;
 import jas.common.modification.ModAddLivingHandler;
-import jas.common.modification.ModRemoveLivingGroup;
 import jas.common.modification.ModRemoveLivingHandler;
-import jas.common.modification.ModUpdateLivingGroup;
 import jas.common.modification.ModUpdateLivingHandler;
-import jas.common.spawner.creature.handler.LivingGroupRegistry;
-import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
@@ -107,7 +102,7 @@ public class CommandModLivingHandler extends CommandJasBase {
 		} else if (stringArgs.length == 2) {
 			LivingHandlerRegistry registry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
 			for (LivingHandler handler : registry.getLivingHandlers()) {
-				String iD = handler.groupID;
+				String iD = handler.livingID;
 				if (iD.contains(" ")) {
 					tabCompletions.add("\"".concat(iD).concat("\""));
 				} else {

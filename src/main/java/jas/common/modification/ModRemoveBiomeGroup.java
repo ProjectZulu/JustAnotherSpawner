@@ -38,7 +38,7 @@ public class ModRemoveBiomeGroup extends BaseModification {
 			if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
 				continue;
 			}
-			registry.removeSpawnListEntry(handler.groupID, groupName);
+			registry.removeSpawnListEntry(handler.livingID, groupName);
 		}
 	}
 }

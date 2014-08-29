@@ -100,7 +100,7 @@ public class StructureHandler {
 					@SuppressWarnings("unchecked")
 					List<LivingHandler> handlers = livingHandlerRegistry.getLivingHandlers(spawnListEntry.entityClass);
 					if (!handlers.isEmpty()) {
-						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(handlers.get(0).groupID, structureKey);
+						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(handlers.get(0).livingID, structureKey);
 						builder.setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
 								.setMaxChunkPack(spawnListEntry.maxGroupCount);
 						spawnList.add(builder);
@@ -124,7 +124,7 @@ public class StructureHandler {
 
 				if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
 					if (spawnEntry.itemWeight > 0 && handler.shouldSpawn) {
-						JASLog.log().info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.groupID,
+						JASLog.log().info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.livingID,
 								handler.creatureTypeID, structureKey);
 						structureKeysToSpawnList.put(structureKey, spawnEntry);
 					} else {
@@ -132,12 +132,12 @@ public class StructureHandler {
 						JASLog.log()
 								.debug(Level.INFO,
 										"Not adding Structure SpawnListEntry of %s to StructureKey %s due to Weight %s or ShouldSpawn %s.",
-										handler.groupID, structureKey, spawnEntry.itemWeight, handler.shouldSpawn);
+										handler.livingID, structureKey, spawnEntry.itemWeight, handler.shouldSpawn);
 					}
 				} else {
 					JASLog.log().debug(Level.INFO,
 							"Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s", structureKey,
-							handler.groupID, handler.creatureTypeID);
+							handler.livingID, handler.creatureTypeID);
 				}
 			}
 

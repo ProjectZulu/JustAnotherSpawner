@@ -63,13 +63,12 @@ public class ModUpdateBiomeGroup extends BaseModification {
 				if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
 					continue;
 				}
-				registry.removeSpawnListEntry(handler.groupID, prevBiomeGroupId);
+				registry.removeSpawnListEntry(handler.livingID, prevBiomeGroupId);
 				// If BiomeGroup is empty there are no SpawnListEntries genereated for it
 				if (!contents.isEmpty()) {
 					BiomeGroup group = biomeGroupRegistry.getBiomeGroup(groupName);
-					LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
-					SpawnListEntryBuilder spawnListEntry = findVanillaSpawnListEntry(group, livGroup,
-							importedSpawnList, biomeGroupRegistry, livingGroupRegistry);
+					SpawnListEntryBuilder spawnListEntry = findVanillaSpawnListEntry(group, handler, importedSpawnList,
+							biomeGroupRegistry, livingGroupRegistry);
 					spawnListToAdd.add(spawnListEntry);
 				}
 			}
@@ -77,18 +76,18 @@ public class ModUpdateBiomeGroup extends BaseModification {
 		}
 	}
 
-	private SpawnListEntryBuilder findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
+	private SpawnListEntryBuilder findVanillaSpawnListEntry(BiomeGroup group, LivingHandler livingHandler,
 			ImportedSpawnList importedSpawnList, BiomeGroupRegistry biomeGroupRegistry,
 			LivingGroupRegistry livingGroupRegistry) {
 		for (String pckgNames : group.getBiomeNames()) {
 			for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
 				Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
 						.getSpawnableCreatureList(biomeID);
-				for (String jasName : livingGroup.entityJASNames()) {
+				for (String jasName : livingHandler.namedJASSpawnables) {
 					Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
 					for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
 						if (spawnListEntry.entityClass.equals(livingClass)) {
-							return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID)
+							return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID)
 									.setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
 									.setMaxChunkPack(spawnListEntry.maxGroupCount);
 						}
@@ -96,6 +95,6 @@ public class ModUpdateBiomeGroup extends BaseModification {
 				}
 			}
 		}
-		return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID);
+		return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID);
 	}
 }

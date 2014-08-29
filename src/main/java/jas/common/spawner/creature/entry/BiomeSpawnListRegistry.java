@@ -237,8 +237,8 @@ public final class BiomeSpawnListRegistry {
                 if (biomeGroupRegistry.getBiomeGroup(builder.getLocationGroupId()) == null) {
                     JASLog.log().severe("BiomeGroup %s does not exist. Entry will be ignored [%s].",
                             builder.getLocationGroupId(), builder);
-                } else if (livingGroupRegistry.getLivingGroup(builder.getLivingGroupId()) == null) {
-                    JASLog.log().severe("LivingGroup %s does not exist. Entry will be ignored [%s].",
+                } else if (livingHandlerRegistry.getLivingHandler(builder.getLivingGroupId()) == null) {
+                    JASLog.log().severe("LivingHandler %s does not exist. Entry will be ignored [%s].",
                             builder.getLivingGroupId(), builder);
                 } else {
                     SpawnListEntry spawnListEntry = null;
@@ -258,20 +258,19 @@ public final class BiomeSpawnListRegistry {
         /* Any files that were not Present/Processable should be created */
         Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
         for (LivingHandler handler : livingHandlers) {
-            if (saveFilesProcessed.contains(getSaveFileName(handler.groupID))) {
+            if (saveFilesProcessed.contains(getSaveFileName(handler.livingID))) {
                 continue;
             }
             // String groupID = handler.groupID;
             if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
                 JASLog.log().debug(Level.INFO,
                         "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
-                        handler.groupID, handler.creatureTypeID);
+                        handler.livingID, handler.creatureTypeID);
                 continue;
             }
             
             for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
-                LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
-                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livGroup, spawnList);
+                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, spawnList);
                 addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
             }
         }
@@ -329,17 +328,17 @@ public final class BiomeSpawnListRegistry {
      * 
      * Generates using defaults values (i.e. spawn rate == 0) if one doesn't exist.
      */
-    private SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
+    private SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, LivingHandler livingHandler,
             ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
             for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
                 Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
                         .getSpawnableCreatureList(biomeID);
-                for (String jasName : livingGroup.entityJASNames()) {
+                for (String jasName : livingHandler.namedJASSpawnables) {
                     Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
                     for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
                         if (spawnListEntry.entityClass.equals(livingClass)) {
-                            return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID)
+                            return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID)
                                     .setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
                                     .setMaxChunkPack(spawnListEntry.maxGroupCount).build();
                         }
@@ -347,7 +346,7 @@ public final class BiomeSpawnListRegistry {
                 }
             }
         }
-        return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID).build();
+        return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID).build();
     }
 
     public void saveToConfig(File configDirectory) {
@@ -364,16 +363,16 @@ public final class BiomeSpawnListRegistry {
             GsonHelper.writeToGson(FileUtilities.createWriter(saveFile, true),
                     new BiomeSpawnsSaveObject(entrySet.getValue(), sortCreatureByBiome), gson);
         }
-    }
+	}
 
-    public static File getFile(File configDirectory, String saveName, String fileName) {
-        String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
-        if (fileName != null && !fileName.equals("")) {
-            filePath = filePath.concat(fileName).concat(".cfg");
-        }
-        return new File(configDirectory, filePath);
-    }
-    
+	public static File getFile(File configDirectory, String saveName, String fileName) {
+		String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
+		if (fileName != null && !fileName.equals("")) {
+			filePath = filePath.concat(fileName).concat(".cfg");
+		}
+		return new File(configDirectory, filePath);
+	}
+
 	public void addSpawnListEntry(SpawnListEntryBuilder builder) {
 		Collection<SpawnListEntryBuilder> list = new ArrayList<SpawnListEntryBuilder>(1);
 		list.add(builder);
