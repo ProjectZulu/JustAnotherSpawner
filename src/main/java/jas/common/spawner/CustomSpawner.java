@@ -3,6 +3,7 @@ package jas.common.spawner;
 import jas.common.BiomeBlacklist;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo.ChunkStat;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -97,16 +98,6 @@ public class CustomSpawner {
 		return eligibleChunksForSpawning;
 	}
 
-	public static class ChunkStat {
-		public final boolean isEdge;
-		public final EntityCounter entityClassCount = new EntityCounter();
-		public final EntityCounter entityTypeCount = new EntityCounter();
-
-		public ChunkStat(boolean isEdge) {
-			this.isEdge = isEdge;
-		}
-	}
-
 	/**
 	 * Count and Cache the Amount of Loaded Entities
 	 * 
@@ -171,6 +162,177 @@ public class CustomSpawner {
 		}
 		return livingTypes;
 	}
+	
+    public static final void spawnCreaturesInChunks(WorldServer worldServer,
+            LivingHandlerRegistry livingHandlerRegistry, LivingGroupRegistry livingGroupRegistry,
+            CreatureType creatureType, HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning,
+            EntityCounter creatureTypeCount, EntityCounter creatureCount, BiomeBlacklist blacklist) {
+        ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
+
+        CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
+        int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
+        if (entityTypeCap < 0 || typeCount.get() < entityTypeCap) {
+            Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
+            ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
+            Collections.shuffle(tmp);
+            iterator = tmp.iterator();
+            labelChunkStart:
+
+            while (iterator.hasNext()) {
+                ChunkCoordIntPair chunkCoord = iterator.next();
+                ChunkStat chunkStat = eligibleChunksForSpawning.get(chunkCoord);
+                if (!chunkStat.isEdge) {
+                    int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
+                            chunkCoord.chunkZPos));
+                    if (biomeCap > -1
+                            && getClodEntityTotal(chunkCoord, eligibleChunksForSpawning, creatureType) >= biomeCap) {
+                        continue;
+                    }
+                    ChunkPosition chunkposition = creatureType.getRandomSpawningPointInChunk(worldServer,
+                            chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+                    int k1 = chunkposition.chunkPosX;
+                    int l1 = chunkposition.chunkPosY;
+                    int i2 = chunkposition.chunkPosZ;
+
+                    if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
+                        int j2 = 0;
+                        for (int k2 = 0; k2 < 3; ++k2) {
+                            int blockSpawnX = k1;
+                            int blockSpawnY = l1;
+                            int blockSpawnZ = i2;
+                            byte variance = 6;
+                            SpawnListEntry spawnlistentry = null;
+                            Class<? extends EntityLiving> livingToSpawn = null;
+                            IEntityLivingData entitylivingdata = null;
+                            CountableInt livingCount = null;
+                            int livingCap = 0;
+                            for (int k3 = 0; k3 < 4; ++k3) {
+                            	
+                            	ChunkPosition chunkposition2 = creatureType.getRandomSpawningPointInChunk(worldServer,
+                                        chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+                            	blockSpawnX = chunkposition2.chunkPosX;
+                            	blockSpawnY = chunkposition2.chunkPosY;
+                            	blockSpawnZ = chunkposition2.chunkPosZ;
+
+//                                blockSpawnX += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
+//                                blockSpawnY += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
+//                                blockSpawnZ += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
+                                if (creatureType.canSpawnAtLocation(worldServer, blockSpawnX, blockSpawnY, blockSpawnZ)) {
+                                    /* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
+                                    float spawnX = blockSpawnX + 0.5F;
+                                    float spawnY = blockSpawnY;
+                                    float spawnZ = blockSpawnZ + 0.5F;
+
+                                    if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(blockSpawnX,
+                                            blockSpawnZ))) {
+                                        continue labelChunkStart;
+                                    }
+
+                                    if (worldServer.getClosestPlayer(spawnX, spawnY, spawnZ, 24.0D) == null) {
+                                        float xOffset = spawnX - chunkcoordinates.posX;
+                                        float yOffset = spawnY - chunkcoordinates.posY;
+                                        float zOffset = spawnZ - chunkcoordinates.posZ;
+                                        float sqOffset = xOffset * xOffset + yOffset * yOffset + zOffset * zOffset;
+
+                                        if (sqOffset < 576.0F) {
+                                            continue;
+                                        }
+
+                                        if (spawnlistentry == null) {
+                                            BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner
+                                                    .worldSettings().biomeSpawnListRegistry();
+                                            spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(
+                                                    worldServer, creatureType, blockSpawnX, blockSpawnY, blockSpawnZ);
+                                            if (spawnlistentry == null) {
+                                                continue;
+                                            }
+                                            livingToSpawn = livingHandlerRegistry.getRandomEntity(
+                                                    spawnlistentry.livingGroupID, worldServer.rand);
+                                            if (livingToSpawn == null) {
+                                                spawnlistentry = null;
+                                                continue;
+                                            }
+
+                                            LivingHandler handler = livingHandlerRegistry
+                                                    .getLivingHandler(spawnlistentry.livingGroupID);
+                                            livingCount = creatureCount.getOrPutIfAbsent(livingToSpawn.getSimpleName(),
+                                                    0);
+                                            livingCap = handler.getLivingCap();
+
+                                            if (typeCount.get() > entityTypeCap) {
+                                                return;
+                                            }
+
+                                            if (livingCap > 0 && livingCount.get() >= livingCap) {
+                                                spawnlistentry = null;
+                                                continue;
+                                            }
+                                        } else {
+                                            livingToSpawn = livingHandlerRegistry.getRandomEntity(
+                                                    spawnlistentry.livingGroupID, worldServer.rand);
+                                            if (livingToSpawn == null) {
+                                                spawnlistentry = null;
+                                                continue;
+                                            }
+                                            livingCount = creatureCount.getOrPutIfAbsent(livingToSpawn.getSimpleName(),
+                                                    0);
+                                        }
+
+                                        EntityLiving entityliving;
+                                        try {
+                                            entityliving = livingToSpawn.getConstructor(new Class[] { World.class })
+                                                    .newInstance(new Object[] { worldServer });
+                                        } catch (Exception exception) {
+                                            exception.printStackTrace();
+                                            return;
+                                        }
+
+                                        entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ,
+                                                worldServer.rand.nextFloat() * 360.0F, 0.0F);
+
+                                        Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer,
+                                                spawnX, spawnY, spawnZ);
+                                        if (canSpawn == Result.ALLOW
+                                                || (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
+                                                        .getCanSpawnHere(entityliving, spawnlistentry))) {
+                                            ++j2;
+                                            worldServer.spawnEntityInWorld(entityliving);
+                                            if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX,
+                                                    spawnY, spawnZ)) {
+                                                entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+                                            }
+                                            JASLog.log().logSpawn(
+                                                    false,
+                                                    (String) EntityList.classToStringMapping.get(entityliving
+                                                            .getClass()),
+                                                    spawnlistentry.getLivingHandler().creatureTypeID,
+                                                    (int) entityliving.posX,
+                                                    (int) entityliving.posY,
+                                                    (int) entityliving.posZ,
+                                                    BiomeHelper.getPackageName(entityliving.worldObj
+                                                            .getBiomeGenForCoords((int) entityliving.posX,
+                                                                    (int) entityliving.posZ)));
+                                            spawnlistentry.getLivingHandler().postSpawnEntity(entityliving,
+                                                    spawnlistentry);
+                                            typeCount.increment();
+                                            livingCount.increment();
+                                            chunkStat.entityClassCount.incrementOrPutIfAbsent(
+                                                    livingToSpawn.getSimpleName(), 1);
+                                            chunkStat.entityTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
+                                            if (j2 >= spawnlistentry.packSize) {
+                                                continue labelChunkStart;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
 	/**
 	 * Performs Actual Creature Spawning inside eligibleChunks. {@link determineChunksForSpawnering} needs to be run to
@@ -180,168 +342,144 @@ public class CustomSpawner {
 	 *            CreatureType spawnList that is being Spawned
 	 */
 	public static final void spawnCreaturesInChunks(WorldServer worldServer,
-			LivingHandlerRegistry livingHandlerRegistry, LivingGroupRegistry livingGroupRegistry,
-			CreatureType creatureType, HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning,
-			EntityCounter creatureTypeCount, EntityCounter creatureCount, BiomeBlacklist blacklist) {
-		ChunkCoordinates chunkcoordinates = worldServer.getSpawnPoint();
+			LivingHandlerRegistry livingHandlerRegistry, BiomeSpawnListRegistry biomeSpawnListRegistry,
+			CreatureType creatureType, BiomeBlacklist blacklist, CountInfo countInfo) {
+		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
 
-		CountableInt typeCount = creatureTypeCount.getOrPutIfAbsent(creatureType.typeID, 0);
-		int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
-		if (entityTypeCap < 0 || typeCount.get() < entityTypeCap) {
-			Iterator<ChunkCoordIntPair> iterator = eligibleChunksForSpawning.keySet().iterator();
-			ArrayList<ChunkCoordIntPair> tmp = new ArrayList<ChunkCoordIntPair>(eligibleChunksForSpawning.keySet());
-			Collections.shuffle(tmp);
-			iterator = tmp.iterator();
-			labelChunkStart:
+		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
+				countInfo.eligibleChunkLocations());
+		Collections.shuffle(eligibleChunksForSpawning);
+		for (ChunkCoordIntPair chunkCoord : eligibleChunksForSpawning) {
+			ChunkStat chunkStat = countInfo.getChunkStat(chunkCoord);
+			if (chunkStat.isEdge) {
+				continue;
+			}
+			// BiomeCap
+			int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
+					chunkCoord.chunkZPos));
+			if (biomeCap > -1 && countInfo.getClodEntityCount(chunkCoord, creatureType.typeID) >= biomeCap) {
+				continue;
+			}
+			// TODO: CreatureType.passiveSpawnAttempts
+			int entitiesSpawned = 0;
+			final int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
+			for (int numLocAttempts = 0; numLocAttempts < 3; ++numLocAttempts) {
+				IEntityLivingData entitylivingdata = null;
+				ChunkPosition spawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
+						chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+				SpawnListEntry spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer,
+						creatureType, spawningPoint.chunkPosX, spawningPoint.chunkPosY, spawningPoint.chunkPosZ);
+				if (spawnlistentry == null) {
+					continue;
+				}
+				Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
+						spawnlistentry.livingGroupID, worldServer.rand);
+				LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
 
-			while (iterator.hasNext()) {
-				ChunkCoordIntPair chunkCoord = iterator.next();
-				ChunkStat chunkStat = eligibleChunksForSpawning.get(chunkCoord);
-				if (!chunkStat.isEdge) {
-					int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
-							chunkCoord.chunkZPos));
-					if (biomeCap > -1
-							&& getClodEntityTotal(chunkCoord, eligibleChunksForSpawning, creatureType) >= biomeCap) {
-						continue;
+				for (int numEntAttempts = 0; numEntAttempts < 4; ++numEntAttempts) {
+					// Randomized on Each Attempt
+					spawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer, chunkCoord.chunkXPos,
+							chunkCoord.chunkZPos);
+					// Biome BlackList
+					if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
+							spawningPoint.chunkPosY))) {
+						break;
 					}
-					ChunkPosition chunkposition = creatureType.getRandomSpawningPointInChunk(worldServer,
-							chunkCoord.chunkXPos, chunkCoord.chunkZPos);
-					int k1 = chunkposition.chunkPosX;
-					int l1 = chunkposition.chunkPosY;
-					int i2 = chunkposition.chunkPosZ;
 
-					if (creatureType.isValidMedium(worldServer, k1, l1, i2)) {
-						int j2 = 0;
-						for (int k2 = 0; k2 < 3; ++k2) {
-							int blockSpawnX = k1;
-							int blockSpawnY = l1;
-							int blockSpawnZ = i2;
-							byte variance = 6;
-							SpawnListEntry spawnlistentry = null;
-							Class<? extends EntityLiving> livingToSpawn = null;
-							IEntityLivingData entitylivingdata = null;
-							CountableInt livingCount = null;
-							int livingCap = 0;
-							for (int k3 = 0; k3 < 4; ++k3) {
-								blockSpawnX += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
-								blockSpawnY += worldServer.rand.nextInt(1) - worldServer.rand.nextInt(1);
-								blockSpawnZ += worldServer.rand.nextInt(variance) - worldServer.rand.nextInt(variance);
-								if (creatureType.canSpawnAtLocation(worldServer, blockSpawnX, blockSpawnY, blockSpawnZ)) {
-									/* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
-									float spawnX = blockSpawnX + 0.5F;
-									float spawnY = blockSpawnY;
-									float spawnZ = blockSpawnZ + 0.5F;
-
-									if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(blockSpawnX,
-											blockSpawnZ))) {
-										continue labelChunkStart;
-									}
-
-									if (worldServer.getClosestPlayer(spawnX, spawnY, spawnZ, 24.0D) == null) {
-										float xOffset = spawnX - chunkcoordinates.posX;
-										float yOffset = spawnY - chunkcoordinates.posY;
-										float zOffset = spawnZ - chunkcoordinates.posZ;
-										float sqOffset = xOffset * xOffset + yOffset * yOffset + zOffset * zOffset;
-
-										if (sqOffset < 576.0F) {
-											continue;
-										}
-
-										if (spawnlistentry == null) {
-											BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner
-													.worldSettings().biomeSpawnListRegistry();
-											spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(
-													worldServer, creatureType, blockSpawnX, blockSpawnY, blockSpawnZ);
-											if (spawnlistentry == null) {
-												continue;
-											}
-											livingToSpawn = livingHandlerRegistry.getRandomEntity(
-													spawnlistentry.livingGroupID, worldServer.rand);
-											if (livingToSpawn == null) {
-												spawnlistentry = null;
-												continue;
-											}
-
-											LivingHandler handler = livingHandlerRegistry
-													.getLivingHandler(spawnlistentry.livingGroupID);
-											livingCount = creatureCount.getOrPutIfAbsent(livingToSpawn.getSimpleName(),
-													0);
-											livingCap = handler.getLivingCap();
-
-											if (typeCount.get() > entityTypeCap) {
-												return;
-											}
-
-											if (livingCap > 0 && livingCount.get() >= livingCap) {
-												spawnlistentry = null;
-												continue;
-											}
-										} else {
-											livingToSpawn = livingHandlerRegistry.getRandomEntity(
-													spawnlistentry.livingGroupID, worldServer.rand);
-											if (livingToSpawn == null) {
-												spawnlistentry = null;
-												continue;
-											}
-											livingCount = creatureCount.getOrPutIfAbsent(livingToSpawn.getSimpleName(),
-													0);
-										}
-
-										EntityLiving entityliving;
-										try {
-											entityliving = livingToSpawn.getConstructor(new Class[] { World.class })
-													.newInstance(new Object[] { worldServer });
-										} catch (Exception exception) {
-											exception.printStackTrace();
-											return;
-										}
-
-										entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ,
-												worldServer.rand.nextFloat() * 360.0F, 0.0F);
-
-										Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer,
-												spawnX, spawnY, spawnZ);
-										if (canSpawn == Result.ALLOW
-												|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler()
-														.getCanSpawnHere(entityliving, spawnlistentry))) {
-											++j2;
-											worldServer.spawnEntityInWorld(entityliving);
-											if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX,
-													spawnY, spawnZ)) {
-												entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
-											}
-											JASLog.log().logSpawn(
-													false,
-													(String) EntityList.classToStringMapping.get(entityliving
-															.getClass()),
-													spawnlistentry.getLivingHandler().creatureTypeID,
-													(int) entityliving.posX,
-													(int) entityliving.posY,
-													(int) entityliving.posZ,
-													BiomeHelper.getPackageName(entityliving.worldObj
-															.getBiomeGenForCoords((int) entityliving.posX,
-																	(int) entityliving.posZ)));
-											spawnlistentry.getLivingHandler().postSpawnEntity(entityliving,
-													spawnlistentry);
-											typeCount.increment();
-											livingCount.increment();
-											chunkStat.entityClassCount.incrementOrPutIfAbsent(
-													livingToSpawn.getSimpleName(), 1);
-											chunkStat.entityTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
-											if (j2 >= spawnlistentry.packSize) {
-												continue labelChunkStart;
-											}
-										}
-									}
-								}
-							}
+					// CreatureType
+					{
+						int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(creatureType.typeID);
+						if (globalEntityTypeCount > entityTypeCap) {
+							break;
+						}
+						if (!creatureType.isValidMedium(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+								spawningPoint.chunkPosZ)) {
+							continue;
+						}
+						if (!creatureType.canSpawnAtLocation(worldServer, spawningPoint.chunkPosX,
+								spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
+							continue;
+						}
+						if (isNearSpawnOrOrigin(worldServer, serverOriginPoint, spawningPoint.chunkPosX,
+								spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
+							continue;
 						}
 					}
+
+					// Check Type and Global Caps
+					{
+						int globalEntityClassCount = countInfo.getGlobalEntityClassCount(livingToSpawn);
+						int livingCap = handler.getLivingCap();
+
+						if (livingCap > 0 && globalEntityClassCount >= livingCap) {
+							spawnlistentry = null;
+							continue;
+						}
+						if (entitiesSpawned >= spawnlistentry.packSize) {
+							continue;
+						}
+					}
+
+					/* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
+					float spawnX = spawningPoint.chunkPosX + 0.5F;
+					float spawnY = spawningPoint.chunkPosY;
+					float spawnZ = spawningPoint.chunkPosZ + 0.5F;
+					EntityLiving entityliving;
+					try {
+						entityliving = livingToSpawn.getConstructor(new Class[] { World.class }).newInstance(
+								new Object[] { worldServer });
+					} catch (Exception exception) {
+						exception.printStackTrace();
+						return;
+					}
+					entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServer.rand.nextFloat() * 360.0F,
+							0.0F);
+
+					Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer, spawnX, spawnY,
+							spawnZ);
+					if (canSpawn == Result.ALLOW
+							|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
+									entityliving, spawnlistentry))) {
+						++entitiesSpawned;
+						worldServer.spawnEntityInWorld(entityliving);
+						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
+							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+						}
+						JASLog.log().logSpawn(
+								false,
+								(String) EntityList.classToStringMapping.get(entityliving.getClass()),
+								spawnlistentry.getLivingHandler().creatureTypeID,
+								(int) entityliving.posX,
+								(int) entityliving.posY,
+								(int) entityliving.posZ,
+								BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+										(int) entityliving.posX, (int) entityliving.posZ)));
+						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry);
+						countInfo.countSpawn(entityliving, creatureType.typeID);
+					}
+
 				}
 			}
 		}
 	}
 
+	private static boolean isNearSpawnOrOrigin(World world, ChunkCoordinates serverSpawnPoint, int originX,
+			int originY, int originZ) {
+		if (world.getClosestPlayer(originX, originY, originZ, 24.0D) == null) {
+			float xOffset = originX - serverSpawnPoint.posX;
+			float yOffset = originY - serverSpawnPoint.posY;
+			float zOffset = originZ - serverSpawnPoint.posZ;
+			float sqOffset = xOffset * xOffset + yOffset * yOffset + zOffset * zOffset;
+
+			if (sqOffset < 576.0F) {
+				return true;
+			}
+			return false;
+		}
+		return true;
+	}
+	
+	@Deprecated
 	private static int getClodEntityTotal(ChunkCoordIntPair chunkCoord,
 			HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning, CreatureType creatureType) {
 		final int clodSize = 2;
