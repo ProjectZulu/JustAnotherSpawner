@@ -29,9 +29,9 @@ public class KeyParserBlockRange extends KeyParserBase {
         return true;
     }
 
-    @Override
-    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
-            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+			TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
+		throw new UnsupportedOperationException();
+	}
 }

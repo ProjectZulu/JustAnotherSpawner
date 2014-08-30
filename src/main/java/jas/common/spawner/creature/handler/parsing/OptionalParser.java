@@ -143,20 +143,21 @@ public class OptionalParser {
         }
     }
 
-    /**
-     * Parses the SpawnRange Tag.
-     * 
-     * @param values Values to be Used for Parsing
-     * @param valueCache Cache used by OptionalSettings to hold values
-     */
-    public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
-        if (values.length == 2) {
-            valueCache.put(Key.spawnRange.key, ParsingHelper.parseFilteredInteger(values[1], JustAnotherSpawner
-                    .worldSettings().worldProperties().getGlobal().despawnDist, Key.spawnRange.key));
-        } else {
-            JASLog.log().severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
-        }
-    }
+	/**
+	 * Parses the SpawnRange Tag.
+	 * 
+	 * @param values
+	 *            Values to be Used for Parsing
+	 * @param valueCache
+	 *            Cache used by OptionalSettings to hold values
+	 */
+	public static void parseSpawnRange(String[] values, HashMap<String, Object> valueCache) {
+		if (values.length == 2) {
+			valueCache.put(Key.spawnRange.key, ParsingHelper.parseFilteredInteger(values[1], 32, Key.spawnRange.key));
+		} else {
+			JASLog.log().severe("Error Parsing spawnRange parameter. Invalid Argument Length.");
+		}
+	}
 
     @Deprecated
     public static Boolean parseSky(String[] values) {
