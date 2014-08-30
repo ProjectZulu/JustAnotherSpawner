@@ -16,8 +16,8 @@ public class WorldGlobalSettings {
 
     public WorldGlobalSettings() {
         fileVersion = "1.0";
-        maxDespawnDist = 32;
-        despawnDist = 128;
+        maxDespawnDist = 128;
+        despawnDist = 32;
         minDespawnTime = 600;
     }
 
