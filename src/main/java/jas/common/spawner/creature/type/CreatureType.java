@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.type;
 
 import jas.common.DefaultProps;
+import jas.common.spawner.CountInfo;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
@@ -17,6 +18,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -207,4 +210,37 @@ public class CreatureType {
     public static File getFile(File configDirectory, String saveName) {
         return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "CreatureType.cfg");
     }
+
+	public boolean canSpawnHere(World worldServer, CountInfo countInfo, CreatureType creatureType,
+			ChunkPosition spawningPoint) {
+		final int entityTypeCap = creatureType.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
+
+		// Max of Type
+		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(creatureType.typeID);
+		if (globalEntityTypeCount > entityTypeCap) {
+			return false;
+		}
+
+		// BiomeCap
+		ChunkCoordIntPair chunkCoord = new ChunkCoordIntPair(MathHelper.floor_double(spawningPoint.chunkPosX / 16.0D),
+				MathHelper.floor_double(spawningPoint.chunkPosZ / 16.0D));
+		int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
+				chunkCoord.chunkZPos));
+		if (biomeCap > -1 && countInfo.getClodEntityCount(chunkCoord, creatureType.typeID) >= biomeCap) {
+			return false;
+		}
+
+		// Valid Medium
+		if (!creatureType.isValidMedium(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+				spawningPoint.chunkPosZ)) {
+			return false;
+		}
+
+		// {spawn} Tag
+		if (!creatureType.canSpawnAtLocation(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+				spawningPoint.chunkPosZ)) {
+			return false;
+		}
+		return false;
+	}
 }

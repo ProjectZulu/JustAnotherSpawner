@@ -18,7 +18,7 @@ public final class CountInfo {
 	private EntityCounter globalCreatureTypeCount;
 	private EntityCounter globalCreatureClassCount;
 
-	private ChunkStat chunkStat;
+	private int entitiesSpawnedThisLoop; // Count of entities spawned in each chunk-spawn loop
 
 	public static class ChunkStat {
 		public final boolean isEdge;
@@ -49,6 +49,7 @@ public final class CountInfo {
 		}
 		globalCreatureTypeCount.incrementOrPutIfAbsent(creatureType, 1);
 		globalCreatureClassCount.incrementOrPutIfAbsent(creature.getClass().getSimpleName(), 1);
+		++entitiesSpawnedThisLoop;
 	}
 
 	public ChunkStat getChunkStat(ChunkCoordIntPair location) {
@@ -74,6 +75,14 @@ public final class CountInfo {
 
 	public int getGlobalEntityClassCount(Class<?> entityClass) {
 		return globalCreatureClassCount.getOrPutIfAbsent(entityClass.getSimpleName(), 0).get();
+	}
+
+	public int getEntitiesSpawnedThisLoop() {
+		return entitiesSpawnedThisLoop;
+	}
+
+	public void resetEntitiesSpawnedThisLoop() {
+		entitiesSpawnedThisLoop = 0;
 	}
 
 	/**

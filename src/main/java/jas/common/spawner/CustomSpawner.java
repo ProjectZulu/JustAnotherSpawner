@@ -183,14 +183,8 @@ public class CustomSpawner {
 			if (chunkStat.isEdge) {
 				continue;
 			}
-			// BiomeCap
-			int biomeCap = creatureType.getChunkCap(worldServer.getChunkFromChunkCoords(chunkCoord.chunkXPos,
-					chunkCoord.chunkZPos));
-			if (biomeCap > -1 && countInfo.getClodEntityCount(chunkCoord, creatureType.typeID) >= biomeCap) {
-				continue;
-			}
 			// TODO: CreatureType.passiveSpawnAttempts
-			int entitiesSpawned = 0;
+			countInfo.resetEntitiesSpawnedThisLoop();
 			final int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
 			for (int numLocAttempts = 0; numLocAttempts < 3; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
@@ -212,30 +206,20 @@ public class CustomSpawner {
 					// Biome BlackList
 					if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
 							spawningPoint.chunkPosY))) {
-						break;
+						continue;
+					}
+
+					if (isNearPlayerOrOrigin(worldServer, serverOriginPoint, spawningPoint.chunkPosX,
+							spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
+						continue;
 					}
 
 					// CreatureType
-					{
-						int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(creatureType.typeID);
-						if (globalEntityTypeCount > entityTypeCap) {
-							break;
-						}
-						if (!creatureType.isValidMedium(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
-								spawningPoint.chunkPosZ)) {
-							continue;
-						}
-						if (!creatureType.canSpawnAtLocation(worldServer, spawningPoint.chunkPosX,
-								spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
-							continue;
-						}
-						if (isNearSpawnOrOrigin(worldServer, serverOriginPoint, spawningPoint.chunkPosX,
-								spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
-							continue;
-						}
+					if (!creatureType.canSpawnHere(worldServer, countInfo, creatureType, spawningPoint)) {
+						continue;
 					}
 
-					// Check Type and Global Caps
+					// LivingCap and PackSize
 					{
 						int globalEntityClassCount = countInfo.getGlobalEntityClassCount(livingToSpawn);
 						int livingCap = handler.getLivingCap();
@@ -244,7 +228,7 @@ public class CustomSpawner {
 							spawnlistentry = null;
 							continue;
 						}
-						if (entitiesSpawned >= spawnlistentry.packSize) {
+						if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
 							continue;
 						}
 					}
@@ -269,7 +253,13 @@ public class CustomSpawner {
 					if (canSpawn == Result.ALLOW
 							|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
 									entityliving, spawnlistentry))) {
-						++entitiesSpawned;
+						if (canSpawn == Result.ALLOW) {
+							JASLog.log()
+									.warning(
+											"JAS is spawning entity %s, irrespective of JAS LH & SLE conditions as part of LivingSpawnEvent compatabillity.",
+											(String) EntityList.classToStringMapping.get(entityliving.getClass()));
+						}
+						
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
@@ -286,13 +276,12 @@ public class CustomSpawner {
 						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry);
 						countInfo.countSpawn(entityliving, creatureType.typeID);
 					}
-
 				}
 			}
 		}
 	}
 
-	private static boolean isNearSpawnOrOrigin(World world, ChunkCoordinates serverSpawnPoint, int originX,
+	private static boolean isNearPlayerOrOrigin(World world, ChunkCoordinates serverSpawnPoint, int originX,
 			int originY, int originZ) {
 		if (world.getClosestPlayer(originX, originY, originZ, 24.0D) == null) {
 			float xOffset = originX - serverSpawnPoint.posX;
@@ -306,25 +295,6 @@ public class CustomSpawner {
 			return false;
 		}
 		return true;
-	}
-	
-	@Deprecated
-	private static int getClodEntityTotal(ChunkCoordIntPair chunkCoord,
-			HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning, CreatureType creatureType) {
-		final int clodSize = 2;
-		int entityTotal = 0;
-		int chunksActiallyCounted = 0;
-		for (int i = -clodSize; i <= clodSize; i++) {
-			for (int k = -clodSize; k <= clodSize; k++) {
-				ChunkCoordIntPair coord = new ChunkCoordIntPair(chunkCoord.chunkXPos + i, chunkCoord.chunkZPos + k);
-				ChunkStat chunkStat = eligibleChunksForSpawning.get(coord);
-				if (chunkStat != null) {
-					entityTotal += chunkStat.entityTypeCount.getOrPutIfAbsent(creatureType.typeID, 0).get();
-					chunksActiallyCounted++;
-				}
-			}
-		}
-		return (int) ((entityTotal) * (2f * clodSize + 1) * (2f * clodSize + 1) / chunksActiallyCounted);
 	}
 
 	/**
