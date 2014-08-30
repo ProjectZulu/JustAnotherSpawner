@@ -27,7 +27,7 @@ public class GsonHelper {
         if (types.length != adapters.length) {
             throw new IllegalArgumentException("Type adapters mismatched arument length");
         }
-        GsonBuilder builder = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION);
+        GsonBuilder builder = new GsonBuilder().setVersion(DefaultProps.GSON_VERSION).disableHtmlEscaping();
         if (prettyPrinting) {
             builder.setPrettyPrinting();
         }

@@ -107,15 +107,14 @@ public abstract class CommandJasBase extends CommandBase {
     /**
      * Helper used to add Entity names to tabCompletetion list. Names with spaces are surrounded with quotation marks.
      */
-    public static void addEntityNames(List<String> tabCompletions) {
-        for (Object object : EntityList.classToStringMapping.values()) {
-            String entityName = (String) object;
-            if (entityName.contains(" ")) {
-                entityName = "\"".concat(entityName).concat("\"");
-            }
-            tabCompletions.add(entityName);
-        }
-    }
+	public static void addEntityNames(List<String> tabCompletions) {
+		for (String entityName : JustAnotherSpawner.worldSettings().livingGroupRegistry().JASNametoEntityClass.keySet()) {
+			if (entityName.contains(" ")) {
+				entityName = "\"".concat(entityName).concat("\"");
+			}
+			tabCompletions.add(entityName);
+		}
+	}
 
     /**
      * Helper used to add Entity category names to tabCompletetion list.

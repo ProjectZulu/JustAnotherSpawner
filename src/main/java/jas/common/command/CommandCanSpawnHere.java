@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.StructureHandler;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -140,22 +141,23 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
     }
 
-    private boolean isValidEntityName(String entityName) {
-        for (Object object : EntityList.classToStringMapping.values()) {
-            String mapping = (String) object;
-            if (entityName.equals(mapping)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	private boolean isValidEntityName(String entityName) {
+		LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+		for (String mapping : livingGroupRegistry.JASNametoEntityClass.keySet()) {
+			if (entityName.equals(mapping)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
     private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) {
         EntityLiving entity;
         try {
+        	LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+        	
             @SuppressWarnings("unchecked")
-            Class<? extends EntityLiving> entityClass = (Class<? extends EntityLiving>) EntityList.stringToClassMapping
-                    .get(entityName);
+            Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(entityName);
             entity = (EntityLiving) LivingHelper.instantiateEntity(entityClass, targetPlayer.worldObj);
         } catch (Exception exception) {
             throw new WrongUsageException("commands.jascanspawnhere.cannotinstantiateentity", new Object[0]);
