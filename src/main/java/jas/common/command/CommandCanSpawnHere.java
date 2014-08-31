@@ -73,6 +73,9 @@ public class CommandCanSpawnHere extends CommandJasBase {
         LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
         ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
                 .get(entity.getClass()));
+        if(groupIDs.isEmpty()) {
+            throw new WrongUsageException("commands.jascanspawnhere.entityhasnogroups", new Object[0]);
+        }
         for (String groupID : groupIDs) {
             LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(groupID);
