@@ -24,7 +24,7 @@ public class OptionalSettingsDespawning extends OptionalSettingsBase {
 
     public boolean isValidAge(int currentAge, int defaultCutoff) {
         parseString();
-        Integer tempCutoff = (Integer) valueCache.get(Key.despawnAge);
+        Integer tempCutoff = (Integer) valueCache.get(Key.despawnAge.key);
         defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
         return currentAge > defaultCutoff;
     }

@@ -122,7 +122,7 @@ public abstract class OptionalSettingsBase extends OptionalSettings {
      */
     public boolean isMidDistance(int playerDistance, int defaultCutoff) {
         parseString();
-        Integer tempCutoff = (Integer) valueCache.get(Key.spawnRange);
+        Integer tempCutoff = (Integer) valueCache.get(Key.spawnRange.key);
         defaultCutoff = tempCutoff == null ? defaultCutoff : tempCutoff;
         return playerDistance > defaultCutoff * defaultCutoff;
     }
