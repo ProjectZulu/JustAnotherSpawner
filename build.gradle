@@ -27,10 +27,16 @@ repositories {
 		name = 'jeval'
 		url = "https://oss.sonatype.org/content/repositories/central-sync"
 	}
+	
+	maven {
+		name = 'Codehaus Maven Repository'
+		url = "https://dav.codehaus.org/repository/mvel/"
+	}
 }
 
 dependencies {
 	compile 'net.sourceforge.jeval:jeval:0.9.4'
+	compile 'org.mvel:mvel2:2.2.0.Final'
 }
 
 minecraft {
