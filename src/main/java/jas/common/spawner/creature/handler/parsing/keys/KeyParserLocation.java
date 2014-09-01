@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler.parsing.keys;
 import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.util.ArrayList;
@@ -79,5 +80,28 @@ public class KeyParserLocation extends KeyParserBase {
             isValid = !(current < minRange && current > maxRange);
         }
         return isValid;
-    }
+	}
+
+	@Override
+	public String toExpression(String parseable) {
+		ArrayList<TypeValuePair> parsedChainable = new ArrayList<TypeValuePair>();
+		ArrayList<Operand> operandvalue = new ArrayList<OptionalSettings.Operand>();
+		boolean parsedSuccessfully = parseChainable(parseable, parsedChainable, operandvalue);
+		Object[] values = (Object[]) parsedChainable.get(0).getValue();
+
+		int targetX = (Integer) values[1];
+		int targetY = (Integer) values[2];
+		int targetZ = (Integer) values[3];
+
+		int varX = (Integer) values[4];
+		int varY = (Integer) values[5];
+		int varZ = (Integer) values[6];
+
+		StringBuilder expBuilder = new StringBuilder(15);
+		expBuilder.append("lgcy.location(");
+		expBuilder.append("{").append(targetX).append(",").append(targetY).append(",").append(targetZ).append("}");
+		expBuilder.append(",{").append(varX).append(",").append(varY).append(",").append(varZ).append("}");
+		expBuilder.append(")");
+		return expBuilder.toString();
+	}
 }

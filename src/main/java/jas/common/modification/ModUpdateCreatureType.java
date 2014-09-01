@@ -22,7 +22,7 @@ public class ModUpdateCreatureType extends BaseModification {
 		this(typeID, spawnRate, maxNumberOfCreature);
 		builder.withChanceToChunkSpawn(chunkSpawnChance);
 		builder.setRawMedium(spawnMedium);
-		builder.withOptionalParameters(tags);
+		builder.withSpawnExpression(tags);
 	}
 
 	@Override

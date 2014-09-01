@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.Tags;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.StructureHandler;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -211,8 +212,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
         {
             boolean tempSpawning = targetPlayer.preventEntitySpawning;
             targetPlayer.preventEntitySpawning = false;
-            boolean canTypeSpawn = livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY,
-                    (int) entity.posZ);
+			boolean canTypeSpawn = livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY,
+					(int) entity.posZ);
             targetPlayer.preventEntitySpawning = tempSpawning;
 
             if (canTypeSpawn == false) {
@@ -243,12 +244,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
         boolean canSpawn = false;
-        for (int i = 0; i < SIMULATION_TRIALS; i++) {
-            if (livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY, (int) entity.posZ)) {
-                canSpawn = true;
-                break;
-            }
-        }
+		for (int i = 0; i < SIMULATION_TRIALS; i++) {
+			if (livingType.canSpawnAtLocation(entity.worldObj, (int) entity.posX, (int) entity.posY,
+					(int) entity.posZ)) {
+				canSpawn = true;
+				break;
+			}
+		}
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {

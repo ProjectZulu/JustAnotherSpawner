@@ -215,7 +215,9 @@ public class CustomSpawner {
 					}
 
 					// CreatureType
-					if (!creatureType.canSpawnHere(worldServer, countInfo, creatureType, spawningPoint)) {
+					Tags tags = new Tags(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+							spawningPoint.chunkPosZ);
+					if (!creatureType.canSpawnHere(worldServer, countInfo, tags, spawningPoint)) {
 						continue;
 					}
 
@@ -259,7 +261,7 @@ public class CustomSpawner {
 											"JAS is spawning entity %s, irrespective of JAS LH & SLE conditions as part of LivingSpawnEvent compatabillity.",
 											(String) EntityList.classToStringMapping.get(entityliving.getClass()));
 						}
-						
+
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);

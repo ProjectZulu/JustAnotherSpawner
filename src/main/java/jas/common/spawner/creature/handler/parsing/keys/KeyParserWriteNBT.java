@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler.parsing.keys;
 import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.NBTWriter;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.util.ArrayList;
@@ -59,4 +60,24 @@ public class KeyParserWriteNBT extends KeyParserBase {
             return true;
         }
     }
+    
+	@Override
+	public String toExpression(String parseable) {
+		ArrayList<TypeValuePair> parsedChainable = new ArrayList<TypeValuePair>();
+		ArrayList<Operand> operandvalue = new ArrayList<OptionalSettings.Operand>();
+		boolean parsedSuccessfully = parseChainable(parseable, parsedChainable, operandvalue);
+		String nbtOperation = (String) parsedChainable.get(0).getValue();
+
+		String[] nbtOperations = nbtOperation.split(",");
+		StringBuilder expBuilder = new StringBuilder(5 + nbtOperations.length * 3);
+		expBuilder.append("writenbt({");
+		for (int i = 0; i < nbtOperations.length; i++) {
+			if (i != 0) {
+				expBuilder.append(",");
+			}
+			expBuilder.append(nbtOperations[i]);
+		}
+		expBuilder.append("})");
+		return expBuilder.toString();
+	}
 }

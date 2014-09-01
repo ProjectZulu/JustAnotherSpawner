@@ -34,7 +34,7 @@ public class GsonHelper {
         for (int i = 0; i < adapters.length; i++) {
             builder.registerTypeAdapter(types[i], adapters[i]);
         }
-        return builder.create();
+        return builder.disableHtmlEscaping().create();
     }
 
     public static <T> T readOrCreateFromGson(OptionalCloseable<FileReaderPlus> reader, Class<T> object, Gson gson,

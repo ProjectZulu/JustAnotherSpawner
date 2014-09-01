@@ -56,4 +56,18 @@ public class KeyParserRandom extends KeyParserBase {
         boolean isValid = !(world.rand.nextInt(randInt) + randOffset <= maximum);
         return isInverted ? isValid : !isValid;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		String[] pieces = parseable.split(",");
+		Operand operand = parseOperand(pieces);
+		if (pieces.length == 4) {
+			int randInt = ParsingHelper.parseFilteredInteger(pieces[1], 16, "RandomRange " + key.key);
+			int randOffset = ParsingHelper.parseFilteredInteger(pieces[2], 16, "RandomOffset " + key.key);
+			int maximum = ParsingHelper.parseFilteredInteger(pieces[3], -1, "Maximum " + key.key);
+			return new StringBuilder().append("random(").append(randInt).append(",").append(randOffset).append(",")
+					.append(maximum).append(")").toString();
+		}
+		return "";
+	}
 }

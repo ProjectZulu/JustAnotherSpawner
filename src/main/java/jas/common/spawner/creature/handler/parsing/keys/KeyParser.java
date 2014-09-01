@@ -44,4 +44,6 @@ public abstract class KeyParser {
      */
     public abstract boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord,
             int zCoord, TypeValuePair typeValuePair, HashMap<String, Object> valueCache);
+    
+    public abstract String toExpression(String parseable);
 }

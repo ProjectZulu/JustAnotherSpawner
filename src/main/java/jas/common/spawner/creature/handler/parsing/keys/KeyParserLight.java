@@ -18,4 +18,10 @@ public class KeyParserLight extends KeyParserRange {
             HashMap<String, Object> valueCache) {
         return world.getBlockLightValue(xCoord, yCoord, zCoord);
     }
+
+	@Override
+	public String toExpression(int minRange, int maxRange) {
+		return new StringBuilder().append("lgcy.light(").append(minRange).append(",").append(maxRange).append(")")
+				.toString();
+	}
 }

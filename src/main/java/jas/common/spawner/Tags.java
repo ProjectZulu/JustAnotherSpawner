@@ -1,7 +1,5 @@
 package jas.common.spawner;
 
-import java.util.IllegalFormatException;
-
 import jas.api.ITameable;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
@@ -9,6 +7,9 @@ import jas.common.spawner.TagsUtility.Conditional;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.handler.parsing.NBTWriter;
+
+import java.util.IllegalFormatException;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityTameable;
@@ -47,12 +48,20 @@ public class Tags {
 		entity = Optional.absent();
 	}
 
-	public boolean sky() {
-		return wrld.skyVisibleAt(posX, posY, posZ);
+	public Tags(World world, int posX, int posY, int posZ, EntityLiving entity) {
+		this.world = world;
+		this.posX = posX;
+		this.posY = posY;
+		this.posZ = posZ;
+		obj = new TagsObjective(world, this);
+		lgcy = new LegacyTags(world, this);
+		util = new TagsUtility(world, this);
+		wrld = new WorldAccessor(world);
+		this.entity = Optional.of(entity);
 	}
 
-	public String block(Integer offsetX, Integer offsetY, Integer offsetZ) {
-		return Block.blockRegistry.getNameForObject(wrld.blockAt(offsetX, offsetY, offsetZ));
+	public boolean sky() {
+		return wrld.skyVisibleAt(posX, posY, posZ);
 	}
 
 	public boolean block(String[] blockKeys, Integer[] searchRange, Integer[] searchOffsets) {
@@ -183,7 +192,7 @@ public class Tags {
 	}
 
 	/* True if [0, range - 1] + offset <= maxValue */
-	public boolean rand(int range, int offset, int maxValue) {
+	public boolean random(int range, int offset, int maxValue) {
 		return util.rand(range) + offset <= maxValue;
 	}
 
@@ -271,7 +280,7 @@ public class Tags {
 	}
 
 	/**
-	 * @formatter:off writenbt("writenbt", KeyParserWriteNBT.class)
+	 * @formatter:off BlockRange DespawnAge EntityCap MaxSpawnRange SpawnRange SpawnRate
 	 * @formatter:on
 	 */
 

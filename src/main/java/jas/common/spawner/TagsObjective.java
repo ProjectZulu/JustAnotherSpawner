@@ -26,6 +26,10 @@ public class TagsObjective {
 		this.world = world;
 	}
 
+	public String block(Integer offsetX, Integer offsetY, Integer offsetZ) {
+		return Block.blockRegistry.getNameForObject(parent.wrld.blockAt(offsetX, offsetY, offsetZ));
+	}
+
 	public int light() {
 		return parent.wrld.lightAt(parent.posX, parent.posY, parent.posZ);
 	}

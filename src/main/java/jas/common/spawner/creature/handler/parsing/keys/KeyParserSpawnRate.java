@@ -34,4 +34,9 @@ public class KeyParserSpawnRate extends KeyParserBase {
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         throw new UnsupportedOperationException();
     }
+
+	@Override
+	public String toExpression(String parseable) {
+        throw new UnsupportedOperationException();
+	}
 }

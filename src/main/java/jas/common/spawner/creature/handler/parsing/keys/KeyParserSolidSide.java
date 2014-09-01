@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler.parsing.keys;
 import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.util.ArrayList;
@@ -111,4 +112,35 @@ public class KeyParserSolidSide extends KeyParserBase {
         }
         return true;
     }
+    
+	@Override
+	public String toExpression(String parseable) {
+		ArrayList<TypeValuePair> parsedChainable = new ArrayList<TypeValuePair>();
+		ArrayList<Operand> operandvalue = new ArrayList<OptionalSettings.Operand>();
+		boolean parsedSuccessfully = parseChainable(parseable, parsedChainable, operandvalue);
+		Object[] values = (Object[]) parsedChainable.get(0).getValue();
+
+        int side = (Integer) values[1];
+        if (values.length == 5 || values.length == 8) {
+            int rangeX = (Integer) values[2];
+            int rangeY = (Integer) values[3];
+            int rangeZ = (Integer) values[4];
+            int offsetX, offsetY, offsetZ;
+            offsetX = offsetY = offsetZ = 0;
+            if (values.length == 8) {
+                offsetX = (Integer) values[5];
+                offsetY = (Integer) values[6];
+                offsetZ = (Integer) values[7];
+            }
+
+			StringBuilder expBuilder = new StringBuilder(15);
+			expBuilder.append("solidside(").append(side);
+			expBuilder.append(",{").append(rangeX).append(",").append(rangeY).append(",").append(rangeZ).append("}");
+			expBuilder.append(",{").append(offsetX).append(",").append(offsetY).append(",").append(offsetZ).append("}");
+			expBuilder.append(")");
+			return expBuilder.toString();
+
+		}
+		return "";
+	}
 }

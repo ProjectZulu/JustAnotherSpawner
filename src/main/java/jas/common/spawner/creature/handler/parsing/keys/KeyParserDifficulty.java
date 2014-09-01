@@ -62,4 +62,15 @@ public class KeyParserDifficulty extends KeyParserBase {
         }
         return true;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		String[] pieces = parseable.split(",");
+		int difficulty = ParsingHelper.parseFilteredInteger(pieces[1], 0, key.key);
+		if (difficulty < 0 || difficulty > 3) {
+			difficulty = 2;
+			JASLog.log().info("Difficulty must be between 0 (Peaceful) and 3 (Hard) setting tag to 2 (Normal)");
+		}
+		return new StringBuilder().append("lgcy.difficulty(").append(difficulty).append(")").toString();
+	}
 }
