@@ -25,7 +25,6 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, dependencies = "after:*", useMetadata = true)
 public class JustAnotherSpawner {
@@ -64,7 +63,7 @@ public class JustAnotherSpawner {
     }
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event) {    	
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         Gson gson = GsonHelper.createGson(true);
 
@@ -79,6 +78,10 @@ public class JustAnotherSpawner {
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 
         MinecraftForge.EVENT_BUS.register(this);
+        
+//    	TagsObject tags = new TagsObject();
+//		Serializable expression = MVEL.compileExpression("sky()==false");
+//		Boolean restult = (Boolean) MVEL.executeExpression(expression, tags);
     }
 
     @EventHandler

@@ -47,26 +47,26 @@ public class KeyParserLocation extends KeyParserBase {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
-            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
-        Object[] values = (Object[]) typeValuePair.getValue();
-        boolean isInverted = (Boolean) values[0];
-        int targetX = (Integer) values[1];
-        int targetY = (Integer) values[2];
-        int targetZ = (Integer) values[3];
+	@Override
+	public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+			TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
+		Object[] values = (Object[]) typeValuePair.getValue();
+		boolean isInverted = (Boolean) values[0];
+		int targetX = (Integer) values[1];
+		int targetY = (Integer) values[2];
+		int targetZ = (Integer) values[3];
 
-        int varX = (Integer) values[4];
-        int varY = (Integer) values[5];
-        int varZ = (Integer) values[6];
+		int varX = (Integer) values[4];
+		int varY = (Integer) values[5];
+		int varZ = (Integer) values[6];
 
-        boolean isValid = false;
-        if (isWithinTargetRange(xCoord, targetX, varX) && isWithinTargetRange(yCoord, targetY, varY)
-                && isWithinTargetRange(zCoord, targetZ, varZ)) {
-            isValid = true;
-        }
-        return isInverted ? isValid : !isValid;
-    }
+		boolean isValid = false;
+		if (isWithinTargetRange(xCoord, targetX, varX) && isWithinTargetRange(yCoord, targetY, varY)
+				&& isWithinTargetRange(zCoord, targetZ, varZ)) {
+			isValid = true;
+		}
+		return isInverted ? isValid : !isValid;
+	}
 
     private boolean isWithinTargetRange(int current, int target, int targetVariance) {
         int maxRange = target + targetVariance;

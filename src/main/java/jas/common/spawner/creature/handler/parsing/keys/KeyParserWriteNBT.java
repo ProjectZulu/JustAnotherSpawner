@@ -48,7 +48,7 @@ public class KeyParserWriteNBT extends KeyParserBase {
         try {
             NBTTagCompound entityNBT = new NBTTagCompound();
             entity.writeToNBT(entityNBT);
-            new NBTWriter(nbtOperation).writeToNBT(entityNBT);
+            new NBTWriter(nbtOperation.split(",")).writeToNBT(entityNBT);
             entity.readFromNBT(entityNBT);
             return false;
         } catch (IllegalFormatException e) {
