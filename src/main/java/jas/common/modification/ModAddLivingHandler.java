@@ -18,8 +18,7 @@ public class ModAddLivingHandler extends BaseModification {
 	}
 
 	public ModAddLivingHandler(String handlerID, String creatureTypeID, boolean shouldSpawn, String optionalParameters) {
-		builder = new LivingHandlerBuilder(handlerID, creatureTypeID).setShouldSpawn(shouldSpawn)
-				.setOptionalParameters(optionalParameters);
+		builder = new LivingHandlerBuilder(handlerID, creatureTypeID).setShouldSpawn(shouldSpawn);
 	}
 
 	@Override

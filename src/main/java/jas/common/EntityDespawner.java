@@ -23,7 +23,7 @@ public class EntityDespawner {
                     .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
             for (LivingHandler livingHandler : livingHandlers) {
                 if (livingHandler != null && livingHandler.getDespawning() != null
-                        && livingHandler.getDespawning().isOptionalEnabled()) {
+                        && livingHandler.getDespawning().isPresent()) {
                     livingHandler.despawnEntity((EntityLiving) event.entityLiving);
                 }
             }

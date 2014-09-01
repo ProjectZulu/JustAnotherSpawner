@@ -2,6 +2,12 @@ package jas.common.spawner.creature.handler;
 
 import jas.common.GsonHelper;
 import jas.common.JASLog;
+import jas.common.spawner.TagConverter;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -51,9 +57,20 @@ public class LivingHandlerSaveObject {
 		public final String HANDLERS_KEY = "LIVING_HANDLERS";
 		public final String STATS_KEY = "Type-Enabled";
 		public final String TAGS_KEY = "Tags";
+		public final String SPAWN_TAG_KEY = "Spawn Tag";
+		public final String DESPAWN_KEY = "Despawn Tags";
+		public final String POSTSPAWN_KEY = "PostSpawn Tags";
+
+		public final String MIN_DESPAWN_RANGE_KEY = "Min Despawn Range";
+		public final String MAX_DESPAWN_RANGE_KEY = "Max Despawn Range";
+		public final String ENTITY_CAP_KEY = "Entity Cap";
+		public final String DESPAWN_AGE_KEY = "Despawn Age";
+		public final String DESPAWN_RATE_KEY = "Despawn Rate";
+		public final String SPAWN_OPERAND_KEY = "Spawn Operand";
+
 		public final String CONTENTS_KEY = "Contents";
 		private String currentVersion;
-		
+
 		@Override
 		public JsonElement serialize(LivingHandlerSaveObject src, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
@@ -70,8 +87,40 @@ public class LivingHandlerSaveObject {
 				}
 				handler.add(CONTENTS_KEY, contents);
 
-				if (!"".equals(builder.getOptionalParameters())) {
-					handler.addProperty(TAGS_KEY, builder.getOptionalParameters());
+				if (builder.getSpawnOperand().isPresent()) {
+					handler.addProperty(SPAWN_OPERAND_KEY, builder.getSpawnOperand().get().toString());
+				}
+
+				if (!"".equals(builder.getSpawnExpression())) {
+					handler.addProperty(SPAWN_TAG_KEY, builder.getSpawnExpression());
+				}
+
+				if (!"".equals(builder.getDespawnExpression())) {
+					handler.addProperty(DESPAWN_KEY, builder.getDespawnExpression());
+				}
+
+				if (!"".equals(builder.getPostSpawnExpression())) {
+					handler.addProperty(POSTSPAWN_KEY, builder.getPostSpawnExpression());
+				}
+
+				if (builder.getMinDespawnRange().isPresent()) {
+					handler.addProperty(MIN_DESPAWN_RANGE_KEY, builder.getMinDespawnRange().get());
+				}
+
+				if (builder.getMaxDespawnRange().isPresent()) {
+					handler.addProperty(MAX_DESPAWN_RANGE_KEY, builder.getMaxDespawnRange().get());
+				}
+
+				if (builder.getEntityCap().isPresent()) {
+					handler.addProperty(ENTITY_CAP_KEY, builder.getEntityCap().get());
+				}
+
+				if (builder.getDespawnAge().isPresent()) {
+					handler.addProperty(DESPAWN_AGE_KEY, builder.getDespawnAge().get());
+				}
+
+				if (builder.getDespawnRate().isPresent()) {
+					handler.addProperty(DESPAWN_RATE_KEY, builder.getDespawnRate().get());
 				}
 				livingHandlers.add(builder.getHandlerId(), handler);
 			}
@@ -106,12 +155,71 @@ public class LivingHandlerSaveObject {
 						stats);
 				stats = "NONE-true";
 			}
-
-			String tags = GsonHelper.getMemberOrDefault(handler, TAGS_KEY, "");
 			String creatureTypeId = stats.split("-")[0];
 			boolean shouldSpawn = Boolean.parseBoolean(stats.split("-")[1].trim());
-			LivingHandlerBuilder builder = new LivingHandlerBuilder(handlerId, creatureTypeId).setShouldSpawn(
-					shouldSpawn).setOptionalParameters(tags);
+			LivingHandlerBuilder builder = new LivingHandlerBuilder(handlerId, creatureTypeId)
+					.setShouldSpawn(shouldSpawn);
+			if (currentVersion.equals("1.0")) {
+				String optionalParameters = GsonHelper.getMemberOrDefault(handler, TAGS_KEY, "");
+				for (String string : optionalParameters.split("\\{")) {
+					String parsed = string.replace("}", "");
+					String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+					TagConverter conv = null;
+					if (Key.spawn.keyParser.isMatch(titletag)) {
+						conv = new TagConverter(parsed.substring(Key.spawn.key.length() + 1));
+						if (!conv.expression.trim().equals("")) {
+							builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
+						}
+					} else if (Key.despawn.keyParser.isMatch(titletag)) {
+						conv = new TagConverter(parsed.substring(Key.despawn.key.length() + 1));
+						if (!conv.expression.trim().equals("")) {
+							builder.setDespawnExpression(conv.expression);
+						}
+					} else if (Key.postspawn.keyParser.isMatch(titletag)) {
+						conv = new TagConverter(parsed.substring(Key.postspawn.key.length() + 1));
+						if (!conv.expression.trim().equals("")) {
+							builder.setPostSpawnExpression(conv.expression);
+						}
+					}
+					if (conv != null) {
+						if (conv.despawnAge.isPresent()) {
+							builder.setDespawnAge(conv.despawnAge.get());
+						}
+						if (conv.entityCap.isPresent()) {
+							builder.setEntityCap(conv.entityCap.get());
+						}
+						if (conv.maxSpawnRange.isPresent()) {
+							builder.setMaxDespawnRange(conv.maxSpawnRange.get());
+						}
+						if (conv.minDespawnRage.isPresent()) {
+							builder.setMinDespawnRange(conv.minDespawnRage.get());
+						}
+						if (conv.despawnRate.isPresent()) {
+							builder.setDespawnRate(conv.despawnRate.get());
+						}
+					}
+				}
+			} else {
+				String spawnTag = GsonHelper.getMemberOrDefault(handler, SPAWN_TAG_KEY, "");
+				String spawnOperand = GsonHelper.getMemberOrDefault(handler, SPAWN_OPERAND_KEY, "");
+				builder.setSpawnExpression(spawnTag,
+						Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
+				String despawnTag = GsonHelper.getMemberOrDefault(handler, DESPAWN_KEY, "");
+				builder.setDespawnExpression(spawnTag);
+				String postspawnTag = GsonHelper.getMemberOrDefault(handler, POSTSPAWN_KEY, "");
+				builder.setDespawnExpression(postspawnTag);
+
+				int minDespawnRange = GsonHelper.getMemberOrDefault(handler, MIN_DESPAWN_RANGE_KEY, -1);
+				builder.setMinDespawnRange(minDespawnRange);
+				int maxDespawnRange = GsonHelper.getMemberOrDefault(handler, MAX_DESPAWN_RANGE_KEY, -1);
+				builder.setMaxDespawnRange(maxDespawnRange);
+				int entityCap = GsonHelper.getMemberOrDefault(handler, ENTITY_CAP_KEY, -1);
+				builder.setEntityCap(entityCap);
+				int despawnAge = GsonHelper.getMemberOrDefault(handler, DESPAWN_AGE_KEY, -1);
+				builder.setEntityCap(despawnAge);
+				int despawnRate = GsonHelper.getMemberOrDefault(handler, DESPAWN_RATE_KEY, -1);
+				builder.setEntityCap(despawnRate);
+			}
 			JsonArray contents = GsonHelper.getMemberOrDefault(handler, CONTENTS_KEY, getDefaultArray(handlerId));
 			for (JsonElement jsonElement : contents) {
 				String content = GsonHelper.getAsOrDefault(jsonElement, "");

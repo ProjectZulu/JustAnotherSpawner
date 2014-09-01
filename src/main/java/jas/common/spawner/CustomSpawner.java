@@ -215,9 +215,7 @@ public class CustomSpawner {
 					}
 
 					// CreatureType
-					Tags tags = new Tags(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
-							spawningPoint.chunkPosZ);
-					if (!creatureType.canSpawnHere(worldServer, countInfo, tags, spawningPoint)) {
+					if (!creatureType.canSpawnHere(worldServer, countInfo, spawningPoint)) {
 						continue;
 					}
 

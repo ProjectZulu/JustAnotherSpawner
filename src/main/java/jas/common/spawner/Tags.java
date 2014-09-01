@@ -167,7 +167,7 @@ public class Tags {
 				this.side = side;
 				return this;
 			}
-
+			
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
 				return wrld.blockAt(xCoord, yCoord, zCoord).isSideSolid(world, xCoord, yCoord, zCoord,

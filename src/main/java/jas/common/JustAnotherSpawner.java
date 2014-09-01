@@ -13,6 +13,8 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
+import org.mvel2.optimizers.OptimizerFactory;
+
 import com.google.gson.Gson;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -78,7 +80,7 @@ public class JustAnotherSpawner {
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 
         MinecraftForge.EVENT_BUS.register(this);
-        
+        OptimizerFactory.setDefaultOptimizer("reflective");
 //    	TagsObject tags = new TagsObject();
 //		Serializable expression = MVEL.compileExpression("sky()==false");
 //		Boolean restult = (Boolean) MVEL.executeExpression(expression, tags);

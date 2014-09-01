@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.gson.annotations.SerializedName;
 
@@ -14,13 +15,24 @@ import jas.common.JASLog;
 import jas.common.math.SetAlgebra;
 import jas.common.math.SetAlgebra.OPERATION;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 public class LivingHandlerBuilder {
 	private String handlerId;
 	private String creatureTypeId;
 	private boolean shouldSpawn;
-	private String optionalParameters;
+	private String spawnExpression;
+	private String despawnExpression;
+	private String postspawnExpression;
+	private Optional<Integer> maxDespawnRange;
+	private Optional<Integer> entityCap;
+	private Optional<Integer> minDespawnRange;
+	private Optional<Integer> despawnAge;
+	private Optional<Integer> despawnRate;
+
+	private Optional<Operand> spawnOperand;
+
 	public List<String> contents; // Raw Input, builds namedJASSpawnables, i.e Bat,A|Beast,-Boar
 	private transient Set<String> namedJASSpawnables; // Resulting list of entities that this LH should be able to spawn
 
@@ -40,18 +52,34 @@ public class LivingHandlerBuilder {
 		setHandlerId(handlerID);
 		setCreatureTypeId(creatureTypeId);
 		setShouldSpawn(true);
-		setOptionalParameters("");
+		setSpawnExpression("", Optional.<Operand> absent());
+		setDespawnExpression("");
+		setPostSpawnExpression("");
 		contents = new ArrayList<String>(5);
 		namedJASSpawnables = new HashSet<String>();
+		this.maxDespawnRange = Optional.absent();
+		this.entityCap = Optional.absent();
+		this.minDespawnRange = Optional.absent();
+		this.despawnAge = Optional.absent();
+		this.despawnRate = Optional.absent();
+		this.spawnOperand = Optional.absent();
 	}
 
 	public LivingHandlerBuilder(LivingHandler handler) {
 		this.handlerId = handler.livingID;
 		this.creatureTypeId = handler.creatureTypeID;
 		this.shouldSpawn = handler.shouldSpawn;
-		this.optionalParameters = handler.optionalParameters;
+		this.spawnExpression = handler.spawnExpression;
+		this.despawnExpression = handler.despawnExpression;
+		this.postspawnExpression = handler.postspawnExpression;
 		this.contents = new ArrayList<String>(handler.contents);
 		this.namedJASSpawnables = new HashSet<String>(handler.namedJASSpawnables);
+		this.maxDespawnRange = handler.maxDespawnRange;
+		this.entityCap = handler.entityCap;
+		this.minDespawnRange = handler.minDespawnDistance;
+		this.despawnAge = handler.despawnAge;
+		this.despawnRate = handler.despawnRate;
+		this.spawnOperand = handler.spawnOperand;
 	}
 
 	public LivingHandlerBuilder setHandlerId(String handlerId) {
@@ -84,16 +112,48 @@ public class LivingHandlerBuilder {
 		return shouldSpawn;
 	}
 
-	public LivingHandlerBuilder setOptionalParameters(String optionalParameters) {
+	public LivingHandlerBuilder setSpawnExpression(String optionalParameters, Optional<Operand> spawnOperand) {
 		if (optionalParameters == null) {
 			optionalParameters = "";
 		}
-		this.optionalParameters = optionalParameters;
+		if (!spawnOperand.isPresent()) {
+			spawnOperand = Optional.of(Operand.OR);
+		}
+		this.spawnExpression = optionalParameters;
+		this.spawnOperand = spawnOperand;
 		return this;
 	}
 
-	public String getOptionalParameters() {
-		return optionalParameters;
+	public String getSpawnExpression() {
+		return spawnExpression;
+	}
+
+	public Optional<Operand> getSpawnOperand() {
+		return spawnOperand;
+	}
+
+	public LivingHandlerBuilder setDespawnExpression(String optionalParameters) {
+		if (optionalParameters == null) {
+			optionalParameters = "";
+		}
+		this.despawnExpression = optionalParameters;
+		return this;
+	}
+
+	public String getDespawnExpression() {
+		return despawnExpression;
+	}
+
+	public LivingHandlerBuilder setPostSpawnExpression(String optionalParameters) {
+		if (optionalParameters == null) {
+			optionalParameters = "";
+		}
+		this.postspawnExpression = optionalParameters;
+		return this;
+	}
+
+	public String getPostSpawnExpression() {
+		return postspawnExpression;
 	}
 
 	public LivingHandler build(CreatureTypeRegistry creatureTypeRegistry, LivingGroupRegistry livingGroupRegistry) {
@@ -109,6 +169,51 @@ public class LivingHandlerBuilder {
 
 	public void parseContensForSpawnableList() {
 		// namedJASSpawnables
+	}
+
+	public LivingHandlerBuilder setMaxDespawnRange(int maxDespawnRange) {
+		this.maxDespawnRange = maxDespawnRange < 0 ? Optional.<Integer> absent() : Optional.of(maxDespawnRange);
+		return this;
+	}
+
+	public Optional<Integer> getMaxDespawnRange() {
+		return maxDespawnRange;
+	}
+
+	public LivingHandlerBuilder setMinDespawnRange(int minDespawnRange) {
+		this.minDespawnRange = minDespawnRange < 0 ? Optional.<Integer> absent() : Optional.of(minDespawnRange);
+		return this;
+	}
+
+	public Optional<Integer> getMinDespawnRange() {
+		return minDespawnRange;
+	}
+
+	public LivingHandlerBuilder setEntityCap(int entityCap) {
+		this.entityCap = entityCap < 0 ? Optional.<Integer> absent() : Optional.of(entityCap);
+		return this;
+	}
+
+	public Optional<Integer> getEntityCap() {
+		return entityCap;
+	}
+
+	public LivingHandlerBuilder setDespawnAge(int despawnAge) {
+		this.despawnAge = despawnAge < 0 ? Optional.<Integer> absent() : Optional.of(despawnAge);
+		return this;
+	}
+
+	public Optional<Integer> getDespawnAge() {
+		return despawnAge;
+	}
+
+	public LivingHandlerBuilder setDespawnRate(int despawnRate) {
+		this.despawnRate = despawnRate < 0 ? Optional.<Integer> absent() : Optional.of(despawnRate);
+		return this;
+	}
+
+	public Optional<Integer> getDespawnRate() {
+		return despawnRate;
 	}
 
 	/**
