@@ -235,6 +235,6 @@ public class CreatureType {
 				spawningPoint.chunkPosZ)) {
 			return false;
 		}
-		return false;
+		return true;
 	}
 }
