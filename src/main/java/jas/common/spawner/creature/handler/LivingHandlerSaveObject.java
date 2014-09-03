@@ -81,12 +81,6 @@ public class LivingHandlerSaveObject {
 				handler.addProperty(STATS_KEY,
 						builder.getCreatureTypeId().concat("-").concat(Boolean.toString(builder.getShouldSpawn())));
 
-				JsonArray contents = new JsonArray();
-				for (String content : builder.contents) {
-					contents.add(new JsonPrimitive(content));
-				}
-				handler.add(CONTENTS_KEY, contents);
-
 				if (builder.getSpawnOperand().isPresent()) {
 					handler.addProperty(SPAWN_OPERAND_KEY, builder.getSpawnOperand().get().toString());
 				}
@@ -122,6 +116,13 @@ public class LivingHandlerSaveObject {
 				if (builder.getDespawnRate().isPresent()) {
 					handler.addProperty(DESPAWN_RATE_KEY, builder.getDespawnRate().get());
 				}
+				
+				JsonArray contents = new JsonArray();
+				for (String content : builder.contents) {
+					contents.add(new JsonPrimitive(content));
+				}
+				handler.add(CONTENTS_KEY, contents);
+				
 				livingHandlers.add(builder.getHandlerId(), handler);
 			}
 			endObject.add(HANDLERS_KEY, livingHandlers);
@@ -160,23 +161,24 @@ public class LivingHandlerSaveObject {
 			LivingHandlerBuilder builder = new LivingHandlerBuilder(handlerId, creatureTypeId)
 					.setShouldSpawn(shouldSpawn);
 			if (currentVersion.equals("1.0")) {
-				String optionalParameters = GsonHelper.getMemberOrDefault(handler, TAGS_KEY, "");
+				final String optionalParameters = GsonHelper.getMemberOrDefault(handler, TAGS_KEY, "");
+				String[] parts = optionalParameters.split("\\{");
 				for (String string : optionalParameters.split("\\{")) {
 					String parsed = string.replace("}", "");
 					String titletag = parsed.split("\\:", 2)[0].toLowerCase();
 					TagConverter conv = null;
 					if (Key.spawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed.substring(Key.spawn.key.length() + 1));
+						conv = new TagConverter(parsed);
 						if (!conv.expression.trim().equals("")) {
 							builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
 						}
 					} else if (Key.despawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed.substring(Key.despawn.key.length() + 1));
+						conv = new TagConverter(parsed);
 						if (!conv.expression.trim().equals("")) {
 							builder.setDespawnExpression(conv.expression);
 						}
 					} else if (Key.postspawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed.substring(Key.postspawn.key.length() + 1));
+						conv = new TagConverter(parsed);
 						if (!conv.expression.trim().equals("")) {
 							builder.setPostSpawnExpression(conv.expression);
 						}

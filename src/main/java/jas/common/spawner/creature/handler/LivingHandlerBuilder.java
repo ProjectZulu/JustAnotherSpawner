@@ -113,14 +113,16 @@ public class LivingHandlerBuilder {
 	}
 
 	public LivingHandlerBuilder setSpawnExpression(String optionalParameters, Optional<Operand> spawnOperand) {
-		if (optionalParameters == null) {
-			optionalParameters = "";
+		if (optionalParameters == null || optionalParameters.trim().equals("")) {
+			this.spawnExpression = "";
+			this.spawnOperand = Optional.absent();
+		} else {
+			if (!spawnOperand.isPresent()) {
+				spawnOperand = Optional.of(Operand.OR);
+			}
+			this.spawnExpression = optionalParameters;
+			this.spawnOperand = spawnOperand;
 		}
-		if (!spawnOperand.isPresent()) {
-			spawnOperand = Optional.of(Operand.OR);
-		}
-		this.spawnExpression = optionalParameters;
-		this.spawnOperand = spawnOperand;
 		return this;
 	}
 

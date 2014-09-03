@@ -69,10 +69,6 @@ public class LivingHandler {
 		this.despawnAge = builder.getDespawnAge();
 		this.despawnRate = builder.getDespawnRate();
 		this.spawnOperand = builder.getSpawnOperand();
-//		this.compSpawnExpression = Optional.<Serializable> absent();
-//		this.compDespawnExpression = Optional.<Serializable> absent();
-//		this.compPostSpawnExpression = Optional.<Serializable> absent();
-
 		this.compSpawnExpression = !spawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
 		this.compDespawnExpression = !despawnExpression.trim().equals("") ? Optional.of(MVEL
