@@ -197,6 +197,9 @@ public class CustomSpawner {
 				}
 				Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
 						spawnlistentry.livingGroupID, worldServer.rand);
+				if (livingToSpawn == null) {
+					continue;
+				}
 				LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
 
 				for (int numEntAttempts = 0; numEntAttempts < 4; ++numEntAttempts) {
