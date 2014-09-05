@@ -5,10 +5,15 @@ import jas.common.command.CommandJAS;
 import jas.common.proxy.CommonProxy;
 import jas.common.spawner.ChunkSpawner;
 import jas.common.spawner.SpawnerTicker;
+import jas.common.spawner.biome.structure.StructureInterpreterHelper;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
 import net.minecraft.world.GameRules;
+import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
@@ -25,7 +30,6 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.relauncher.Side;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, dependencies = "after:*", useMetadata = true)
 public class JustAnotherSpawner {
@@ -95,7 +99,31 @@ public class JustAnotherSpawner {
     public void serverStart(FMLServerStartingEvent event) {
         worldSettings = new WorldSettings(modConfigDirectoryFile, event.getServer().worldServers[0], importedSpawnList);
         event.registerServerCommand(new CommandJAS());
-    }
+		if (globalSettings.emptyVanillaSpawnLists) {
+			JASLog.log().info("Removing Netherbridge spawnlist");
+			ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(
+					event.getServer().worldServers[1], ChunkProviderHell.class);
+			if (chunkProviderHell != null) {
+				List<?> netherSpawnList;
+				MapGenNetherBridge genNetherBridge;
+				try {
+					genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c",
+							chunkProviderHell, MapGenNetherBridge.class);
+					netherSpawnList = ReflectionHelper.getCatchableFieldFromReflection("field_75060_e",
+							genNetherBridge, List.class);
+				} catch (NoSuchFieldException e) {
+					genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
+							MapGenNetherBridge.class);
+					netherSpawnList = ReflectionHelper.getFieldFromReflection("spawnList", genNetherBridge, List.class);
+				}
+				Iterator<?> spawnIterator = netherSpawnList.iterator();
+				while (spawnIterator.hasNext()) {
+					Object spawn = spawnIterator.next();
+					spawnIterator.remove();
+				}
+			}
+		}
+	}
 
     @SubscribeEvent
     public void worldLoad(WorldEvent.Load event) {
