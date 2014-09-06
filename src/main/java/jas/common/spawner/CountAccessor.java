@@ -34,7 +34,7 @@ public class CountAccessor {
 		return info.getLocalEntityTypeCount(blockPosToChunkPos(), entityType);
 	}
 
-	public int getLocalEntityClassCount(ChunkCoordIntPair location, String entityJasName) {
+	public int getLocalEntityClassCount(String entityJasName) {
 		ImmutableBiMap<String, Class<? extends EntityLiving>> mapping = JustAnotherSpawner.worldSettings()
 				.livingGroupRegistry().JASNametoEntityClass;
 		Class<?> entityClass = mapping.get(entityJasName);
@@ -48,7 +48,7 @@ public class CountAccessor {
 		return info.getGlobalEntityTypeCount(entityType);
 	}
 
-	public int getGlobalEntityClassCount(ChunkCoordIntPair location, String entityJasName) {
+	public int getGlobalEntityClassCount(String entityJasName) {
 		ImmutableBiMap<String, Class<? extends EntityLiving>> mapping = JustAnotherSpawner.worldSettings()
 				.livingGroupRegistry().JASNametoEntityClass;
 		Class<?> entityClass = mapping.get(entityJasName);
