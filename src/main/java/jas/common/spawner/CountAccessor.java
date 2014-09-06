@@ -59,6 +59,10 @@ public class CountAccessor {
 		return info.getEntitiesSpawnedThisLoop();
 	}
 
+	public int entitiesSpawnedThisPack() {
+		return info.getEntityPackCount();
+	}
+
 	public int clodCount(String entityType) {
 		if (JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureType(entityType) == null) {
 			JASLog.log().severe("CreatureType %s does not exist. clodCount will return 0.", entityType);

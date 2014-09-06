@@ -210,6 +210,7 @@ public class CustomSpawner {
 					continue;
 				}
 				LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
+				countInfo.resetEntitiesPackCount();
 				for (int numEntAttempts = 0; numEntAttempts < 4; ++numEntAttempts) {
 					// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
 					final int horVar = 6;
