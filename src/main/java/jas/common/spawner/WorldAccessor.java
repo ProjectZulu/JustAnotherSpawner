@@ -26,6 +26,10 @@ public class WorldAccessor {
 		return world.getSavedLightValue(EnumSkyBlock.Block, coordX, coordY, coordZ);
 	}
 
+	public String blockNameAt(Integer offsetX, Integer offsetY, Integer offsetZ) {
+		return Block.blockRegistry.getNameForObject(blockAt(offsetX, offsetY, offsetZ));
+	}
+	
 	public Block blockAt(int coordX, int coordY, int coordZ) {
 		return world.getBlock(coordX, coordY, coordZ);
 	}
@@ -55,7 +59,7 @@ public class WorldAccessor {
 	}
 
 	public int originDis(int coordX, int coordY, int coordZ) {
-		return (int) Math.sqrt(world.getSpawnPoint().getDistanceSquared(coordX, coordY, coordZ));
+		return (int) Math.sqrt(originPos().getDistanceSquared(coordX, coordY, coordZ));
 	}
 
 	public int dimension() {

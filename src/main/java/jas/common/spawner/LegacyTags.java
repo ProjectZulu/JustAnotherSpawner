@@ -45,14 +45,14 @@ public class LegacyTags {
 		return parent.wrld.dimension() == dimension;
 	}
 
-	public boolean location(int[] target, int[] variane) {
-		return parent.util.inRange(parent.posX, target[0] - variane[0], target[0] + variane[0])
-				&& parent.util.inRange(parent.posY, target[1] - variane[1], target[1] + variane[1])
-				&& parent.util.inRange(parent.posZ, target[2] - variane[2], target[2] + variane[2]);
+	public boolean location(int[] offset, int[] range) {
+		return parent.util.inRange(parent.posX, offset[0] - range[0], offset[0] + range[0])
+				&& parent.util.inRange(parent.posY, offset[1] - range[1], offset[1] + range[1])
+				&& parent.util.inRange(parent.posZ, offset[2] - range[2], offset[2] + range[2]);
 	}
 
 	public boolean players(int[] searchRange, int[] minMaxBounds) {
-		return parent.util.inRange(parent.obj.playersInRange(world, searchRange[0], searchRange[1]), minMaxBounds[0],
+		return parent.util.inRange(parent.obj.playersInRange(searchRange[0], searchRange[1]), minMaxBounds[0],
 				minMaxBounds[1]);
 	}
 
