@@ -141,8 +141,7 @@ public class CreatureType {
 	 * @param zCoord
 	 * @return
 	 */
-	public boolean canSpawnAtLocation(World world, int xCoord, int yCoord, int zCoord) {
-		Tags tags = new Tags(world, xCoord, yCoord, zCoord);
+	public boolean canSpawnAtLocation(World world, Tags tags, int xCoord, int yCoord, int zCoord) {
 		if (compSpawnExpression.isPresent()) {
 			return !(Boolean) MVEL.executeExpression(compSpawnExpression.get(), tags);
 		} else {
@@ -209,7 +208,8 @@ public class CreatureType {
 
 	public boolean canSpawnHere(World worldServer, CountInfo countInfo, ChunkPosition spawningPoint) {
 		final int entityTypeCap = this.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
-
+		Tags tags = new Tags(worldServer, countInfo, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+				spawningPoint.chunkPosZ);
 		// Max of Type
 		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(this.typeID);
 		if (globalEntityTypeCount > entityTypeCap) {
@@ -231,7 +231,7 @@ public class CreatureType {
 		}
 
 		// {spawn} Tag
-		if (!this.canSpawnAtLocation(worldServer, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+		if (!this.canSpawnAtLocation(worldServer, tags, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
 				spawningPoint.chunkPosZ)) {
 			return false;
 		}

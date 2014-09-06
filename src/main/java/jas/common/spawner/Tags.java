@@ -35,8 +35,9 @@ public class Tags {
 	public final LegacyTags lgcy;
 	public final TagsUtility util;
 	public final WorldAccessor wrld;
-
-	public Tags(World world, int posX, int posY, int posZ) {
+	public final CountAccessor count;
+	
+	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ) {
 		this.world = world;
 		this.posX = posX;
 		this.posY = posY;
@@ -45,10 +46,11 @@ public class Tags {
 		lgcy = new LegacyTags(world, this);
 		util = new TagsUtility(world, this);
 		wrld = new WorldAccessor(world);
+		count = new CountAccessor(countInfo, this);
 		entity = Optional.absent();
 	}
 
-	public Tags(World world, int posX, int posY, int posZ, EntityLiving entity) {
+	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ, EntityLiving entity) {
 		this.world = world;
 		this.posX = posX;
 		this.posY = posY;
@@ -57,6 +59,7 @@ public class Tags {
 		lgcy = new LegacyTags(world, this);
 		util = new TagsUtility(world, this);
 		wrld = new WorldAccessor(world);
+		count = new CountAccessor(countInfo, this);
 		this.entity = Optional.of(entity);
 	}
 
@@ -277,35 +280,5 @@ public class Tags {
 			JASLog.log().severe("Skipping NBT Write due to %s", e.getMessage());
 		}
 		return false;
-	}
-
-	/**
-	 * @formatter:off BlockRange DespawnAge EntityCap MaxSpawnRange SpawnRange SpawnRate
-	 * @formatter:on
-	 */
-
-	// TODO: Move Value Tags into HashMap stored in CreatureType/LivingHandler/SpawnListEntry; or as fields perphaps
-	// Optional where they default to globals when absent
-	public int entityCap() {
-		throw new UnsupportedOperationException();
-	}
-
-	public void spawnRange() {
-		// Value Tag -- What to do?
-		throw new UnsupportedOperationException();
-	}
-
-	public void maxSpawnRange() {
-		// Value Tag -- What to do?
-		throw new UnsupportedOperationException();
-	}
-
-	public void despawnAge() {
-		// KeyParserDespawnAge
-		throw new UnsupportedOperationException();
-	}
-
-	public void KeyParserSpawnRate() {
-		throw new UnsupportedOperationException();
 	}
 }

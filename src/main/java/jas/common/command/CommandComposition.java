@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo;
 import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
@@ -70,7 +71,7 @@ public class CommandComposition extends CommandJasBase {
                 EntityCounter creatureCount = new EntityCounter();
                 EntityCounter despawnCreatureCount = new EntityCounter();
                 foundMatch = true;
-                
+                CountInfo info = CustomSpawner.determineCountInfo(targetPlayer.worldObj);
                 for (Entity entity : CustomSpawner.getLoadedEntities(targetPlayer.worldObj)) {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
@@ -91,7 +92,7 @@ public class CommandComposition extends CommandJasBase {
                             creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
                             totalTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                             typesCounted.add(creatureType.typeID);
-                            if (livingHandler.canDespawn((EntityLiving) entity)) {
+                            if (livingHandler.canDespawn((EntityLiving) entity, info)) {
                                 despawnTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                                 despawnCreatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
                             }

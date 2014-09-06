@@ -4,6 +4,7 @@ import jas.common.DefaultProps;
 import jas.common.EntityProperties;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo;
 import jas.common.spawner.Tags;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
@@ -90,9 +91,9 @@ public class LivingHandler {
 	 * @param spawnListEntry SpawnListEntry the Entity belongs to
 	 * @return True if location is valid For entity to spawn, false otherwise
 	 */
-	public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
-		boolean canLivingSpawn = isValidLiving(entity);
-		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
+	public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
+		boolean canLivingSpawn = isValidLiving(entity, info);
+		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry, info);
 
 		if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND) || spawnListEntry.spawnOperand.isPresent()
 				&& spawnListEntry.spawnOperand.get() == Operand.AND) {
@@ -105,7 +106,7 @@ public class LivingHandler {
 	/**
 	 * Evaluates if this Entity in its current location / state would be capable of despawning eventually
 	 */
-	public final boolean canDespawn(EntityLiving entity) {
+	public final boolean canDespawn(EntityLiving entity, CountInfo info) {
 		if (!getDespawning().isPresent()) {
 			return LivingHelper.canDespawn(entity);
 		}
@@ -120,7 +121,7 @@ public class LivingHandler {
 			double d2 = entityplayer.posZ - entity.posZ;
 			double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-			Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 
 			if (canDespawn == false) {
@@ -144,7 +145,7 @@ public class LivingHandler {
 	 * 
 	 * @param entity
 	 */
-	public final void despawnEntity(EntityLiving entity) {
+	public final void despawnEntity(EntityLiving entity, CountInfo info) {
 		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
 		int xCoord = MathHelper.floor_double(entity.posX);
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
@@ -161,7 +162,7 @@ public class LivingHandler {
 					.getExtendedProperties(EntityProperties.JAS_PROPERTIES);
 			entityProps.incrementAge(60);
 
-			Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 
 			if (canDespawn == false) {
@@ -204,20 +205,20 @@ public class LivingHandler {
 		return entity.getCanSpawnHere();
 	}
 
-	public final boolean isValidLiving(EntityLiving entity) {
+	public final boolean isValidLiving(EntityLiving entity, CountInfo info) {
 		if (!compSpawnExpression.isPresent()) {
 			return isValidLocation(entity);
 		}
 		int xCoord = MathHelper.floor_double(entity.posX);
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
-		Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canLivingSpawn = !(Boolean) MVEL.executeExpression(compSpawnExpression.get(), tags);
 		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
 	}
 
-	public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry) {
+	public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
 		if (!spawnListEntry.getOptionalSpawning().isPresent()) {
 			return false;
 		}
@@ -226,19 +227,19 @@ public class LivingHandler {
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
-		Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canSpawnListSpawn = !(Boolean) MVEL.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags);
 		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
 	}
 
-	public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry) {
+	public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
 		if (compPostSpawnExpression.isPresent()) {
 			int xCoord = MathHelper.floor_double(entity.posX);
 			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
-			Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			MVEL.executeExpression(compPostSpawnExpression.get(), tags);
 		}
 
@@ -247,7 +248,7 @@ public class LivingHandler {
 			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
-			Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			MVEL.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags);
 		}
 	}

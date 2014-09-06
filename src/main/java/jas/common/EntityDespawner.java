@@ -1,5 +1,7 @@
 package jas.common;
 
+import jas.common.spawner.CountInfo;
+import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 
@@ -18,13 +20,14 @@ public class EntityDespawner {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
             LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+            CountInfo info = CustomSpawner.determineCountInfo(event.entityLiving.worldObj);
             @SuppressWarnings("unchecked")
             List<LivingHandler> livingHandlers = livingHandlerRegistry
                     .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
             for (LivingHandler livingHandler : livingHandlers) {
                 if (livingHandler != null && livingHandler.getDespawning() != null
                         && livingHandler.getDespawning().isPresent()) {
-                    livingHandler.despawnEntity((EntityLiving) event.entityLiving);
+                    livingHandler.despawnEntity((EntityLiving) event.entityLiving, info);
                 }
             }
         }

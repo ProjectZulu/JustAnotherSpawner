@@ -5,6 +5,7 @@ import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -61,6 +62,7 @@ public final class CountInfo {
 	}
 
 	public int getLocalEntityTypeCount(ChunkCoordIntPair location, String entityType) {
+		entityType = entityType.toUpperCase(Locale.ENGLISH);
 		return eligibleChunksForSpawning.get(location).entityTypeCount.getOrPutIfAbsent(entityType, 0).get();
 	}
 
@@ -70,6 +72,7 @@ public final class CountInfo {
 	}
 
 	public int getGlobalEntityTypeCount(String entityType) {
+		entityType = entityType.toUpperCase(Locale.ENGLISH);
 		return globalCreatureTypeCount.getOrPutIfAbsent(entityType, 0).get();
 	}
 

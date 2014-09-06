@@ -45,6 +45,15 @@ import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CustomSpawner {
 
+	public static CountInfo determineCountInfo(World world) {
+		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
+				world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
+		EntityCounter creatureTypeCount = new EntityCounter();
+		EntityCounter creatureCount = new EntityCounter();
+		CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
+		return new CountInfo(eligibleChunksForSpawning, creatureTypeCount, creatureCount);
+	}
+
 	/**
 	 * Populates eligibleChunksForSpawning with All Valid Chunks. Unlike its vanilla counterpart
 	 * {@link SpawnerAnimals#findChunksForSpawning} this does not spawn a Creature.
@@ -255,7 +264,7 @@ public class CustomSpawner {
 							spawnZ);
 					if (canSpawn == Result.ALLOW
 							|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
-									entityliving, spawnlistentry))) {
+									entityliving, spawnlistentry, countInfo))) {
 						if (canSpawn == Result.ALLOW) {
 							JASLog.log()
 									.warning(
@@ -276,7 +285,7 @@ public class CustomSpawner {
 								(int) entityliving.posZ,
 								BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
 										(int) entityliving.posX, (int) entityliving.posZ)));
-						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry);
+						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry, countInfo);
 						countInfo.countSpawn(entityliving, creatureType.typeID);
 					}
 				}
@@ -334,8 +343,9 @@ public class CustomSpawner {
 				}
 				for (int k2 = 0; !flag && k2 < 4; ++k2) {
 					int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
-
-					if (creatureType.canSpawnAtLocation(world, j1, l2, k1)) {
+					CountInfo countInfo = CustomSpawner.determineCountInfo(world);
+					Tags tags = new Tags(world, countInfo, j1, l2, k1);
+					if (creatureType.canSpawnAtLocation(world, tags, j1, l2, k1)) {
 						float f = j1 + 0.5F;
 						float f1 = l2;
 						float f2 = k1 + 0.5F;
@@ -363,7 +373,7 @@ public class CustomSpawner {
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
 						}
-						spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry);
+						spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry, countInfo);
 
 						flag = true;
 					} else {
