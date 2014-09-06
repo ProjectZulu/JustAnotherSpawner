@@ -29,9 +29,9 @@ public class TagsUtility {
 	}
 
 	public boolean searchAndEvaluateBlock(Conditional condition, Integer[] searchRange, Integer[] searchOffsets) {
-		Integer xRange = searchOffsets.length == 3 ? searchOffsets[0] : searchOffsets[0];
-		Integer yRange = searchOffsets.length == 3 ? searchOffsets[1] : searchOffsets[0];
-		Integer zRange = searchOffsets.length == 3 ? searchOffsets[2] : searchOffsets[0];
+		Integer xRange = searchRange.length == 3 ? searchRange[0] : searchRange[0];
+		Integer yRange = searchRange.length == 3 ? searchRange[1] : searchRange[0];
+		Integer zRange = searchRange.length == 3 ? searchRange[2] : searchRange[0];
 
 		Integer xOffset = searchOffsets.length == 3 ? searchOffsets[0] : searchOffsets[0];
 		Integer yOffset = searchOffsets.length == 3 ? searchOffsets[1] : searchOffsets[0];
@@ -40,7 +40,8 @@ public class TagsUtility {
 		for (int i = -xRange; i <= xRange; i++) {
 			for (int k = -zRange; k <= zRange; k++) {
 				for (int j = -yRange; j <= yRange; j++) {
-					if (condition.isMatch(world, i, j, k)) {
+					if (condition.isMatch(world, parent.posX + i + xOffset, parent.posY + j + yOffset, parent.posZ + k
+							+ zOffset)) {
 						return true;
 					}
 				}
