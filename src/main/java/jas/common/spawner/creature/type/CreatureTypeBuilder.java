@@ -24,6 +24,8 @@ public class CreatureTypeBuilder {
 
 	private int defaultBiomeCap;
 	private HashMap<String, Integer> biomeMappingToCap;
+	private int iterationsPerChunk;
+	private int iterationsPerPack;
 
 	public CreatureTypeBuilder() {
 		this(null, 1, 50);
@@ -38,6 +40,8 @@ public class CreatureTypeBuilder {
 		this.defaultBiomeCap = -1;
 		this.biomeMappingToCap = new HashMap<String, Integer>();
 		this.spawnExpression = "!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})";
+		this.iterationsPerChunk = 3;
+		this.iterationsPerPack = 4;
 	}
 
 	public CreatureTypeBuilder(CreatureType creatureType) {
@@ -54,6 +58,8 @@ public class CreatureTypeBuilder {
 		this.biomeMappingToCap = CreatureTypeBuilder.capMapBiomeIdToMapping(creatureType.biomeCaps,
 				creatureType.biomeGroupRegistry.biomePckgToMapping());
 		this.spawnExpression = creatureType.spawnExpression;
+		this.iterationsPerChunk = creatureType.iterationsPerChunk;
+		this.iterationsPerPack = creatureType.iterationsPerPack;
 	}
 
 	public float getChunkSpawnChance() {
@@ -102,6 +108,24 @@ public class CreatureTypeBuilder {
 	public CreatureTypeBuilder withSpawnExpression(String optionalParameters) {
 		this.spawnExpression = optionalParameters;
 		return this;
+	}
+
+	public CreatureTypeBuilder setIterationsPerChunk(int iterationsPerChunk) {
+		this.iterationsPerChunk = iterationsPerChunk;
+		return this;
+	}
+
+	public int getIterationsPerChunk() {
+		return iterationsPerChunk;
+	}
+	
+	public CreatureTypeBuilder setIterationsPerPack(int iterationsPerPack) {
+		this.iterationsPerPack = iterationsPerPack;
+		return this;
+	}
+
+	public int getIterationsPerPack() {
+		return iterationsPerPack;
 	}
 
 	public int getDefaultBiomeCap() {

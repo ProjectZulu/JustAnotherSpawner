@@ -63,6 +63,8 @@ public class CreatureTypeSaveObject {
 		public final String MAX_CREATURE_KEY = "Spawn Cap";
 		public final String CHUNK_CHANCE_KEY = "Chunk Spawn Chance";
 		public final String SPAWN_MEDIUM_KEY = "Spawn Medium";
+		public final String ITER_PER_CHUNK = "Iterations Per Chunk";
+		public final String ITER_PER_PACK = "Iterations Per Pack";
 		public final String OPTIONAL_PARAM_KEY = "Spawn Tag";
 		public final String DEFAULT_BIOME_CAP_KEY = "Default Biome Cap";
 		public final String MAPPING_TO_CAP = "Biome Caps";
@@ -78,8 +80,11 @@ public class CreatureTypeSaveObject {
                 entry.addProperty(MAX_CREATURE_KEY, type.maxNumberOfCreature);
                 entry.addProperty(CHUNK_CHANCE_KEY, type.getChunkSpawnChance());
                 entry.addProperty(SPAWN_MEDIUM_KEY, type.getRawSpawnMedium());
+                entry.addProperty(ITER_PER_CHUNK, type.getIterationsPerChunk());
+                entry.addProperty(ITER_PER_PACK, type.getIterationsPerPack());
                 entry.addProperty(OPTIONAL_PARAM_KEY, type.getSpawnExpression());
                 entry.addProperty(DEFAULT_BIOME_CAP_KEY, type.getDefaultBiomeCap());
+
                 JsonObject biomeCaps = new JsonObject();
                 for (Entry<String, Integer> capEntry : type.getBiomeCaps().entrySet()) {
                     biomeCaps.addProperty(capEntry.getKey(), capEntry.getValue());
@@ -108,6 +113,8 @@ public class CreatureTypeSaveObject {
                             GsonHelper.getMemberOrDefault(builderObject, MAX_CREATURE_KEY, 10));
                     builder.withChanceToChunkSpawn(GsonHelper.getMemberOrDefault(builderObject, CHUNK_CHANCE_KEY, 0f));
                     builder.setRawMedium(GsonHelper.getMemberOrDefault(builderObject, SPAWN_MEDIUM_KEY, "air"));
+                    builder.setIterationsPerChunk(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_CHUNK, 3));
+                    builder.setIterationsPerPack(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_PACK, 4));
 					if (fileVersion.equals("1.0")) {
 						TagConverter tag = new TagConverter(GsonHelper.getMemberOrDefault(builderObject, "Tags", ""));
 						builder.withSpawnExpression(tag.expression);

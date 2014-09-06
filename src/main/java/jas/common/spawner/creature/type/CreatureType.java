@@ -43,6 +43,9 @@ public class CreatureType {
 	public final Material spawnMedium;
 	public final String spawnExpression;
 
+	public final int iterationsPerChunk;
+	public final int iterationsPerPack;
+	
 	private Optional<Serializable> compSpawnExpression = Optional.absent();
 	public final BiomeGroupRegistry biomeGroupRegistry;
 
@@ -63,6 +66,8 @@ public class CreatureType {
 		this.spawnExpression = builder.getSpawnExpression();
 		this.compSpawnExpression = !spawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
+		this.iterationsPerChunk = builder.getIterationsPerChunk();
+		this.iterationsPerPack = builder.getIterationsPerPack();
 	}
 
 	public boolean isReady(WorldServer world) {

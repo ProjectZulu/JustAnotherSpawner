@@ -55,7 +55,7 @@ public class CountAccessor {
 		return entityClass != null ? info.getGlobalEntityClassCount(entityClass) : 0;
 	}
 
-	public int entitiesSpawnedThisLoop() {
+	public int entitiesSpawnedThisChunk() {
 		return info.getEntitiesSpawnedThisLoop();
 	}
 
