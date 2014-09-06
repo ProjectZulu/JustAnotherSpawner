@@ -22,16 +22,16 @@ group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
 
 repositories {
-	mavenCentral()
-	maven {
-		name = 'jeval'
-		url = "https://oss.sonatype.org/content/repositories/central-sync"
-	}
+	//mavenCentral()
+	//maven {
+	//	name = 'jeval'
+	//	url = "https://oss.sonatype.org/content/repositories/central-sync"
+	//}
 	
-	maven {
-		name = 'Codehaus Maven Repository'
-		url = "https://dav.codehaus.org/repository/mvel/"
-	}
+	//maven {
+	//	name = 'Codehaus Maven Repository'
+	//	url = "https://dav.codehaus.org/repository/mvel/"
+	//}
 }
 
 dependencies {
@@ -43,6 +43,12 @@ minecraft {
 	version = "1.7.10-10.13.0.1180"
     assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
 }
+
+//task fatJar(type: Jar) {
+//    baseName = project.name + '-all'
+//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
+//}
 
 processResources
 {
