@@ -34,6 +34,7 @@ public class LivingHandler {
 	public final String spawnExpression;
 	public final String despawnExpression;
 	public final String postspawnExpression;
+	public final String entityExpression;
 
 	public final Optional<Integer> maxDespawnRange;
 	public final Optional<Integer> entityCap;
@@ -44,6 +45,7 @@ public class LivingHandler {
 	private Optional<Serializable> compSpawnExpression;
 	private Optional<Serializable> compDespawnExpression;
 	private Optional<Serializable> compPostSpawnExpression;
+	public final Optional<Serializable> compEntityExpression;
 
 	public final ImmutableList<String> contents; // Raw Input, builds namedJASSpawnables, i.e Bat,A|Beast,-Boar
 	public transient final ImmutableSet<String> namedJASSpawnables; // Resulting list of entities that this LH should be
@@ -64,6 +66,7 @@ public class LivingHandler {
 		this.spawnExpression = builder.getSpawnExpression();
 		this.despawnExpression = builder.getDespawnExpression();
 		this.postspawnExpression = builder.getPostSpawnExpression();
+		this.entityExpression = builder.getEntityExpression();
 		this.maxDespawnRange = builder.getMaxDespawnRange();
 		this.entityCap = builder.getEntityCap();
 		this.minDespawnDistance = builder.getMinDespawnRange();
@@ -76,6 +79,8 @@ public class LivingHandler {
 				.compileExpression(despawnExpression)) : Optional.<Serializable> absent();
 		this.compPostSpawnExpression = !postspawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(postspawnExpression)) : Optional.<Serializable> absent();
+		this.compEntityExpression = !entityExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(entityExpression)) : Optional.<Serializable> absent();
 	}
 
 	public final int getLivingCap() {

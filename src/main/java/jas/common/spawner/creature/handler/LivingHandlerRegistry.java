@@ -5,6 +5,7 @@ import jas.common.GsonHelper;
 import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
+import jas.common.spawner.Tags;
 import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+
+import org.mvel2.MVEL;
 
 import scala.actors.threadpool.Arrays;
 
@@ -52,10 +55,18 @@ public class LivingHandlerRegistry {
 		}
 		return list;
 	}
-	
-	public Class<? extends EntityLiving> getRandomEntity(String livingID, Random random) {
+
+	public Class<? extends EntityLiving> getRandomEntity(String livingID, Random random, Tags tags) {
 		LivingHandler livingHandler = getLivingHandler(livingID);
-		if (!livingHandler.namedJASSpawnables.isEmpty()) {
+		if (livingHandler.compEntityExpression.isPresent()) {
+			Object result = MVEL.executeExpression(livingHandler.compEntityExpression.get(), tags);
+			Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(result);
+			if (entityClass == null) {
+				JASLog.log().severe("MVEL expression %s yeiled entity mapping %s which does not exist",
+						livingHandler.entityExpression, result);
+			}
+			return entityClass;
+		} else if (!livingHandler.namedJASSpawnables.isEmpty()) {
 			int selectedEntry = random.nextInt(livingHandler.namedJASSpawnables.size());
 			int i = 0;
 			for (String jasName : livingHandler.namedJASSpawnables) {

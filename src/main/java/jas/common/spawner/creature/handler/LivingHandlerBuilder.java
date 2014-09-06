@@ -25,12 +25,13 @@ public class LivingHandlerBuilder {
 	private String spawnExpression;
 	private String despawnExpression;
 	private String postspawnExpression;
+	private String entityExpression;
+
 	private Optional<Integer> maxDespawnRange;
 	private Optional<Integer> entityCap;
 	private Optional<Integer> minDespawnRange;
 	private Optional<Integer> despawnAge;
 	private Optional<Integer> despawnRate;
-
 	private Optional<Operand> spawnOperand;
 
 	public List<String> contents; // Raw Input, builds namedJASSpawnables, i.e Bat,A|Beast,-Boar
@@ -55,6 +56,7 @@ public class LivingHandlerBuilder {
 		setSpawnExpression("", Optional.<Operand> absent());
 		setDespawnExpression("");
 		setPostSpawnExpression("");
+		setEntityExpression("");
 		contents = new ArrayList<String>(5);
 		namedJASSpawnables = new HashSet<String>();
 		this.maxDespawnRange = Optional.absent();
@@ -68,9 +70,10 @@ public class LivingHandlerBuilder {
 		this.handlerId = handler.livingID;
 		this.creatureTypeId = handler.creatureTypeID;
 		this.shouldSpawn = handler.shouldSpawn;
-		this.spawnExpression = handler.spawnExpression;
-		this.despawnExpression = handler.despawnExpression;
-		this.postspawnExpression = handler.postspawnExpression;
+		setSpawnExpression(handler.spawnExpression, handler.spawnOperand);
+		setDespawnExpression(handler.despawnExpression);
+		setPostSpawnExpression(handler.postspawnExpression);
+		setEntityExpression(handler.entityExpression);
 		this.contents = new ArrayList<String>(handler.contents);
 		this.namedJASSpawnables = new HashSet<String>(handler.namedJASSpawnables);
 		this.maxDespawnRange = handler.maxDespawnRange;
@@ -78,7 +81,6 @@ public class LivingHandlerBuilder {
 		this.minDespawnRange = handler.minDespawnDistance;
 		this.despawnAge = handler.despawnAge;
 		this.despawnRate = handler.despawnRate;
-		this.spawnOperand = handler.spawnOperand;
 	}
 
 	public LivingHandlerBuilder setHandlerId(String handlerId) {
@@ -156,7 +158,20 @@ public class LivingHandlerBuilder {
 	public String getPostSpawnExpression() {
 		return postspawnExpression;
 	}
+	
+	public LivingHandlerBuilder setEntityExpression(String entityExpression) {
+		if (entityExpression == null) {
+			entityExpression = "";
+		}
 
+		this.entityExpression = entityExpression;
+		return this;
+	}
+
+	public String getEntityExpression() {
+		return entityExpression;
+	}
+	
 	public LivingHandler build(CreatureTypeRegistry creatureTypeRegistry, LivingGroupRegistry livingGroupRegistry) {
 		if (handlerId == null) {
 			throw new IllegalArgumentException("Cannot build CreatureType instance with null name");

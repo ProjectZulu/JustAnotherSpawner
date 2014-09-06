@@ -204,8 +204,10 @@ public class CustomSpawner {
 				if (spawnlistentry == null) {
 					continue;
 				}
+				Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
+						startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
 				Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
-						spawnlistentry.livingGroupID, worldServer.rand);
+						spawnlistentry.livingGroupID, worldServer.rand, tags);
 				if (livingToSpawn == null) {
 					continue;
 				}
@@ -324,9 +326,10 @@ public class CustomSpawner {
 			int k1 = par3 + random.nextInt(par5);
 			int l1 = j1;
 			int i2 = k1;
+			int topHeight = world.getTopSolidOrLiquidBlock(j1, k1);
 			BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
 			SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
-					world.getTopSolidOrLiquidBlock(j1, k1), k1);
+					topHeight, k1);
 			IEntityLivingData entitylivingdata = null;
 			if (spawnListEntry == null) {
 				JASLog.log().debug(Level.INFO, "Entity not Spawned due to Empty %s List", creatureType.typeID);
@@ -337,19 +340,19 @@ public class CustomSpawner {
 			}
 			int i1 = spawnListEntry.minChunkPack
 					+ random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
+			CountInfo countInfo = CustomSpawner.determineCountInfo(world);
 			for (int j2 = 0; j2 < i1; ++j2) {
 				boolean flag = false;
+				Tags tags = new Tags(world, countInfo, j1, topHeight, k1);
 				Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
-						spawnListEntry.livingGroupID, world.rand);
+						spawnListEntry.livingGroupID, world.rand, tags);
 				if (livingToSpawn == null) {
 					JASLog.log().severe("No EntityClasses appear to exist in %s", spawnListEntry.toString());
 					continue;
 				}
 				for (int k2 = 0; !flag && k2 < 4; ++k2) {
 					int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
-					CountInfo countInfo = CustomSpawner.determineCountInfo(world);
-					Tags tags = new Tags(world, countInfo, j1, l2, k1);
-					if (creatureType.canSpawnAtLocation(world, tags, j1, l2, k1)) {
+					if (creatureType.canSpawnAtLocation(world, new Tags(world, countInfo, j1, l2, k1), j1, l2, k1)) {
 						float f = j1 + 0.5F;
 						float f1 = l2;
 						float f2 = k1 + 0.5F;
@@ -378,7 +381,7 @@ public class CustomSpawner {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
 						}
 						spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry, countInfo);
-
+						countInfo.countSpawn(entityliving, creatureType.typeID);
 						flag = true;
 					} else {
 						JASLog.log().debug(Level.INFO,
