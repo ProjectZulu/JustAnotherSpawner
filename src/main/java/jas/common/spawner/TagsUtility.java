@@ -1,5 +1,6 @@
 package jas.common.spawner;
 
+import jas.common.JASLog;
 import net.minecraft.world.World;
 
 /**
@@ -52,5 +53,9 @@ public class TagsUtility {
 
 	public int rand(int value) {
 		return world.rand.nextInt(value);
+	}
+	
+	public void log(String string) {
+		JASLog.log().info("[TAG_LOG]".concat(string));
 	}
 }
