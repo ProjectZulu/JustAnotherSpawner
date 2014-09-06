@@ -6,6 +6,7 @@ import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Ope
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -65,4 +66,35 @@ public class KeyParserBlockFoot extends KeyParserBase {
         }
         return foundMatch ? false : true;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		String[] pieces = parseable.split(",");
+		ListMultimap<String, Integer> output = OptionalParser.parseBlock(pieces);
+		StringBuilder expBuilder = new StringBuilder(12 + output.values().size() * 3);
+		Integer xRange = 3;
+		Integer yRange = 3;
+		Integer zRange = 3;
+		Iterator<String> iter = output.keys().iterator();
+		while (iter.hasNext()) {
+			String blockKey = iter.next();
+			expBuilder.append("blockFoot(").append(blockKey);
+
+			List<Integer> metas = output.get(blockKey);
+			if (!metas.isEmpty()) {
+				expBuilder.append(",{");
+				Iterator<Integer> metaIter = metas.iterator();
+				while (metaIter.hasNext()) {
+					Integer meta = metaIter.next();
+					expBuilder.append(meta);
+					if (metaIter.hasNext()) {
+						expBuilder.append(",");
+					}
+				}
+				expBuilder.append("}");
+			}
+			expBuilder.append(")");
+		}
+		return expBuilder.toString();
+	}
 }

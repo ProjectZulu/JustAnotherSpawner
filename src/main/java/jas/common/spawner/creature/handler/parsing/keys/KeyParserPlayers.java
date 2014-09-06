@@ -3,6 +3,7 @@ package jas.common.spawner.creature.handler.parsing.keys;
 import jas.common.JASLog;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.util.ArrayList;
@@ -83,4 +84,24 @@ public class KeyParserPlayers extends KeyParserBase {
         }
         return count;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		ArrayList<TypeValuePair> parsedChainable = new ArrayList<TypeValuePair>();
+		ArrayList<Operand> operandvalue = new ArrayList<OptionalSettings.Operand>();
+		boolean parsedSuccessfully = parseChainable(parseable, parsedChainable, operandvalue);
+		Object[] values = (Object[]) parsedChainable.get(0).getValue();
+
+        int minSearch = (Integer) values[1];
+        int maxSearch = (Integer) values[2];
+        int minRange = (Integer) values[3];
+        int maxRange = (Integer) values[4];
+
+		StringBuilder expBuilder = new StringBuilder(15);
+		expBuilder.append("lgcy.entities(");
+		expBuilder.append("{").append(minSearch).append(",").append(maxSearch).append("}");
+		expBuilder.append(",{").append(minRange).append(",").append(maxRange).append("}");
+		expBuilder.append(")");
+		return expBuilder.toString();
+	}
 }

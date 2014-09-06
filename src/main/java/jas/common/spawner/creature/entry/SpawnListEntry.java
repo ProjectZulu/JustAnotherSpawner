@@ -6,8 +6,14 @@ import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
+import java.io.Serializable;
 import java.util.Locale;
+
+import org.mvel2.MVEL;
+
+import com.google.common.base.Optional;
 
 import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.config.ConfigCategory;
@@ -27,21 +33,24 @@ public class SpawnListEntry extends WeightedRandom.Item {
     public final String locationGroup;
     public final int minChunkPack;
     public final int maxChunkPack;
-    public final String optionalParameters;
-    protected OptionalSettingsSpawnListSpawning spawning;
-    protected OptionalSettingsPostSpawning postspawning;
+    
+	public final String spawnExpression;
+	public final String postspawnExpression;
+	public final Optional<Operand> spawnOperand;
+	private Optional<Serializable> compSpawnExpression;
+	private Optional<Serializable> compPostSpawnExpression;
 
-    public OptionalSettingsSpawnListSpawning getOptionalSpawning() {
-        return spawning;
-    }
+	public Optional<Serializable> getOptionalSpawning() {
+		return compSpawnExpression;
+	}
 
-    public OptionalSettingsPostSpawning getOptionalPostSpawning() {
-        return postspawning;
-    }
+	public Optional<Serializable> getOptionalPostSpawning() {
+		return compPostSpawnExpression;
+	}
 
-    public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
-            + "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
-            + "MaxChunkPackSize";
+	public static final String SpawnListCategoryComment = "Editable Format: SpawnWeight" + DefaultProps.DELIMETER
+			+ "SpawnPackSize" + DefaultProps.DELIMETER + "MinChunkPackSize" + DefaultProps.DELIMETER
+			+ "MaxChunkPackSize";
 
     public SpawnListEntry(SpawnListEntryBuilder builder) {
         super(builder.getWeight());
@@ -50,19 +59,13 @@ public class SpawnListEntry extends WeightedRandom.Item {
         this.locationGroup = builder.getLocationGroupId();
         this.minChunkPack = builder.getMinChunkPack();
         this.maxChunkPack = builder.getMaxChunkPack();
-        this.optionalParameters = builder.getOptionalParameters();
-
-        for (String string : optionalParameters.split("\\{")) {
-            String parsed = string.replace("}", "");
-            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-            if (Key.spawn.keyParser.isMatch(titletag)) {
-                spawning = new OptionalSettingsSpawnListSpawning(parsed);
-            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
-                postspawning = new OptionalSettingsPostSpawning(parsed);
-            }
-        }
-        spawning = spawning == null ? new OptionalSettingsSpawnListSpawning("") : spawning;
-        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
+        this.spawnOperand = builder.getSpawnOperand();
+		this.spawnExpression = builder.getSpawnExpression();
+		this.postspawnExpression = builder.getPostSpawnExpression();
+		this.compSpawnExpression = !spawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
+		this.compPostSpawnExpression = !postspawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(postspawnExpression)) : Optional.<Serializable> absent();
     }
 
     // TODO: Remove This. Hidden static dependency bad. Unnecessary. Alternatively, pass in livingHandlerRegistry
@@ -94,16 +97,5 @@ public class SpawnListEntry extends WeightedRandom.Item {
 
         SpawnListEntry otherEntry = (SpawnListEntry) other;
         return locationGroup.equals(otherEntry.locationGroup) && livingGroupID.equals(otherEntry.livingGroupID);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[SpawnListEntry: ID ").append(livingGroupID).append(",");
-        sb.append(" Biome ").append(locationGroup).append(",");
-        sb.append(" Stats ").append(itemWeight).append("/").append(packSize).append("/").append(minChunkPack)
-                .append("/").append(maxChunkPack).append(",");
-        sb.append(" Tags ").append(optionalParameters).append("]");
-        return sb.toString();
     }
 }

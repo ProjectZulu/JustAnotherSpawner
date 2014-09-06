@@ -13,4 +13,9 @@ public class KeyParserSky extends KeyParserBoolean {
     public boolean getValue(EntityLiving entity, World world, int xCoord, int yCoord, int zCoord) {
         return world.canBlockSeeTheSky(xCoord, yCoord, zCoord);
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		return "sky()";
+	}
 }

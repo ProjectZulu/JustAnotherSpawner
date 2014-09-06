@@ -34,7 +34,7 @@ public class GsonHelper {
         for (int i = 0; i < adapters.length; i++) {
             builder.registerTypeAdapter(types[i], adapters[i]);
         }
-        return builder.create();
+        return builder.disableHtmlEscaping().create();
     }
 
     public static <T> T readOrCreateFromGson(OptionalCloseable<FileReaderPlus> reader, Class<T> object, Gson gson,
@@ -132,6 +132,16 @@ public class GsonHelper {
         return defaultValue;
     }
 
+    /**
+     * Helper for unwrapping JsonObject members, returns default value if element is absent or an invalid type
+     */
+    public static String getAsOrDefault(JsonElement element, String defaultValue) {
+        if (element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isString()) {
+            return element.getAsJsonPrimitive().getAsString();
+        }
+        return defaultValue;
+    }
+    
     /**
      * Helper for unwrapping JsonObject members, returns default value if desired member is absent or an invalid type
      */

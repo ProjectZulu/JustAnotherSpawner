@@ -1,5 +1,10 @@
 package jas.common.command;
 
+import jas.common.command.mods.CommandModBiomeGroup;
+import jas.common.command.mods.CommandModBiomeSpawnList;
+import jas.common.command.mods.CommandModCreatureType;
+import jas.common.command.mods.CommandModLivingHandler;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,18 +18,22 @@ public final class CommandJAS extends CommandJasBase {
 
     private HashMap<String, CommandWrapper> commands = new HashMap<String, CommandWrapper>();
 
-    public CommandJAS() {
-        addCommand(new CommandCountCap());
-        addCommand(new CommandListSpawns());
-        addCommand(new CommandCanSpawnHere());
-        addCommand(new CommandComposition());
-        addCommand(new CommandKillAll());
-        addCommand(new CommandLocate());
-        addCommand(new CommandPackageEntity());
-        addCommand(new CommandSaveConfig());
-        addCommand(new CommandLoadConfig());
-        addCommand(new CommandCanDespawnHere());
-    }
+	public CommandJAS() {
+		addCommand(new CommandCountCap());
+		addCommand(new CommandListSpawns());
+		addCommand(new CommandCanSpawnHere());
+		addCommand(new CommandComposition());
+		addCommand(new CommandKillAll());
+		addCommand(new CommandLocate());
+		addCommand(new CommandPackageEntity());
+		addCommand(new CommandSaveConfig());
+		addCommand(new CommandLoadConfig());
+		addCommand(new CommandCanDespawnHere());
+		addCommand(new CommandModBiomeGroup());
+		addCommand(new CommandModCreatureType());
+		addCommand(new CommandModLivingHandler());
+		addCommand(new CommandModBiomeSpawnList());
+	}
 
     public void addCommand(CommandBase base) {
         if (base == null || base.getCommandName() == null || commands.containsKey(base.getCommandName())) {

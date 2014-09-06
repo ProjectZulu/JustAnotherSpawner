@@ -1,6 +1,8 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo;
+import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHelper;
@@ -80,9 +82,10 @@ public class CommandCanDespawnHere extends CommandJasBase {
     private boolean canEntityDespawnHere(EntityLiving entity) {
         LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
         List<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers(entity.getClass());
+        CountInfo info = CustomSpawner.determineCountInfo(entity.worldObj);
         if (!livingHandlers.isEmpty()) {
             for (LivingHandler livingHandler : livingHandlers) {
-                if (livingHandler.canDespawn(entity)) {
+                if (livingHandler.canDespawn(entity, info)) {
                     return true;
                 }
             }

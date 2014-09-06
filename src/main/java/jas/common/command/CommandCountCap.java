@@ -1,8 +1,8 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo.ChunkStat;
 import jas.common.spawner.CustomSpawner;
-import jas.common.spawner.CustomSpawner.ChunkStat;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.type.CreatureType;

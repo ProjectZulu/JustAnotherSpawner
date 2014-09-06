@@ -62,4 +62,20 @@ public abstract class KeyParserRange extends KeyParserBase {
 
     abstract int getCurrent(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache);
+    
+	@Override
+	public String toExpression(String parseable) {
+		String[] pieces = parseable.split(",");
+		Operand operand = parseOperand(pieces);
+
+		if (pieces.length == 3) {
+			int minRange = ParsingHelper.parseFilteredInteger(pieces[1], 16, "1st " + key.key);
+			int maxRange = ParsingHelper.parseFilteredInteger(pieces[2], -1, "2nd " + key.key);
+			return toExpression(minRange, maxRange);
+		}
+		return "";
+	}
+
+	public abstract String toExpression(int minRange, int maxRange);
+
 }

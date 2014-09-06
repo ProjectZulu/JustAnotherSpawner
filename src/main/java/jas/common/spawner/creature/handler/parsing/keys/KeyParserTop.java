@@ -43,5 +43,10 @@ public class KeyParserTop extends KeyParserBase {
         boolean isTopBlock = world.getBiomeGenForCoords(xCoord, zCoord).topBlock == world.getBlock(xCoord, yCoord - 1,
                 zCoord);
         return isInverted ? isTopBlock : !isTopBlock;
-    }
+	}
+
+	@Override
+	public String toExpression(String parseable) {
+		return "lgcy.top())";
+	}
 }

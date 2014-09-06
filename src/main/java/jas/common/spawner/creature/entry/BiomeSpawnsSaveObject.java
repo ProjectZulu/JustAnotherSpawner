@@ -1,6 +1,9 @@
 package jas.common.spawner.creature.entry;
 
 import jas.common.GsonHelper;
+import jas.common.spawner.TagConverter;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -9,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -84,12 +88,18 @@ public class BiomeSpawnsSaveObject {
 
     public static class BiomeSpawnsSaveObjectSerializer implements JsonSerializer<BiomeSpawnsSaveObject>,
             JsonDeserializer<BiomeSpawnsSaveObject> {
-        public final String FILE_VERSION = "1.0";
+        public final String FILE_VERSION = "2.0";
         public final String FILE_VERSION_KEY = "FILE_VERSION";
         public final String SORT_MODE_KEY = "SORTED_BY_BIOME";
         public final String SPAWN_LIST_KEY = "SPAWN_LIST_ENTRIES";
         public final String ENTITY_STAT_KEY = "Weight-PassivePackMax-ChunkPackMin-ChunkPackMax";
+        @Deprecated
         public final String ENTITY_TAG_KEY = "Tags";
+        
+		public final String SPAWN_TAG_KEY = "Spawn Tag";
+		public final String POSTSPAWN_KEY = "PostSpawn Tags";
+		public final String SPAWN_OPERAND_KEY = "Spawn Operand";
+
         private final boolean defaultSortByBiome;
 
         public BiomeSpawnsSaveObjectSerializer(boolean defaultSortByBiome) {
@@ -123,9 +133,16 @@ public class BiomeSpawnsSaveObject {
                         String stats = statsToString(builder.getWeight(), builder.getPackSize(),
                                 builder.getMinChunkPack(), builder.getMaxChunkPack());
                         entityValueObject.addProperty(ENTITY_STAT_KEY, stats);
-                        if (!"".equals(builder.getOptionalParameters())) {
-                            entityValueObject.addProperty(ENTITY_TAG_KEY, builder.getOptionalParameters());
-                        }
+						if (builder.getSpawnOperand().isPresent()) {
+							entityValueObject
+									.addProperty(SPAWN_OPERAND_KEY, builder.getSpawnOperand().get().toString());
+						}
+						if (!"".equals(builder.getSpawnExpression())) {
+							entityValueObject.addProperty(SPAWN_TAG_KEY, builder.getSpawnExpression());
+						}
+						if (!"".equals(builder.getPostSpawnExpression())) {
+							entityValueObject.addProperty(POSTSPAWN_KEY, builder.getPostSpawnExpression());
+						}
                         tertObject.add(tertKey, entityValueObject);
                     }
                     secObject.add(secKey, tertObject);
@@ -177,8 +194,36 @@ public class BiomeSpawnsSaveObject {
                         builder = new SpawnListEntryBuilder(livingGroup, biomeGroupId);
                         getSetStats(builder, entityValueObject);
 
-                        builder.setOptionalParameters(GsonHelper.getMemberOrDefault(entityValueObject, ENTITY_TAG_KEY,
-                                ""));
+						if (fileVersion.equals("1.0")) {
+							String optionalParameters = GsonHelper.getMemberOrDefault(entityValueObject,
+									ENTITY_TAG_KEY, "");
+							String[] parts = optionalParameters.split("\\{");
+							for (String string : optionalParameters.split("\\{")) {
+								String parsed = string.replace("}", "");
+								String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+								TagConverter conv = null;
+								if (Key.spawn.keyParser.isMatch(titletag)) {
+									conv = new TagConverter(parsed);
+									if (!conv.expression.trim().equals("")) {
+										builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
+									}
+								} else if (Key.postspawn.keyParser.isMatch(titletag)) {
+									conv = new TagConverter(parsed);
+									if (!conv.expression.trim().equals("")) {
+										builder.setPostSpawnExpression(conv.expression);
+									}
+								}
+							}
+						} else {
+							String spawnTag = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_TAG_KEY, "");
+							String spawnOperand = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_OPERAND_KEY,
+									"");
+							builder.setSpawnExpression(spawnTag,
+									Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
+							String postspawnTag = GsonHelper.getMemberOrDefault(entityValueObject, POSTSPAWN_KEY, "");
+							builder.setPostSpawnExpression(postspawnTag);
+						}
+                        
                         tertMap.put(tertKey, builder);
                     }
                 }

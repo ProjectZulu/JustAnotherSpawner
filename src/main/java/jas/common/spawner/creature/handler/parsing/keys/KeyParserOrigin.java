@@ -18,4 +18,11 @@ public class KeyParserOrigin extends KeyParserRange {
             HashMap<String, Object> valueCache) {
         return (int) Math.sqrt(world.getSpawnPoint().getDistanceSquared(xCoord, yCoord, zCoord));
     }
+    
+	@Override
+	public String toExpression(int minRange, int maxRange) {
+		return new StringBuilder().append("lgcy.origin(").append(minRange).append(",").append(maxRange).append(")")
+				.toString();
+	}
+
 }

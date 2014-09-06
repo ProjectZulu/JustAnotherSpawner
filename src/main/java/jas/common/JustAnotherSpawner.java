@@ -18,6 +18,8 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
+import org.mvel2.optimizers.OptimizerFactory;
+
 import com.google.gson.Gson;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -47,7 +49,12 @@ public class JustAnotherSpawner {
         return modConfigDirectoryFile;
     }
 
-    ImportedSpawnList importedSpawnList;
+	private static ImportedSpawnList importedSpawnList;
+
+	public static ImportedSpawnList importedSpawnList() {
+		return importedSpawnList;
+	}
+    
     BiomeBlacklist biomeBlacklist;
 
     private static GlobalSettings globalSettings;
@@ -63,7 +70,7 @@ public class JustAnotherSpawner {
     }
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event) {    	
         modConfigDirectoryFile = event.getModConfigurationDirectory();
         Gson gson = GsonHelper.createGson(true);
 
@@ -78,6 +85,10 @@ public class JustAnotherSpawner {
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 
         MinecraftForge.EVENT_BUS.register(this);
+        OptimizerFactory.setDefaultOptimizer("reflective");
+//    	TagsObject tags = new TagsObject();
+//		Serializable expression = MVEL.compileExpression("sky()==false");
+//		Boolean restult = (Boolean) MVEL.executeExpression(expression, tags);
     }
 
     @EventHandler

@@ -19,4 +19,10 @@ public class KeyParserTorchLight extends KeyParserRange {
             HashMap<String, Object> valueCache) {
         return world.getSavedLightValue(EnumSkyBlock.Block, xCoord, yCoord, zCoord);
     }
+
+	@Override
+	public String toExpression(int minRange, int maxRange) {
+		return new StringBuilder().append("lgcy.torchlight(").append(minRange).append(",").append(maxRange).append(")")
+				.toString();
+	}
 }

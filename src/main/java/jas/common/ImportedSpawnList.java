@@ -43,10 +43,6 @@ public class ImportedSpawnList {
         }
     }
 
-    public void clearImportedSpawnList() {
-        spawnLists = new SpawnList[BiomeGenBase.getBiomeGenArray().length];
-    }
-
     public Collection<SpawnListEntry> getSpawnableCreatureList(BiomeGenBase biome, EnumCreatureType creatureType) {
         if (spawnLists[biome.biomeID] != null) {
             return spawnLists[biome.biomeID].spawnLists.get(creatureType);

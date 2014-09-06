@@ -6,10 +6,10 @@ import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.handler.parsing.TypeValuePair;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 import net.minecraft.entity.EntityLiving;
@@ -191,4 +191,38 @@ public class KeyParserBiome extends KeyParserBase {
         }
         return true;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		ArrayList<TypeValuePair> parsedChainable = new ArrayList<TypeValuePair>();
+		ArrayList<Operand> operandvalue = new ArrayList<OptionalSettings.Operand>();
+		boolean parsedSuccessfully = parseChainable(parseable, parsedChainable, operandvalue);
+		Object[] values = (Object[]) parsedChainable.get(0).getValue();
+		if (parsedSuccessfully) {
+			final int shortFormLength = 4;
+			final int formWithOffsetLength = 6;
+			if (values.length == shortFormLength || values.length == formWithOffsetLength) {
+				int rangeX = (Integer) values[1];
+				int rangeZ = (Integer) values[2];
+				int offsetX, offsetZ;
+				offsetX = offsetZ = 0;
+				if (values.length == formWithOffsetLength) {
+					offsetX = (Integer) values[3];
+					offsetZ = (Integer) values[4];
+				}
+				String biomeName;
+				if (values.length == formWithOffsetLength) {
+					biomeName = (String) values[5];
+				} else {
+					biomeName = (String) values[3];
+				}
+				StringBuilder expBuilder = new StringBuilder(15);
+				expBuilder.append("biome(").append(biomeName);
+				expBuilder.append(",{").append(rangeX).append(",").append(rangeZ).append("}");
+				expBuilder.append(",{").append(offsetX).append(",").append(offsetZ).append("})");
+				return expBuilder.toString();
+			}
+		}
+		return "";
+	}
 }
