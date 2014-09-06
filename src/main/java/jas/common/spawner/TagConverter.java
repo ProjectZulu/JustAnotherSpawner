@@ -75,9 +75,9 @@ public class TagConverter {
 							}
 							if (i != 1) {
 								if (tagOoperand == Operand.OR) {
-									tagExpre = "&&".concat(tagExpre);
-								} else if (tagOoperand == Operand.AND) {
 									tagExpre = "||".concat(tagExpre);
+								} else if (tagOoperand == Operand.AND) {
+									tagExpre = "&&".concat(tagExpre);
 								}
 							}
 							expressionBuilder.append(tagExpre);
