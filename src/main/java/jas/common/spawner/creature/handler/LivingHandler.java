@@ -94,8 +94,8 @@ public class LivingHandler {
 		boolean canLivingSpawn = isValidLiving(entity);
 		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
 
-		if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND)
-				|| spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
+		if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND) || spawnListEntry.spawnOperand.isPresent()
+				&& spawnListEntry.spawnOperand.get() == Operand.AND) {
 			return canLivingSpawn && canSpawnListSpawn;
 		} else {
 			return canLivingSpawn || canSpawnListSpawn;
@@ -218,7 +218,7 @@ public class LivingHandler {
 	}
 
 	public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry) {
-		if (!spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
+		if (!spawnListEntry.getOptionalSpawning().isPresent()) {
 			return false;
 		}
 
@@ -226,11 +226,8 @@ public class LivingHandler {
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
-		boolean canSpawnListSpawn = !spawnListEntry.getOptionalSpawning().isInverted();
-		if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-			canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
-		}
-
+		Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+		boolean canSpawnListSpawn = !(Boolean) MVEL.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags);
 		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
 	}
@@ -245,12 +242,13 @@ public class LivingHandler {
 			MVEL.executeExpression(compPostSpawnExpression.get(), tags);
 		}
 
-		if (spawnListEntry.getOptionalPostSpawning().isOptionalEnabled()) {
+		if (spawnListEntry.getOptionalPostSpawning().isPresent()) {
 			int xCoord = MathHelper.floor_double(entity.posX);
 			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
-			spawnListEntry.getOptionalPostSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
+			Tags tags = new Tags(entity.worldObj, xCoord, yCoord, zCoord, entity);
+			MVEL.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags);
 		}
 	}
 

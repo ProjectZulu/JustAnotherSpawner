@@ -56,7 +56,8 @@ public class LivingHandlerSaveObject {
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String HANDLERS_KEY = "LIVING_HANDLERS";
 		public final String STATS_KEY = "Type-Enabled";
-		public final String TAGS_KEY = "Tags";
+		@Deprecated
+		final String TAGS_KEY = "Tags";
 		public final String SPAWN_TAG_KEY = "Spawn Tag";
 		public final String DESPAWN_KEY = "Despawn Tags";
 		public final String POSTSPAWN_KEY = "PostSpawn Tags";
@@ -116,13 +117,13 @@ public class LivingHandlerSaveObject {
 				if (builder.getDespawnRate().isPresent()) {
 					handler.addProperty(DESPAWN_RATE_KEY, builder.getDespawnRate().get());
 				}
-				
+
 				JsonArray contents = new JsonArray();
 				for (String content : builder.contents) {
 					contents.add(new JsonPrimitive(content));
 				}
 				handler.add(CONTENTS_KEY, contents);
-				
+
 				livingHandlers.add(builder.getHandlerId(), handler);
 			}
 			endObject.add(HANDLERS_KEY, livingHandlers);
@@ -209,7 +210,7 @@ public class LivingHandlerSaveObject {
 				String despawnTag = GsonHelper.getMemberOrDefault(handler, DESPAWN_KEY, "");
 				builder.setDespawnExpression(spawnTag);
 				String postspawnTag = GsonHelper.getMemberOrDefault(handler, POSTSPAWN_KEY, "");
-				builder.setDespawnExpression(postspawnTag);
+				builder.setPostSpawnExpression(postspawnTag);
 
 				int minDespawnRange = GsonHelper.getMemberOrDefault(handler, MIN_DESPAWN_RANGE_KEY, -1);
 				builder.setMinDespawnRange(minDespawnRange);

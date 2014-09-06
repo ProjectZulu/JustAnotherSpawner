@@ -32,7 +32,7 @@ public class ModUpdateSpawnListEntry extends BaseModification {
 		builder.setPackSize(packSize);
 		builder.setMinChunkPack(packSize);
 		builder.setMaxChunkPack(packSize);
-		builder.setOptionalParameters(optionalParameters);
+//		builder.setOptionalParameters(optionalParameters);
 	}
 
 	@Override

@@ -286,7 +286,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             return "\u00A7c".concat("Entity not in B:").concat(locationName).concat(" spawnlist").concat("\u00A7r");
         }
 
-        if (!spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
+        if (!spawnListEntry.getOptionalSpawning().isPresent()) {
             return "\u00A7a".concat("No ").concat(isBiome ? "B:" : "S:").concat(locationName).concat(" tags.")
                     .concat("\u00A7r");
         }

@@ -28,7 +28,7 @@ public class ModAddSpawnListEntry extends BaseModification {
 		builder.setPackSize(packSize);
 		builder.setMinChunkPack(packSize);
 		builder.setMaxChunkPack(packSize);
-		builder.setOptionalParameters(optionalParameters);
+//		builder.setOptionalParameters(optionalParameters);
 	}
 
 	@Override

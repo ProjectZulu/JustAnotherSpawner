@@ -62,7 +62,6 @@ public class LivingHandlerBuilder {
 		this.minDespawnRange = Optional.absent();
 		this.despawnAge = Optional.absent();
 		this.despawnRate = Optional.absent();
-		this.spawnOperand = Optional.absent();
 	}
 
 	public LivingHandlerBuilder(LivingHandler handler) {
