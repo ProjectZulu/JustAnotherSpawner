@@ -90,7 +90,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             /* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
             boolean isBiome = false;
             List<SpawnListEntry> spawnlistentries = new ArrayList<SpawnListEntry>(3);
-            String locationName = getMatchingStructureSpawnListEntries(entity, spawnlistentries);
+            String locationName = getMatchingStructureSpawnListEntries(groupID, entity, spawnlistentries);
             String structureName = locationName;
             if (spawnlistentries.isEmpty()) {
                 isBiome = true;
@@ -170,7 +170,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
         return entity;
     }
 
-    private String getMatchingStructureSpawnListEntries(EntityLiving entity,
+    private String getMatchingStructureSpawnListEntries(String livingGroupID, EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
         for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry()
@@ -181,7 +181,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
                 for (String structureKey : StructureHandler.getStructureKeys()) {
                     if (structureName.equals(structureKey)) {
                         for (SpawnListEntry entry : StructureHandler.getStructureSpawnList(structureKey)) {
-                            if (entity.getClass().equals(entry.getClass())) {
+                            if (livingGroupID.equals(entry.livingGroupID)) {
                                 matchingSpawnListEntries.add(entry);
                             }
                         }
