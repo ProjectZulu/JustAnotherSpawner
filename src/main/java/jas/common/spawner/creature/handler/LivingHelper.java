@@ -19,14 +19,16 @@ public class LivingHelper {
      * @param worldServer Instance of World
      * @return
      */
-    public static EntityLiving createCreature(Class<? extends EntityLiving> livingClass, World world) {
-        try {
-            return instantiateEntity(livingClass, world);
-        } catch (Exception exception) {
-            JASLog.log().warning("Entity %s could not be initialized.", livingClass.getSimpleName());
-        }
-        return null;
-    }
+	public static EntityLiving createCreature(Class<? extends EntityLiving> livingClass, World world) {
+		try {
+			return instantiateEntity(livingClass, world);
+		} catch (NoClassDefFoundError exception) {
+			JASLog.log().severe("Entity %s references classes that do not exist.", livingClass.getSimpleName());
+		} catch (Exception exception) {
+			JASLog.log().warning("Entity %s could not be initialized.", livingClass.getSimpleName());
+		}
+		return null;
+	}
 
     public static <T extends Entity> T instantiateEntity(Class<? extends T> entityClass, World world)
             throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
