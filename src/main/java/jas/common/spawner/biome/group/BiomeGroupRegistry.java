@@ -43,6 +43,9 @@ import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 public class BiomeGroupRegistry {
 	private ImmutableMap<String, BiomeGroup> iDToGroup;
 
+	/** New Mappings added the Last Time BiomeGroupRegistry.load() was run */
+	public Set<String> newMappings = new HashSet<String>();
+
 	/** Group Identifier to Group Instance Regsitry */
 	public ImmutableMap<String, BiomeGroup> iDToGroup() {
 		return iDToGroup;
@@ -208,8 +211,8 @@ public class BiomeGroupRegistry {
 			}
 		}
 		pckgNameToBiomeID = ImmutableListMultimap.<String, Integer> builder().putAll(pckgNameToBiomeIDBuilder).build();
-
-		Set<String> newMappings = loadMappings(savedStats);
+		
+		newMappings = new HashSet<String>(loadMappings(savedStats));
 		loadAttributes(savedStats);
 		loadBiomeGroups(savedStats, newMappings);
 	}
@@ -306,19 +309,14 @@ public class BiomeGroupRegistry {
 					}
 				}
 			}
-			for (String biomeMapping : newMappings) {
-				BiomeGroup group = new BiomeGroup(biomeMapping);
-				group.contents.add(biomeMapping);
-				biomeGroups.add(group);
-			}
-		} else {
-			/* Create default groups, Each Mapping corresponds to group */
-			for (String mapping : biomeMappingToPckg.keySet()) {
-				BiomeGroup group = new BiomeGroup(mapping);
-				group.contents.add(mapping);
-				biomeGroups.add(group);
-			}
+			
 		}
+		for (String biomeMapping : newMappings) {
+			BiomeGroup group = new BiomeGroup(biomeMapping);
+			group.contents.add(biomeMapping);
+			biomeGroups.add(group);
+		}
+		
 		List<BiomeGroup> sortedGroups = getSortedGroups(biomeGroups);
 		HashMap<String, BiomeGroup> iDToGroupBuilder = new HashMap<String, BiomeGroup>();
 		ListMultimap<String, String> packgNameToGroupIDsBuilder = ArrayListMultimap.create();

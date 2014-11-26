@@ -61,6 +61,9 @@ public class LivingGroupRegistry {
 	/** Reverse Look-up Map to Get All Groups a Particular Entity is In */
 	private ImmutableListMultimap<String, String> entityIDToGroupIDList;
 
+	/** New Mappings added the Last Time LivingGroupRegistry.load() was run */
+	public Set<String> newJASNames = new HashSet<String>();
+	
 	public ImmutableMultimap<String, String> getEntityIDToGroupIDList() {
 		return entityIDToGroupIDList;
 	}
@@ -206,7 +209,7 @@ public class LivingGroupRegistry {
 		LivingGroupSaveObject savedStats = GsonHelper.readOrCreateFromGson(
 				FileUtilities.createReader(gsonBiomeFile, false), LivingGroupSaveObject.class, gson);
 
-		List<String> newJASNames = loadMappings(savedStats);
+		newJASNames = new HashSet<String>((loadMappings(savedStats)));
 		loadAttributes(savedStats);
 		loadBiomes(savedStats, newJASNames);
 	}
@@ -286,7 +289,7 @@ public class LivingGroupRegistry {
 				.putAll(iDToAttributeBuilder).build();
 	}
 
-	private void loadBiomes(LivingGroupSaveObject savedStats, List<String> newJASNames) {
+	private void loadBiomes(LivingGroupSaveObject savedStats, Set<String> newJASNames) {
 		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
 		if (savedStats.configNameToLivingGroups.isPresent()) {
 			Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
@@ -297,18 +300,14 @@ public class LivingGroupRegistry {
 					}
 				}
 			}
-			for (String jasName : newJASNames) {
-				LivingGroup livingGroup = new LivingGroup(jasName);
-				livingGroup.contents.add(jasName);
-				livingGroups.add(livingGroup);
-			}
-		} else {
-			for (String jasName : JASNametoEntityClass.keySet()) {
-				LivingGroup livingGroup = new LivingGroup(jasName);
-				livingGroup.contents.add(jasName);
-				livingGroups.add(livingGroup);
-			}
+			
 		}
+		for (String jasName : newJASNames) {
+			LivingGroup livingGroup = new LivingGroup(jasName);
+			livingGroup.contents.add(jasName);
+			livingGroups.add(livingGroup);
+		}
+		
 		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
 		HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
 		ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();

@@ -214,7 +214,7 @@ public final class BiomeSpawnListRegistry {
         }
     }
 
-    public void loadFromConfig(File configDirectory, ImportedSpawnList spawnList) {
+    public void loadFromConfig(File configDirectory, ImportedSpawnList importedSpawnList) {
         /* Contains Mapping between BiomeGroupID, LivingType to valid SpawnListEntry */
         Table<String, String, Set<SpawnListEntry>> validEntriesBuilder = HashBasedTable.create();
         /* Contains Mapping Between BiomeGroupID, LivingType to invalid SpawnListEntry i.e. spawnWeight <=0 etc. */
@@ -257,23 +257,29 @@ public final class BiomeSpawnListRegistry {
 
         /* Any files that were not Present/Processable should be created */
         Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
-        for (LivingHandler handler : livingHandlers) {
-            if (saveFilesProcessed.contains(getSaveFileName(handler.livingID))) {
-                continue;
-            }
-            // String groupID = handler.groupID;
-            if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
-                JASLog.log().debug(Level.INFO,
-                        "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
-                        handler.livingID, handler.creatureTypeID);
-                continue;
-            }
-            
-            for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
-                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, spawnList);
-                addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
-            }
-        }
+		for (LivingHandler handler : livingHandlers) {
+			if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
+				JASLog.log().debug(Level.INFO,
+						"Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
+						handler.livingID, handler.creatureTypeID);
+				continue;
+			}
+			if (saveFilesProcessed.contains(getSaveFileName(handler.livingID))
+					&& !livingGroupRegistry.newJASNames.contains(handler.livingID)) {
+				for (String newMapping : biomeGroupRegistry.newMappings) {
+					BiomeGroup newGroup = biomeGroupRegistry.getBiomeGroup(newMapping);
+					if (newGroup != null) {
+						SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(newGroup, handler, importedSpawnList);
+						addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+					}
+				}
+			} else {
+				for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
+					SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, importedSpawnList);
+					addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+				}
+			}
+		}
 
         this.validSpawnListEntries = ImmutableTable.<String, String, Set<SpawnListEntry>> builder()
                 .putAll(validEntriesBuilder).build();
