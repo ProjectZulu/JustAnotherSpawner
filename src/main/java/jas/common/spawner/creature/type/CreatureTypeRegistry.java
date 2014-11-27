@@ -94,7 +94,7 @@ public class CreatureTypeRegistry {
 			CreatureTypeBuilder creature = new CreatureTypeBuilder(CREATURE, 400, 10)
 					.withChanceToChunkSpawn(0.1f)
 					.withSpawnExpression(
-							"{spawn:!solidside,1,0,[0/-1/0]:liquid,0:normal,0:normal,0,[0/1/0]:!opaque,0,[0/-1/0]:!sky}");
+							"!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})&&!sky()");
 			readTypes.put(monster.typeID, monster);
 			readTypes.put(ambient.typeID, ambient);
 			readTypes.put(opensky.typeID, opensky);
