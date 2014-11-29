@@ -125,9 +125,10 @@ public class LivingHandlerRegistry {
 		}
 
 		//TODO Change this to instead of all mappings, only newly added mappings
-		Collection<String> livingGroups = livingGroupRegistry.jasNametoEntityClass().keySet();
-		for (String mapping : livingGroups) {
+		Collection<String> mappings = livingGroupRegistry.jasNametoEntityClass().keySet();
+		for (String mapping : mappings) {
 			LivingHandlerBuilder builder = new LivingHandlerBuilder(mapping, guessCreatureTypeOfGroup(world, spawnList, mapping));
+			builder.contents.add(mapping);
 			livingHandlers.add(builder.build(creatureTypeRegistry, livingGroupRegistry));
 		}
 		Builder<String, LivingHandler> builder = ImmutableMap.<String, LivingHandler> builder();
