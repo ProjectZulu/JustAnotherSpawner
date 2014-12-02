@@ -1,5 +1,6 @@
 package jas.common.command;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.command.mods.CommandModBiomeGroup;
 import jas.common.command.mods.CommandModBiomeSpawnList;
 import jas.common.command.mods.CommandModCreatureType;
@@ -18,7 +19,7 @@ public final class CommandJAS extends CommandJasBase {
 
     private HashMap<String, CommandWrapper> commands = new HashMap<String, CommandWrapper>();
 
-	public CommandJAS() {
+	public CommandJAS(JustAnotherSpawner justAnotherSpawner) {
 		addCommand(new CommandCountCap());
 		addCommand(new CommandListSpawns());
 		addCommand(new CommandCanSpawnHere());
@@ -33,6 +34,7 @@ public final class CommandJAS extends CommandJasBase {
 		addCommand(new CommandModCreatureType());
 		addCommand(new CommandModLivingHandler());
 		addCommand(new CommandModBiomeSpawnList());
+		addCommand(new CommandEffectiveSpawnList(justAnotherSpawner.biomeBlacklist()));
 	}
 
     public void addCommand(CommandBase base) {

@@ -55,8 +55,12 @@ public class JustAnotherSpawner {
 		return importedSpawnList;
 	}
     
-    BiomeBlacklist biomeBlacklist;
+	BiomeBlacklist biomeBlacklist;
 
+	public BiomeBlacklist biomeBlacklist() {
+		return biomeBlacklist;
+	}
+    
     private static GlobalSettings globalSettings;
 
     public static GlobalSettings globalSettings() {
@@ -109,7 +113,7 @@ public class JustAnotherSpawner {
     @EventHandler
     public void serverStart(FMLServerStartingEvent event) {
         worldSettings = new WorldSettings(modConfigDirectoryFile, event.getServer().worldServers[0], importedSpawnList);
-        event.registerServerCommand(new CommandJAS());
+        event.registerServerCommand(new CommandJAS(this));
 		if (globalSettings.emptyVanillaSpawnLists) {
 			JASLog.log().info("Removing Netherbridge spawnlist");
 			ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(

@@ -78,8 +78,20 @@ public final class CountInfo {
 		return globalCreatureTypeCount.getOrPutIfAbsent(entityType, 0).get();
 	}
 
+	public Set<String> getGlobalEntityTypeCountKeysSet() {
+		return globalCreatureTypeCount.keySet();
+	}
+
 	public int getGlobalEntityClassCount(Class<?> entityClass) {
 		return globalCreatureClassCount.getOrPutIfAbsent(entityClass.getSimpleName(), 0).get();
+	}
+	
+	public int getGlobalEntityClassCount(String entityClassSimpleName) {
+		return globalCreatureClassCount.getOrPutIfAbsent(entityClassSimpleName, 0).get();
+	}
+
+	public Set<String> getGlobalEntityClassCountKeysSet() {
+		return globalCreatureClassCount.keySet();
 	}
 
 	public int getEntitiesSpawnedThisLoop() {
