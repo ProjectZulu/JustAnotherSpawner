@@ -1,5 +1,13 @@
 package jas.common.spawner.creature.entry;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import jas.common.spawner.creature.handler.LivingHandlerBuilder;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+
+import com.google.common.base.Optional;
+
 public class SpawnListEntryBuilder {
     private String livingGroupId;
     private String locationGroupId; // BiomeGroupId or StructureGroupId
@@ -7,8 +15,11 @@ public class SpawnListEntryBuilder {
     private int packSize;
     private int minChunkPack;
     private int maxChunkPack;
-    private String optionalParameters;
-
+    
+	private String spawnExpression;
+	private String postspawnExpression;
+	private Optional<Operand> spawnOperand;
+    
     public SpawnListEntryBuilder() {
         this.livingGroupId = null;
         this.locationGroupId = null;
@@ -16,7 +27,8 @@ public class SpawnListEntryBuilder {
         this.packSize = 4;
         this.minChunkPack = 0;
         this.maxChunkPack = 4;
-        this.optionalParameters = "";
+        this.setSpawnExpression("", Optional.<Operand> absent());
+		this.setPostSpawnExpression("");
     }
 
     public SpawnListEntryBuilder(String livingGroupId, String biomeGroupId) {
@@ -26,7 +38,8 @@ public class SpawnListEntryBuilder {
         this.packSize = 4;
         this.minChunkPack = 0;
         this.maxChunkPack = 4;
-        this.optionalParameters = "";
+		this.setSpawnExpression("", Optional.<Operand> absent());
+		this.setPostSpawnExpression("");
     }
 
     public SpawnListEntryBuilder(SpawnListEntry entry) {
@@ -36,7 +49,8 @@ public class SpawnListEntryBuilder {
         this.packSize = entry.packSize;
         this.minChunkPack = entry.minChunkPack;
         this.maxChunkPack = entry.maxChunkPack;
-        this.optionalParameters = entry.optionalParameters;
+		this.setSpawnExpression(entry.spawnExpression, entry.spawnOperand);
+		this.setPostSpawnExpression(entry.postspawnExpression);
     }
 
     public String getLivingGroupId() {
@@ -92,19 +106,41 @@ public class SpawnListEntryBuilder {
         this.maxChunkPack = maxChunkPack;
         return this;
     }
+    
+	public SpawnListEntryBuilder setSpawnExpression(String optionalParameters, Optional<Operand> spawnOperand) {
+		if (optionalParameters == null || optionalParameters.trim().equals("")) {
+			this.spawnExpression = "";
+			this.spawnOperand = Optional.absent();
+		} else {
+			if (!spawnOperand.isPresent()) {
+				spawnOperand = Optional.of(Operand.OR);
+			}
+			this.spawnExpression = optionalParameters;
+			this.spawnOperand = spawnOperand;
+		}
+		return this;
+	}
 
-    public String getOptionalParameters() {
-        return optionalParameters;
-    }
+	public String getSpawnExpression() {
+		return spawnExpression;
+	}
 
-    public SpawnListEntryBuilder setOptionalParameters(String optionalParameters) {
-        if (optionalParameters == null) {
-            optionalParameters = "";
-        }
-        this.optionalParameters = optionalParameters;
-        return this;
-    }
+	public Optional<Operand> getSpawnOperand() {
+		return spawnOperand;
+	}
 
+	public SpawnListEntryBuilder setPostSpawnExpression(String optionalParameters) {
+		if (optionalParameters == null) {
+			optionalParameters = "";
+		}
+		this.postspawnExpression = optionalParameters;
+		return this;
+	}
+
+	public String getPostSpawnExpression() {
+		return postspawnExpression;
+	}
+    
     public SpawnListEntry build() {
         if (livingGroupId == null || livingGroupId.trim().equals("")) {
             throw new IllegalArgumentException("LivingGroupID cannot be " + livingGroupId != null ? "empty." : "null.");

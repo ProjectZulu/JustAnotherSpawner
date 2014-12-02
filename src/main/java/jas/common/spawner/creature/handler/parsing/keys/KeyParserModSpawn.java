@@ -43,4 +43,9 @@ public class KeyParserModSpawn extends KeyParserBase {
         boolean canSpawn = entity.getCanSpawnHere();
         return isInverted ? canSpawn : !canSpawn;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		return "modspawn()";
+	}
 }

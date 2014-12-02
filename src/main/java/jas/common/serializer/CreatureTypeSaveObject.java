@@ -1,6 +1,14 @@
 package jas.common.serializer;
 
 import jas.common.GsonHelper;
+import jas.common.JASLog;
+import jas.common.spawner.TagConverter;
+import jas.common.spawner.creature.handler.parsing.OptionalParser;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeBuilder;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
@@ -8,6 +16,7 @@ import jas.common.spawner.creature.type.CreatureTypeRegistry;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
@@ -46,17 +55,19 @@ public class CreatureTypeSaveObject {
 
     public static class CreatureTypeSaveObjectSerializer implements JsonSerializer<CreatureTypeSaveObject>,
             JsonDeserializer<CreatureTypeSaveObject> {
-        public final String FILE_VERSION = "1.0";
-        public final String FILE_VERSION_KEY = "FILE_VERSION";
-        public final String TYPE_KEY = "TYPES";
+		public final String FILE_VERSION = "2.0";
+		public final String FILE_VERSION_KEY = "FILE_VERSION";
+		public final String TYPE_KEY = "TYPES";
 
-        public final String SPAWN_RATE_KEY = "Spawn Rate";
-        public final String MAX_CREATURE_KEY = "Spawn Cap";
-        public final String CHUNK_CHANCE_KEY = "Chunk Spawn Chance";
-        public final String SPAWN_MEDIUM_KEY = "Spawn Medium";
-        public final String OPTIONAL_PARAM_KEY = "Tags";
-        public final String DEFAULT_BIOME_CAP_KEY = "Default Biome Cap";
-        public final String MAPPING_TO_CAP = "Biome Caps";
+		public final String SPAWN_RATE_KEY = "Spawn Rate";
+		public final String MAX_CREATURE_KEY = "Spawn Cap";
+		public final String CHUNK_CHANCE_KEY = "Chunk Spawn Chance";
+		public final String SPAWN_MEDIUM_KEY = "Spawn Medium";
+		public final String ITER_PER_CHUNK = "Iterations Per Chunk";
+		public final String ITER_PER_PACK = "Iterations Per Pack";
+		public final String OPTIONAL_PARAM_KEY = "Spawn Tag";
+		public final String DEFAULT_BIOME_CAP_KEY = "Default Biome Cap";
+		public final String MAPPING_TO_CAP = "Biome Caps";
 
         @Override
         public JsonElement serialize(CreatureTypeSaveObject src, Type typeOfSrc, JsonSerializationContext context) {
@@ -69,8 +80,11 @@ public class CreatureTypeSaveObject {
                 entry.addProperty(MAX_CREATURE_KEY, type.maxNumberOfCreature);
                 entry.addProperty(CHUNK_CHANCE_KEY, type.getChunkSpawnChance());
                 entry.addProperty(SPAWN_MEDIUM_KEY, type.getRawSpawnMedium());
-                entry.addProperty(OPTIONAL_PARAM_KEY, type.getOptionalParameters());
+                entry.addProperty(ITER_PER_CHUNK, type.getIterationsPerChunk());
+                entry.addProperty(ITER_PER_PACK, type.getIterationsPerPack());
+                entry.addProperty(OPTIONAL_PARAM_KEY, type.getSpawnExpression());
                 entry.addProperty(DEFAULT_BIOME_CAP_KEY, type.getDefaultBiomeCap());
+
                 JsonObject biomeCaps = new JsonObject();
                 for (Entry<String, Integer> capEntry : type.getBiomeCaps().entrySet()) {
                     biomeCaps.addProperty(capEntry.getKey(), capEntry.getValue());
@@ -99,7 +113,16 @@ public class CreatureTypeSaveObject {
                             GsonHelper.getMemberOrDefault(builderObject, MAX_CREATURE_KEY, 10));
                     builder.withChanceToChunkSpawn(GsonHelper.getMemberOrDefault(builderObject, CHUNK_CHANCE_KEY, 0f));
                     builder.setRawMedium(GsonHelper.getMemberOrDefault(builderObject, SPAWN_MEDIUM_KEY, "air"));
-                    builder.withOptionalParameters(GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY, ""));
+                    builder.setIterationsPerChunk(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_CHUNK, 3));
+                    builder.setIterationsPerPack(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_PACK, 4));
+					if (fileVersion.equals("1.0")) {
+						TagConverter tag = new TagConverter(GsonHelper.getMemberOrDefault(builderObject, "Tags", ""));
+						builder.withSpawnExpression(tag.expression);
+
+					} else {
+						builder.withSpawnExpression(GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY,
+								""));
+					}
                     builder.withDefaultBiomeCap(GsonHelper.getMemberOrDefault(builderObject, DEFAULT_BIOME_CAP_KEY, -1));
                     JsonObject caps = GsonHelper.getMemberOrDefault(builderObject, MAPPING_TO_CAP, new JsonObject());
                     for (Entry<String, JsonElement> capEntry : caps.entrySet()) {

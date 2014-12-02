@@ -12,26 +12,31 @@ import net.minecraft.world.World;
 
 public class KeyParserSpawnRange extends KeyParserBase {
 
-    public KeyParserSpawnRange(Key key) {
-        super(key, false, KeyType.VALUE);
-    }
+	public KeyParserSpawnRange(Key key) {
+		super(key, false, KeyType.VALUE);
+	}
 
-    @Override
-    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
-            ArrayList<Operand> operandvalue) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
+			ArrayList<Operand> operandvalue) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
-        String[] pieces = parseable.split(",");
-        OptionalParser.parseSpawnRange(pieces, valueCache);
-        return true;
-    }
+	@Override
+	public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
+		String[] pieces = parseable.split(",");
+		OptionalParser.parseSpawnRange(pieces, valueCache);
+		return true;
+	}
 
-    @Override
-    public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
-            TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
+			TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String toExpression(String parseable) {
+		throw new UnsupportedOperationException();
+	}
 }

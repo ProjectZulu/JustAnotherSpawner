@@ -39,7 +39,7 @@ public class LivingGroupSaveObject {
         this.configNameToAttributeGroups = Optional.absent();
         this.configNameToLivingGroups = Optional.absent();
     }
-
+    //TODO: Remove LivingGroups as they no longer exist
     public LivingGroupSaveObject(Map<Class<? extends EntityLiving>, String> classNamesToJASNames,
             Collection<LivingGroup> attributeGroups, Collection<LivingGroup> LivingGroups) {
         this.fmlToJASName = new TreeMap<String, String>();
@@ -72,7 +72,7 @@ public class LivingGroupSaveObject {
 
     public static class LivingGroupSaveObjectSerializer implements JsonSerializer<LivingGroupSaveObject>,
             JsonDeserializer<LivingGroupSaveObject> {
-        public final static String FILE_VERSION = "1.0";
+        public final static String FILE_VERSION = "2.0";
         public final static String FILE_VERSION_KEY = "File Version";
         public final static String ENTITY_MAP_KEY = "CustomEntityNames";
         public final static String ATTRIBUTE_KEY = "AttributeGroups";
@@ -109,26 +109,6 @@ public class LivingGroupSaveObject {
                 attributeObject.add(configName, biomeObject);
             }
             endObject.add(ATTRIBUTE_KEY, attributeObject);
-
-            JsonObject biomeGroupObject = new JsonObject();
-            for (Entry<String, TreeMap<String, LivingGroup>> outerEntry : saveObject.configNameToLivingGroups.get()
-                    .entrySet()) {
-                String configName = outerEntry.getKey();
-                JsonObject biomeObject = new JsonObject();
-                for (Entry<String, LivingGroup> innerEntry : outerEntry.getValue().entrySet()) {
-                    String groupName = innerEntry.getKey();
-                    LivingGroup group = innerEntry.getValue();
-                    JsonArray contents = new JsonArray();
-                    for (String content : group.contents()) {
-                        contents.add(new JsonPrimitive(content));
-                    }
-                    JsonObject contentsObject = new JsonObject();
-                    contentsObject.add(CONTENTS_KEY, contents);
-                    biomeObject.add(groupName, contentsObject);
-                }
-                biomeGroupObject.add(configName, biomeObject);
-            }
-            endObject.add(GROUP_KEY, biomeGroupObject);
             return endObject;
         }
 
@@ -144,35 +124,37 @@ public class LivingGroupSaveObject {
                 saveObject.fmlToJASName.put(entry.getKey(), entry.getValue().getAsString());
             }
 
-            JsonElement attribElement = endObject.get(ATTRIBUTE_KEY);
-            if (attribElement != null && attribElement.isJsonObject()) {
-                JsonObject attributeObject = attribElement.getAsJsonObject();
-                for (Entry<String, JsonElement> outerEntry : attributeObject.entrySet()) {
-                    String configName = outerEntry.getKey();
-                    saveObject.configNameToAttributeGroups = Optional
-                            .of(new TreeMap<String, TreeMap<String, LivingGroup>>());
-                    TreeMap<String, LivingGroup> groupNameToBiomeGroup = saveObject.configNameToAttributeGroups.get()
-                            .get(configName);
-                    if (groupNameToBiomeGroup == null) {
-                        groupNameToBiomeGroup = new TreeMap<String, LivingGroup>();
-                        saveObject.configNameToAttributeGroups.get().put(configName, groupNameToBiomeGroup);
-                    }
-                    JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
-                    for (Entry<String, JsonElement> innerEntry : innerObject.entrySet()) {
-                        String groupName = innerEntry.getKey();
-                        JsonArray contentsArray = innerEntry.getValue().getAsJsonObject().get(CONTENTS_KEY)
-                                .getAsJsonArray();
-                        ArrayList<String> contents = new ArrayList<String>();
-                        for (JsonElement jsonElement : contentsArray) {
-                            contents.add(jsonElement.getAsString());
-                        }
-                        groupNameToBiomeGroup.put(groupName, new LivingGroup(groupName, configName, contents));
-                    }
-                }
-            }
+			JsonElement attribElement = endObject.get(ATTRIBUTE_KEY);
+			if (attribElement != null && attribElement.isJsonObject()) {
+				JsonObject attributeObject = attribElement.getAsJsonObject();
+				for (Entry<String, JsonElement> outerEntry : attributeObject.entrySet()) {
+					String configName = outerEntry.getKey();
+					saveObject.configNameToAttributeGroups = Optional
+							.of(new TreeMap<String, TreeMap<String, LivingGroup>>());
+					TreeMap<String, LivingGroup> groupNameToBiomeGroup = saveObject.configNameToAttributeGroups.get()
+							.get(configName);
+					if (groupNameToBiomeGroup == null) {
+						groupNameToBiomeGroup = new TreeMap<String, LivingGroup>();
+						saveObject.configNameToAttributeGroups.get().put(configName, groupNameToBiomeGroup);
+					}
+					JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
+					for (Entry<String, JsonElement> innerEntry : innerObject.entrySet()) {
+						String groupName = innerEntry.getKey();
+						JsonArray contentsArray = innerEntry.getValue().getAsJsonObject().get(CONTENTS_KEY)
+								.getAsJsonArray();
+						ArrayList<String> contents = new ArrayList<String>();
+						for (JsonElement jsonElement : contentsArray) {
+							contents.add(jsonElement.getAsString());
+						}
+						groupNameToBiomeGroup.put(groupName, new LivingGroup(groupName, configName, contents));
+					}
+				}
+			}
 
             JsonElement groupElement = endObject.get(GROUP_KEY);
             if (groupElement != null && groupElement.isJsonObject()) {
+            	//Hack to port LivningGroupContents to LivingHandler
+            	LivingHandlerSaveObject.Serializer.livingGroupContents.clear(); 
                 JsonObject biomeGroupObject = groupElement.getAsJsonObject();
                 saveObject.configNameToLivingGroups = Optional.of(new TreeMap<String, TreeMap<String, LivingGroup>>());
                 for (Entry<String, JsonElement> outerEntry : biomeGroupObject.entrySet()) {
@@ -194,7 +176,9 @@ public class LivingGroupSaveObject {
                         for (JsonElement jsonElement : contentsArray) {
                             contents.add(jsonElement.getAsString());
                         }
-                        groupNameToBiomeGroup.put(groupName, new LivingGroup(groupName, configName, contents));
+						if (fileVersion.equals("1.0")) {
+							LivingHandlerSaveObject.Serializer.livingGroupContents.put(groupName, contents);
+						}
                     }
                 }
             }

@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -55,27 +57,35 @@ public final class BiomeSpawnListRegistry {
             Table<String, String, Set<SpawnListEntry>> validSpawnListEntries,
             Table<String, String, Set<SpawnListEntry>> invalidSpawnListEntries) {
         LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnListEntry.livingGroupID);
-        if (spawnListEntry.itemWeight > 0
-                && livingHandlerRegistry.getLivingHandler(spawnListEntry.livingGroupID).shouldSpawn) {
-            logSpawning(spawnListEntry, handler, true);
-            Set<SpawnListEntry> spawnList = validSpawnListEntries.get(spawnListEntry.locationGroup,
-                    handler.creatureTypeID);
-            if (spawnList == null) {
-                spawnList = new HashSet<SpawnListEntry>();
-                validSpawnListEntries.put(spawnListEntry.locationGroup, handler.creatureTypeID, spawnList);
-            }
-            return spawnList.add(spawnListEntry);
-        } else {
-            logSpawning(spawnListEntry, handler, false);
-            Set<SpawnListEntry> spawnList = invalidSpawnListEntries.get(spawnListEntry.locationGroup,
-                    handler.creatureTypeID);
-            if (spawnList == null) {
-                spawnList = new HashSet<SpawnListEntry>();
-                invalidSpawnListEntries.put(spawnListEntry.locationGroup, handler.creatureTypeID, spawnList);
-            }
-            return spawnList.add(spawnListEntry);
-        }
-    }
+		if (isSpawnListValid(spawnListEntry)) {
+			logSpawning(spawnListEntry, handler, true);
+			Set<SpawnListEntry> spawnList = validSpawnListEntries.get(spawnListEntry.locationGroup,
+					handler.creatureTypeID);
+			if (spawnList == null) {
+				spawnList = new HashSet<SpawnListEntry>();
+				validSpawnListEntries.put(spawnListEntry.locationGroup, handler.creatureTypeID, spawnList);
+			}
+			return spawnList.add(spawnListEntry);
+		} else {
+			logSpawning(spawnListEntry, handler, false);
+			Set<SpawnListEntry> spawnList = invalidSpawnListEntries.get(spawnListEntry.locationGroup,
+					handler.creatureTypeID);
+			if (spawnList == null) {
+				spawnList = new HashSet<SpawnListEntry>();
+				invalidSpawnListEntries.put(spawnListEntry.locationGroup, handler.creatureTypeID, spawnList);
+			}
+			return spawnList.add(spawnListEntry);
+		}
+	}
+
+	private boolean isSpawnListValid(SpawnListEntry entry) {
+		LivingHandler handler = livingHandlerRegistry.getLivingHandler(entry.livingGroupID);
+		BiomeGroup biomeGroup = biomeGroupRegistry.getBiomeGroup(entry.locationGroup);
+		// Confirm LivingHandler and BiomeGroup Exists
+		// Weight > 0 && Type.shouldSpawn == true
+		return handler != null && biomeGroup != null && entry.itemWeight > 0 && handler.shouldSpawn
+				&& !handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE);
+	}
 
     private void logSpawning(SpawnListEntry spawnListEntry, LivingHandler handler, boolean success) {
         if (success) {
@@ -126,11 +136,11 @@ public final class BiomeSpawnListRegistry {
         return ImmutableList.copyOf(biomeSpawnList);
     }
 
-    private WorldProperties worldProperties;
-    private BiomeGroupRegistry biomeGroupRegistry;
-    private LivingGroupRegistry livingGroupRegistry;
-    private LivingHandlerRegistry livingHandlerRegistry;
-    private StructureHandlerRegistry structureHandlerRegistry;
+    public final WorldProperties worldProperties;
+    public final BiomeGroupRegistry biomeGroupRegistry;
+    public final LivingGroupRegistry livingGroupRegistry;
+    public final LivingHandlerRegistry livingHandlerRegistry;
+    public final StructureHandlerRegistry structureHandlerRegistry;
 
     public BiomeSpawnListRegistry(WorldProperties worldProperties, BiomeGroupRegistry biomeGroupRegistry,
             LivingGroupRegistry livingGroupRegistry, CreatureTypeRegistry creatureTypeRegistry,
@@ -205,7 +215,7 @@ public final class BiomeSpawnListRegistry {
         }
     }
 
-    public void loadFromConfig(File configDirectory, ImportedSpawnList spawnList) {
+    public void loadFromConfig(File configDirectory, ImportedSpawnList importedSpawnList) {
         /* Contains Mapping between BiomeGroupID, LivingType to valid SpawnListEntry */
         Table<String, String, Set<SpawnListEntry>> validEntriesBuilder = HashBasedTable.create();
         /* Contains Mapping Between BiomeGroupID, LivingType to invalid SpawnListEntry i.e. spawnWeight <=0 etc. */
@@ -228,8 +238,8 @@ public final class BiomeSpawnListRegistry {
                 if (biomeGroupRegistry.getBiomeGroup(builder.getLocationGroupId()) == null) {
                     JASLog.log().severe("BiomeGroup %s does not exist. Entry will be ignored [%s].",
                             builder.getLocationGroupId(), builder);
-                } else if (livingGroupRegistry.getLivingGroup(builder.getLivingGroupId()) == null) {
-                    JASLog.log().severe("LivingGroup %s does not exist. Entry will be ignored [%s].",
+                } else if (livingHandlerRegistry.getLivingHandler(builder.getLivingGroupId()) == null) {
+                    JASLog.log().severe("LivingHandler %s does not exist. Entry will be ignored [%s].",
                             builder.getLivingGroupId(), builder);
                 } else {
                     SpawnListEntry spawnListEntry = null;
@@ -238,7 +248,7 @@ public final class BiomeSpawnListRegistry {
                     } catch (Exception e) {
                         JASLog.log().severe("Error building %s. Entry will be ignored [%s].", builder);
                     }
-                    if (spawnListEntry != null) {
+					if (spawnListEntry != null) {
                         saveFilesProcessed.add(getSaveFileName(spawnListEntry.livingGroupID));
                         addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
                     }
@@ -248,24 +258,29 @@ public final class BiomeSpawnListRegistry {
 
         /* Any files that were not Present/Processable should be created */
         Collection<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers();
-        for (LivingHandler handler : livingHandlers) {
-            if (saveFilesProcessed.contains(getSaveFileName(handler.groupID))) {
-                continue;
-            }
-            // String groupID = handler.groupID;
-            if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
-                JASLog.log().debug(Level.INFO,
-                        "Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
-                        handler.groupID, handler.creatureTypeID);
-                continue;
-            }
-            
-            for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
-                LivingGroup livGroup = livingGroupRegistry.getLivingGroup(handler.groupID);
-                SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, livGroup, spawnList);
-                addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
-            }
-        }
+		for (LivingHandler handler : livingHandlers) {
+			if (handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
+				JASLog.log().debug(Level.INFO,
+						"Not Generating SpawnList entries for %s as it does not have CreatureType. CreatureTypeID: %s",
+						handler.livingID, handler.creatureTypeID);
+				continue;
+			}
+			if (saveFilesProcessed.contains(getSaveFileName(handler.livingID))
+					&& !livingGroupRegistry.newJASNames.contains(handler.livingID)) {
+				for (String newMapping : biomeGroupRegistry.newMappings) {
+					BiomeGroup newGroup = biomeGroupRegistry.getBiomeGroup(newMapping);
+					if (newGroup != null) {
+						SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(newGroup, handler, importedSpawnList);
+						addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+					}
+				}
+			} else {
+				for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
+					SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, importedSpawnList);
+					addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+				}
+			}
+		}
 
         this.validSpawnListEntries = ImmutableTable.<String, String, Set<SpawnListEntry>> builder()
                 .putAll(validEntriesBuilder).build();
@@ -320,17 +335,17 @@ public final class BiomeSpawnListRegistry {
      * 
      * Generates using defaults values (i.e. spawn rate == 0) if one doesn't exist.
      */
-    private SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, LivingGroup livingGroup,
+    private SpawnListEntry findVanillaSpawnListEntry(BiomeGroup group, LivingHandler livingHandler,
             ImportedSpawnList importedSpawnList) {
         for (String pckgNames : group.getBiomeNames()) {
             for (Integer biomeID : biomeGroupRegistry.pckgNameToBiomeID().get(pckgNames)) {
                 Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
                         .getSpawnableCreatureList(biomeID);
-                for (String jasName : livingGroup.entityJASNames()) {
+                for (String jasName : livingHandler.namedJASSpawnables) {
                     Class<? extends EntityLiving> livingClass = livingGroupRegistry.JASNametoEntityClass.get(jasName);
                     for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
                         if (spawnListEntry.entityClass.equals(livingClass)) {
-                            return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID)
+                            return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID)
                                     .setWeight(spawnListEntry.itemWeight).setMinChunkPack(spawnListEntry.minGroupCount)
                                     .setMaxChunkPack(spawnListEntry.maxGroupCount).build();
                         }
@@ -338,7 +353,7 @@ public final class BiomeSpawnListRegistry {
                 }
             }
         }
-        return new SpawnListEntryBuilder(livingGroup.groupID, group.groupID).build();
+        return new SpawnListEntryBuilder(livingHandler.livingID, group.groupID).build();
     }
 
     public void saveToConfig(File configDirectory) {
@@ -355,13 +370,97 @@ public final class BiomeSpawnListRegistry {
             GsonHelper.writeToGson(FileUtilities.createWriter(saveFile, true),
                     new BiomeSpawnsSaveObject(entrySet.getValue(), sortCreatureByBiome), gson);
         }
-    }
+	}
 
-    public static File getFile(File configDirectory, String saveName, String fileName) {
-        String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
-        if (fileName != null && !fileName.equals("")) {
-            filePath = filePath.concat(fileName).concat(".cfg");
-        }
-        return new File(configDirectory, filePath);
-    }
+	public static File getFile(File configDirectory, String saveName, String fileName) {
+		String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
+		if (fileName != null && !fileName.equals("")) {
+			filePath = filePath.concat(fileName).concat(".cfg");
+		}
+		return new File(configDirectory, filePath);
+	}
+
+	public void addSpawnListEntry(SpawnListEntryBuilder builder) {
+		Collection<SpawnListEntryBuilder> list = new ArrayList<SpawnListEntryBuilder>(1);
+		list.add(builder);
+		addSpawnListEntry(list);
+	}
+
+	public void addSpawnListEntry(Collection<SpawnListEntryBuilder> builders) {
+		Collection<SpawnListEntry> newEntries = new ArrayList<SpawnListEntry>(builders.size());
+		for (SpawnListEntryBuilder builder : builders) {
+			newEntries.add(builder.build());
+		}
+
+		for (SpawnListEntry newEntry : newEntries) {
+			LivingHandler handler = livingHandlerRegistry.getLivingHandler(newEntry.livingGroupID);
+			String creatureTypeId = handler != null ? handler.creatureTypeID : CreatureTypeRegistry.NONE;
+
+			boolean isAlreadyPresent = false;
+			for (Set<SpawnListEntry> allSpawnLists : validSpawnListEntries.row(newEntry.locationGroup).values()) {
+				for (SpawnListEntry spawnListEntry : allSpawnLists) {
+					if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
+						isAlreadyPresent = true;
+					}
+				}
+			}
+			for (Set<SpawnListEntry> allSpawnLists : invalidSpawnListEntries.row(newEntry.locationGroup).values()) {
+				for (SpawnListEntry spawnListEntry : allSpawnLists) {
+					if (spawnListEntry.livingGroupID.equalsIgnoreCase(newEntry.livingGroupID)) {
+						isAlreadyPresent = true;
+					}
+				}
+			}
+			if (!isAlreadyPresent && !creatureTypeId.equalsIgnoreCase(CreatureTypeRegistry.NONE)) {
+				if (isSpawnListValid(newEntry)) {
+					Set<SpawnListEntry> validList = validSpawnListEntries.get(newEntry.locationGroup, creatureTypeId);
+					validList.add(newEntry);
+				} else {
+					Set<SpawnListEntry> invalidList = invalidSpawnListEntries.get(newEntry.locationGroup,
+							creatureTypeId);
+					invalidList.add(newEntry);
+				}
+			}
+		}
+	}
+
+	public void removeSpawnListEntry(SpawnListEntryBuilder builder) {
+		removeSpawnListEntry(builder.getLivingGroupId(), builder.getLocationGroupId());
+	}
+
+	public boolean removeSpawnListEntry(String livingGroupId, String biomeGroupId) {
+		ImmutableCollection<String> validSpawnListKeys = validSpawnListEntries.row(biomeGroupId).keySet();
+		boolean wasPresent = false;
+		for (String creatureTypeKey : validSpawnListKeys) {
+			Set<SpawnListEntry> validSpawnList = validSpawnListEntries.get(biomeGroupId, creatureTypeKey);
+			Iterator<SpawnListEntry> iterator = validSpawnList.iterator();
+			while (iterator.hasNext()) {
+				SpawnListEntry spawnListEntry = iterator.next();
+				if (spawnListEntry.livingGroupID.equalsIgnoreCase(livingGroupId)) {
+					iterator.remove();
+					wasPresent = true;
+				}
+			}
+		}
+
+		ImmutableCollection<String> invalidSpawnListKeys = invalidSpawnListEntries.row(biomeGroupId).keySet();
+		for (String creatureTypeKey : invalidSpawnListKeys) {
+			Set<SpawnListEntry> invalidSpawnList = invalidSpawnListEntries.get(biomeGroupId, creatureTypeKey);
+			Iterator<SpawnListEntry> iterator = invalidSpawnList.iterator();
+			while (iterator.hasNext()) {
+				SpawnListEntry spawnListEntry = iterator.next();
+				if (spawnListEntry.livingGroupID.equalsIgnoreCase(livingGroupId)) {
+					iterator.remove();
+					wasPresent = true;
+				}
+			}
+		}
+		return wasPresent;
+	}
+
+	public void updateSpawnListEntry(String prevLivingGroupId, String prevBiomeGroupId, SpawnListEntryBuilder newBuilder) {
+		if (removeSpawnListEntry(prevLivingGroupId, prevBiomeGroupId)) {
+			addSpawnListEntry(newBuilder);
+		}
+	}
 }

@@ -1,10 +1,13 @@
 package jas.common.spawner.biome.structure;
 
 import jas.common.GsonHelper;
+import jas.common.spawner.TagConverter;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
+import jas.common.spawner.creature.handler.parsing.keys.Key;
+import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.lang.reflect.Type;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import com.google.common.base.Optional;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -99,12 +103,17 @@ public class StructureSaveObject {
 
     public static class Serializer implements JsonSerializer<StructureSaveObject>,
             JsonDeserializer<StructureSaveObject> {
-        public final String FILE_VERSION = "1.0";
+        public final String FILE_VERSION = "2.0";
         public final String FILE_VERSION_KEY = "FILE_VERSION";
         public final String STRUCTURES_KEY = "STRUCTURES";
         public final String ENTITY_STAT_KEY = "Weight-PassivePackMax-ChunkPackMin-ChunkPackMax";
+        @Deprecated
         public final String ENTITY_TAG_KEY = "Tags";
 
+		public final String SPAWN_TAG_KEY = "Spawn Tag";
+		public final String POSTSPAWN_KEY = "PostSpawn Tags";
+		public final String SPAWN_OPERAND_KEY = "Spawn Operand";
+        
         @Override
         public JsonElement serialize(StructureSaveObject object, Type type, JsonSerializationContext context) {
             JsonObject endObject = new JsonObject();
@@ -125,7 +134,18 @@ public class StructureSaveObject {
                                 .getPackSize(), nameEntry.getValue().getMinChunkPack(), nameEntry.getValue()
                                 .getMaxChunkPack());
                         creatureNameObject.addProperty(ENTITY_STAT_KEY, stats);
-                        creatureNameObject.addProperty(ENTITY_TAG_KEY, nameEntry.getValue().getOptionalParameters());
+                        
+						if (nameEntry.getValue().getSpawnOperand().isPresent()) {
+							creatureNameObject.addProperty(SPAWN_OPERAND_KEY, nameEntry.getValue().getSpawnOperand()
+									.get().toString());
+						}
+						if (!"".equals(nameEntry.getValue().getSpawnExpression())) {
+							creatureNameObject.addProperty(SPAWN_TAG_KEY, nameEntry.getValue().getSpawnExpression());
+						}
+						if (!"".equals(nameEntry.getValue().getPostSpawnExpression())) {
+							creatureNameObject
+									.addProperty(POSTSPAWN_KEY, nameEntry.getValue().getPostSpawnExpression());
+						}
                         livingTypeObject.add(creatureName, creatureNameObject);
                     }
                     structureKeyObject.add(livingType, livingTypeObject);
@@ -169,11 +189,36 @@ public class StructureSaveObject {
                         JsonObject creatureNameObject = nameEntry.getValue().getAsJsonObject();
                         SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingGroup, structureKey);
                         getSetStats(builder, creatureNameObject);
+						if (fileVersion.equals("1.0")) {
+							String optionalParameters = GsonHelper.getMemberOrDefault(creatureNameObject,
+									ENTITY_TAG_KEY, "");
+							String[] parts = optionalParameters.split("\\{");
+							for (String string : optionalParameters.split("\\{")) {
+								String parsed = string.replace("}", "");
+								String titletag = parsed.split("\\:", 2)[0].toLowerCase();
+								TagConverter conv = null;
+								if (Key.spawn.keyParser.isMatch(titletag)) {
+									conv = new TagConverter(parsed);
+									if (!conv.expression.trim().equals("")) {
+										builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
+									}
+								} else if (Key.postspawn.keyParser.isMatch(titletag)) {
+									conv = new TagConverter(parsed);
+									if (!conv.expression.trim().equals("")) {
+										builder.setPostSpawnExpression(conv.expression);
+									}
+								}
+							}
+						} else {
+							String spawnTag = GsonHelper.getMemberOrDefault(creatureNameObject, SPAWN_TAG_KEY, "");
+							String spawnOperand = GsonHelper.getMemberOrDefault(creatureNameObject, SPAWN_OPERAND_KEY,
+									"");
+							builder.setSpawnExpression(spawnTag,
+									Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
+							String postspawnTag = GsonHelper.getMemberOrDefault(creatureNameObject, POSTSPAWN_KEY, "");
+							builder.setPostSpawnExpression(postspawnTag);
+						}
 
-                        JsonElement element = creatureNameObject.get(ENTITY_TAG_KEY);
-                        if (element != null) {
-                            builder.setOptionalParameters(element.getAsString());
-                        }
                         livingTypeMap.put(livingGroup, builder);
                     }
                 }

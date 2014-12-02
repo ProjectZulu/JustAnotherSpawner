@@ -4,327 +4,285 @@ import jas.common.DefaultProps;
 import jas.common.EntityProperties;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo;
+import jas.common.spawner.Tags;
 import jas.common.spawner.creature.entry.SpawnListEntry;
-import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
-import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
-import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
-import jas.common.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
+import java.io.Serializable;
 
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 
 import org.apache.logging.log4j.Level;
+import org.mvel2.MVEL;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 public class LivingHandler {
 
-    public static final String LivingHandlerCategoryComment = "Editable Format: CreatureType" + DefaultProps.DELIMETER
-            + "ShouldSpawn" + "{TAG1:PARAM1,value:PARAM2,value}{TAG2:PARAM1,value:PARAM2,value}";
+	public final String livingID;
+	public final String creatureTypeID;
+	public final boolean shouldSpawn;
+	public final CreatureTypeRegistry creatureTypeRegistry;
 
-    public final String groupID;
-    public final String creatureTypeID;
-    public final boolean shouldSpawn;
-    public final String optionalParameters;
-    public final CreatureTypeRegistry creatureTypeRegistry;
-    protected OptionalSettingsSpawning spawning;
-    protected OptionalSettingsDespawning despawning;
-    protected OptionalSettingsPostSpawning postspawning;
+	public final String spawnExpression;
+	public final String despawnExpression;
+	public final String postspawnExpression;
+	public final String entityExpression;
 
-    public OptionalSettingsDespawning getDespawning() {
-        return despawning;
-    }
+	public final Optional<Integer> maxDespawnRange;
+	public final Optional<Integer> entityCap;
+	public final Optional<Integer> minDespawnDistance;
+	public final Optional<Integer> despawnAge;
+	public final Optional<Integer> despawnRate;
+	public final Optional<Operand> spawnOperand;
+	private Optional<Serializable> compSpawnExpression;
+	private Optional<Serializable> compDespawnExpression;
+	private Optional<Serializable> compPostSpawnExpression;
+	public final Optional<Serializable> compEntityExpression;
 
-    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, LivingHandlerBuilder builder) {
-        this.creatureTypeRegistry = creatureTypeRegistry;
-        this.groupID = builder.getHandlerId();
-        this.creatureTypeID = creatureTypeRegistry.getCreatureType(builder.getCreatureTypeId()) != null ? builder
-                .getCreatureTypeId() : CreatureTypeRegistry.NONE;
-        this.shouldSpawn = builder.getShouldSpawn();
-        this.optionalParameters = builder.getOptionalParameters();
-        for (String string : optionalParameters.split("\\{")) {
-            String parsed = string.replace("}", "");
-            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-            if (Key.spawn.keyParser.isMatch(titletag)) {
-                spawning = new OptionalSettingsSpawning(parsed);
-            } else if (Key.despawn.keyParser.isMatch(titletag)) {
-                despawning = new OptionalSettingsDespawning(parsed);
-            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
-                postspawning = new OptionalSettingsPostSpawning(parsed);
-            }
-        }
-        spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
-        despawning = despawning == null ? new OptionalSettingsDespawning("") : despawning;
-        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
-    }
+	public final ImmutableList<String> contents; // Raw Input, builds namedJASSpawnables, i.e Bat,A|Beast,-Boar
+	public transient final ImmutableSet<String> namedJASSpawnables; // Resulting list of entities that this LH should be
+																	// able to spawn
 
-    @Deprecated
-    public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, String livingGroupID, String creatureTypeID,
-            boolean shouldSpawn, String optionalParameters) {
-        this.creatureTypeRegistry = creatureTypeRegistry;
-        this.groupID = livingGroupID;
-        this.creatureTypeID = creatureTypeRegistry.getCreatureType(creatureTypeID) != null ? creatureTypeID
-                : CreatureTypeRegistry.NONE;
-        this.shouldSpawn = shouldSpawn;
-        this.optionalParameters = optionalParameters;
+	public Optional<Serializable> getDespawning() {
+		return compDespawnExpression;
+	}
 
-        for (String string : optionalParameters.split("\\{")) {
-            String parsed = string.replace("}", "");
-            String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-            if (Key.spawn.keyParser.isMatch(titletag)) {
-                spawning = new OptionalSettingsSpawning(parsed);
-            } else if (Key.despawn.keyParser.isMatch(titletag)) {
-                despawning = new OptionalSettingsDespawning(parsed);
-            } else if (Key.postspawn.keyParser.isMatch(titletag)) {
-                postspawning = new OptionalSettingsPostSpawning(parsed);
-            }
-        }
-        spawning = spawning == null ? new OptionalSettingsSpawning("") : spawning;
-        despawning = despawning == null ? new OptionalSettingsDespawning("") : despawning;
-        postspawning = postspawning == null ? new OptionalSettingsPostSpawning("") : postspawning;
-    }
+	public LivingHandler(CreatureTypeRegistry creatureTypeRegistry, LivingHandlerBuilder builder) {
+		this.creatureTypeRegistry = creatureTypeRegistry;
+		this.livingID = builder.getHandlerId();
+		this.creatureTypeID = creatureTypeRegistry.getCreatureType(builder.getCreatureTypeId()) != null ? builder
+				.getCreatureTypeId() : CreatureTypeRegistry.NONE;
+		this.shouldSpawn = builder.getShouldSpawn();
+		this.contents = ImmutableList.<String> builder().addAll(builder.contents).build();
+		this.namedJASSpawnables = ImmutableSet.<String> builder().addAll(builder.getNamedJASSpawnables()).build();
+		this.spawnExpression = builder.getSpawnExpression();
+		this.despawnExpression = builder.getDespawnExpression();
+		this.postspawnExpression = builder.getPostSpawnExpression();
+		this.entityExpression = builder.getEntityExpression();
+		this.maxDespawnRange = builder.getMaxDespawnRange();
+		this.entityCap = builder.getEntityCap();
+		this.minDespawnDistance = builder.getMinDespawnRange();
+		this.despawnAge = builder.getDespawnAge();
+		this.despawnRate = builder.getDespawnRate();
+		this.spawnOperand = builder.getSpawnOperand();
+		this.compSpawnExpression = !spawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
+		this.compDespawnExpression = !despawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(despawnExpression)) : Optional.<Serializable> absent();
+		this.compPostSpawnExpression = !postspawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(postspawnExpression)) : Optional.<Serializable> absent();
+		this.compEntityExpression = !entityExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(entityExpression)) : Optional.<Serializable> absent();
+	}
 
-    @Deprecated
-    public final LivingHandler toCreatureTypeID(String creatureTypeID) {
-        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
-    }
+	public final int getLivingCap() {
+		return entityCap.isPresent() ? entityCap.get() : 0;
+	}
 
-    @Deprecated
-    public final LivingHandler toShouldSpawn(boolean shouldSpawn) {
-        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
-    }
+	/**
+	 * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
+	 * both ensures that a Modder can implement their own logic indepenently of the modded creature and that end users
+	 * are allowed to customize their experience
+	 * 
+	 * @param entity Entity being Spawned
+	 * @param spawnListEntry SpawnListEntry the Entity belongs to
+	 * @return True if location is valid For entity to spawn, false otherwise
+	 */
+	public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
+		boolean canLivingSpawn = isValidLiving(entity, info);
+		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry, info);
 
-    @Deprecated
-    public final LivingHandler toOptionalParameters(String optionalParameters) {
-        return constructInstance(groupID, creatureTypeID, shouldSpawn, optionalParameters);
-    }
+		if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND) || spawnListEntry.spawnOperand.isPresent()
+				&& spawnListEntry.spawnOperand.get() == Operand.AND) {
+			return canLivingSpawn && canSpawnListSpawn;
+		} else {
+			return canLivingSpawn || canSpawnListSpawn;
+		}
+	}
 
-    /**
-     * Used internally to create a new Instance of LivingHandler. MUST be Overriden by Subclasses so that they are not
-     * replaced with Parent. Used to Allow subclasses to Include their own Logic, but maintain same data structure.
-     * 
-     * Should create a new instance of class using parameters provided in the constructor.
-     * 
-     * @param typeID
-     * @param maxNumberOfCreature
-     * @param spawnMedium
-     * @param spawnRate
-     * @param chunkSpawning
-     */
-    @Deprecated
-    protected LivingHandler constructInstance(String livingGroupID, String creatureTypeID, boolean shouldSpawn,
-            String optionalParameters) {
-        return new LivingHandler(creatureTypeRegistry, livingGroupID, creatureTypeID, shouldSpawn, optionalParameters);
-    }
+	/**
+	 * Evaluates if this Entity in its current location / state would be capable of despawning eventually
+	 */
+	public final boolean canDespawn(EntityLiving entity, CountInfo info) {
+		if (!getDespawning().isPresent()) {
+			return LivingHelper.canDespawn(entity);
+		}
+		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
+		int xCoord = MathHelper.floor_double(entity.posX);
+		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int zCoord = MathHelper.floor_double(entity.posZ);
 
-    public final int getLivingCap() {
-        Integer cap = spawning.getEntityCap();
-        return cap != null ? cap : 0;
-    }
+		if (entityplayer != null) {
+			double d0 = entityplayer.posX - entity.posX;
+			double d1 = entityplayer.posY - entity.posY;
+			double d2 = entityplayer.posZ - entity.posZ;
+			double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-    /**
-     * Replacement Method for EntitySpecific getCanSpawnHere(). Allows Handler to Override Creature functionality. This
-     * both ensures that a Modder can implement their own logic indepenently of the modded creature and that end users
-     * are allowed to customize their experience
-     * 
-     * @param entity Entity being Spawned
-     * @param spawnListEntry SpawnListEntry the Entity belongs to
-     * @return True if location is valid For entity to spawn, false otherwise
-     */
-    public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
-        boolean canLivingSpawn = isValidLiving(entity);
-        boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 
-        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
-            return canLivingSpawn && canSpawnListSpawn;
-        } else {
-            return canLivingSpawn || canSpawnListSpawn;
-        }
-    }
+			if (canDespawn == false) {
+				return false;
+			}
 
-    /**
-     * Evaluates if this Entity in its current location / state would be capable of despawning eventually
-     */
-    public final boolean canDespawn(EntityLiving entity) {
-        if (!getDespawning().isOptionalEnabled()) {
-            return LivingHelper.canDespawn(entity);
-        }
-        EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
-        int xCoord = MathHelper.floor_double(entity.posX);
-        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-        int zCoord = MathHelper.floor_double(entity.posZ);
+			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
+					.worldProperties().getGlobal().maxDespawnDist;
+			boolean instantDespawn = d3 > maxRange * maxRange;
+			if (instantDespawn) {
+				return true;
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        if (entityplayer != null) {
-            double d0 = entityplayer.posX - entity.posX;
-            double d1 = entityplayer.posY - entity.posY;
-            double d2 = entityplayer.posZ - entity.posZ;
-            double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+	/**
+	 * Called by Despawn to Manually Attempt to Despawn Entity
+	 * 
+	 * @param entity
+	 */
+	public final void despawnEntity(EntityLiving entity, CountInfo info) {
+		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
+		int xCoord = MathHelper.floor_double(entity.posX);
+		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int zCoord = MathHelper.floor_double(entity.posZ);
 
-            boolean canDespawn = !despawning.isInverted();
-            if (!despawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-                canDespawn = despawning.isInverted();
-            }
+		LivingHelper.setPersistenceRequired(entity, true);
+		if (entityplayer != null) {
+			double d0 = entityplayer.posX - entity.posX;
+			double d1 = entityplayer.posY - entity.posY;
+			double d2 = entityplayer.posZ - entity.posZ;
+			double playerDistance = d0 * d0 + d1 * d1 + d2 * d2;
 
-            if (canDespawn == false) {
-                return false;
-            }
+			EntityProperties entityProps = (EntityProperties) entity
+					.getExtendedProperties(EntityProperties.JAS_PROPERTIES);
+			entityProps.incrementAge(60);
 
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().getGlobal().maxDespawnDist);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 
-            if (instantDespawn) {
-                return true;
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
+			if (canDespawn == false) {
+				entityProps.resetAge();
+				return;
+			}
 
-    /**
-     * Called by Despawn to Manually Attempt to Despawn Entity
-     * 
-     * @param entity
-     */
-    public final void despawnEntity(EntityLiving entity) {
-        EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
-        int xCoord = MathHelper.floor_double(entity.posX);
-        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-        int zCoord = MathHelper.floor_double(entity.posZ);
+			Integer minRange = minDespawnDistance.isPresent() ? minDespawnDistance.get() : JustAnotherSpawner
+					.worldSettings().worldProperties().getGlobal().despawnDist;
+			boolean validDistance = playerDistance > minRange * minRange;
 
-        LivingHelper.setPersistenceRequired(entity, true);
-        if (entityplayer != null) {
-            double d0 = entityplayer.posX - entity.posX;
-            double d1 = entityplayer.posY - entity.posY;
-            double d2 = entityplayer.posZ - entity.posZ;
-            double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+			Integer minAge = despawnAge.isPresent() ? despawnAge.get() : JustAnotherSpawner.worldSettings()
+					.worldProperties().getGlobal().minDespawnTime;
+			boolean isOfAge = entityProps.getAge() > minAge;
 
-            EntityProperties entityProps = (EntityProperties) entity
-                    .getExtendedProperties(EntityProperties.JAS_PROPERTIES);
-            entityProps.incrementAge(60);
+			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
+					.worldProperties().getGlobal().maxDespawnDist;
+			boolean instantDespawn = playerDistance > maxRange * maxRange;
+			int rate = despawnRate.isPresent() ? despawnRate.get() : 40;
+			if (instantDespawn) {
+				entity.setDead();
+			} else if (isOfAge && entity.worldObj.rand.nextInt(1 + rate / 3) == 0 && validDistance) {
+				JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getCommandSenderName(),
+						entityProps.getAge(), rate);
+				entity.setDead();
+			} else if (!validDistance) {
+				entityProps.resetAge();
+			}
+		}
+	}
 
-            boolean canDespawn = !despawning.isInverted();
-            if (!despawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-                canDespawn = despawning.isInverted();
-            }
+	/**
+	 * Represents the 'Modders Choice' for Creature SpawnLocation.
+	 * 
+	 * @param entity
+	 * @param spawnType
+	 * @return
+	 */
+	protected boolean isValidLocation(EntityLiving entity) {
+		return entity.getCanSpawnHere();
+	}
 
-            if (canDespawn == false) {
-                entityProps.resetAge();
-                return;
-            }
+	public final boolean isValidLiving(EntityLiving entity, CountInfo info) {
+		if (!compSpawnExpression.isPresent()) {
+			return isValidLocation(entity);
+		}
+		int xCoord = MathHelper.floor_double(entity.posX);
+		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int zCoord = MathHelper.floor_double(entity.posZ);
+		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+		boolean canLivingSpawn = !(Boolean) MVEL.executeExpression(compSpawnExpression.get(), tags);
+		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
+				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+	}
 
-            boolean validDistance = despawning.isMidDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().getGlobal().despawnDist);
-            boolean isOfAge = despawning.isValidAge(entityProps.getAge(), JustAnotherSpawner.worldSettings()
-                    .worldProperties().getGlobal().minDespawnTime);
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, JustAnotherSpawner.worldSettings()
-                    .worldProperties().getGlobal().maxDespawnDist);
+	public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
+		if (!spawnListEntry.getOptionalSpawning().isPresent()) {
+			return false;
+		}
 
-            if (instantDespawn) {
-                entity.setDead();
-            } else if (isOfAge && entity.worldObj.rand.nextInt(1 + despawning.getRate() / 3) == 0 && validDistance) {
-                JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getCommandSenderName(),
-                        entityProps.getAge(), despawning.getRate());
-                entity.setDead();
-            } else if (!validDistance) {
-                entityProps.resetAge();
-            }
-        }
-    }
+		int xCoord = MathHelper.floor_double(entity.posX);
+		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int zCoord = MathHelper.floor_double(entity.posZ);
 
-    /**
-     * Represents the 'Modders Choice' for Creature SpawnLocation.
-     * 
-     * @param entity
-     * @param spawnType
-     * @return
-     */
-    protected boolean isValidLocation(EntityLiving entity) {
-        return entity.getCanSpawnHere();
-    }
+		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+		boolean canSpawnListSpawn = !(Boolean) MVEL.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags);
+		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
+				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+	}
 
-    public final boolean isValidLiving(EntityLiving entity) {
-        if (!spawning.isOptionalEnabled()) {
-            return isValidLocation(entity);
-        }
+	public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
+		if (compPostSpawnExpression.isPresent()) {
+			int xCoord = MathHelper.floor_double(entity.posX);
+			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+			int zCoord = MathHelper.floor_double(entity.posZ);
 
-        int xCoord = MathHelper.floor_double(entity.posX);
-        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-        int zCoord = MathHelper.floor_double(entity.posZ);
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+			MVEL.executeExpression(compPostSpawnExpression.get(), tags);
+		}
 
-        boolean canLivingSpawn = !spawning.isInverted();
-        if (!spawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-            canLivingSpawn = spawning.isInverted();
-        }
+		if (spawnListEntry.getOptionalPostSpawning().isPresent()) {
+			int xCoord = MathHelper.floor_double(entity.posX);
+			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+			int zCoord = MathHelper.floor_double(entity.posZ);
 
-        return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
-                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
-    }
+			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
+			MVEL.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags);
+		}
+	}
 
-    public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry) {
-        if (!spawnListEntry.getOptionalSpawning().isOptionalEnabled()) {
-            return false;
-        }
+	public static File getFile(File configDirectory, String saveName, String fileName) {
+		String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYHANDLERDIR;
+		if (fileName != null && !fileName.equals("")) {
+			filePath = filePath.concat(fileName).concat(".cfg");
+		}
+		return new File(configDirectory, filePath);
+	}
 
-        int xCoord = MathHelper.floor_double(entity.posX);
-        int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-        int zCoord = MathHelper.floor_double(entity.posZ);
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		LivingHandler other = (LivingHandler) obj;
+		return livingID.equals(other.livingID);
+	}
 
-        boolean canSpawnListSpawn = !spawnListEntry.getOptionalSpawning().isInverted();
-        if (!spawnListEntry.getOptionalSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord)) {
-            canSpawnListSpawn = spawnListEntry.getOptionalSpawning().isInverted();
-        }
-
-        return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
-                && entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
-    }
-
-    public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry) {
-        if (postspawning.isOptionalEnabled()) {
-            int xCoord = MathHelper.floor_double(entity.posX);
-            int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-            int zCoord = MathHelper.floor_double(entity.posZ);
-
-            postspawning.isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
-        }
-
-        if (spawnListEntry.getOptionalPostSpawning().isOptionalEnabled()) {
-            int xCoord = MathHelper.floor_double(entity.posX);
-            int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
-            int zCoord = MathHelper.floor_double(entity.posZ);
-
-            spawnListEntry.getOptionalPostSpawning().isValidLocation(entity.worldObj, entity, xCoord, yCoord, zCoord);
-        }
-    }
-
-    public static File getFile(File configDirectory, String saveName, String fileName) {
-        String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYHANDLERDIR;
-        if (fileName != null && !fileName.equals("")) {
-            filePath = filePath.concat(fileName).concat(".cfg");
-        }
-        return new File(configDirectory, filePath);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        LivingHandler other = (LivingHandler) obj;
-        return groupID.equals(other.groupID);
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((groupID == null) ? 0 : groupID.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((livingID == null) ? 0 : livingID.hashCode());
+		return result;
+	}
 }

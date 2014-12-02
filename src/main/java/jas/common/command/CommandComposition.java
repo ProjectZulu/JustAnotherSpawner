@@ -1,11 +1,13 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.spawner.CountInfo;
 import jas.common.spawner.CustomSpawner;
 import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
@@ -70,28 +72,28 @@ public class CommandComposition extends CommandJasBase {
                 EntityCounter creatureCount = new EntityCounter();
                 EntityCounter despawnCreatureCount = new EntityCounter();
                 foundMatch = true;
-                
+                CountInfo info = CustomSpawner.determineCountInfo(targetPlayer.worldObj);
                 for (Entity entity : CustomSpawner.getLoadedEntities(targetPlayer.worldObj)) {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
                     }
                     LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-                    ImmutableCollection<String> groupIDs = groupRegistry
-                            .getGroupsWithEntity(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+                    LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+					List<LivingHandler> livingHandlers = handlerRegistry
+							.getLivingHandlers(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+
                     /*
                      * Used to ensure that if an entity is in multiple groups that are have the same type (i.e.
                      * MONSTER), that it only counts once for each type
                      */
                     Set<String> typesCounted = new HashSet<String>();
-                    for (String groupID : groupIDs) {
-                        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
-                                .getLivingHandler(groupID);
+            		for (LivingHandler livingHandler : livingHandlers) {
                         if (!typesCounted.contains(creatureType.typeID)
                                 && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
                             creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
                             totalTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                             typesCounted.add(creatureType.typeID);
-                            if (livingHandler.canDespawn((EntityLiving) entity)) {
+                            if (livingHandler.canDespawn((EntityLiving) entity, info)) {
                                 despawnTypeCount.incrementOrPutIfAbsent(creatureType.typeID, 1);
                                 despawnCreatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
                             }

@@ -9,6 +9,7 @@ import jas.common.TopologicalSortingException;
 import jas.common.WorldProperties;
 import jas.common.math.SetAlgebra;
 import jas.common.math.SetAlgebra.OPERATION;
+import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.common.spawner.creature.handler.LivingGroupSaveObject.LivingGroupSaveObjectSerializer;
 
 import java.io.File;
@@ -46,419 +47,381 @@ import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 public class LivingGroupRegistry {
 
-    /* Contains packages with known prefixes apriori such as net.minecraft.entity should have vanilla prefix */
-    public static final HashMap<String, String> entityPackageToPrefix;
-    public static final String UNKNOWN_PREFIX;
-    static {
-        UNKNOWN_PREFIX = "unknown";
-        entityPackageToPrefix = new HashMap<String, String>(5);
-        entityPackageToPrefix.put("net.minecraft.entity.monster", "");
-        entityPackageToPrefix.put("net.minecraft.entity.passive", "");
-        entityPackageToPrefix.put("net.minecraft.entity.boss", "");
-    }
+	/* Contains packages with known prefixes apriori such as net.minecraft.entity should have vanilla prefix */
+	public static final HashMap<String, String> entityPackageToPrefix;
+	public static final String UNKNOWN_PREFIX;
+	static {
+		UNKNOWN_PREFIX = "unknown";
+		entityPackageToPrefix = new HashMap<String, String>(5);
+		entityPackageToPrefix.put("net.minecraft.entity.monster", "");
+		entityPackageToPrefix.put("net.minecraft.entity.passive", "");
+		entityPackageToPrefix.put("net.minecraft.entity.boss", "");
+	}
 
-    /** Group Identifier to Group Instance */
-    private ImmutableMap<String, LivingGroup> iDToGroup;
+	/** New Mappings added the Last Time LivingGroupRegistry.load() was run */
+	public Set<String> newJASNames = new HashSet<String>();
 
-    public Collection<LivingGroup> getEntityGroups() {
-        return iDToGroup.values();
-    }
+	/** Group Identifier to Group Instance */
+	private ImmutableMap<String, LivingGroup> iDToAttribute;
 
-    public LivingGroup getLivingGroup(String groupID) {
-        return iDToGroup.get(groupID);
-    }
+	public ImmutableMap<String, LivingGroup> iDToAttribute() {
+		return iDToAttribute;
+	}
 
-    public Class<? extends EntityLiving> getRandomEntity(String livingGroupID, Random random) {
-        LivingGroup livingGroup = getLivingGroup(livingGroupID);
-        if (!livingGroup.entityJASNames.isEmpty()) {
-            int selectedEntry = random.nextInt(livingGroup.entityJASNames.size());
-            int i = 0;
-            for (String jasName : livingGroup.entityJASNames) {
-                if (i++ == selectedEntry) {
-                    return this.JASNametoEntityClass.get(jasName);
-                }
-            }
-        }
-        return null;
-    }
+	/* Mapping From Entity Name (via EntityList.classToString) to JAS Name */
+	public ImmutableBiMap<Class<? extends EntityLiving>, String> EntityClasstoJASName;
 
-    /** Reverse Look-up Map to Get All Groups a Particular Entity is In */
-    private ImmutableListMultimap<String, String> entityIDToGroupIDList;
+	public ImmutableBiMap<Class<? extends EntityLiving>, String> entityClasstoJASName() {
+		return EntityClasstoJASName;
+	}
 
-    public ImmutableMultimap<String, String> getEntityIDToGroupIDList() {
-        return entityIDToGroupIDList;
-    }
+	/* Mapping From JAS Name to Entity Name (via EntityList.classToString) */
+	public ImmutableBiMap<String, Class<? extends EntityLiving>> JASNametoEntityClass;
 
-    public ImmutableCollection<String> getGroupsWithEntity(String jasName) {
-        return entityIDToGroupIDList.get(jasName);
-    }
+	public ImmutableBiMap<String, Class<? extends EntityLiving>> jasNametoEntityClass() {
+		return JASNametoEntityClass;
+	}
 
-    public List<LivingGroup> getEntityGroups(Class<? extends EntityLiving> entityClass) {
-        String jasName = EntityClasstoJASName.get(entityClass);
-        List<LivingGroup> list = new ArrayList<LivingGroup>();
-        for (String groupID : entityIDToGroupIDList.get(jasName)) {
-            list.add(iDToGroup.get(groupID));
-        }
-        return list;
-    }
+	private WorldProperties worldProperties;
 
-    /** Group Identifier to Group Instance */
-    private ImmutableMap<String, LivingGroup> iDToAttribute;
+	public LivingGroupRegistry(WorldProperties worldProperties) {
+		this.worldProperties = worldProperties;
+	}
 
-    public ImmutableMap<String, LivingGroup> iDToAttribute() {
-        return iDToAttribute;
-    }
+	public static class LivingGroup {
+		public final String groupID;
+		public final String configName; // TODO Change COnfigName to be transient and fetch its value from the map on
+										// loading
+		private final transient Set<String> entityJASNames = new HashSet<String>();
+		/* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
+		private final List<String> contents;
 
-    /* Mapping From Entity Name (via EntityList.classToString) to JAS Name */
-    public ImmutableBiMap<Class<? extends EntityLiving>, String> EntityClasstoJASName;
+		public LivingGroup() {
+			this.groupID = "";
+			this.configName = "";
+			contents = new ArrayList<String>();
+		}
 
-    public ImmutableBiMap<Class<? extends EntityLiving>, String> entityClasstoJASName() {
-        return EntityClasstoJASName;
-    }
+		public LivingGroup(String groupID) {
+			if (groupID == null || groupID.trim().equals("")) {
+				throw new IllegalArgumentException("Group ID cannot be " + groupID == null ? "null" : "empty");
+			}
+			this.groupID = groupID;
+			String[] parts = groupID.split("\\.");
+			if (parts.length > 1) {
+				this.configName = parts[0];
+			} else {
+				this.configName = "";
+			}
+			contents = new ArrayList<String>();
+		}
 
-    /* Mapping From JAS Name to Entity Name (via EntityList.classToString) */
-    public ImmutableBiMap<String, Class<? extends EntityLiving>> JASNametoEntityClass;
+		public LivingGroup(String groupID, ArrayList<String> contents) {
+			if (groupID == null || groupID.trim().equals("")) {
+				throw new IllegalArgumentException("Group ID cannot be " + groupID == null ? "null" : "empty");
+			}
+			this.groupID = groupID;
+			String[] parts = groupID.split("\\.");
+			if (parts.length > 1) {
+				this.configName = parts[0];
+			} else {
+				this.configName = "";
+			}
+			this.contents = contents;
+		}
 
-    public ImmutableBiMap<String, Class<? extends EntityLiving>> jasNametoEntityClass() {
-        return JASNametoEntityClass;
-    }
+		public LivingGroup(String groupID, String configName, ArrayList<String> contents) {
+			this.groupID = groupID;
+			this.configName = configName;
+			this.contents = new ArrayList<String>(contents);
+		}
 
-    private WorldProperties worldProperties;
+		public Set<String> entityJASNames() {
+			return Collections.unmodifiableSet(entityJASNames);
+		}
 
-    public LivingGroupRegistry(WorldProperties worldProperties) {
-        this.worldProperties = worldProperties;
-    }
+		public List<String> contents() {
+			return Collections.unmodifiableList(contents);
+		}
 
-    public static class LivingGroup {
-        public final String groupID;
-        public final String configName; // TODO Change COnfigName to be transient and fetch its value from the map on
-                                        // loading
-        private final transient Set<String> entityJASNames = new HashSet<String>();
-        /* String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-        private final List<String> contents;
+		@Override
+		public boolean equals(Object paramObject) {
+			if (paramObject == null || !(paramObject instanceof LivingGroup)) {
+				return false;
+			}
+			return ((LivingGroup) paramObject).groupID.equals(groupID);
+		}
 
-        public LivingGroup() {
-            this.groupID = "";
-            this.configName = "";
-            contents = new ArrayList<String>();
-        }
+		@Override
+		public int hashCode() {
+			return groupID.hashCode();
+		}
 
-        public LivingGroup(String groupID) {
-            if (groupID == null || groupID.trim().equals("")) {
-                throw new IllegalArgumentException("Group ID cannot be " + groupID == null ? "null" : "empty");
-            }
-            this.groupID = groupID;
-            String[] parts = groupID.split("\\.");
-            if (parts.length > 1) {
-                this.configName = parts[0];
-            } else {
-                this.configName = "";
-            }
-            contents = new ArrayList<String>();
-        }
+		@Override
+		public String toString() {
+			return groupID.concat(" contains ").concat(jasNamesToString().concat(" from ").concat(contentsToString()));
+		}
 
-        public LivingGroup(String groupID, String configName, ArrayList<String> contents) {
-            this.groupID = groupID;
-            this.configName = configName;
-            this.contents = new ArrayList<String>(contents);
-        }
+		public String contentsToString() {
+			StringBuilder builder = new StringBuilder(contents.size() * 10);
+			Iterator<String> iterator = contents.iterator();
+			while (iterator.hasNext()) {
+				String contentComponent = iterator.next();
+				builder.append(contentComponent);
+				if (iterator.hasNext()) {
+					builder.append(",");
+				}
+			}
+			return builder.toString();
+		}
 
-        public Set<String> entityJASNames() {
-            return Collections.unmodifiableSet(entityJASNames);
-        }
+		public String jasNamesToString() {
+			StringBuilder builder = new StringBuilder(entityJASNames.size() * 10);
+			Iterator<String> iterator = entityJASNames.iterator();
+			while (iterator.hasNext()) {
+				String jasName = iterator.next();
+				builder.append(jasName);
+				if (iterator.hasNext()) {
+					builder.append(",");
+				}
+			}
+			return builder.toString();
+		}
+	}
 
-        public List<String> contents() {
-            return Collections.unmodifiableList(contents);
-        }
+	public void loadFromConfig(File configDirectory) {
+		Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
+				new Object[] { new LivingGroupSaveObjectSerializer() });
 
-        @Override
-        public boolean equals(Object paramObject) {
-            if (paramObject == null || !(paramObject instanceof LivingGroup)) {
-                return false;
-            }
-            return ((LivingGroup) paramObject).groupID.equals(groupID);
-        }
+		File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
+				worldProperties.getFolderConfiguration().saveName);
+		LivingGroupSaveObject savedStats = GsonHelper.readOrCreateFromGson(
+				FileUtilities.createReader(gsonBiomeFile, false), LivingGroupSaveObject.class, gson);
 
-        @Override
-        public int hashCode() {
-            return groupID.hashCode();
-        }
+		newJASNames = new HashSet<String>((loadMappings(savedStats)));
+		loadAttributes(savedStats);
+	}
 
-        @Override
-        public String toString() {
-            return groupID.concat(" contains ").concat(jasNamesToString().concat(" from ").concat(contentsToString()));
-        }
+	private List<String> loadMappings(LivingGroupSaveObject savedStats) {
+		List<String> newJASNames = new ArrayList<String>();
+		BiMap<Class<? extends EntityLiving>, String> entityClassToJASNameBuilder = HashBiMap.create();
+		for (Entry<String, String> entry : savedStats.fmlToJASName.entrySet()) {
+			Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entry.getKey());
+			if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass)
+					|| Modifier.isAbstract(entityClass.getModifiers())) {
+				JASLog.log().warning("Read entity %s does not correspond to an valid FML entry entry", entry.getKey());
+				continue;
+			}
+			@SuppressWarnings("unchecked")
+			Class<? extends EntityLiving> livingClass = (Class<? extends EntityLiving>) entityClass;
+			entityClassToJASNameBuilder.put(livingClass, entry.getValue());
+		}
+		@SuppressWarnings("unchecked")
+		Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
+		for (Entry<Class<?>, String> entry : fmlNames) {
+			if (!EntityLiving.class.isAssignableFrom(entry.getKey())
+					|| Modifier.isAbstract(entry.getKey().getModifiers())) {
+				continue;
+			}
+			@SuppressWarnings("unchecked")
+			Class<? extends EntityLiving> livingClass = (Class<? extends EntityLiving>) entry.getKey();
+			String jasName;
+			if (entry.getValue().contains(".")) {
+				jasName = entry.getValue();
+			} else {
+				String prefix = guessPrefix(entry.getKey(), fmlNames);
+				jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
+			}
+			if (entityClassToJASNameBuilder.containsKey(livingClass)) {
+				JASLog.log().severe(
+						"Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for class, class %s",
+						entry.getValue(), jasName, livingClass);
+			} else if (entityClassToJASNameBuilder.values().contains(jasName)) {
+				JASLog.log()
+						.severe("Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
+								jasName, entry.getValue(), livingClass);
+			} else {
+				JASLog.log()
+						.debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
+				newJASNames.add(jasName);
+				entityClassToJASNameBuilder.forcePut(livingClass, jasName);
+			}
+		}
 
-        public String contentsToString() {
-            StringBuilder builder = new StringBuilder(contents.size() * 10);
-            Iterator<String> iterator = contents.iterator();
-            while (iterator.hasNext()) {
-                String contentComponent = iterator.next();
-                builder.append(contentComponent);
-                if (iterator.hasNext()) {
-                    builder.append(",");
-                }
-            }
-            return builder.toString();
-        }
+		EntityClasstoJASName = ImmutableBiMap.<Class<? extends EntityLiving>, String> builder()
+				.putAll(entityClassToJASNameBuilder).build();
+		JASNametoEntityClass = EntityClasstoJASName.inverse();
+		return newJASNames;
+	}
 
-        public String jasNamesToString() {
-            StringBuilder builder = new StringBuilder(entityJASNames.size() * 10);
-            Iterator<String> iterator = entityJASNames.iterator();
-            while (iterator.hasNext()) {
-                String jasName = iterator.next();
-                builder.append(jasName);
-                if (iterator.hasNext()) {
-                    builder.append(",");
-                }
-            }
-            return builder.toString();
-        }
-    }
+	private void loadAttributes(LivingGroupSaveObject savedStats) {
+		Set<LivingGroup> attributeGroups = new HashSet<LivingGroup>();
+		if (savedStats.configNameToAttributeGroups.isPresent()) {
+			Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToAttributeGroups.get()
+					.values();
+			for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
+				for (LivingGroup attributeGroup : treeMap.values()) {
+					if (!"".equals(attributeGroup.groupID)) {
+						attributeGroups.add(attributeGroup);
+					}
+				}
+			}
+		}
+		List<LivingGroup> sortedAttributes = getSortedGroups(attributeGroups);
+		HashMap<String, LivingGroup> iDToAttributeBuilder = new HashMap<String, LivingGroup>();
+		for (LivingGroup livingGroup : sortedAttributes) {
+			parseGroupContents(livingGroup);
+			iDToAttributeBuilder.put(livingGroup.groupID, livingGroup);
+		}
+		this.iDToAttribute = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder()
+				.putAll(iDToAttributeBuilder).build();
+	}
 
-    public void loadFromConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
-                new Object[] { new LivingGroupSaveObjectSerializer() });
+//	@Deprecated
+//	private void loadBiomes(LivingGroupSaveObject savedStats, Set<String> newJASNames) {
+//		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
+//		if (savedStats.configNameToLivingGroups.isPresent()) {
+//			Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
+//			for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
+//				for (LivingGroup biomeGroup : treeMap.values()) {
+//					if (!"".equals(biomeGroup.groupID)) {
+//						livingGroups.add(biomeGroup);
+//					}
+//				}
+//			}
+//			
+//		}
+//		for (String jasName : newJASNames) {
+//			LivingGroup livingGroup = new LivingGroup(jasName);
+//			livingGroup.contents.add(jasName);
+//			livingGroups.add(livingGroup);
+//		}
+//		
+//		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
+//		HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
+//		ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();
+//		for (LivingGroup livingGroup : sortedGroups) {
+//			parseGroupContents(livingGroup);
+//			JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
+//			iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
+//			for (String jasName : livingGroup.entityJASNames) {
+//				entityIDToGroupIDListBuild.get(jasName).add(livingGroup.groupID);
+//			}
+//		}
+////		this.iDToGroup = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder().putAll(iDToGroupBuilder)
+////				.build();
+////		this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
+////				.putAll(entityIDToGroupIDListBuild).build();
+//	}
 
-        File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
-                worldProperties.getFolderConfiguration().saveName);
-        LivingGroupSaveObject savedStats = GsonHelper.readOrCreateFromGson(
-                FileUtilities.createReader(gsonBiomeFile, false), LivingGroupSaveObject.class, gson);
+	/**
+	 * Attempts to Guess the prefix an entity should have.
+	 * 
+	 * First attempts to search
+	 */
+	private String guessPrefix(Class<?> entity, Set<Entry<Class<?>, String>> fmlNames) {
+		String currentPackage = entity.getName();
 
-        List<String> newJASNames = loadMappings(savedStats);
-        loadAttributes(savedStats);
-        loadBiomes(savedStats, newJASNames);
-    }
+		if (currentPackage.lastIndexOf(".") != -1) {
+			currentPackage = currentPackage.substring(0, currentPackage.lastIndexOf("."));
+		}
 
-    private List<String> loadMappings(LivingGroupSaveObject savedStats) {
-        List<String> newJASNames = new ArrayList<String>();
-        BiMap<Class<? extends EntityLiving>, String> entityClassToJASNameBuilder = HashBiMap.create();
-        for (Entry<String, String> entry : savedStats.fmlToJASName.entrySet()) {
-            Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entry.getKey());
-            if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass)
-                    || Modifier.isAbstract(entityClass.getModifiers())) {
-                JASLog.log().warning("Read entity %s does not correspond to an valid FML entry entry", entry.getKey());
-                continue;
-            }
-            @SuppressWarnings("unchecked")
-            Class<? extends EntityLiving> livingClass = (Class<? extends EntityLiving>) entityClass;
-            entityClassToJASNameBuilder.put(livingClass, entry.getValue());
-        }
-        @SuppressWarnings("unchecked")
-        Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
-        for (Entry<Class<?>, String> entry : fmlNames) {
-            if (!EntityLiving.class.isAssignableFrom(entry.getKey())
-                    || Modifier.isAbstract(entry.getKey().getModifiers())) {
-                continue;
-            }
-            @SuppressWarnings("unchecked")
-            Class<? extends EntityLiving> livingClass = (Class<? extends EntityLiving>) entry.getKey();
-            String jasName;
-            if (entry.getValue().contains(".")) {
-                jasName = entry.getValue();
-            } else {
-                String prefix = guessPrefix(entry.getKey(), fmlNames);
-                jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
-            }
-            if (entityClassToJASNameBuilder.containsKey(livingClass)) {
-                JASLog.log().severe(
-                        "Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for class, class %s",
-                        entry.getValue(), jasName, livingClass);
-            } else if (entityClassToJASNameBuilder.values().contains(jasName)) {
-                JASLog.log()
-                        .severe("Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
-                                jasName, entry.getValue(), livingClass);
-            } else {
-                JASLog.log()
-                        .debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
-                newJASNames.add(jasName);
-                entityClassToJASNameBuilder.forcePut(livingClass, jasName);
-            }
-        }
+		for (Entry<Class<?>, String> entry : fmlNames) {
+			String packageName = entry.getKey().getName();
+			if (packageName.lastIndexOf(".") != -1) {
+				packageName = packageName.substring(0, packageName.lastIndexOf("."));
+			}
 
-        EntityClasstoJASName = ImmutableBiMap.<Class<? extends EntityLiving>, String> builder()
-                .putAll(entityClassToJASNameBuilder).build();
-        JASNametoEntityClass = EntityClasstoJASName.inverse();
-        return newJASNames;
-    }
+			if (currentPackage.equals(packageName) && entry.getValue().contains(".")) {
+				return entry.getValue().split("\\.")[0];
+			}
+		}
+		String manualPrefix = entityPackageToPrefix.get(currentPackage);
+		if (manualPrefix != null) {
+			return manualPrefix;
+		}
+		String[] currentParts = currentPackage.split("\\.");
+		return currentParts.length > 1 ? currentParts[0] : UNKNOWN_PREFIX;
+	}
 
-    private void loadAttributes(LivingGroupSaveObject savedStats) {
-        Set<LivingGroup> attributeGroups = new HashSet<LivingGroup>();
-        if (savedStats.configNameToAttributeGroups.isPresent()) {
-            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToAttributeGroups.get()
-                    .values();
-            for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
-                for (LivingGroup attributeGroup : treeMap.values()) {
-                    if (!"".equals(attributeGroup.groupID)) {
-                        attributeGroups.add(attributeGroup);
-                    }
-                }
-            }
-        }
-        List<LivingGroup> sortedAttributes = getSortedGroups(attributeGroups);
-        HashMap<String, LivingGroup> iDToAttributeBuilder = new HashMap<String, LivingGroup>();
-        for (LivingGroup livingGroup : sortedAttributes) {
-            parseGroupContents(livingGroup);
-            iDToAttributeBuilder.put(livingGroup.groupID, livingGroup);
-        }
-        this.iDToAttribute = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder()
-                .putAll(iDToAttributeBuilder).build();
-    }
+	private List<LivingGroup> getSortedGroups(Collection<LivingGroup> livingGroups) {
+		/* Evaluate each group, ensuring entries are valid mappings or Groups and */
+		DirectedGraph<LivingGroup> groupGraph = new DirectedGraph<LivingGroup>();
+		for (LivingGroup livingGroup : livingGroups) {
+			groupGraph.addNode(livingGroup);
+		}
+		for (LivingGroup currentGroup : livingGroups) {
+			for (String contentComponent : currentGroup.contents) {
+				for (LivingGroup possibleGroup : livingGroups) {
+					// Reminder: substring(2) is to remove mandatory A| and G| for groups
+					if (contentComponent.substring(2).equals(possibleGroup.groupID)) {
+						groupGraph.addEdge(possibleGroup, currentGroup);
+					}
+				}
+			}
+		}
 
-    private void loadBiomes(LivingGroupSaveObject savedStats, List<String> newJASNames) {
-        Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
-        if (savedStats.configNameToLivingGroups.isPresent()) {
-            Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
-            for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
-                for (LivingGroup biomeGroup : treeMap.values()) {
-                    if (!"".equals(biomeGroup.groupID)) {
-                        livingGroups.add(biomeGroup);
-                    }
-                }
-            }
-            for (String jasName : newJASNames) {
-                LivingGroup livingGroup = new LivingGroup(jasName);
-                livingGroup.contents.add(jasName);
-                livingGroups.add(livingGroup);
-            }
-        } else {
-            for (String jasName : JASNametoEntityClass.keySet()) {
-                LivingGroup livingGroup = new LivingGroup(jasName);
-                livingGroup.contents.add(jasName);
-                livingGroups.add(livingGroup);
-            }
-        }
-        List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
-        HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
-        ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();
-        for (LivingGroup livingGroup : sortedGroups) {
-            parseGroupContents(livingGroup);
-            JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
-            iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
-            for (String jasName : livingGroup.entityJASNames) {
-                entityIDToGroupIDListBuild.get(jasName).add(livingGroup.groupID);
-            }
-        }
-        this.iDToGroup = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder().putAll(iDToGroupBuilder)
-                .build();
-        this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
-                .putAll(entityIDToGroupIDListBuild).build();
-    }
+		List<LivingGroup> sortedList;
+		try {
+			sortedList = TopologicalSort.topologicalSort(groupGraph);
+		} catch (TopologicalSortingException sortException) {
+			SortingExceptionData<LivingGroup> exceptionData = sortException.getExceptionData();
+			JASLog.log().severe(
+					"A circular reference was detected when processing entity groups. Groups in the cycle were: ");
+			int i = 1;
+			for (LivingGroup invalidGroups : exceptionData.getVisitedNodes()) {
+				JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
+						invalidGroups.contentsToString());
+			}
+			throw sortException;
+		}
+		return sortedList;
+	}
 
-    /**
-     * Attempts to Guess the prefix an entity should have.
-     * 
-     * First attempts to search
-     */
-    private String guessPrefix(Class<?> entity, Set<Entry<Class<?>, String>> fmlNames) {
-        String currentPackage = entity.getName();
+	/**
+	 * Evaluate build instructions (i.e. A|allbiomes,&Jungle) of group and evalute them into jasNames
+	 */
+	private void parseGroupContents(LivingGroup livingGroup) {
+		/* Evaluate contents and fill in jasNames */
+		for (String contentComponent : livingGroup.contents) {
+			OPERATION operation;
+			if (contentComponent.startsWith("-")) {
+				contentComponent = contentComponent.substring(1);
+				operation = OPERATION.COMPLEMENT;
+			} else if (contentComponent.startsWith("&")) {
+				contentComponent = contentComponent.substring(1);
+				operation = OPERATION.INTERSECT;
+			} else {
+				operation = OPERATION.UNION;
+				if (contentComponent.startsWith("+")) {
+					contentComponent = contentComponent.substring(1);
+				}
+			}
+			
+			if (contentComponent.startsWith("A|")) {
+				LivingGroup groupToAdd = iDToAttribute.get(contentComponent.substring(2));
+				if (groupToAdd != null) {
+					SetAlgebra.operate(livingGroup.entityJASNames, groupToAdd.entityJASNames, operation);
+					continue;
+				}
+			} else if (JASNametoEntityClass.containsKey(contentComponent)) {
+				SetAlgebra.operate(livingGroup.entityJASNames, Sets.newHashSet(contentComponent), operation);
+				continue;
+			}
+			JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.",
+					livingGroup.groupID, livingGroup.contentsToString(), contentComponent);
+		}
+	}
 
-        if (currentPackage.lastIndexOf(".") != -1) {
-            currentPackage = currentPackage.substring(0, currentPackage.lastIndexOf("."));
-        }
+	public void saveToConfig(File configDirectory) {
+		Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
+				new Object[] { new LivingGroupSaveObjectSerializer() });
 
-        for (Entry<Class<?>, String> entry : fmlNames) {
-            String packageName = entry.getKey().getName();
-            if (packageName.lastIndexOf(".") != -1) {
-                packageName = packageName.substring(0, packageName.lastIndexOf("."));
-            }
+		File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
+				worldProperties.getFolderConfiguration().saveName);
 
-            if (currentPackage.equals(packageName) && entry.getValue().contains(".")) {
-                return entry.getValue().split("\\.")[0];
-            }
-        }
-        String manualPrefix = entityPackageToPrefix.get(currentPackage);
-        if (manualPrefix != null) {
-            return manualPrefix;
-        }
-        String[] currentParts = currentPackage.split("\\.");
-        return currentParts.length > 1 ? currentParts[0] : UNKNOWN_PREFIX;
-    }
-
-    private List<LivingGroup> getSortedGroups(Collection<LivingGroup> livingGroups) {
-        /* Evaluate each group, ensuring entries are valid mappings or Groups and */
-        DirectedGraph<LivingGroup> groupGraph = new DirectedGraph<LivingGroup>();
-        for (LivingGroup livingGroup : livingGroups) {
-            groupGraph.addNode(livingGroup);
-        }
-        for (LivingGroup currentGroup : livingGroups) {
-            for (String contentComponent : currentGroup.contents) {
-                for (LivingGroup possibleGroup : livingGroups) {
-                    // Reminder: substring(2) is to remove mandatory A| and G| for groups
-                    if (contentComponent.substring(2).equals(possibleGroup.groupID)) {
-                        groupGraph.addEdge(possibleGroup, currentGroup);
-                    }
-                }
-            }
-        }
-
-        List<LivingGroup> sortedList;
-        try {
-            sortedList = TopologicalSort.topologicalSort(groupGraph);
-        } catch (TopologicalSortingException sortException) {
-            SortingExceptionData<LivingGroup> exceptionData = sortException.getExceptionData();
-            JASLog.log().severe(
-                    "A circular reference was detected when processing entity groups. Groups in the cycle were: ");
-            int i = 1;
-            for (LivingGroup invalidGroups : exceptionData.getVisitedNodes()) {
-                JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.groupID,
-                        invalidGroups.contentsToString());
-            }
-            throw sortException;
-        }
-        return sortedList;
-    }
-
-    /**
-     * Evaluate build instructions (i.e. A|allbiomes,&Jungle) of group and evalute them into jasNames
-     */
-    private void parseGroupContents(LivingGroup livingGroup) {
-        /* Evaluate contents and fill in jasNames */
-        for (String contentComponent : livingGroup.contents) {
-            OPERATION operation;
-            if (contentComponent.startsWith("-")) {
-                contentComponent = contentComponent.substring(1);
-                operation = OPERATION.COMPLEMENT;
-            } else if (contentComponent.startsWith("&")) {
-                contentComponent = contentComponent.substring(1);
-                operation = OPERATION.INTERSECT;
-            } else {
-                operation = OPERATION.UNION;
-                if (contentComponent.startsWith("+")) {
-                    contentComponent = contentComponent.substring(1);
-                }
-            }
-
-            if (contentComponent.startsWith("G|")) {
-                LivingGroup groupToAdd = iDToGroup.get(contentComponent.substring(2));
-                if (groupToAdd != null) {
-                    SetAlgebra.operate(livingGroup.entityJASNames, groupToAdd.entityJASNames, operation);
-                    continue;
-                }
-            } else if (contentComponent.startsWith("A|")) {
-                LivingGroup groupToAdd = iDToAttribute.get(contentComponent.substring(2));
-                if (groupToAdd != null) {
-                    SetAlgebra.operate(livingGroup.entityJASNames, groupToAdd.entityJASNames, operation);
-                    continue;
-                }
-            } else if (JASNametoEntityClass.containsKey(contentComponent)) {
-                SetAlgebra.operate(livingGroup.entityJASNames, Sets.newHashSet(contentComponent), operation);
-                continue;
-            }
-            JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.",
-                    livingGroup.groupID, livingGroup.contentsToString(), contentComponent);
-        }
-    }
-
-    public void saveToConfig(File configDirectory) {
-        Gson gson = GsonHelper.createGson(true, new java.lang.reflect.Type[] { LivingGroupSaveObject.class },
-                new Object[] { new LivingGroupSaveObjectSerializer() });
-
-        File gsonBiomeFile = LivingGroupSaveObject.getFile(configDirectory,
-                worldProperties.getFolderConfiguration().saveName);
-
-        LivingGroupSaveObject biomeGroupAuthor = new LivingGroupSaveObject(EntityClasstoJASName,
-                iDToAttribute.values(), iDToGroup.values());
-        GsonHelper.writeToGson(FileUtilities.createWriter(gsonBiomeFile, true), biomeGroupAuthor, gson);
-    }
+		LivingGroupSaveObject biomeGroupAuthor = new LivingGroupSaveObject(EntityClasstoJASName,
+				iDToAttribute.values(), Collections.<LivingGroup> emptyList());
+		GsonHelper.writeToGson(FileUtilities.createWriter(gsonBiomeFile, true), biomeGroupAuthor, gson);
+	}
 }

@@ -1,6 +1,7 @@
 package jas.common.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.modification.ModSaveConfig;
 
 import java.util.List;
 
@@ -25,14 +26,15 @@ public class CommandSaveConfig extends CommandJasBase {
         return "commands.jassaveconfig.usage";
     }
 
-    @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
-        if (stringArgs.length > 0) {
-            throw new WrongUsageException("commands.jassaveconfig.usage", new Object[0]);
-        }
-        JustAnotherSpawner.worldSettings().saveWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
-                MinecraftServer.getServer().worldServers[0]);
-    }
+	@Override
+	public void process(ICommandSender commandSender, String[] stringArgs) {
+		if (stringArgs.length > 0) {
+			throw new WrongUsageException("commands.jassaveconfig.usage", new Object[0]);
+		}
+		JustAnotherSpawner.worldSettings().addChange(
+				new ModSaveConfig(JustAnotherSpawner.getModConfigDirectory(),
+						MinecraftServer.getServer().worldServers[0]));
+	}
 
     /**
      * Adds the strings available in this command to the given list of tab completion options.

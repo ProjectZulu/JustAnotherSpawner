@@ -20,4 +20,9 @@ public class KeyParserIsTameable extends KeyParserBoolean {
         }
         return false;
     }
+
+	@Override
+	public String toExpression(String parseable) {
+		return "isTameable()";
+	}
 }

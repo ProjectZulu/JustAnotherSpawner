@@ -44,4 +44,9 @@ public class KeyParserFill extends KeyParserBase {
                 yCoord - 1, zCoord);
         return isInverted ? isFillerBlock : !isFillerBlock;
     }
+    
+	@Override
+	public String toExpression(String parseable) {
+		return "lgcy.filler()";
+	}
 }
