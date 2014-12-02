@@ -13,6 +13,7 @@ import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.handler.LivingHelper;
 import jas.common.spawner.creature.type.CreatureType;
 
@@ -76,48 +77,48 @@ public class CommandCanSpawnHere extends CommandJasBase {
             throw new WrongUsageException("commands.jascanspawnhere.entitynotfound", new Object[0]);
         }
 
-        EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-        ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
-                .get(entity.getClass()));
-        if(groupIDs.isEmpty()) {
-            throw new WrongUsageException("commands.jascanspawnhere.entityhasnogroups", new Object[0]);
-        }
-        for (String groupID : groupIDs) {
-            LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
-                    .getLivingHandler(groupID);
-            CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-                    .getCreatureType(livingHandler.creatureTypeID);
-            if (livingType == null) {
-                commandSender.addChatMessage(new ChatComponentText(String.format(
-                        "Entity %s is of type NONE and thus will never spawn.", entityName)));
-                return;
-            }
-    		CountInfo countInfo = CustomSpawner.determineCountInfo(entity.worldObj);
+		EntityLiving entity = getTargetEntity(entityName, targetPlayer);
+		LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+		LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+		List<LivingHandler> livingHandlers = handlerRegistry.getLivingHandlers(groupRegistry.EntityClasstoJASName
+				.get(entity.getClass()));
+		if (livingHandlers.isEmpty()) {
+			throw new WrongUsageException("commands.jascanspawnhere.entityhasnogroups", new Object[0]);
+		}
+		for (LivingHandler livingHandler : livingHandlers) {
+			CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+					.getCreatureType(livingHandler.creatureTypeID);
+			if (livingType == null) {
+				commandSender.addChatMessage(new ChatComponentText(String.format(
+						"Entity %s is of type NONE and thus will never spawn.", entityName)));
+				return;
+			}
+			CountInfo countInfo = CustomSpawner.determineCountInfo(entity.worldObj);
 
-            /* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
-            boolean isBiome = false;
-            List<SpawnListEntry> spawnlistentries = new ArrayList<SpawnListEntry>(3);
-            String locationName = getMatchingStructureSpawnListEntries(entity, spawnlistentries);
-            String structureName = locationName;
-            if (spawnlistentries.isEmpty()) {
-                isBiome = true;
-                locationName = getMatchingBiomeSpawnListEntries(groupID, entity, livingType, spawnlistentries);
-            }
+			/* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
+			boolean isBiome = false;
+			List<SpawnListEntry> spawnlistentries = new ArrayList<SpawnListEntry>(3);
+			String locationName = getMatchingStructureSpawnListEntries(entity, spawnlistentries);
+			String structureName = locationName;
+			if (spawnlistentries.isEmpty()) {
+				isBiome = true;
+				locationName = getMatchingBiomeSpawnListEntries(livingHandler.livingID, entity, livingType,
+						spawnlistentries);
+			}
 
-            if (spawnlistentries.isEmpty()) {
-                spawnlistentries.add(null);
-            }
+			if (spawnlistentries.isEmpty()) {
+				spawnlistentries.add(null);
+			}
 
-            StringBuilder resultMessage = new StringBuilder();
-            if (groupIDs.size() > 1) {
-                resultMessage.append("{Group ").append(groupID).append(": ");
-            }
-            Iterator<SpawnListEntry> iterator = spawnlistentries.iterator();
-            while (iterator.hasNext()) {
-                SpawnListEntry spawnListEntry = iterator.next();
-                if (spawnlistentries.size() > 1) {
-                    resultMessage.append("{");
+			StringBuilder resultMessage = new StringBuilder();
+			if (livingHandlers.size() > 1) {
+				resultMessage.append("{Group ").append(livingHandler.livingID).append(": ");
+			}
+			Iterator<SpawnListEntry> iterator = spawnlistentries.iterator();
+			while (iterator.hasNext()) {
+				SpawnListEntry spawnListEntry = iterator.next();
+				if (spawnlistentries.size() > 1) {
+					resultMessage.append("{");
 				}
 				resultMessage.append(
 						canEntitySpawnHere(targetPlayer, entity, livingHandler, livingType, spawnListEntry, entityName,
@@ -139,19 +140,19 @@ public class CommandCanSpawnHere extends CommandJasBase {
 							locationName, true, countInfo));
 				}
 
-                if (spawnlistentries.size() > 1) {
-                    resultMessage.append("}");
-                    if (iterator.hasNext()) {
-                        resultMessage.append(" ");
-                    }
-                }
-            }
-            if (groupIDs.size() > 1) {
-                resultMessage.append("}");
-            }
-            commandSender.addChatMessage(new ChatComponentText(resultMessage.toString()));
-        }
-    }
+				if (spawnlistentries.size() > 1) {
+					resultMessage.append("}");
+					if (iterator.hasNext()) {
+						resultMessage.append(" ");
+					}
+				}
+			}
+			if (livingHandlers.size() > 1) {
+				resultMessage.append("}");
+			}
+			commandSender.addChatMessage(new ChatComponentText(resultMessage.toString()));
+		}
+	}
 
 	private boolean isValidEntityName(String entityName) {
 		LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();

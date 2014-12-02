@@ -6,7 +6,6 @@ import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
 import jas.common.WorldProperties;
 import jas.common.spawner.Tags;
-import jas.common.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.common.spawner.creature.type.CreatureType;
 import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
@@ -21,39 +20,48 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import org.mvel2.MVEL;
-
-import scala.actors.threadpool.Arrays;
-
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
+import org.mvel2.MVEL;
+
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.gson.Gson;
 
 public class LivingHandlerRegistry {
 	/* Mapping from GroupID to LivingHandler */
 	private ImmutableMap<String, LivingHandler> livingHandlers;
 
-	public LivingHandler getLivingHandler(String groupID) {
-		return livingHandlers.get(groupID);
+	/* Map from a Content entry (JASName) to LivingHandler Key */
+	private ImmutableMultimap<String, String> jasNameToHandler = ImmutableSetMultimap.<String, String> builder()
+			.build();
+
+	public LivingHandler getLivingHandler(String handlerID) {
+		return livingHandlers.get(handlerID);
 	}
 
-	public List<LivingHandler> getLivingHandlers(Class<? extends EntityLiving> entityClass) {
+	public List<LivingHandler> getLivingHandlers(String jasName) {
 		List<LivingHandler> list = new ArrayList<LivingHandler>();
-		for (String groupID : livingGroupRegistry.getGroupsWithEntity(livingGroupRegistry.EntityClasstoJASName
-				.get(entityClass))) {
-			LivingHandler handler = livingHandlers.get(groupID);
+		for (String handlerID : jasNameToHandler.get(jasName)) {
+			LivingHandler handler = livingHandlers.get(handlerID);
 			if (handler != null) {
 				list.add(handler);
 			}
 		}
 		return list;
+	}
+
+	public List<LivingHandler> getLivingHandlers(Class<? extends EntityLiving> entityClass) {
+		List<LivingHandler> list = new ArrayList<LivingHandler>();
+		String jasName = livingGroupRegistry.EntityClasstoJASName.get(entityClass);
+		return getLivingHandlers(jasName);
 	}
 
 	public Class<? extends EntityLiving> getRandomEntity(String livingID, Random random, Tags tags) {
@@ -85,6 +93,10 @@ public class LivingHandlerRegistry {
 	 */
 	public Collection<LivingHandler> getLivingHandlers() {
 		return livingHandlers.values();
+	}
+
+	public Collection<String> getLivingHandlerKeys() {
+		return livingHandlers.keySet();
 	}
 
 	private CreatureTypeRegistry creatureTypeRegistry;
@@ -131,11 +143,16 @@ public class LivingHandlerRegistry {
 			builder.contents.add(mapping);
 			livingHandlers.add(builder.build(creatureTypeRegistry, livingGroupRegistry));
 		}
-		Builder<String, LivingHandler> builder = ImmutableMap.<String, LivingHandler> builder();
+		ImmutableMap.Builder<String, LivingHandler> handlerBuilder = ImmutableMap.<String, LivingHandler> builder();
+		ImmutableSetMultimap.Builder<String, String> jasNameBuilder = ImmutableSetMultimap.<String, String>builder();
 		for (LivingHandler handler : livingHandlers) {
-			builder.put(handler.livingID, handler);
+			handlerBuilder.put(handler.livingID, handler);
+			for (String jasName : handler.namedJASSpawnables) {
+				jasNameBuilder.put(jasName, handler.livingID);
+			}
 		}
-		this.livingHandlers = builder.build();
+		this.livingHandlers = handlerBuilder.build();
+		this.jasNameToHandler = jasNameBuilder.build();
 	}
 
 	// This used to check if LivingGroup was declared before building the LivingHandler, this may be unneccesary now

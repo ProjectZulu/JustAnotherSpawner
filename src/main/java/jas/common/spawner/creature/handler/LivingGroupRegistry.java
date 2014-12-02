@@ -58,19 +58,8 @@ public class LivingGroupRegistry {
 		entityPackageToPrefix.put("net.minecraft.entity.boss", "");
 	}
 
-	/** Reverse Look-up Map to Get All Groups a Particular Entity is In */
-	private ImmutableListMultimap<String, String> entityIDToGroupIDList;
-
 	/** New Mappings added the Last Time LivingGroupRegistry.load() was run */
 	public Set<String> newJASNames = new HashSet<String>();
-	
-	public ImmutableMultimap<String, String> getEntityIDToGroupIDList() {
-		return entityIDToGroupIDList;
-	}
-
-	public ImmutableCollection<String> getGroupsWithEntity(String jasName) {
-		return entityIDToGroupIDList.get(jasName);
-	}
 
 	/** Group Identifier to Group Instance */
 	private ImmutableMap<String, LivingGroup> iDToAttribute;
@@ -211,7 +200,6 @@ public class LivingGroupRegistry {
 
 		newJASNames = new HashSet<String>((loadMappings(savedStats)));
 		loadAttributes(savedStats);
-		loadBiomes(savedStats, newJASNames);
 	}
 
 	private List<String> loadMappings(LivingGroupSaveObject savedStats) {
@@ -289,41 +277,42 @@ public class LivingGroupRegistry {
 				.putAll(iDToAttributeBuilder).build();
 	}
 
-	private void loadBiomes(LivingGroupSaveObject savedStats, Set<String> newJASNames) {
-		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
-		if (savedStats.configNameToLivingGroups.isPresent()) {
-			Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
-			for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
-				for (LivingGroup biomeGroup : treeMap.values()) {
-					if (!"".equals(biomeGroup.groupID)) {
-						livingGroups.add(biomeGroup);
-					}
-				}
-			}
-			
-		}
-		for (String jasName : newJASNames) {
-			LivingGroup livingGroup = new LivingGroup(jasName);
-			livingGroup.contents.add(jasName);
-			livingGroups.add(livingGroup);
-		}
-		
-		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
-		HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
-		ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();
-		for (LivingGroup livingGroup : sortedGroups) {
-			parseGroupContents(livingGroup);
-			JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
-			iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
-			for (String jasName : livingGroup.entityJASNames) {
-				entityIDToGroupIDListBuild.get(jasName).add(livingGroup.groupID);
-			}
-		}
-//		this.iDToGroup = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder().putAll(iDToGroupBuilder)
-//				.build();
-		this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
-				.putAll(entityIDToGroupIDListBuild).build();
-	}
+//	@Deprecated
+//	private void loadBiomes(LivingGroupSaveObject savedStats, Set<String> newJASNames) {
+//		Set<LivingGroup> livingGroups = new HashSet<LivingGroup>();
+//		if (savedStats.configNameToLivingGroups.isPresent()) {
+//			Collection<TreeMap<String, LivingGroup>> mapOfGroups = savedStats.configNameToLivingGroups.get().values();
+//			for (TreeMap<String, LivingGroup> treeMap : mapOfGroups) {
+//				for (LivingGroup biomeGroup : treeMap.values()) {
+//					if (!"".equals(biomeGroup.groupID)) {
+//						livingGroups.add(biomeGroup);
+//					}
+//				}
+//			}
+//			
+//		}
+//		for (String jasName : newJASNames) {
+//			LivingGroup livingGroup = new LivingGroup(jasName);
+//			livingGroup.contents.add(jasName);
+//			livingGroups.add(livingGroup);
+//		}
+//		
+//		List<LivingGroup> sortedGroups = getSortedGroups(livingGroups);
+//		HashMap<String, LivingGroup> iDToGroupBuilder = new HashMap<String, LivingGroup>();
+//		ListMultimap<String, String> entityIDToGroupIDListBuild = ArrayListMultimap.create();
+//		for (LivingGroup livingGroup : sortedGroups) {
+//			parseGroupContents(livingGroup);
+//			JASLog.log().info("Registering EntityGroup %s", livingGroup.toString());
+//			iDToGroupBuilder.put(livingGroup.groupID, livingGroup);
+//			for (String jasName : livingGroup.entityJASNames) {
+//				entityIDToGroupIDListBuild.get(jasName).add(livingGroup.groupID);
+//			}
+//		}
+////		this.iDToGroup = ImmutableMap.<String, LivingGroupRegistry.LivingGroup> builder().putAll(iDToGroupBuilder)
+////				.build();
+////		this.entityIDToGroupIDList = ImmutableListMultimap.<String, String> builder()
+////				.putAll(entityIDToGroupIDListBuild).build();
+//	}
 
 	/**
 	 * Attempts to Guess the prefix an entity should have.

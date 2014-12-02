@@ -7,6 +7,7 @@ import jas.common.spawner.EntityCounter;
 import jas.common.spawner.EntityCounter.CountableInt;
 import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandler;
+import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
@@ -77,16 +78,16 @@ public class CommandComposition extends CommandJasBase {
                         continue;
                     }
                     LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-                    ImmutableCollection<String> groupIDs = groupRegistry
-                            .getGroupsWithEntity(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+                    LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+					List<LivingHandler> livingHandlers = handlerRegistry
+							.getLivingHandlers(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
+
                     /*
                      * Used to ensure that if an entity is in multiple groups that are have the same type (i.e.
                      * MONSTER), that it only counts once for each type
                      */
                     Set<String> typesCounted = new HashSet<String>();
-                    for (String groupID : groupIDs) {
-                        LivingHandler livingHandler = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
-                                .getLivingHandler(groupID);
+            		for (LivingHandler livingHandler : livingHandlers) {
                         if (!typesCounted.contains(creatureType.typeID)
                                 && livingHandler.creatureTypeID.equals(creatureType.typeID)) {
                             creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);

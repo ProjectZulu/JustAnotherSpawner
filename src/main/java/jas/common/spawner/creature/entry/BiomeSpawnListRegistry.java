@@ -83,7 +83,8 @@ public final class BiomeSpawnListRegistry {
 		BiomeGroup biomeGroup = biomeGroupRegistry.getBiomeGroup(entry.locationGroup);
 		// Confirm LivingHandler and BiomeGroup Exists
 		// Weight > 0 && Type.shouldSpawn == true
-		return handler != null && biomeGroup != null && entry.itemWeight > 0 && handler.shouldSpawn;
+		return handler != null && biomeGroup != null && entry.itemWeight > 0 && handler.shouldSpawn
+				&& !handler.creatureTypeID.equalsIgnoreCase(CreatureTypeRegistry.NONE);
 	}
 
     private void logSpawning(SpawnListEntry spawnListEntry, LivingHandler handler, boolean success) {
@@ -247,7 +248,7 @@ public final class BiomeSpawnListRegistry {
                     } catch (Exception e) {
                         JASLog.log().severe("Error building %s. Entry will be ignored [%s].", builder);
                     }
-                    if (spawnListEntry != null) {
+					if (spawnListEntry != null) {
                         saveFilesProcessed.add(getSaveFileName(spawnListEntry.livingGroupID));
                         addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
                     }
