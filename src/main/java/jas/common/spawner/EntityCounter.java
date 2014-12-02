@@ -1,5 +1,7 @@
 package jas.common.spawner;
 
+import java.util.Enumeration;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityCounter {
@@ -22,6 +24,15 @@ public class EntityCounter {
         }
     }
 
+    /**
+     * Gets Keys of Map.
+     * 
+     * @return Keys contained in CountingHash
+     */
+    public Set<String> keySet() {
+        return countingHash.keySet();
+    }
+    
     /**
      * Gets or Puts if absent a CountableInt from the provided Map.
      * 
