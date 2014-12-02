@@ -10,6 +10,7 @@ import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.common.spawner.creature.entry.SpawnListEntry;
 import jas.common.spawner.creature.handler.LivingHandler;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
+import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 import jas.common.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
@@ -59,26 +60,36 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 
 	@Override
 	public void process(ICommandSender commandSender, String[] stringArgs) {
-		// /jas effectivespawnlist [0]<Player=CommanderSender> [0]<CreatureType=*> [1]<ChunkDistance=8> [2]<Trials=100>
-		// /jas effectivespawnlist [0]<HorizontalRange> [2]<VerticalRange>
-		// /jas effectivespawnlist [0]<HorizontalRange>
-		// /jas effectivespawnlist (HorizontalRange=60) [1]<VerticalRange> [2]<trials
-		// 0
-		// 1
-		// 2
-		// 3
-		// 4
-		//
-		if (stringArgs.length > 3) {
-			throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
-		}
-
-		EntityPlayer targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
-		//		getPlayer(commandSender, stringArgs[0])
+		// /jas effectivespawnlist [0]<Player=CommanderSender> [1]<CreatureType=*> [2]<ChunkDistance=8> [3]<cycles=100>
+		// /jas effectivespawnlist [0]<CreatureType> [1]<ChunkDistance> [2]<cycles>
+		// /jas effectivespawnlist [0]<CreatureType> [1]<ChunkDistance>
+		// /jas effectivespawnlist [0]<CreatureType>
+				
+		EntityPlayer targetPlayer = null;
 		String desiredCreatureType = "*";
 		int chunkDistace = 8;
-		int cycles = 5;
-		
+		int cycles = 3;
+		switch (stringArgs.length) {
+		case 4:
+			targetPlayer = getPlayer(commandSender, stringArgs[0]);
+			desiredCreatureType = stringArgs[1];
+			cycles = ParsingHelper.parseFilteredInteger(stringArgs[2], cycles, "Cycles");
+			chunkDistace = ParsingHelper.parseFilteredInteger(stringArgs[3], chunkDistace, "Chunk Distance");
+			break;
+
+		// Fall through below is intentional
+		case 3:
+			chunkDistace = ParsingHelper.parseFilteredInteger(stringArgs[2], chunkDistace, "Chunk Distance");
+		case 2:
+			cycles = ParsingHelper.parseFilteredInteger(stringArgs[1], cycles, "Cycles");
+		case 1:
+			desiredCreatureType = stringArgs[0];
+		case 0:
+			targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
+			break;
+		default:
+			throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
+		}
 		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = determineChunksForSpawnering(targetPlayer,
 				JustAnotherSpawner.globalSettings().chunkSpawnDistance);
 
@@ -86,7 +97,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 				.getCreatureTypes();
 		CountInfo reportCount = new CountInfo(eligibleChunksForSpawning, new EntityCounter(), new EntityCounter());
 		StringBuilder resultMessage = new StringBuilder();
-		resultMessage.append("SpawnList after ").append(cycles).append(" cycles.");
+		resultMessage.append("SpawnList after ").append("\u00A7b").append(cycles).append(" cycles").append("\u00A7r");
 		while (typeIterator.hasNext()) {
 			CreatureType creatureType = typeIterator.next();
 			if (!desiredCreatureType.equals("*") && !desiredCreatureType.equals(creatureType.typeID)) {
@@ -104,13 +115,16 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 				int count = reportCount.getGlobalEntityClassCount(key);
 				totalCount += count;
 			}
-			resultMessage.append(" TotalSpawned of ").append(creatureType.typeID);
-			resultMessage.append(" is ").append((int)totalCount).append(". ");
+			resultMessage.append(". \u00A7b").append(creatureType.typeID).append("\u00A7r");
+			resultMessage.append(" spawned ").append("\u00A79").append((int) totalCount).append("\u00A7r").append(" {");
 			for (String key : reportCount.getGlobalEntityClassCountKeysSet()) {
 				float count = reportCount.getGlobalEntityClassCount(key);
-				resultMessage.append(" ").append(key).append(": ").append((int)count);
-				resultMessage.append("[").append((int)(count / totalCount)).append("%]");
+				resultMessage.append(" \u00A7a").append(key).append("\u00A7r").append(": ");
+				resultMessage.append("\u00A79").append((int) count).append("\u00A7r");
+				resultMessage.append("[").append("\u00A79").append((int) (count / totalCount * 100)).append("\u00A7r")
+						.append("%]");
 			}
+			resultMessage.append("}");
 		}
 		commandSender.addChatMessage(new ChatComponentText(resultMessage.toString()));
 	}
@@ -241,20 +255,24 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 	 */
 	@Override
 	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
-		throw new UnsupportedOperationException();
-		// stringArgs = correctedParseArgs(stringArgs, false);
-		// List<String> tabCompletions = new ArrayList<String>();
-		// if (stringArgs.length == 1) {
-		// addPlayerUsernames(tabCompletions);
-		// addEntityNames(tabCompletions);
-		// } else if (stringArgs.length == 2) {
-		// addEntityNames(tabCompletions);
-		// }
-		//
-		// if (!tabCompletions.isEmpty()) {
-		// return getStringsMatchingLastWord(stringArgs, tabCompletions);
-		// } else {
-		// return tabCompletions;
-		// }
+		stringArgs = correctedParseArgs(stringArgs, false);
+		List<String> tabCompletions = new ArrayList<String>();
+		if (stringArgs.length == 1) {
+			addPlayerUsernames(tabCompletions);
+			addEntityTypes(tabCompletions);
+		} else if (stringArgs.length == 2) {
+			// Two valid inputs are NUMBERS {i.e. ChunkDistance} or CREATURETYPE
+			try {
+				Integer.parseInt(stringArgs[1]);
+			} catch (Exception e) {
+				addEntityTypes(tabCompletions);
+			}
+		}
+
+		if (!tabCompletions.isEmpty()) {
+			return getStringsMatchingLastWord(stringArgs, tabCompletions);
+		} else {
+			return tabCompletions;
+		}
 	}
 }
