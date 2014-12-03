@@ -213,7 +213,7 @@ public class LivingHandlerSaveObject {
 				builder.setSpawnExpression(spawnTag,
 						Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
 				String despawnTag = GsonHelper.getMemberOrDefault(handler, DESPAWN_KEY, "");
-				builder.setDespawnExpression(spawnTag);
+				builder.setDespawnExpression(despawnTag);
 				String postspawnTag = GsonHelper.getMemberOrDefault(handler, POSTSPAWN_KEY, "");
 				builder.setPostSpawnExpression(postspawnTag);
 
