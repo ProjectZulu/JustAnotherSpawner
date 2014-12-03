@@ -29,7 +29,7 @@ public class KeyParserMaxHeight extends KeyParserIntArray {
 			for (int i = 0; i < argAmount; i++) {
 				args[i] = ParsingHelper.parseFilteredInteger(pieces[i + 1], 0, i + " " + key.key);
 			}
-			return new StringBuilder().append("lgcy.height(").append("args[0]").append(",").append("256").append(")")
+			return new StringBuilder().append("lgcy.height(").append(args[0]).append(",").append("256").append(")")
 					.toString();
 		}
 		return "";

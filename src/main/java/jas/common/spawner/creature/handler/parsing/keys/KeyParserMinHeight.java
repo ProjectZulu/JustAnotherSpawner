@@ -29,7 +29,7 @@ public class KeyParserMinHeight extends KeyParserIntArray {
 			for (int i = 0; i < argAmount; i++) {
 				args[i] = ParsingHelper.parseFilteredInteger(pieces[i + 1], 0, i + " " + key.key);
 			}
-			return new StringBuilder().append("lgcy.height(").append("-1").append(",").append("args[0]").append(")")
+			return new StringBuilder().append("lgcy.height(").append("-1").append(",").append(args[0]).append(")")
 					.toString();
 		}
 		return "";
