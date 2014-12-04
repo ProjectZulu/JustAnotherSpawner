@@ -141,14 +141,7 @@ public class LivingHandler {
 				return false;
 			}
 
-			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
-					.worldProperties().getGlobal().maxDespawnDist;
-			boolean instantDespawn = d3 > maxRange * maxRange;
-			if (instantDespawn) {
-				return true;
-			} else {
-				return true;
-			}
+			return true;
 		}
 		return false;
 	}
