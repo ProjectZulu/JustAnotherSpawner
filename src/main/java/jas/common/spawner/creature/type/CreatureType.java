@@ -1,6 +1,7 @@
 package jas.common.spawner.creature.type;
 
 import jas.common.DefaultProps;
+import jas.common.MVELHelper;
 import jas.common.spawner.CountInfo;
 import jas.common.spawner.Tags;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
@@ -148,7 +149,8 @@ public class CreatureType {
 	 */
 	public boolean canSpawnAtLocation(World world, Tags tags, int xCoord, int yCoord, int zCoord) {
 		if (compSpawnExpression.isPresent()) {
-			return !(Boolean) MVEL.executeExpression(compSpawnExpression.get(), tags);
+			return !MVELHelper.executeExpression(compSpawnExpression.get(), tags,
+					"Error processing spawnExpression compiled expression for " + typeID);
 		} else {
 			if (spawnMedium == Material.water) {
 				return world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
