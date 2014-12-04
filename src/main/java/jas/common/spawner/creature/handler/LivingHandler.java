@@ -4,6 +4,7 @@ import jas.common.DefaultProps;
 import jas.common.EntityProperties;
 import jas.common.JASLog;
 import jas.common.JustAnotherSpawner;
+import jas.common.MVELHelper;
 import jas.common.spawner.CountInfo;
 import jas.common.spawner.Tags;
 import jas.common.spawner.creature.entry.SpawnListEntry;
@@ -135,7 +136,8 @@ public class LivingHandler {
 			double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
+			boolean canDespawn = !MVELHelper.executeExpression(getDespawning().get(), tags,
+					"Error processing canDespawn compiled expression for " + livingID);
 
 			if (canDespawn == false) {
 				return false;
@@ -171,7 +173,9 @@ public class LivingHandler {
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 
-			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
+			boolean canDespawn = !MVELHelper.executeExpression(getDespawning().get(), tags,
+					"Error processing canDespawn compiled expression for " + livingID);
+
 			if (canDespawn == false) {
 				entityProps.resetAge();
 				return;
@@ -182,7 +186,8 @@ public class LivingHandler {
 
 			boolean instantDespawn = playerDistance > maxRange * maxRange;
 			if (compInstantDespawnExpression.isPresent()) {
-				instantDespawn = !(Boolean) MVEL.executeExpression(compInstantDespawnExpression.get(), tags);
+				instantDespawn = !MVELHelper.executeExpression(compInstantDespawnExpression.get(), tags,
+						"Error instantDespawn processing compiled expression for " + livingID);
 			}
 
 			if (instantDespawn) {
@@ -225,7 +230,9 @@ public class LivingHandler {
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-		boolean canLivingSpawn = !(Boolean) MVEL.executeExpression(compSpawnExpression.get(), tags);
+		boolean canLivingSpawn = !MVELHelper.executeExpression(compSpawnExpression.get(), tags,
+				"Error processing compiled spawn expression for " + livingID);
+
 		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
 	}
@@ -240,7 +247,9 @@ public class LivingHandler {
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-		boolean canSpawnListSpawn = !(Boolean) MVEL.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags);
+		boolean canSpawnListSpawn = !MVELHelper.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags,
+				"Error processing compiled spawnListSpawn expression for " + livingID);
+
 		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
 	}
@@ -252,7 +261,9 @@ public class LivingHandler {
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-			MVEL.executeExpression(compPostSpawnExpression.get(), tags);
+			MVELHelper.executeExpression(compPostSpawnExpression.get(), tags,
+					"Error processing compiled handler postSpawn expression for " + livingID);
+
 		}
 
 		if (spawnListEntry.getOptionalPostSpawning().isPresent()) {
@@ -261,7 +272,8 @@ public class LivingHandler {
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-			MVEL.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags);
+			MVELHelper.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags,
+					"Error processing compiled spawnlistentry postSpawn expression for " + livingID);
 		}
 	}
 
