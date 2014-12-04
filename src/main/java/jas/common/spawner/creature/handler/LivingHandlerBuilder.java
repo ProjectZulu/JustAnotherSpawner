@@ -24,6 +24,7 @@ public class LivingHandlerBuilder {
 	private boolean shouldSpawn;
 	private String spawnExpression;
 	private String despawnExpression;
+	private String instantdespawnExpression;
 	private String postspawnExpression;
 	private String entityExpression;
 
@@ -55,6 +56,7 @@ public class LivingHandlerBuilder {
 		setShouldSpawn(true);
 		setSpawnExpression("", Optional.<Operand> absent());
 		setDespawnExpression("");
+		setInstantDespawnExpression("");
 		setPostSpawnExpression("");
 		setEntityExpression("");
 		contents = new ArrayList<String>(5);
@@ -72,6 +74,7 @@ public class LivingHandlerBuilder {
 		this.shouldSpawn = handler.shouldSpawn;
 		setSpawnExpression(handler.spawnExpression, handler.spawnOperand);
 		setDespawnExpression(handler.despawnExpression);
+		setInstantDespawnExpression(handler.instantdespawnExpression);
 		setPostSpawnExpression(handler.postspawnExpression);
 		setEntityExpression(handler.entityExpression);
 		this.contents = new ArrayList<String>(handler.contents);
@@ -146,7 +149,19 @@ public class LivingHandlerBuilder {
 	public String getDespawnExpression() {
 		return despawnExpression;
 	}
+	
+	public LivingHandlerBuilder setInstantDespawnExpression(String optionalParameters) {
+		if (optionalParameters == null) {
+			optionalParameters = "";
+		}
+		this.instantdespawnExpression = optionalParameters;
+		return this;
+	}
 
+	public String getInstantDespawnExpression() {
+		return instantdespawnExpression;
+	}
+	
 	public LivingHandlerBuilder setPostSpawnExpression(String optionalParameters) {
 		if (optionalParameters == null) {
 			optionalParameters = "";
