@@ -166,7 +166,6 @@ public class LivingHandler {
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
-		LivingHelper.setPersistenceRequired(entity, true);
 		if (entityplayer != null) {
 			double d0 = entityplayer.posX - entity.posX;
 			double d1 = entityplayer.posY - entity.posY;
