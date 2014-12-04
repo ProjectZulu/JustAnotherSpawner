@@ -33,6 +33,7 @@ public class LivingHandler {
 
 	public final String spawnExpression;
 	public final String despawnExpression;
+	public final String instantdespawnExpression;
 	public final String postspawnExpression;
 	public final String entityExpression;
 
@@ -44,6 +45,7 @@ public class LivingHandler {
 	public final Optional<Operand> spawnOperand;
 	private Optional<Serializable> compSpawnExpression;
 	private Optional<Serializable> compDespawnExpression;
+	private Optional<Serializable> compInstantDespawnExpression;
 	private Optional<Serializable> compPostSpawnExpression;
 	public final Optional<Serializable> compEntityExpression;
 
@@ -65,6 +67,7 @@ public class LivingHandler {
 		this.namedJASSpawnables = ImmutableSet.<String> builder().addAll(builder.getNamedJASSpawnables()).build();
 		this.spawnExpression = builder.getSpawnExpression();
 		this.despawnExpression = builder.getDespawnExpression();
+		this.instantdespawnExpression = builder.getInstantDespawnExpression();
 		this.postspawnExpression = builder.getPostSpawnExpression();
 		this.entityExpression = builder.getEntityExpression();
 		this.maxDespawnRange = builder.getMaxDespawnRange();
@@ -77,6 +80,9 @@ public class LivingHandler {
 				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
 		this.compDespawnExpression = !despawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(despawnExpression)) : Optional.<Serializable> absent();
+		this.compInstantDespawnExpression = !instantdespawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(instantdespawnExpression)) : Optional.<Serializable> absent();
+
 		this.compPostSpawnExpression = !postspawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(postspawnExpression)) : Optional.<Serializable> absent();
 		this.compEntityExpression = !entityExpression.trim().equals("") ? Optional.of(MVEL
@@ -110,6 +116,8 @@ public class LivingHandler {
 
 	/**
 	 * Evaluates if this Entity in its current location / state would be capable of despawning eventually
+	 * 
+	 * NOTE: Not for actually despawning, logic only
 	 */
 	public final boolean canDespawn(EntityLiving entity, CountInfo info) {
 		if (!getDespawning().isPresent()) {
@@ -133,20 +141,15 @@ public class LivingHandler {
 				return false;
 			}
 
-			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
-					.worldProperties().getGlobal().maxDespawnDist;
-			boolean instantDespawn = d3 > maxRange * maxRange;
-			if (instantDespawn) {
-				return true;
-			} else {
-				return true;
-			}
+			return true;
 		}
 		return false;
 	}
 
 	/**
 	 * Called by Despawn to Manually Attempt to Despawn Entity
+	 * 
+	 * Persistence is set via EntityDespawner.entityPersistance
 	 * 
 	 * @param entity
 	 */
@@ -156,7 +159,6 @@ public class LivingHandler {
 		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
-		LivingHelper.setPersistenceRequired(entity, true);
 		if (entityplayer != null) {
 			double d0 = entityplayer.posX - entity.posX;
 			double d1 = entityplayer.posY - entity.posY;
@@ -168,33 +170,38 @@ public class LivingHandler {
 			entityProps.incrementAge(60);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 
+			boolean canDespawn = !(Boolean) MVEL.executeExpression(getDespawning().get(), tags);
 			if (canDespawn == false) {
 				entityProps.resetAge();
 				return;
 			}
 
-			Integer minRange = minDespawnDistance.isPresent() ? minDespawnDistance.get() : JustAnotherSpawner
-					.worldSettings().worldProperties().getGlobal().despawnDist;
-			boolean validDistance = playerDistance > minRange * minRange;
-
-			Integer minAge = despawnAge.isPresent() ? despawnAge.get() : JustAnotherSpawner.worldSettings()
-					.worldProperties().getGlobal().minDespawnTime;
-			boolean isOfAge = entityProps.getAge() > minAge;
-
 			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
 					.worldProperties().getGlobal().maxDespawnDist;
+
 			boolean instantDespawn = playerDistance > maxRange * maxRange;
-			int rate = despawnRate.isPresent() ? despawnRate.get() : 40;
+			if (compInstantDespawnExpression.isPresent()) {
+				instantDespawn = !(Boolean) MVEL.executeExpression(compInstantDespawnExpression.get(), tags);
+			}
+
 			if (instantDespawn) {
 				entity.setDead();
-			} else if (isOfAge && entity.worldObj.rand.nextInt(1 + rate / 3) == 0 && validDistance) {
-				JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s", entity.getCommandSenderName(),
-						entityProps.getAge(), rate);
-				entity.setDead();
-			} else if (!validDistance) {
-				entityProps.resetAge();
+			} else {
+				Integer minRange = minDespawnDistance.isPresent() ? minDespawnDistance.get() : JustAnotherSpawner
+						.worldSettings().worldProperties().getGlobal().despawnDist;
+				Integer minAge = despawnAge.isPresent() ? despawnAge.get() : JustAnotherSpawner.worldSettings()
+						.worldProperties().getGlobal().minDespawnTime;
+				boolean isOfAge = entityProps.getAge() > minAge;
+				boolean validDistance = playerDistance > minRange * minRange;
+				int rate = despawnRate.isPresent() ? despawnRate.get() : 40;
+				if (isOfAge && entity.worldObj.rand.nextInt(1 + rate / 3) == 0 && validDistance) {
+					JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s",
+							entity.getCommandSenderName(), entityProps.getAge(), rate);
+					entity.setDead();
+				} else if (!validDistance) {
+					entityProps.resetAge();
+				}
 			}
 		}
 	}

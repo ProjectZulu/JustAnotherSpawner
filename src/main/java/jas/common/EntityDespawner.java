@@ -11,6 +11,8 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
+import cpw.mods.fml.common.eventhandler.Event.Result;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class EntityDespawner {
@@ -33,6 +35,20 @@ public class EntityDespawner {
         }
     }
 
+	@SubscribeEvent
+	public void entityPersistance(AllowDespawn event) {
+		LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+		@SuppressWarnings("unchecked")
+		List<LivingHandler> livingHandlers = livingHandlerRegistry
+				.getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
+		for (LivingHandler livingHandler : livingHandlers) {
+			if (livingHandler != null && livingHandler.getDespawning() != null
+					&& livingHandler.getDespawning().isPresent()) {
+				event.setResult(Result.DENY);
+			}
+		}
+	}
+    
     @SubscribeEvent
     public void entityConstructed(EntityConstructing event) {
         if (event.entity instanceof EntityLivingBase) {

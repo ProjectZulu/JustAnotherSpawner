@@ -60,6 +60,7 @@ public class LivingHandlerSaveObject {
 		final String TAGS_KEY = "Tags";
 		public final String SPAWN_TAG_KEY = "Spawn Tag";
 		public final String DESPAWN_KEY = "Despawn Tags";
+		public final String INSTANT_DESPAWN_KEY = "InstantDespawn Tags";
 		public final String POSTSPAWN_KEY = "PostSpawn Tags";
 		public final String ENTITY_EXP_KEY = "Entity Tags";
 
@@ -99,6 +100,10 @@ public class LivingHandlerSaveObject {
 					handler.addProperty(DESPAWN_KEY, builder.getDespawnExpression());
 				}
 
+				if (!"".equals(builder.getInstantDespawnExpression())) {
+					handler.addProperty(INSTANT_DESPAWN_KEY, builder.getInstantDespawnExpression());
+				}
+				
 				if (!"".equals(builder.getPostSpawnExpression())) {
 					handler.addProperty(POSTSPAWN_KEY, builder.getPostSpawnExpression());
 				}
@@ -122,7 +127,7 @@ public class LivingHandlerSaveObject {
 				if (builder.getDespawnRate().isPresent()) {
 					handler.addProperty(DESPAWN_RATE_KEY, builder.getDespawnRate().get());
 				}
-
+				
 				JsonArray contents = new JsonArray();
 				for (String content : builder.contents) {
 					contents.add(new JsonPrimitive(content));
@@ -214,6 +219,8 @@ public class LivingHandlerSaveObject {
 						Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
 				String despawnTag = GsonHelper.getMemberOrDefault(handler, DESPAWN_KEY, "");
 				builder.setDespawnExpression(despawnTag);
+				String instantdespawnTag = GsonHelper.getMemberOrDefault(handler, INSTANT_DESPAWN_KEY, "");
+				builder.setInstantDespawnExpression(instantdespawnTag);
 				String postspawnTag = GsonHelper.getMemberOrDefault(handler, POSTSPAWN_KEY, "");
 				builder.setPostSpawnExpression(postspawnTag);
 
