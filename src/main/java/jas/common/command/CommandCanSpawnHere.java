@@ -25,6 +25,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.biome.BiomeGenBase;
 
 public class CommandCanSpawnHere extends CommandJasBase {
@@ -212,7 +213,6 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
     private String canEntitySpawnHere(EntityPlayer targetPlayer, EntityLiving entity, LivingHandler livingHandler,
             CreatureType livingType, SpawnListEntry spawnListEntry, String entityName, CountInfo countInfo) {
-        String successMessage = "\u00A7a".concat(entityName).concat(" can spawn").concat("\u00A7r");
         String failureMessage = "\u00A7c".concat(entityName).concat(" cannot spawn").concat("\u00A7r");
         /* Check Entity Type */
         {
@@ -242,7 +242,9 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
         targetPlayer.preventEntitySpawning = tempSpawning;
         if (canSpawn) {
-            return successMessage;
+			StringBuilder builder = new StringBuilder();
+			builder.append("\u00A7a").append(entityName).append(" can spawn").append("\u00A7r");
+			return builder.toString();
         } else {
             return failureMessage;
         }
@@ -254,17 +256,28 @@ public class CommandCanSpawnHere extends CommandJasBase {
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
         boolean canSpawn = false;
+        int successes = 0;
+        int numTrials = 0;
 		for (int i = 0; i < SIMULATION_TRIALS; i++) {
 			if (livingType.canSpawnAtLocation(entity.worldObj, tags, (int) entity.posX, (int) entity.posY,
 					(int) entity.posZ)) {
 				canSpawn = true;
-				break;
+                successes++;
 			}
+            numTrials++;
 		}
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
-            return "\u00A7a".concat(livingType.typeID).concat(" can spawn.").concat("\u00A7r");
+			StringBuilder builder = new StringBuilder();
+			builder.append("\u00A7a").append(livingType.typeID).append(" can spawn");
+			if (successes != numTrials) {
+				builder.append(" [").append(MathHelper.ceiling_float_int(successes / (float) numTrials)).append("%]");
+			} else { 
+				builder.append(".");
+			}
+			builder.append("\u00A7r");
+			return builder.toString();
         } else {
             return "\u00A7c".concat(livingType.typeID).concat(" cannot spawn.").concat("\u00A7r");
         }
@@ -275,16 +288,27 @@ public class CommandCanSpawnHere extends CommandJasBase {
         targetPlayer.preventEntitySpawning = false;
 
         boolean canSpawn = false;
+        int successes = 0;
+        int numTrials = 0;
         for (int i = 0; i < SIMULATION_TRIALS; i++) {
             if (livingHandler.isValidLiving(entity, countInfo)) {
                 canSpawn = true;
-                break;
+                successes++;
             }
+            numTrials++;
         }
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
-            return "\u00A7a".concat("Livinghandler can spawn.").concat("\u00A7r");
+			StringBuilder builder = new StringBuilder();
+			builder.append("\u00A7a").append("Livinghandler can spawn");
+			if (successes != numTrials) {
+				builder.append(" [").append(MathHelper.ceiling_float_int(successes / (float) numTrials)).append("%]");
+			} else { 
+				builder.append(".");
+			}
+			builder.append("\u00A7r");
+			return builder.toString();
         } else {
             return "\u00A7c".concat("Livinghandler cannot spawn.").concat("\u00A7r");
         }
@@ -304,17 +328,27 @@ public class CommandCanSpawnHere extends CommandJasBase {
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
         boolean canSpawn = false;
+        int successes = 0;
+        int numTrials = 0;
         for (int i = 0; i < SIMULATION_TRIALS; i++) {
             if (livingHandler.isValidSpawnList(entity, spawnListEntry, countInfo)) {
                 canSpawn = true;
-                break;
+                successes++;
             }
+            numTrials++;
         }
         targetPlayer.preventEntitySpawning = tempSpawning;
 
         if (canSpawn) {
-            return "\u00A7a".concat("Can spawn in ").concat(isBiome ? "B:" : "S:").concat(locationName).concat(".")
-                    .concat("\u00A7r");
+			StringBuilder builder = new StringBuilder();
+			builder.append("\u00A7a").append("Can spawn in ").append(isBiome ? "B:" : "S:").append(locationName);
+			if (successes != numTrials) {
+				builder.append(" [").append(MathHelper.ceiling_float_int(successes / (float) numTrials)).append("%]");
+			} else { 
+				builder.append(".");
+			}
+			builder.append("\u00A7r");
+			return builder.toString();
         } else {
             return "\u00A7c".concat("Cannot spawn in ").concat(isBiome ? "B:" : "S:").concat(locationName).concat(".")
                     .concat("\u00A7r");
