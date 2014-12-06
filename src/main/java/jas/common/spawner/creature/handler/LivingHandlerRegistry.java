@@ -4,6 +4,7 @@ import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
+import jas.common.MVELHelper;
 import jas.common.WorldProperties;
 import jas.common.spawner.Tags;
 import jas.common.spawner.creature.type.CreatureType;
@@ -67,7 +68,9 @@ public class LivingHandlerRegistry {
 	public Class<? extends EntityLiving> getRandomEntity(String livingID, Random random, Tags tags) {
 		LivingHandler livingHandler = getLivingHandler(livingID);
 		if (livingHandler.compEntityExpression.isPresent()) {
-			Object result = MVEL.executeExpression(livingHandler.compEntityExpression.get(), tags);
+			String result = MVELHelper.typedExecuteExpression(String.class, livingHandler.compEntityExpression.get(),
+					tags, "Error processing compiled entityExpression expression for " + livingHandler.livingID);
+
 			Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(result);
 			if (entityClass == null) {
 				JASLog.log().severe("MVEL expression %s yeiled entity mapping %s which does not exist",

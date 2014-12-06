@@ -218,6 +218,7 @@ public class LivingGroupRegistry {
 		}
 		@SuppressWarnings("unchecked")
 		Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
+		HashMap<Class<? extends EntityLiving>, String> processedEntitiesAndJASNames = new HashMap<Class<? extends EntityLiving>, String>();
 		for (Entry<Class<?>, String> entry : fmlNames) {
 			if (!EntityLiving.class.isAssignableFrom(entry.getKey())
 					|| Modifier.isAbstract(entry.getKey().getModifiers())) {
@@ -232,18 +233,19 @@ public class LivingGroupRegistry {
 				String prefix = guessPrefix(entry.getKey(), fmlNames);
 				jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
 			}
-			if (entityClassToJASNameBuilder.containsKey(livingClass)) {
+			if (processedEntitiesAndJASNames.containsKey(livingClass)) {
 				JASLog.log().severe(
-						"Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for class, class %s",
-						entry.getValue(), jasName, livingClass);
-			} else if (entityClassToJASNameBuilder.values().contains(jasName)) {
-				JASLog.log()
-						.severe("Duplicate entity mapping reading config. Mapping JASname [%s]'s new key will be ignored: [FMLname:class]=[%s:%s]",
-								jasName, entry.getValue(), livingClass);
+						"Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
+						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
+			} else if (processedEntitiesAndJASNames.values().contains(jasName)) {
+				JASLog.log().severe(
+						"Duplicate entity mapping detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
+						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
 			} else {
 				JASLog.log()
 						.debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
 				newJASNames.add(jasName);
+				processedEntitiesAndJASNames.put(livingClass, jasName);
 				entityClassToJASNameBuilder.forcePut(livingClass, jasName);
 			}
 		}

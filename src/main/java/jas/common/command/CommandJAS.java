@@ -35,6 +35,8 @@ public final class CommandJAS extends CommandJasBase {
 		addCommand(new CommandModLivingHandler());
 		addCommand(new CommandModBiomeSpawnList());
 		addCommand(new CommandEffectiveSpawnList(justAnotherSpawner.biomeBlacklist()));
+		addCommand(new CommandDimension());
+		addCommand(new CommandEntityStats());
 	}
 
     public void addCommand(CommandBase base) {

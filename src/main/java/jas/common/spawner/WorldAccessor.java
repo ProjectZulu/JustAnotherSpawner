@@ -65,4 +65,12 @@ public class WorldAccessor {
 	public int dimension() {
 		return world.provider.dimensionId;
 	}
+	
+	public long totalTime() {
+		return world.getWorldInfo().getWorldTotalTime();
+	}
+
+	public long timeOfDay() {
+		return world.getWorldInfo().getWorldTime();
+	}
 }
