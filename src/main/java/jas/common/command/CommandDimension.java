@@ -50,7 +50,8 @@ public class CommandDimension extends CommandJasBase {
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append("Current Dimension is ").append(commandSender.getEntityWorld().provider.dimensionId);
+		builder.append("Current Dimension ID is ").append(commandSender.getEntityWorld().provider.dimensionId);
+		builder.append(" aka ").append(commandSender.getEntityWorld().provider.getDimensionName());
 		commandSender.addChatMessage(new ChatComponentText(builder.toString()));
 	}
 
