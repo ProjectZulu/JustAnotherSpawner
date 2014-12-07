@@ -102,7 +102,7 @@ public class KeyParserBlock extends KeyParserBase {
 		Iterator<String> iter = output.keys().iterator();
 		while (iter.hasNext()) {
 			String blockKey = iter.next();
-			expBuilder.append("block(").append(blockKey).append(",");
+			expBuilder.append("block({'").append(blockKey).append("'},");
 
 			List<Integer> metas = output.get(blockKey);
 			if (!metas.isEmpty()) {
