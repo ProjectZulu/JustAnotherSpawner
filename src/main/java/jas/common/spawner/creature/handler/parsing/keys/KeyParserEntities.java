@@ -108,7 +108,7 @@ public class KeyParserEntities extends KeyParserBase {
 		int maxRange = (Integer) values[5];
 
 		StringBuilder expBuilder = new StringBuilder(15);
-		expBuilder.append("lgcy.entities({").append(entityName).append("}");
+		expBuilder.append("lgcy.entities({'").append(entityName).append("'}");
 		expBuilder.append(",{").append(minSearch).append(",").append(maxSearch).append("}");
 		expBuilder.append(",{").append(minRange).append(",").append(maxRange).append("}");
 		expBuilder.append(")");

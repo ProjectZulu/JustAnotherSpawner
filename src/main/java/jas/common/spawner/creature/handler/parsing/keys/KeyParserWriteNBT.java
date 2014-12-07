@@ -75,7 +75,7 @@ public class KeyParserWriteNBT extends KeyParserBase {
 			if (i != 0) {
 				expBuilder.append(",");
 			}
-			expBuilder.append(nbtOperations[i]);
+			expBuilder.append("'").append(nbtOperations[i]).append("'");
 		}
 		expBuilder.append("})");
 		return expBuilder.toString();

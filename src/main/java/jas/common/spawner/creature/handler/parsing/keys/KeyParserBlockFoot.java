@@ -78,7 +78,7 @@ public class KeyParserBlockFoot extends KeyParserBase {
 		Iterator<String> iter = output.keys().iterator();
 		while (iter.hasNext()) {
 			String blockKey = iter.next();
-			expBuilder.append("blockFoot(").append(blockKey);
+			expBuilder.append("blockFoot({'").append(blockKey).append("'}");
 
 			List<Integer> metas = output.get(blockKey);
 			if (!metas.isEmpty()) {
