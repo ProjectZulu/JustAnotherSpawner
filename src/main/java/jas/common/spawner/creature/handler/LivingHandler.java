@@ -137,7 +137,7 @@ public class LivingHandler {
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			boolean canDespawn = !MVELHelper.executeExpression(getDespawning().get(), tags,
-					"Error processing canDespawn compiled expression for " + livingID);
+					"Error processing canDespawn compiled expression for " + livingID + ": " + despawnExpression);
 
 			if (canDespawn == false) {
 				return false;
@@ -174,7 +174,7 @@ public class LivingHandler {
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 
 			boolean canDespawn = !MVELHelper.executeExpression(getDespawning().get(), tags,
-					"Error processing canDespawn compiled expression for " + livingID);
+					"Error processing canSpawn compiled expression for " + livingID + ": " + despawnExpression);
 
 			if (canDespawn == false) {
 				entityProps.resetAge();
@@ -231,7 +231,7 @@ public class LivingHandler {
 		int zCoord = MathHelper.floor_double(entity.posZ);
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canLivingSpawn = !MVELHelper.executeExpression(compSpawnExpression.get(), tags,
-				"Error processing compiled spawn expression for " + livingID);
+				"Error processing compiled spawn expression for " + livingID + ": " + spawnExpression);
 
 		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
@@ -248,7 +248,7 @@ public class LivingHandler {
 
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canSpawnListSpawn = !MVELHelper.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags,
-				"Error processing compiled spawnListSpawn expression for " + livingID);
+				"Error processing compiled spawnListSpawn expression for " + livingID + ": " + spawnListEntry.spawnExpression);
 
 		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
 				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
@@ -262,8 +262,8 @@ public class LivingHandler {
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			MVELHelper.executeExpression(compPostSpawnExpression.get(), tags,
-					"Error processing compiled handler postSpawn expression for " + livingID);
-
+					"Error processing compiled handler postSpawn expression for " + livingID + livingID + ": "
+							+ postspawnExpression);
 		}
 
 		if (spawnListEntry.getOptionalPostSpawning().isPresent()) {

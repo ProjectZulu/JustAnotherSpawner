@@ -69,7 +69,8 @@ public class LivingHandlerRegistry {
 		LivingHandler livingHandler = getLivingHandler(livingID);
 		if (livingHandler.compEntityExpression.isPresent()) {
 			String result = MVELHelper.typedExecuteExpression(String.class, livingHandler.compEntityExpression.get(),
-					tags, "Error processing compiled entityExpression expression for " + livingHandler.livingID);
+					tags, "Error processing compiled entityExpression expression for " + livingHandler.livingID
+							+ livingID + ": " + livingHandler.entityExpression);
 
 			Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(result);
 			if (entityClass == null) {

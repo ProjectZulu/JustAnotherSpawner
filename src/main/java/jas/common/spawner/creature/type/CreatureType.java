@@ -150,7 +150,7 @@ public class CreatureType {
 	public boolean canSpawnAtLocation(World world, Tags tags, int xCoord, int yCoord, int zCoord) {
 		if (compSpawnExpression.isPresent()) {
 			return !MVELHelper.executeExpression(compSpawnExpression.get(), tags,
-					"Error processing spawnExpression compiled expression for " + typeID);
+					"Error processing spawnExpression compiled expression for " + typeID + ": " + spawnExpression);
 		} else {
 			if (spawnMedium == Material.water) {
 				return world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
