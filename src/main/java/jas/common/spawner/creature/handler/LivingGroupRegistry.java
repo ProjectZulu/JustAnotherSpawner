@@ -233,6 +233,8 @@ public class LivingGroupRegistry {
 				String prefix = guessPrefix(entry.getKey(), fmlNames);
 				jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
 			}
+			
+			
 			if (processedEntitiesAndJASNames.containsKey(livingClass)) {
 				JASLog.log().severe(
 						"Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
@@ -241,6 +243,14 @@ public class LivingGroupRegistry {
 				JASLog.log().severe(
 						"Duplicate entity mapping detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
 						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
+			} else if (!entityClassToJASNameBuilder.containsKey(livingClass)
+					|| entityClassToJASNameBuilder.values().contains(jasName)) {
+				JASLog.log().severe(
+						"Duplicate entity mapping detected: Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
+						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
+			} else if (entityClassToJASNameBuilder.containsKey(livingClass)) {
+				// Since we've already read this class
+				processedEntitiesAndJASNames.put(livingClass, jasName);
 			} else {
 				JASLog.log()
 						.debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
