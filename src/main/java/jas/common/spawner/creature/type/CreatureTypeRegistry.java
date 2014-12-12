@@ -86,15 +86,15 @@ public class CreatureTypeRegistry {
 			CreatureTypeBuilder monster = new CreatureTypeBuilder(MONSTER, 1, 70);
 			CreatureTypeBuilder ambient = new CreatureTypeBuilder(AMBIENT, 1, 15);
 			CreatureTypeBuilder watercreature = new CreatureTypeBuilder(WATERCREATURE, 1, 15).insideMedium(
-					Material.water).withSpawnExpression("!liquid({0,0,0},{0,0,0})&&!liquid({0,0,0},{0,-1,0})&&normal({0,0,0},{0,1,0})");
+					Material.water).withSpawnExpression("!liquid({0,0,0},{0,0,0})||!liquid({0,0,0},{0,-1,0})||normal({0,0,0},{0,1,0})");
 			CreatureTypeBuilder underground = new CreatureTypeBuilder(UNDERGROUND, 1, 10)
-					.withSpawnExpression("!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})&&sky()");
+					.withSpawnExpression("!solidside(1,{0,0,0},{0,-1,0})||liquid({0,0,0},{0,0,0})||normal({0,0,0},{0,0,0})||normal({0,0,0},{0,1,0})||!opaque({0,0,0},{0,-1,0})||sky()");
 			CreatureTypeBuilder opensky = new CreatureTypeBuilder(OPENSKY, 1, 10)
-					.withSpawnExpression("!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})&&!sky()");
+					.withSpawnExpression("!solidside(1,{0,0,0},{0,-1,0})||liquid({0,0,0},{0,0,0})||normal({0,0,0},{0,0,0})||normal({0,0,0},{0,1,0})||!opaque({0,0,0},{0,-1,0})||!sky()");
 			CreatureTypeBuilder creature = new CreatureTypeBuilder(CREATURE, 400, 10)
 					.withChanceToChunkSpawn(0.1f)
 					.withSpawnExpression(
-							"!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})&&!sky()");
+							"!solidside(1,{0,0,0},{0,-1,0})||liquid({0,0,0},{0,0,0})||normal({0,0,0},{0,0,0})||normal({0,0,0},{0,1,0})||!opaque({0,0,0},{0,-1,0})||!sky()");
 			readTypes.put(monster.typeID, monster);
 			readTypes.put(ambient.typeID, ambient);
 			readTypes.put(opensky.typeID, opensky);
