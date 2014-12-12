@@ -21,6 +21,8 @@ public class GlobalSettings {
     public int chunkSpawnDistance = 8;
     @SerializedName("Distance (in Chunks) to perform entity counting")
     public int chunkCountDistance = 8;
+    @SerializedName("Generate Zero-Weight Spawn Entries")
+    public boolean shouldGenerateZeroSpawnEntries;
 
     @SerializedName("___GLOBAL SETTINGS___")
     public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
@@ -30,6 +32,7 @@ public class GlobalSettings {
     public GlobalSettings() {
         spawnerTickSpacing = 0;
         globalSortCreatureByBiome = true;
+        shouldGenerateZeroSpawnEntries = true;
         turnGameruleSpawningOff = false;
         emptyVanillaSpawnLists = true;
         disabledVanillaChunkSpawning = true;
