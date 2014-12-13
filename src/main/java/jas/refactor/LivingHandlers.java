@@ -79,10 +79,10 @@ public class LivingHandlers {
 
 	public void saveToConfig(WorldProperties worldProperties, ConfigLoader loader) {
 		Collection<LivingGroupBuilder> livGrpBuilders = new ArrayList<LivingGroupBuilder>();
-		for (LivingGroup attribute : attributes.iDToAttribute().values()) {
+		for (LivingGroup attribute : attributes.iDToGroup().values()) {
 			livGrpBuilders.add(new LivingGroupBuilder(attribute));
 		}
-		loader.livingGroupLoader = new LoadedFile(new EntityGroupingLoader(mappings.entityClasstoJASName(),
+		loader.livingGroupLoader = new LoadedFile(new EntityGroupingLoader(mappings.keyToMapping(),
 				livGrpBuilders));
 
 		Map<String, Collection<LivingHandlerBuilder>> fileNameToLivingHandlers = new HashMap<String, Collection<LivingHandlerBuilder>>();

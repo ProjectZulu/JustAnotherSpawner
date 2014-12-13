@@ -21,7 +21,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-public class LivingMappings implements Mappings {
+public class LivingMappings implements Mappings<Class<? extends EntityLiving>, String> {
 	private final HashMap<String, String> entityPackageToPrefix;
 	private final String UNKNOWN_PREFIX;
 	{
@@ -124,12 +124,12 @@ public class LivingMappings implements Mappings {
 	}
 
 	@Override
-	public ImmutableBiMap<Class<? extends EntityLiving>, String> entityClasstoJASName() {
+	public ImmutableBiMap<Class<? extends EntityLiving>, String> keyToMapping() {
 		return EntityClasstoJASName;
 	}
 
 	@Override
-	public ImmutableBiMap<String, Class<? extends EntityLiving>> jASNametoEntityClass() {
+	public ImmutableBiMap<String, Class<? extends EntityLiving>> mappingToKey() {
 		return JASNametoEntityClass;
 	}
 }

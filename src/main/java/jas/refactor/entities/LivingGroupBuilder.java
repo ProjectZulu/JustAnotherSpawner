@@ -3,7 +3,8 @@ package jas.refactor.entities;
 import jas.common.JASLog;
 import jas.common.math.SetAlgebra;
 import jas.common.math.SetAlgebra.OPERATION;
-import jas.refactor.entities.Groups.Group;
+import jas.refactor.entities.Group.Groups;
+import jas.refactor.entities.Group.MutableGroup;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
-public class LivingGroupBuilder {
+public class LivingGroupBuilder implements MutableGroup {
 	public final String groupID;
 	public String configName;
 	public transient Set<String> entityJASNames = new HashSet<String>();
@@ -73,37 +74,8 @@ public class LivingGroupBuilder {
 	 * 
 	 * Requires Previous processed Attribtues and Entity Mappings
 	 */
-	public LivingGroup build(Mappings mappings, Groups attributes) {
-		/* Evaluate contents and fill in jasNames */
-		for (String contentComponent : contents) {
-			OPERATION operation;
-			if (contentComponent.startsWith("-")) {
-				contentComponent = contentComponent.substring(1);
-				operation = OPERATION.COMPLEMENT;
-			} else if (contentComponent.startsWith("&")) {
-				contentComponent = contentComponent.substring(1);
-				operation = OPERATION.INTERSECT;
-			} else {
-				operation = OPERATION.UNION;
-				if (contentComponent.startsWith("+")) {
-					contentComponent = contentComponent.substring(1);
-				}
-			}
-
-			if (contentComponent.startsWith("A|")) {
-				Group groupToAdd = attributes.iDToAttribute().get(contentComponent.substring(2));
-				if (groupToAdd != null) {
-					SetAlgebra.operate(this.entityJASNames, groupToAdd.results(), operation);
-					continue;
-				}
-			} else if (mappings.jASNametoEntityClass().containsKey(contentComponent)) {
-				SetAlgebra.operate(this.entityJASNames, Sets.newHashSet(contentComponent), operation);
-				continue;
-			}
-			JASLog.log().severe("Error processing %s content from %s. The component %s does not exist.", this.groupID,
-					contents.toString(), contentComponent);
-		}
-
+	public LivingGroup build(Mappings mappings, Groups<Group> attributes) {
+		Group.Parser.parseGroupContents(this, mappings, attributes);
 		return new LivingGroup(this);
 	}
 
@@ -160,5 +132,30 @@ public class LivingGroupBuilder {
 			return groupID.concat(" contains ").concat(
 					entityJASNames.toString().concat(" from ").concat(contents.toString()));
 		}
+	}
+
+	@Override
+	public String iD() {
+		return groupID;
+	}
+
+	@Override
+	public Set<String> results() {
+		return entityJASNames;
+	}
+
+	@Override
+	public List<String> contents() {
+		return contents;
+	}
+
+	@Override
+	public void setResults(Set<String> results) {
+		this.entityJASNames = results;
+	}
+
+	@Override
+	public void setContents(List<String> contents) {
+		this.contents = contents;
 	}
 }

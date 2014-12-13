@@ -6,10 +6,10 @@ import net.minecraft.entity.EntityLiving;
 
 import com.google.common.collect.BiMap;
 
-public interface Mappings {
-	public Collection<String> newMappings();
+public interface Mappings<K, M> {
+	public Collection<M> newMappings();
 
-	public BiMap<Class<? extends EntityLiving>, String> entityClasstoJASName();
+	public BiMap<K, M> keyToMapping();
 
-	public BiMap<String, Class<? extends EntityLiving>> jASNametoEntityClass();
+	public BiMap<M, K> mappingToKey();
 }
