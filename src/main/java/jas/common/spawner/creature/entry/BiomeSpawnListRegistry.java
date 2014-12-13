@@ -5,6 +5,7 @@ import jas.common.FileUtilities;
 import jas.common.GsonHelper;
 import jas.common.ImportedSpawnList;
 import jas.common.JASLog;
+import jas.common.JustAnotherSpawner;
 import jas.common.WorldProperties;
 import jas.common.spawner.biome.group.BiomeGroupRegistry;
 import jas.common.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
@@ -265,19 +266,32 @@ public final class BiomeSpawnListRegistry {
 						handler.livingID, handler.creatureTypeID);
 				continue;
 			}
+			
 			if (saveFilesProcessed.contains(getSaveFileName(handler.livingID))
 					&& !livingGroupRegistry.newJASNames.contains(handler.livingID)) {
 				for (String newMapping : biomeGroupRegistry.newMappings) {
 					BiomeGroup newGroup = biomeGroupRegistry.getBiomeGroup(newMapping);
 					if (newGroup != null) {
 						SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(newGroup, handler, importedSpawnList);
-						addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+						if (JustAnotherSpawner.globalSettings().shouldGenerateZeroSpawnEntries
+								|| spawnListEntry.itemWeight > 0) {
+							addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+						} else {
+							JASLog.log().debug(Level.INFO, "Not creating defualt entry due to Zero-Weight %s",
+									spawnListEntry);
+						}
 					}
 				}
 			} else {
 				for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
 					SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, importedSpawnList);
-					addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+					if (!JustAnotherSpawner.globalSettings().shouldGenerateZeroSpawnEntries
+							|| spawnListEntry.itemWeight > 0) {
+						addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
+					} else {
+						JASLog.log().debug(Level.INFO, "Not creating defualt entry due to Zero-Weight %s",
+								spawnListEntry);
+					}
 				}
 			}
 		}

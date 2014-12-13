@@ -325,7 +325,7 @@ public class BiomeGroupRegistry {
 		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedGroups) {
-			parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
+			parseGroupContents(biomeGroup, iDToGroupBuilder, iDToAttribute);
 			if (biomeGroup.pckgNames.size() > 0) {
 				JASLog.log().info("Registering BiomeGroup %s", biomeGroup.toString());
 				iDToGroupBuilder.put(biomeGroup.groupID, biomeGroup);
@@ -477,7 +477,7 @@ public class BiomeGroupRegistry {
 		 * Evaluate and register groups. i.e. from group form A|allbiomes,&Jungle to individual jasNames
 		 */
 		for (BiomeGroup biomeGroup : sortedGroups) {
-			parseGroupContents(biomeGroup, iDToAttribute, iDToGroupBuilder);
+			parseGroupContents(biomeGroup, iDToGroupBuilder, iDToAttribute);
 			if (biomeGroup.pckgNames.size() > 0) {
 				JASLog.log().info("Registering BiomeGroup %s", biomeGroup.toString());
 				iDToGroupBuilder.put(biomeGroup.groupID, biomeGroup);
