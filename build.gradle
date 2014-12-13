@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "0.16.6"
+version = "0.16.7"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
 

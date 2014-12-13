@@ -285,7 +285,7 @@ public final class BiomeSpawnListRegistry {
 			} else {
 				for (BiomeGroup group : biomeGroupRegistry.iDToGroup().values()) {
 					SpawnListEntry spawnListEntry = findVanillaSpawnListEntry(group, handler, importedSpawnList);
-					if (!JustAnotherSpawner.globalSettings().shouldGenerateZeroSpawnEntries
+					if (JustAnotherSpawner.globalSettings().shouldGenerateZeroSpawnEntries
 							|| spawnListEntry.itemWeight > 0) {
 						addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
 					} else {
