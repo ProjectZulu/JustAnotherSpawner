@@ -95,7 +95,7 @@ public final class BiomeSpawnListRegistry {
         } else {
             JASLog.log().debug(Level.INFO,
                     "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
-                    spawnListEntry.livingGroupID, spawnListEntry.itemWeight, handler, spawnListEntry.locationGroup);
+                    spawnListEntry.livingGroupID, spawnListEntry.itemWeight, handler.shouldSpawn, spawnListEntry.locationGroup);
         }
     }
 
