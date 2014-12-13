@@ -233,21 +233,32 @@ public class LivingGroupRegistry {
 				String prefix = guessPrefix(entry.getKey(), fmlNames);
 				jasName = prefix.trim().equals("") ? entry.getValue() : prefix + "." + entry.getValue();
 			}
-			
-			
+
 			if (processedEntitiesAndJASNames.containsKey(livingClass)) {
 				JASLog.log().severe(
 						"Duplicate entity class detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
 						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
 			} else if (processedEntitiesAndJASNames.values().contains(jasName)) {
+				Class<? extends EntityLiving> previousClass = null;
+				for (Entry<Class<? extends EntityLiving>, String> searchEntry : processedEntitiesAndJASNames.entrySet()) {
+					if (jasName.equals(searchEntry.getValue().equals(jasName))) {
+						previousClass = searchEntry.getKey();
+					}
+				}
 				JASLog.log().severe(
-						"Duplicate entity mapping detected. Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
-						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
+						"Duplicate entity mapping detected, Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
+						livingClass, jasName, previousClass, jasName);
 			} else if (!entityClassToJASNameBuilder.containsKey(livingClass)
-					|| entityClassToJASNameBuilder.values().contains(jasName)) {
+					&& entityClassToJASNameBuilder.values().contains(jasName)) {
+				Class<? extends EntityLiving> previousClass = null;
+				for (Entry<Class<? extends EntityLiving>, String> searchEntry : entityClassToJASNameBuilder.entrySet()) {
+					if (jasName.equals(searchEntry.getValue())) {
+						previousClass = searchEntry.getKey();
+					}
+				}
 				JASLog.log().severe(
 						"Duplicate entity mapping detected: Ignoring FML,JasName pair [%s,%s] for pair [%s, %s]",
-						livingClass, jasName, livingClass, processedEntitiesAndJASNames.get(livingClass));
+						livingClass, jasName, previousClass, jasName);
 			} else if (entityClassToJASNameBuilder.containsKey(livingClass)) {
 				// Since we've already read this class
 				processedEntitiesAndJASNames.put(livingClass, jasName);
