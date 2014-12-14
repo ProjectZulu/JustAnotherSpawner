@@ -17,11 +17,13 @@ import java.util.Map.Entry;
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class LivingHandlerLoader implements VersionedFile {
 	private String version;
@@ -51,7 +53,8 @@ public class LivingHandlerLoader implements VersionedFile {
 		return version;
 	}
 
-	public static class Serializer {
+	public static class Serializer implements JsonSerializer<LivingHandlerLoader>,
+			JsonDeserializer<LivingHandlerLoader> {
 		// Hack to provide backwards compatability: read contents from LivingGroups and move them to LivingHandler
 		public static HashMap<String, List<String>> livingGroupContents = new HashMap<String, List<String>>();
 
@@ -91,7 +94,7 @@ public class LivingHandlerLoader implements VersionedFile {
 		public final String CONTENTS_KEY = "Contents";
 		private String currentVersion;
 
-		// @Override
+		@Override
 		public JsonElement serialize(LivingHandlerLoader src, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
@@ -126,7 +129,8 @@ public class LivingHandlerLoader implements VersionedFile {
 			endObject.add(HANDLERS_KEY, livingHandlers);
 			return endObject;
 		}
-
+		
+		@Override
 		public LivingHandlerLoader deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
 				throws JsonParseException {
 			LivingHandlerLoader saveObject = new LivingHandlerLoader();
