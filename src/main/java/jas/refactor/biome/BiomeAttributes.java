@@ -60,16 +60,8 @@ public class BiomeAttributes implements ReversibleGroups {
 					}
 				}
 			}
-		} else {
-			/* Get Default Groups From BiomeDictionary */
-			for (Type type : BiomeDictionary.Type.values()) {
-				BiomeGroupBuilder attributeGroup = new BiomeGroupBuilder(type.toString());
-				for (BiomeGenBase biome : BiomeDictionary.getBiomesForType(type)) {
-					attributeGroup.contents().add(biomeMappings.keyToMapping().get(BiomeHelper.getPackageName(biome)));
-				}
-				attributeGroups.addGroup(attributeGroup);
-			}
 		}
+
 		List<BiomeGroupBuilder> sortedAttributes = Group.Sorter.getSortedGroups(attributeGroups);
 		ListMultimap<String, String> packgNameToAttribIDsBuilder = ArrayListMultimap.create();
 		attributeGroups.clear();
