@@ -247,13 +247,13 @@ public class Tags {
 				BiomeGenBase biome = wrld.biomeAt(xCoord, zCoord);
 				BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
 				if (type.equals("GROUP")) {
-					if (registry.packgNameToAttribIDs().get(BiomeHelper.getPackageName(biome))
-							.contains(biomeName.substring(2))) {
+					ImmutableMultimap<String, String> packgToBiomeGroupID = registry.packgNameToGroupIDs();
+					if (packgToBiomeGroupID.get(BiomeHelper.getPackageName(biome)).contains(biomeName.substring(2))) {
 						return true;
 					}
 				} else if (type.equals("ATTRIBUTE")) {
-					ImmutableMultimap<String, String> packgToBiomeGroupID = registry.packgNameToGroupIDs();
-					if (packgToBiomeGroupID.get(BiomeHelper.getPackageName(biome)).contains(biomeName.substring(2))) {
+					ImmutableMultimap<String, String> packgToAttributeID = registry.packgNameToAttribIDs();
+					if (packgToAttributeID.get(BiomeHelper.getPackageName(biome)).contains(biomeName.substring(2))) {
 						return true;
 					}
 				} else if (type.equals("MAPPING")) {
