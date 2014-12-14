@@ -1,6 +1,7 @@
 package jas.refactor.ConfigLoader;
 
 import jas.common.GsonHelper;
+import jas.common.spawner.biome.group.BiomeGroupSaveObject;
 import jas.refactor.ConfigLoader.ConfigLoader.VersionedFile;
 import jas.refactor.biome.BiomeGroupBuilder;
 import jas.refactor.biome.BiomeGroupBuilder.BiomeGroup;
@@ -15,11 +16,13 @@ import java.util.TreeMap;
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class BiomeGroupLoader implements VersionedFile {
 	private String fileVersion;
@@ -67,7 +70,7 @@ public class BiomeGroupLoader implements VersionedFile {
 		return fileVersion;
 	}
 
-	public static class Serializer {
+	public static class Serializer implements JsonSerializer<BiomeGroupLoader>, JsonDeserializer<BiomeGroupLoader> {
 		public static final String FILE_VERSION = "2.0";
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String BIOME_MAPPINGS = "Biome Mappings";
@@ -77,6 +80,7 @@ public class BiomeGroupLoader implements VersionedFile {
 		@Deprecated
 		public final String BIOME_GROUPS = "Biome Groups";
 
+		@Override
 		public JsonElement serialize(BiomeGroupLoader saveObject, Type type, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, saveObject.fileVersion);
@@ -106,9 +110,30 @@ public class BiomeGroupLoader implements VersionedFile {
 				attributeObject.add(configName, biomeObject);
 			}
 			endObject.add(ATTRIBUTE_GROUPS, attributeObject);
+
+			JsonObject biomeGroupObject = new JsonObject();
+			for (Entry<String, TreeMap<String, BiomeGroupBuilder>> outerEntry : saveObject.configNameToBiomeGroups
+					.get().entrySet()) {
+				String configName = outerEntry.getKey();
+				JsonObject biomeObject = new JsonObject();
+				for (Entry<String, BiomeGroupBuilder> innerEntry : outerEntry.getValue().entrySet()) {
+					String groupName = innerEntry.getKey();
+					BiomeGroupBuilder group = innerEntry.getValue();
+					JsonArray contents = new JsonArray();
+					for (String content : group.contents()) {
+						contents.add(new JsonPrimitive(content));
+					}
+					JsonObject contentsObject = new JsonObject();
+					contentsObject.add(CONTENTS_KEY, contents);
+					biomeObject.add(groupName, contentsObject);
+				}
+				biomeGroupObject.add(configName, biomeObject);
+			}
+
 			return endObject;
 		}
 
+		@Override
 		public BiomeGroupLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
 				throws JsonParseException {
 			BiomeGroupLoader saveObject = new BiomeGroupLoader();
