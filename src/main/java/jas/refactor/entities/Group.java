@@ -127,45 +127,5 @@ public interface Group {
 			}
 			return sortedList;
 		}
-
-		// /**
-		// * Returns a new List with the Groups sorted based on their Content dependencies.
-		// *
-		// * Order is not guaranteed for entries without dependencies.
-		// */
-		// public static <T extends Group> List<T> getSortedGroups(Collection<T> livingGroups) {
-		// /* Evaluate each group, ensuring entries are valid mappings or Groups and */
-		// DirectedGraph<T> groupGraph = new DirectedGraph<T>();
-		// for (T livingGroup : livingGroups) {
-		// groupGraph.addNode(livingGroup);
-		// }
-		// for (T currentGroup : livingGroups) {
-		// for (String contentComponent : currentGroup.contents()) {
-		// for (T possibleGroup : livingGroups) {
-		// // Reminder: substring(2) is to remove mandatory A| and G| for groups
-		// // Don't care about entries without prefix as those are mappings which never have dependencies
-		// if (contentComponent.substring(2).equals(possibleGroup.iD())) {
-		// groupGraph.addEdge(possibleGroup, currentGroup);
-		// }
-		// }
-		// }
-		// }
-		//
-		// List<T> sortedList;
-		// try {
-		// sortedList = TopologicalSort.topologicalSort(groupGraph);
-		// } catch (TopologicalSortingException sortException) {
-		// SortingExceptionData<T> exceptionData = sortException.getExceptionData();
-		// JASLog.log().severe(
-		// "A circular reference was detected when processing entity groups. Groups in the cycle were: ");
-		// int i = 1;
-		// for (T invalidGroups : exceptionData.getVisitedNodes()) {
-		// JASLog.log().severe("Group %s: %s containing %s", i++, invalidGroups.iD(),
-		// invalidGroups.contents().toString());
-		// }
-		// throw sortException;
-		// }
-		// return sortedList;
-		// }
 	}
 }
