@@ -214,14 +214,14 @@ public class CreatureType {
 	}
 
 	public boolean canSpawnHere(World worldServer, CountInfo countInfo, ChunkPosition spawningPoint) {
-		final int entityTypeCap = this.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
 		Tags tags = new Tags(worldServer, countInfo, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
 				spawningPoint.chunkPosZ);
-		// Max of Type
-		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(this.typeID);
-		if (globalEntityTypeCount > entityTypeCap) {
-			return false;
-		}
+		// Max of Type: Moved back to beggining of CustomSpawner for performance
+//		final int entityTypeCap = this.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
+//		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(this.typeID);
+//		if (globalEntityTypeCount > entityTypeCap) {
+//			return false;
+//		}
 
 		// BiomeCap
 		ChunkCoordIntPair chunkCoord = new ChunkCoordIntPair(MathHelper.floor_double(spawningPoint.chunkPosX / 16.0D),

@@ -187,6 +187,12 @@ public class CustomSpawner {
 		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
 				countInfo.eligibleChunkLocations());
 		Collections.shuffle(eligibleChunksForSpawning);
+		
+		final int entityTypeCap = creatureType.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
+		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(creatureType.typeID);
+		if (globalEntityTypeCount > entityTypeCap) {
+			return;
+		}
 		for (ChunkCoordIntPair chunkCoord : eligibleChunksForSpawning) {
 			ChunkStat chunkStat = countInfo.getChunkStat(chunkCoord);
 			if (chunkStat.isEdge) {
@@ -194,7 +200,6 @@ public class CustomSpawner {
 			}
 			// TODO: CreatureType.passiveSpawnAttempts
 			countInfo.resetEntitiesSpawnedThisLoop();
-			final int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
 			for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
 				ChunkPosition startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
