@@ -4,13 +4,13 @@ import jas.common.BiomeBlacklist;
 import jas.common.JustAnotherSpawner;
 import jas.common.spawner.CountInfo.ChunkStat;
 import jas.common.spawner.creature.entry.BiomeSpawnListRegistry;
-import jas.common.spawner.creature.handler.LivingGroupRegistry;
 import jas.common.spawner.creature.handler.LivingHandlerRegistry;
 import jas.common.spawner.creature.type.CreatureType;
-import jas.common.spawner.creature.type.CreatureTypeRegistry;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -52,6 +52,21 @@ public class SpawnerTicker {
 	private void performSpawningInWorld(WorldServer world) {
 		if (!world.getGameRules().hasRule("doCustomMobSpawning")
 				|| world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
+
+			List<CreatureType> readyCreatureTypes = new ArrayList<CreatureType>();
+			Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+					.getCreatureTypes();
+			while (typeIterator.hasNext()) {
+				CreatureType creatureType = typeIterator.next();
+				if (creatureType.isReady(world)) {
+					readyCreatureTypes.add(creatureType);
+				}
+			}
+
+			if (readyCreatureTypes.isEmpty()) {
+				return;
+			}
+
 			HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner
 					.determineChunksForSpawnering(world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
 
@@ -61,10 +76,7 @@ public class SpawnerTicker {
 
 			CountInfo countInfo = new CountInfo(eligibleChunksForSpawning, creatureTypeCount, creatureCount);
 
-			Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
-					.getCreatureTypes();
-			while (typeIterator.hasNext()) {
-				CreatureType creatureType = typeIterator.next();
+			for (CreatureType creatureType : readyCreatureTypes) {
 				if (creatureType.isReady(world)) {
 					LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings()
 							.livingHandlerRegistry();
