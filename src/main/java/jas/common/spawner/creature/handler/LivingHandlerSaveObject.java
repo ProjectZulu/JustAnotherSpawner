@@ -231,9 +231,9 @@ public class LivingHandlerSaveObject {
 				int entityCap = GsonHelper.getMemberOrDefault(handler, ENTITY_CAP_KEY, -1);
 				builder.setEntityCap(entityCap);
 				int despawnAge = GsonHelper.getMemberOrDefault(handler, DESPAWN_AGE_KEY, -1);
-				builder.setEntityCap(despawnAge);
+				builder.setDespawnAge(despawnAge);
 				int despawnRate = GsonHelper.getMemberOrDefault(handler, DESPAWN_RATE_KEY, -1);
-				builder.setEntityCap(despawnRate);
+				builder.setDespawnRate(despawnRate);
 			}
 			builder.setEntityExpression(GsonHelper.getMemberOrDefault(handler, ENTITY_EXP_KEY, ""));
 			
