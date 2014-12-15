@@ -50,10 +50,7 @@ public class LivingTypes {
 		return types.get(typeID.toUpperCase());
 	}
 
-	public final WorldProperties worldProperties;
-
-	public LivingTypes(WorldProperties worldProperties) {
-		this.worldProperties = worldProperties;
+	public LivingTypes() {
 	}
 
 	public void loadFromConfig(ConfigLoader loader) {

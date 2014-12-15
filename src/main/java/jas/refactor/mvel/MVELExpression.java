@@ -28,4 +28,8 @@ public class MVELExpression<T> {
 			throw e;
 		}
 	}
+
+	public boolean isPresent() {
+		return compiled.isPresent();
+	}
 }

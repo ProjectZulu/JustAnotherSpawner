@@ -6,6 +6,7 @@ import jas.common.spawner.creature.entry.BiomeSpawnsSaveObject;
 import jas.common.spawner.creature.handler.parsing.keys.Key;
 import jas.common.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.refactor.ConfigLoader.ConfigLoader.VersionedFile;
+import jas.refactor.biome.BiomeGroups;
 import jas.refactor.biome.list.SpawnListEntryBuilder;
 import jas.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
 
@@ -20,10 +21,12 @@ import java.util.TreeMap;
 import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 public class BiomeSpawnListLoader implements VersionedFile {
 	private String version;
@@ -94,8 +97,9 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		return version;
 	}
 
-	public static class Serializer {
-		public final static String FILE_VERSION = "1.0";
+	public static class Serializer implements JsonSerializer<BiomeSpawnListLoader>,
+			JsonDeserializer<BiomeSpawnListLoader> {
+		public final static String FILE_VERSION = "3.0";
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String SORT_MODE_KEY = "SORTED_BY_BIOME";
 		public final String SPAWN_LIST_KEY = "SPAWN_LIST_ENTRIES";
@@ -114,12 +118,13 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		@Deprecated
 		public final String ENTITY_TAG_KEY = "Tags";
 
-        private final boolean defaultSortByBiome;
+		private final boolean defaultSortByBiome;
 
-        public Serializer(boolean defaultSortByBiome) {
-            this.defaultSortByBiome = defaultSortByBiome;
-        }
-		
+		public Serializer(boolean defaultSortByBiome) {
+			this.defaultSortByBiome = defaultSortByBiome;
+		}
+
+		@Override
 		public JsonElement serialize(BiomeSpawnListLoader loader, Type type, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
@@ -164,50 +169,62 @@ public class BiomeSpawnListLoader implements VersionedFile {
 			endObject.add(SPAWN_LIST_KEY, primObject);
 			return endObject;
 		}
-		
-        public BiomeSpawnListLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
-                throws JsonParseException {
-            JsonObject endObject = object.getAsJsonObject();
-            String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
+
+		@Override
+		public BiomeSpawnListLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
+				throws JsonParseException {
+			JsonObject endObject = object.getAsJsonObject();
+			String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
 			BiomeSpawnListLoader saveObject = new BiomeSpawnListLoader(GsonHelper.getMemberOrDefault(endObject,
 					SORT_MODE_KEY, defaultSortByBiome));
-            JsonObject primObject = GsonHelper.getMemberOrDefault(endObject, SPAWN_LIST_KEY, new JsonObject());            
-            for (Entry<String, JsonElement> primEntries : primObject.entrySet()) {
-                String primKey = primEntries.getKey();
-                if (primKey == null || primKey.trim().equals("")) {
-                    continue;
-                }
-                TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = saveObject.biomeToTypeToCreature
-                        .get(primKey);
-                if (secMap == null) {
-                    secMap = new TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>();
-                    saveObject.biomeToTypeToCreature.put(primKey, secMap);
-                }
-                for (Entry<String, JsonElement> secEntries : GsonHelper.getAsJsonObject(primEntries.getValue())
-                        .entrySet()) {
-                    String secKey = secEntries.getKey();
-                    if (secKey == null || secKey.trim().equals("")) {
-                        continue;
-                    }
-                    TreeMap<String, SpawnListEntryBuilder> tertMap = secMap.get(secKey);
-                    if (tertMap == null) {
-                        tertMap = new TreeMap<String, SpawnListEntryBuilder>();
-                        secMap.put(secKey, tertMap);
-                    }
-                    for (Entry<String, JsonElement> tertEntries : GsonHelper.getAsJsonObject(secEntries.getValue())
-                            .entrySet()) {
-                        String tertKey = tertEntries.getKey();
-                        JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
-                        
-                        SpawnListEntryBuilder builder = new SpawnListEntryBuilder(tertKey, primKey);
-						if (fileVersion.equals("2.0")) {
+			JsonObject primObject = GsonHelper.getMemberOrDefault(endObject, SPAWN_LIST_KEY, new JsonObject());
+			for (Entry<String, JsonElement> primEntries : primObject.entrySet()) {
+				String primKey = primEntries.getKey();
+				if (primKey == null || primKey.trim().equals("")) {
+					continue;
+				}
+				TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = saveObject.biomeToTypeToCreature
+						.get(primKey);
+				if (secMap == null) {
+					secMap = new TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>();
+					saveObject.biomeToTypeToCreature.put(primKey, secMap);
+				}
+				for (Entry<String, JsonElement> secEntries : GsonHelper.getAsJsonObject(primEntries.getValue())
+						.entrySet()) {
+					String secKey = secEntries.getKey();
+					if (secKey == null || secKey.trim().equals("")) {
+						continue;
+					}
+					TreeMap<String, SpawnListEntryBuilder> tertMap = secMap.get(secKey);
+					if (tertMap == null) {
+						tertMap = new TreeMap<String, SpawnListEntryBuilder>();
+						secMap.put(secKey, tertMap);
+					}
+					for (Entry<String, JsonElement> tertEntries : GsonHelper.getAsJsonObject(secEntries.getValue())
+							.entrySet()) {
+						String tertKey = tertEntries.getKey();
+						JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
 
-						} else {
-							String biomeGroupId = saveObject.sortCreatureByBiome ? primKey : tertKey;
-							String livingGroup = saveObject.sortCreatureByBiome ? tertKey : secKey;
-							builder = new SpawnListEntryBuilder(livingGroup, biomeGroupId);
-							getSetStats(builder, entityValueObject);
+						String biomeGroupId = BiomeGroups.key.concat(saveObject.sortCreatureByBiome ? primKey : tertKey);
+						String livingGroup = saveObject.sortCreatureByBiome ? tertKey : secKey;
+						// String livingHandlerID = saveObject.sortCreatureByBiome ? tertKey : secKey;
 
+						String livingType = saveObject.sortCreatureByBiome ? secKey : primKey;
+						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingGroup, livingType, biomeGroupId);
+						if (fileVersion.equals("3.0")) {
+
+						} else if (fileVersion.equals("1.0")) {
+							JsonElement element = entityValueObject.get(ENTITY_STAT_KEY);
+							int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
+							builder.setWeight(Integer.toString(stats[0]));
+							builder.setPassivePackSize(Integer.toString(stats[1]));
+							builder.setChunkPackSize(new StringBuilder().append(stats[1]).append("+ util.rand(1 + ")
+									.append(stats[3]).append("-").append(stats[2]).append(")").toString());
+							builder.setEntityToSpawn(livingGroup);
+							// Hack, will not convert well if LivingHandler.contents was used thoroughly
+
+							String canSpawnExpression = "";
+							String postSpawnExpression = "";
 							if (fileVersion.equals("1.0")) {
 								String optionalParameters = GsonHelper.getMemberOrDefault(entityValueObject,
 										ENTITY_TAG_KEY, "");
@@ -219,12 +236,12 @@ public class BiomeSpawnListLoader implements VersionedFile {
 									if (Key.spawn.keyParser.isMatch(titletag)) {
 										conv = new TagConverter(parsed);
 										if (!conv.expression.trim().equals("")) {
-											builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
+											canSpawnExpression = conv.expression;
 										}
 									} else if (Key.postspawn.keyParser.isMatch(titletag)) {
 										conv = new TagConverter(parsed);
 										if (!conv.expression.trim().equals("")) {
-											builder.setPostSpawnExpression(conv.expression);
+											postSpawnExpression = conv.expression;
 										}
 									}
 								}
@@ -232,49 +249,33 @@ public class BiomeSpawnListLoader implements VersionedFile {
 								String spawnTag = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_TAG_KEY, "");
 								String spawnOperand = GsonHelper.getMemberOrDefault(entityValueObject,
 										SPAWN_OPERAND_KEY, "");
-								builder.setSpawnExpression(spawnTag,
-										Optional.of("OR".equalsIgnoreCase(spawnOperand) ? Operand.OR : Operand.AND));
+								canSpawnExpression = spawnTag;
 								String postspawnTag = GsonHelper.getMemberOrDefault(entityValueObject, POSTSPAWN_KEY,
 										"");
-								builder.setPostSpawnExpression(postspawnTag);
+								postSpawnExpression = postspawnTag;
 							}
+							builder.setCanSpawn(canSpawnExpression);
+							builder.setPostSpawn(postSpawnExpression);
 						}
-                        tertMap.put(tertKey, builder);
-                    }
-                }
-            }
-            return saveObject;
-        }
-        
-        private void legacyLoad() {
-        	
-        }
-        
-        private String statsToString(int weight, int packSize, int minChunk, int maxChunk) {
-            return new StringBuilder().append(weight).append("-").append(packSize).append("-").append(minChunk)
-                    .append("-").append(maxChunk).toString();
-        }
+						tertMap.put(tertKey, builder);
+					}
+				}
+			}
+			return saveObject;
+		}
 
-        private void getSetStats(SpawnListEntryBuilder builder, JsonObject creatureNameObject) {
-            JsonElement element = creatureNameObject.get(ENTITY_STAT_KEY);
-            int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
-            builder.setWeight(stats[0]).setPackSize(stats[1]).setMinChunkPack(stats[2]).setMaxChunkPack(stats[3]);
-        }
-
-        private int[] stringToStats(String stats) {
-            String[] parts = stats.split("-");
-            int[] result = new int[4];
-            for (int i = 0; i < 4; i++) {
-                try {
-                    result[i] = i < parts.length ? Integer.parseInt(parts[i]) : 0;
-                } catch (NumberFormatException e) {
-                    result[i] = 0;
-                }
-            }
-            return result;
-        }
-
-        
+		private int[] stringToStats(String stats) {
+			String[] parts = stats.split("-");
+			int[] result = new int[4];
+			for (int i = 0; i < 4; i++) {
+				try {
+					result[i] = i < parts.length ? Integer.parseInt(parts[i]) : 0;
+				} catch (NumberFormatException e) {
+					result[i] = 0;
+				}
+			}
+			return result;
+		}
 
 	}
 }

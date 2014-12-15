@@ -1,8 +1,17 @@
 package jas.refactor.entities;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+
+import jas.refactor.entities.Group.MutableGroup;
 import jas.refactor.mvel.MVELExpression;
 
-public class LivingHandlerBuilder {
+public class LivingHandlerBuilder implements MutableGroup {
 	private String livingHandlerID;
 	private String canSpawn;
 	private String canDspwn;
@@ -10,6 +19,9 @@ public class LivingHandlerBuilder {
 	private String dieOfAge;
 	private String resetAge;
 	private String postSpawn;
+	private transient Set<String> results = new HashSet<String>();
+	/** String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
+	private ArrayList<String> contents;
 
 	public LivingHandlerBuilder(String livingHandlerID) {
 		this.livingHandlerID = livingHandlerID;
@@ -31,7 +43,7 @@ public class LivingHandlerBuilder {
 		this.postSpawn = livingHandler.postSpawn.expression;
 	}
 
-	public static class LivingHandler {
+	public static class LivingHandler implements Group {
 		public final String livingHandlerID;
 		public final MVELExpression<Boolean> canSpawn;
 		public final MVELExpression<Boolean> canDspwn;
@@ -39,6 +51,9 @@ public class LivingHandlerBuilder {
 		public final MVELExpression<Boolean> postSpawn;
 		public final MVELExpression<Boolean> isDspnbleAge;
 		public final MVELExpression<Boolean> shouldResetAge;
+		private final ImmutableSet<String> results;
+		/** String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
+		private final ImmutableList<String> contents;
 
 		private LivingHandler(LivingHandlerBuilder builder) {
 			this.livingHandlerID = builder.livingHandlerID;
@@ -48,6 +63,23 @@ public class LivingHandlerBuilder {
 			this.postSpawn = new MVELExpression<Boolean>(builder.getPostSpawn());
 			this.isDspnbleAge = new MVELExpression<Boolean>(builder.getIsDspnbleAge());
 			this.shouldResetAge = new MVELExpression<Boolean>(builder.getShouldResetAge());
+			this.results = ImmutableSet.<String> builder().addAll(builder.results()).build();
+			this.contents = ImmutableList.<String> builder().addAll(builder.results()).build();
+		}
+
+		@Override
+		public String iD() {
+			return livingHandlerID;
+		}
+
+		@Override
+		public Set<String> results() {
+			return results;
+		}
+
+		@Override
+		public List<String> contents() {
+			return contents;
 		}
 	}
 
@@ -105,5 +137,30 @@ public class LivingHandlerBuilder {
 
 	public void setShouldResetAge(String shouldResetAge) {
 		this.resetAge = shouldResetAge;
+	}
+
+	@Override
+	public String iD() {
+		return livingHandlerID;
+	}
+
+	@Override
+	public Set<String> results() {
+		return results;
+	}
+
+	@Override
+	public List<String> contents() {
+		return contents;
+	}
+
+	@Override
+	public void setResults(Set<String> results) {
+		this.results = new HashSet<String>(results);
+	}
+
+	@Override
+	public void setContents(List<String> contents) {
+		this.contents = new ArrayList<String>(contents);
 	}
 }

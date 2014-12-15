@@ -9,6 +9,7 @@ import jas.refactor.LivingTypes.LivingTypeBuilder;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -105,7 +106,7 @@ public class LivingTypeLoader implements VersionedFile {
 				for (Entry<String, JsonElement> entry : types.entrySet()) {
 					JsonObject builderObject = GsonHelper.getAsJsonObject(entry.getValue());
 					if (fileVersion.equals("3.0")) {
-						String livingTypeID = entry.getKey();
+						String livingTypeID = entry.getKey().toUpperCase(Locale.ENGLISH);
 						String canSpawnExpression = GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY,
 								"count.globalType('" + livingTypeID + "') >= (20 * count.players / 256) "
 										+ " || !isSpawnMedium('AIR')" + "||!solidside(1,{0,0,0},{0,-1,0})"
@@ -124,7 +125,7 @@ public class LivingTypeLoader implements VersionedFile {
 						builder.setIterationsPerPack(iterPerPack);
 						typeMap.put(builder.livingTypeID, builder);
 					} else {
-						String livingTypeID = entry.getKey();
+						String livingTypeID = entry.getKey().toUpperCase(Locale.ENGLISH);
 
 						/* New CanSpawn */
 						int maxCreature = GsonHelper.getMemberOrDefault(builderObject, MAX_CREATURE_KEY, 10);

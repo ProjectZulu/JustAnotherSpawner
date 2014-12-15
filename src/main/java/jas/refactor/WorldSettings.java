@@ -23,10 +23,19 @@ public class WorldSettings {
 	public void loadWorldSettings(File modConfigDirectoryFile, World world) {
 		File defaultWorldSettingDirectory = new File(DefaultProps.WORLDSETTINGSDIR
 				+ worldProperties.getFolderConfiguration().saveName + "/");
-		defaultSpawnSettings = new SpawnSettings(worldProperties, defaultWorldSettingDirectory);
+		defaultSpawnSettings = new SpawnSettings(world, worldProperties, defaultWorldSettingDirectory);
 	}
 
 	public void saveWorldSettings(File modConfigDirectoryFile, World world) {
 
+	}
+
+	public SpawnSettings getSpawnSettings(World world) {
+		if (dimSpawnOverrides.isEmpty()) {
+			return defaultSpawnSettings;
+		} else {
+			SpawnSettings dimSpawnSettings = dimSpawnOverrides.get(world.provider.dimensionId);
+			return dimSpawnSettings != null ? dimSpawnSettings : defaultSpawnSettings;
+		}
 	}
 }
