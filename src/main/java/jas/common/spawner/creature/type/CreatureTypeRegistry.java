@@ -83,7 +83,8 @@ public class CreatureTypeRegistry {
 			}
 		} else {
 			readTypes = new HashMap<String, CreatureTypeBuilder>();
-			CreatureTypeBuilder monster = new CreatureTypeBuilder(MONSTER, 1, 70);
+			CreatureTypeBuilder monster = new CreatureTypeBuilder(MONSTER, 1, 70)
+			.withSpawnExpression("obj.difficulty()==0||!solidside(1,{0,0,0},{0,-1,0})||liquid({0,0,0},{0,0,0})||normal({0,0,0},{0,0,0})||normal({0,0,0},{0,1,0})||!opaque({0,0,0},{0,-1,0})");
 			CreatureTypeBuilder ambient = new CreatureTypeBuilder(AMBIENT, 1, 15);
 			CreatureTypeBuilder watercreature = new CreatureTypeBuilder(WATERCREATURE, 1, 15).insideMedium(
 					Material.water).withSpawnExpression("!liquid({0,0,0},{0,0,0})||!liquid({0,0,0},{0,-1,0})||normal({0,0,0},{0,1,0})");
