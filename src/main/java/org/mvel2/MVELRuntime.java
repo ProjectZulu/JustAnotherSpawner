@@ -24,6 +24,8 @@ import org.mvel2.compiler.CompiledExpression;
 import org.mvel2.debug.Debugger;
 import org.mvel2.debug.DebuggerContext;
 import org.mvel2.integration.VariableResolverFactory;
+import org.mvel2.optimizers.OptimizerFactory;
+import org.mvel2.util.ErrorUtil;
 import org.mvel2.util.ExecutionStack;
 
 import static org.mvel2.Operator.*;
@@ -36,7 +38,6 @@ import static org.mvel2.util.PropertyTools.isEmpty;
 public class MVELRuntime {
   // public static final ImmutableDefaultFactory IMMUTABLE_DEFAULT_FACTORY = new ImmutableDefaultFactory();
   private static ThreadLocal<DebuggerContext> debuggerContext;
-
 
   /**
    * Main interpreter.
@@ -53,7 +54,6 @@ public class MVELRuntime {
 
     Object v1, v2;
     ExecutionStack stk = new ExecutionStack();
-    variableFactory.setTiltFlag(false);
 
     ASTNode tk = expression.getFirstNode();
     Integer operator;
@@ -94,7 +94,6 @@ public class MVELRuntime {
           case RETURN:
             variableFactory.setTiltFlag(true);
             return stk.pop();
-          //     throw new EndWithValue(stk.pop());
 
           case NOOP:
             continue;
@@ -164,6 +163,9 @@ public class MVELRuntime {
       else {
         throw e;
       }
+    }
+    finally {
+      OptimizerFactory.clearThreadAccessorOptimizer();
     }
   }
 

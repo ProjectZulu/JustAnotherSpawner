@@ -3,12 +3,19 @@ package org.mvel2.util;
 import org.mvel2.MVEL;
 import org.mvel2.ParserContext;
 
+import java.util.Arrays;
 import java.util.Set;
 
 /**
  * @author Mike Brock .
  */
 public class VariableSpaceCompiler {
+  private static final Object[] EMPTY_OBJ = new Object[0];
+  
+  public static SharedVariableSpaceModel compileShared(String expr, ParserContext pCtx) {
+    return compileShared(expr, pCtx, EMPTY_OBJ);
+  }
+  
   public static SharedVariableSpaceModel compileShared(String expr, ParserContext pCtx, Object[] vars) {
     String[] varNames = pCtx.getIndexedVarNames();
 
@@ -50,6 +57,4 @@ public class VariableSpaceCompiler {
 
     return new SimpleVariableSpaceModel(allVars);
   }
-
-
 }

@@ -22,6 +22,7 @@ import org.mvel2.ast.Function;
 import org.mvel2.ast.LineLabel;
 import org.mvel2.ast.Proto;
 import org.mvel2.compiler.AbstractParser;
+import org.mvel2.compiler.CompiledExpression;
 import org.mvel2.compiler.Parser;
 import org.mvel2.integration.Interceptor;
 import org.mvel2.util.LineMapper;
@@ -71,7 +72,10 @@ public class ParserContext implements Serializable {
   private LineLabel lastLineLabel;
 
   private transient Parser rootParser;
+  private transient Map<String, CompiledExpression> compiledExpressionCache;
+  private transient Map<String, Class> returnTypeCache;
 
+  private boolean functionContext = false;
   private boolean compiled = false;
   private boolean strictTypeEnforcement = false;
   private boolean strongTyping = false;
@@ -83,7 +87,6 @@ public class ParserContext implements Serializable {
   private boolean blockSymbols = false;
   private boolean executableCodeReached = false;
   private boolean indexAllocation = false;
-  private boolean allowBootstrapBypass = true;
   protected boolean variablesEscape = false;
 
   public ParserContext() {
@@ -99,6 +102,12 @@ public class ParserContext implements Serializable {
 
   public ParserContext(ParserConfiguration parserConfiguration) {
     this.parserConfiguration = parserConfiguration;
+  }
+
+  public ParserContext(ParserConfiguration parserConfiguration, ParserContext parent, boolean functionContext) {
+    this.parserConfiguration = parserConfiguration;
+    this.parent = parent;
+    this.functionContext = functionContext;
   }
 
   public ParserContext(Map<String, Object> imports, Map<String, Interceptor> interceptors, String sourceFile) {
@@ -149,7 +158,8 @@ public class ParserContext implements Serializable {
     ParserContext ctx = new ParserContext(parserConfiguration) {
       @Override
       public void addVariable(String name, Class type) {
-        if ((parent.variables != null && parent.variables.containsKey(name)) || (parent.inputs != null && parent.inputs.containsKey(name))) {
+        if ((parent.variables != null && parent.variables.containsKey(name))
+            || (parent.inputs != null && parent.inputs.containsKey(name))) {
           this.variablesEscape = true;
         }
         super.addVariable(name, type);
@@ -157,7 +167,8 @@ public class ParserContext implements Serializable {
 
       @Override
       public void addVariable(String name, Class type, boolean failIfNewAssignment) {
-        if ((parent.variables != null && parent.variables.containsKey(name)) || (parent.inputs != null && parent.inputs.containsKey(name))) {
+        if ((parent.variables != null && parent.variables.containsKey(name))
+            || (parent.inputs != null && parent.inputs.containsKey(name))) {
           this.variablesEscape = true;
         }
         super.addVariable(name, type, failIfNewAssignment);
@@ -165,7 +176,8 @@ public class ParserContext implements Serializable {
 
       @Override
       public Class getVarOrInputType(String name) {
-        if ((parent.variables != null && parent.variables.containsKey(name)) || (parent.inputs != null && parent.inputs.containsKey(name))) {
+        if ((parent.variables != null && parent.variables.containsKey(name))
+            || (parent.inputs != null && parent.inputs.containsKey(name))) {
           this.variablesEscape = true;
         }
 
@@ -183,6 +195,7 @@ public class ParserContext implements Serializable {
 
     ctx.sourceLineLookups = sourceLineLookups;
     ctx.lastLineLabel = lastLineLabel;
+    ctx.variableVisibility = variableVisibility;
 
     ctx.globalFunctions = globalFunctions;
     ctx.lastTypeParameters = lastTypeParameters;
@@ -205,7 +218,6 @@ public class ParserContext implements Serializable {
     return ctx;
   }
 
-
   /**
    * Tests whether or not a variable or input exists in the current parser context.
    *
@@ -214,7 +226,7 @@ public class ParserContext implements Serializable {
    */
   public boolean hasVarOrInput(String name) {
     return (variables != null && variables.containsKey(name))
-            || (inputs != null && inputs.containsKey(name));
+        || (inputs != null && inputs.containsKey(name));
   }
 
   /**
@@ -227,7 +239,8 @@ public class ParserContext implements Serializable {
   public Class getVarOrInputType(String name) {
     if (variables != null && variables.containsKey(name)) {
       return variables.get(name);
-    } else if (inputs != null && inputs.containsKey(name)) {
+    }
+    else if (inputs != null && inputs.containsKey(name)) {
       return inputs.get(name);
     }
     return Object.class;
@@ -236,7 +249,8 @@ public class ParserContext implements Serializable {
   public Class getVarOrInputTypeOrNull(String name) {
     if (variables != null && variables.containsKey(name)) {
       return variables.get(name);
-    } else if (inputs != null && inputs.containsKey(name)) {
+    }
+    else if (inputs != null && inputs.containsKey(name)) {
       return inputs.get(name);
     }
     return null;
@@ -449,10 +463,14 @@ public class ParserContext implements Serializable {
         for (Method m : ctxType.getMethods()) {
           if ((m.getModifiers() & Modifier.PUBLIC) != 0) {
             if (m.getName().startsWith("get")
-                    || (m.getName().startsWith("is")
-                    && (m.getReturnType().equals(boolean.class) || m.getReturnType().equals(Boolean.class)))) {
-              scope.add(ReflectionUtil.getPropertyFromAccessor(m.getName()));
-            } else {
+                || (m.getName().startsWith("is")
+                && (m.getReturnType().equals(boolean.class) || m.getReturnType().equals(Boolean.class)))) {
+              String propertyName = ReflectionUtil.getPropertyFromAccessor(m.getName());
+              scope.add(propertyName);
+              propertyName = propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+              scope.add(propertyName);
+            }
+            else {
               scope.add(m.getName());
             }
           }
@@ -460,7 +478,6 @@ public class ParserContext implements Serializable {
       }
     }
   }
-
 
   public void addVariable(String name, Class type, boolean failIfNewAssignment) {
     initializeTables();
@@ -555,8 +572,8 @@ public class ParserContext implements Serializable {
     else {
       for (ErrorDetail detail : errorList) {
         if (detail.getMessage().equals(errorDetail.getMessage())
-                && detail.getColumn() == errorDetail.getColumn()
-                && detail.getLineNumber() == errorDetail.getLineNumber()) {
+            && detail.getColumn() == errorDetail.getColumn()
+            && detail.getLineNumber() == errorDetail.getLineNumber()) {
           return;
         }
       }
@@ -647,11 +664,14 @@ public class ParserContext implements Serializable {
     for (Map.Entry<String, Object> entry : imports.entrySet()) {
       if ((val = entry.getValue()) instanceof Class) {
         addImport(entry.getKey(), (Class) val);
-      } else if (val instanceof Method) {
+      }
+      else if (val instanceof Method) {
         addImport(entry.getKey(), (Method) val);
-      } else if (val instanceof MethodStub) {
+      }
+      else if (val instanceof MethodStub) {
         addImport(entry.getKey(), (MethodStub) val);
-      } else {
+      }
+      else {
         throw new RuntimeException("invalid element in imports map: " + entry.getKey() + " (" + val + ")");
       }
     }
@@ -671,6 +691,7 @@ public class ParserContext implements Serializable {
   public void popVariableScope() {
     if (variableVisibility != null && !variableVisibility.isEmpty()) {
       variableVisibility.remove(variableVisibility.size() - 1);
+      setLastTypeParameters(null);
     }
   }
 
@@ -747,14 +768,14 @@ public class ParserContext implements Serializable {
 
   public int getLineFor(String sourceName, int cursor) {
     return (sourceLineLookups != null
-            && sourceLineLookups.containsKey(sourceName)) ?
-            sourceLineLookups.get(sourceName).getLineFromCursor(cursor) : -1;
+        && sourceLineLookups.containsKey(sourceName)) ?
+        sourceLineLookups.get(sourceName).getLineFromCursor(cursor) : -1;
   }
 
   public boolean isVisitedLine(String sourceName, int lineNumber) {
     return visitedLines != null
-            && visitedLines.containsKey(sourceName)
-            && visitedLines.get(sourceName).contains(lineNumber);
+        && visitedLines.containsKey(sourceName)
+        && visitedLines.get(sourceName).contains(lineNumber);
   }
 
   public void visitLine(String sourceName, int lineNumber) {
@@ -768,18 +789,6 @@ public class ParserContext implements Serializable {
 
     visitedLines.get(sourceName).add(lineNumber);
   }
-
-
-
-//  public void addKnownLine(String sourceName, int lineNumber) {
-//    if (sourceMap == null) sourceMap = new HashMap<String, Set<Integer>>();
-//    if (!sourceMap.containsKey(sourceName)) sourceMap.put(sourceName, new HashSet<Integer>());
-//    sourceMap.get(sourceName).add(lineNumber);
-//  }
-
-//  public void addKnownLine(int lineNumber) {
-//    addKnownLine(sourceFile, lineNumber);
-//  }
 
   public LineLabel getLastLineLabel() {
     return lastLineLabel;
@@ -804,7 +813,7 @@ public class ParserContext implements Serializable {
   }
 
   public Map getFunctions() {
-    return globalFunctions;
+    return globalFunctions == null ? Collections.emptyMap() : globalFunctions;
   }
 
   public boolean hasFunction(String name) {
@@ -970,8 +979,16 @@ public class ParserContext implements Serializable {
     this.indexAllocation = indexAllocation;
   }
 
+  public boolean isFunctionContext() {
+    return functionContext;
+  }
+
   public ParserConfiguration getParserConfiguration() {
     return parserConfiguration;
+  }
+
+  public ClassLoader getClassLoader() {
+    return parserConfiguration.getClassLoader();
   }
 
   public Type[] getLastTypeParameters() {
@@ -983,17 +1000,33 @@ public class ParserContext implements Serializable {
   }
 
   public boolean isAllowBootstrapBypass() {
-    return allowBootstrapBypass;
+    return parserConfiguration.isAllowBootstrapBypass();
   }
 
   public void setAllowBootstrapBypass(boolean allowBootstrapBypass) {
-    this.allowBootstrapBypass = allowBootstrapBypass;
+    parserConfiguration.setAllowBootstrapBypass(allowBootstrapBypass);
   }
 
   public String[] getIndexedVarNames() {
+    if (indexedInputs == null) return new String[0];
+
     String[] s = new String[indexedInputs.size()];
     indexedInputs.toArray(s);
     return s;
+  }
+
+  public Map<String, CompiledExpression> getCompiledExpressionCache() {
+    if (compiledExpressionCache == null) {
+      compiledExpressionCache = new HashMap<String, CompiledExpression>();
+    }
+    return compiledExpressionCache;
+  }
+
+  public Map<String, Class> getReturnTypeCache() {
+    if (returnTypeCache == null) {
+      returnTypeCache = new HashMap<String, Class>();
+    }
+    return returnTypeCache;
   }
 
   // Introduce some new Fluent API stuff here.
@@ -1034,11 +1067,8 @@ public class ParserContext implements Serializable {
 
   public ParserContext withIndexedVars(String[] varNames) {
     indexedInputs = new ArrayList<String>();
-    for (String s : varNames) {
-      indexedInputs.add(s);
-    }
+    Collections.addAll(indexedInputs, varNames);
 
     return this;
   }
-
 }

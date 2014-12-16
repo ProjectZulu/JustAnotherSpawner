@@ -27,12 +27,14 @@ import static org.mvel2.DataConversion.canConvert;
 import static org.mvel2.DataConversion.convert;
 import static org.mvel2.MVEL.eval;
 import static org.mvel2.util.ParseTools.subCompileExpression;
+import static org.mvel2.util.ReflectionUtil.isAssignableFrom;
 
 public class TypeCast extends ASTNode {
   private ExecutableStatement statement;
   private boolean widen;
 
   public TypeCast(char[] expr, int start, int offset, Class cast, int fields, ParserContext pCtx) {
+    super(pCtx);
     this.egressType = cast;
     this.expr = expr;
     this.start = start;
@@ -52,12 +54,11 @@ public class TypeCast extends ASTNode {
               + statement.getKnownEgressType() + "; to: " + cast, expr, start);
         }
       }
-
     }
   }
 
   private boolean canCast(Class from, Class to) {
-    return from.isAssignableFrom(to) || (from.isInterface() && interfaceAssignable(from, to));
+    return isAssignableFrom(from, to) || (from.isInterface() && interfaceAssignable(from, to));
   }
 
   private boolean interfaceAssignable(Class from, Class to) {
@@ -87,5 +88,9 @@ public class TypeCast extends ASTNode {
     else {
       throw new ClassCastException(inst.getClass().getName() + " cannot be cast to: " + type.getClass().getName());
     }
+  }
+
+  public ExecutableStatement getStatement() {
+    return statement;
   }
 }

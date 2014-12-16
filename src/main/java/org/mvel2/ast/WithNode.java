@@ -41,8 +41,8 @@ public class WithNode extends BlockNode implements NestedStatement {
   //   protected ExecutableStatement nestedStatement;
   protected ParmValuePair[] withExpressions;
 
-  public WithNode(char[] expr, int start, int offset, int blockStart, int blockOffset, int fields,
-                  ParserContext pCtx) {
+  public WithNode(char[] expr, int start, int offset, int blockStart, int blockOffset, int fields, ParserContext pCtx) {
+    super(pCtx);
     nestParm = createStringTrimmed(this.expr = expr, this.start = start, this.offset = offset);
     this.blockStart = blockStart;
     this.blockOffset = blockOffset;
@@ -248,9 +248,9 @@ public class WithNode extends BlockNode implements NestedStatement {
     return compiledBlock;
   }
 
-//  public ParmValuePair[] getWithExpressions() {
-//    return withExpressions;
-//  }
+  public ParmValuePair[] getWithExpressions() {
+    return withExpressions;
+  }
 
   public static final class ParmValuePair implements Serializable {
     private Serializable setExpression;
