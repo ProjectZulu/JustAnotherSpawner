@@ -33,6 +33,7 @@ import static java.lang.Character.isDigit;
 import static org.mvel2.ast.ASTNode.COMPILE_IMMEDIATE;
 import static org.mvel2.util.ArrayTools.findFirst;
 import static org.mvel2.util.ParseTools.*;
+import static org.mvel2.util.ReflectionUtil.toPrimitiveArrayType;
 
 public class TypeDescriptor implements Serializable {
   private String className;
@@ -132,7 +133,15 @@ public class TypeDescriptor implements Serializable {
   public void setEndRange(int endRange) {
     this.endRange = endRange;
   }
-
+  
+  public Class<?> getClassReference() throws ClassNotFoundException {
+    return getClassReference(null, this);
+  }
+  
+  public Class<?> getClassReference(ParserContext ctx) throws ClassNotFoundException {
+    return getClassReference(ctx,this);
+  }
+  
   public static Class getClassReference(Class baseType,
                                         TypeDescriptor tDescr,
                                         VariableResolverFactory factory, ParserContext ctx) throws ClassNotFoundException {
@@ -141,7 +150,9 @@ public class TypeDescriptor implements Serializable {
 
   public static Class getClassReference(ParserContext ctx, Class cls, TypeDescriptor tDescr) throws ClassNotFoundException {
     if (tDescr.isArray()) {
-      cls = findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
+      cls = cls.isPrimitive() ?
+              toPrimitiveArrayType(cls) :
+              findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
     }
     return cls;
   }
@@ -152,19 +163,25 @@ public class TypeDescriptor implements Serializable {
     if (ctx != null && ctx.hasImport(tDescr.className)) {
       cls = ctx.getImport(tDescr.className);
       if (tDescr.isArray()) {
-        cls = findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
+        cls = cls.isPrimitive() ?
+                toPrimitiveArrayType(cls) :
+                findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
       }
     }
     else if (ctx == null && hasContextFreeImport(tDescr.className)) {
       cls = getContextFreeImport(tDescr.className);
       if (tDescr.isArray()) {
-        cls = findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
+        cls = cls.isPrimitive() ?
+                toPrimitiveArrayType(cls) :
+                findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
       }
     }
     else {
       cls = createClass(tDescr.getClassName(), ctx);
       if (tDescr.isArray()) {
-        cls = findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
+        cls = cls.isPrimitive() ?
+                toPrimitiveArrayType(cls) :
+                findClass(null, repeatChar('[', tDescr.arraySize.length) + "L" + cls.getName() + ";", ctx);
       }
     }
 

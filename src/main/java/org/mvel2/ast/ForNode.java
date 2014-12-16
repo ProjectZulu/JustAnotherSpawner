@@ -44,6 +44,7 @@ public class ForNode extends BlockNode {
   protected boolean indexAlloc = false;
 
   public ForNode(char[] expr, int start, int offset, int blockStart, int blockEnd, int fields, ParserContext pCtx) {
+    super(pCtx);
 
     boolean varsEscape = buildForEach(this.expr = expr, this.start = start, this.offset = offset,
         this.blockStart = blockStart, this.blockOffset = blockEnd, fields, pCtx);
@@ -86,7 +87,7 @@ public class ForNode extends BlockNode {
     boolean varsEscape = false;
 
     try {
-      ParserContext spCtx = pCtx;
+      ParserContext spCtx;
       if (pCtx != null) {
         spCtx = pCtx.createSubcontext().createColoringSubcontext();
       }
@@ -129,7 +130,9 @@ public class ForNode extends BlockNode {
       }
 
       this.compiledBlock = (ExecutableStatement) subCompileExpression(expr, blockStart, blockEnd, spCtx);
-
+      if (pCtx != null) {
+        pCtx.setInputs(spCtx.getInputs());
+      }
     }
     catch (NegativeArraySizeException e) {
       throw new CompileException("wrong syntax; did you mean to use 'foreach'?", expr, start);

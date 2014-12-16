@@ -89,7 +89,7 @@ public class JustAnotherSpawner {
         GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
 
         MinecraftForge.EVENT_BUS.register(this);
-        OptimizerFactory.setDefaultOptimizer("reflective");
+//        OptimizerFactory.setDefaultOptimizer("reflective");
 //    	TagsObject tags = new TagsObject();
 //		Serializable expression = MVEL.compileExpression("sky()==false");
 //		Boolean restult = (Boolean) MVEL.executeExpression(expression, tags);

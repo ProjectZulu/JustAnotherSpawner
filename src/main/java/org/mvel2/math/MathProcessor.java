@@ -18,6 +18,7 @@
 package org.mvel2.math;
 
 import org.mvel2.DataTypes;
+import org.mvel2.Operator;
 import org.mvel2.Unit;
 import org.mvel2.debug.DebugTools;
 import org.mvel2.util.InternalNumber;
@@ -205,17 +206,17 @@ public strictfp class MathProcessor {
 
   private static Object _doOperations(int type1, Object val1, int operation, int type2, Object val2) {
     if (operation < 20) {
-      if (type1 > 49 && type1 == type2) {
+      if (((type1 > 49 || operation == EQUAL || operation == NEQUAL) && type1 == type2) ||
+              (isIntegerType(type1) && isIntegerType(type2) && operation >= BW_AND && operation <= BW_NOT)) {
         return doOperationsSameType(type1, val1, operation, val2);
       }
-      else if ((type1 > 99 && (type2 > 99))
-          || (operation != 0 && isNumber(val1) && isNumber(val2))) {
+      else if (isNumericOperation(type1, val1, operation, type2, val2)) {
         return doPrimWrapperArithmetic(getNumber(val1, type1),
             operation,
             getNumber(val2, type2), true, box(type2) > box(type1) ? box(type2) : box(type1));
       }
       else if (operation != ADD &&
-          (type1 == 15 || type2 == 15) &&
+          (type1 == DataTypes.W_BOOLEAN || type2 == DataTypes.W_BOOLEAN) &&
           type1 != type2 && type1 != EMPTY && type2 != EMPTY) {
 
         return doOperationNonNumeric(type1, convert(val1, Boolean.class), operation, convert(val2, Boolean.class));
@@ -231,6 +232,15 @@ public strictfp class MathProcessor {
       }
     }
     return doOperationNonNumeric(type1, val1, operation, val2);
+  }
+
+  private static boolean isNumericOperation(int type1, Object val1, int operation, int type2, Object val2) {
+    return (type1 > 99 && type2 > 99)
+        || (operation != ADD && (type1 > 99 || type2 > 99 || operation < LTHAN || operation > GETHAN) && isNumber(val1) && isNumber(val2));
+  }
+
+  private static boolean isIntegerType(int type) {
+    return type == DataTypes.INTEGER || type == DataTypes.W_INTEGER || type == DataTypes.LONG || type == DataTypes.W_LONG;
   }
 
   private static Object doOperationNonNumeric(int type1, final Object val1, final int operation, final Object val2) {
@@ -393,16 +403,22 @@ public strictfp class MathProcessor {
           case NEQUAL:
             return ((Integer) val1).intValue() != ((Integer) val2).intValue() ? Boolean.TRUE : Boolean.FALSE;
           case BW_AND:
+            if (val2 instanceof Long) return (Integer) val1 & (Long) val2;
             return (Integer) val1 & (Integer) val2;
           case BW_OR:
+            if (val2 instanceof Long) return (Integer) val1 | (Long) val2;
             return (Integer) val1 | (Integer) val2;
           case BW_SHIFT_LEFT:
+            if (val2 instanceof Long) return (Integer) val1 << (Long) val2;
             return (Integer) val1 << (Integer) val2;
           case BW_SHIFT_RIGHT:
+            if (val2 instanceof Long) return (Integer) val1 >> (Long) val2;
             return (Integer) val1 >> (Integer) val2;
           case BW_USHIFT_RIGHT:
+            if (val2 instanceof Long) return (Integer) val1 >>> (Long) val2;
             return (Integer) val1 >>> (Integer) val2;
           case BW_XOR:
+            if (val2 instanceof Long) return (Integer) val1 ^ (Long) val2;
             return (Integer) val1 ^ (Integer) val2;
         }
 
@@ -479,18 +495,24 @@ public strictfp class MathProcessor {
           case NEQUAL:
             return ((Long) val1).longValue() != ((Long) val2).longValue() ? Boolean.TRUE : Boolean.FALSE;
           case BW_AND:
+            if (val2 instanceof Integer) return (Long) val1 & (Integer) val2;
             return (Long) val1 & (Long) val2;
           case BW_OR:
+            if (val2 instanceof Integer) return (Long) val1 | (Integer) val2;
             return (Long) val1 | (Long) val2;
           case BW_SHIFT_LEFT:
+            if (val2 instanceof Integer) return (Long) val1 << (Integer) val2;
             return (Long) val1 << (Long) val2;
           case BW_USHIFT_LEFT:
             throw new UnsupportedOperationException("unsigned left-shift not supported");
           case BW_SHIFT_RIGHT:
+            if (val2 instanceof Integer) return (Long) val1 >> (Integer) val2;
             return (Long) val1 >> (Long) val2;
           case BW_USHIFT_RIGHT:
+            if (val2 instanceof Integer) return (Long) val1 >>> (Integer) val2;
             return (Long) val1 >>> (Long) val2;
           case BW_XOR:
+            if (val2 instanceof Integer) return (Long) val1 ^ (Integer) val2;
             return (Long) val1 ^ (Long) val2;
         }
 
@@ -646,26 +668,26 @@ public strictfp class MathProcessor {
       return 0d;
     switch (type) {
       case BIG_DECIMAL:
-        return ((BigDecimal) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.BIG_INTEGER:
-        return ((BigInteger) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.INTEGER:
       case DataTypes.W_INTEGER:
-        return ((Integer) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.LONG:
       case DataTypes.W_LONG:
-        return ((Long) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.STRING:
         return Double.parseDouble((String) in);
       case DataTypes.FLOAT:
       case DataTypes.W_FLOAT:
-        return ((Float) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.DOUBLE:
       case DataTypes.W_DOUBLE:
         return (Double) in;
       case DataTypes.SHORT:
       case DataTypes.W_SHORT:
-        return ((Short) in).doubleValue();
+        return ((Number) in).doubleValue();
       case DataTypes.CHAR:
       case DataTypes.W_CHAR:
         return Double.parseDouble(String.valueOf((Character) in));

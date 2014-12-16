@@ -151,5 +151,21 @@ public interface Operator {
   public static final int RETURN = 99;
 
   public static final int FUNCTION = 100;
+  public static final int STACKLANG = 101;
+  public static final int PUSH = 102;
+  public static final int POP = 103;
+  public static final int LOAD = 104;
+  public static final int LDTYPE = 105;
+  public static final int INVOKE = 106;
+  public static final int GETFIELD = 107;
+  public static final int STOREFIELD = 108;
+  public static final int STORE = 109;
+  public static final int DUP = 110;
+  public static final int LABEL = 111;
+  public static final int JUMP = 112;
+  public static final int JUMPIF = 113;
+  public static final int REDUCE = 114;
+  public static final int SWAP = 115;
+  public static final int XSWAP = 116;
 
 }

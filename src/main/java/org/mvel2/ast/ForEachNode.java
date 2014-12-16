@@ -48,7 +48,7 @@ public class ForEachNode extends BlockNode {
   private int type = -1;
 
   public ForEachNode(char[] expr, int start, int offset, int blockStart, int blockOffset, int fields, ParserContext pCtx) {
-
+    super(pCtx);
 
     handleCond(this.expr = expr, this.start = start, this.offset = offset, this.fields = fields, pCtx);
     this.blockStart = blockStart;
@@ -58,8 +58,6 @@ public class ForEachNode extends BlockNode {
       if (pCtx.isStrictTypeEnforcement() && itemType != null) {
         pCtx = pCtx.createSubcontext();
         pCtx.addInput(item, itemType);
-
-
       }
 
       pCtx.pushVariableScope();

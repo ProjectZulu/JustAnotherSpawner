@@ -23,6 +23,8 @@ import org.mvel2.Operator;
 import org.mvel2.ParserContext;
 import org.mvel2.ScriptRuntimeException;
 import org.mvel2.integration.VariableResolverFactory;
+import org.mvel2.util.CompatibilityStrategy;
+import org.mvel2.util.NullType;
 import org.mvel2.util.ParseTools;
 
 import static org.mvel2.DataConversion.canConvert;
@@ -38,23 +40,13 @@ public class BinaryOperation extends BooleanNode {
   private int lType = -1;
   private int rType = -1;
 
-  public BinaryOperation(int operation) {
+  public BinaryOperation(int operation, ParserContext ctx) {
+    super(ctx);
     this.operation = operation;
-  }
-
-  public BinaryOperation(int operation, ASTNode left, ASTNode right) {
-    this.operation = operation;
-    if ((this.left = left) == null) {
-      throw new RuntimeException("not a statement");
-    }
-    if ((this.right = right) == null) {
-      throw new RuntimeException("not a statement");
-    }
-
-    egressType = getReturnTypeFromOp(operation, left.egressType, right.egressType);
   }
 
   public BinaryOperation(int operation, ASTNode left, ASTNode right, ParserContext ctx) {
+    super(ctx);
     this.operation = operation;
     if ((this.left = left) == null) {
       throw new ScriptRuntimeException("not a statement");
@@ -78,19 +70,21 @@ public class BinaryOperation extends BooleanNode {
         }
 
       default:
+        egressType = getReturnTypeFromOp(operation, this.left.egressType, this.right.egressType);
         if (!ctx.isStrongTyping()) break;
 
-        if (!left.getEgressType().isAssignableFrom(right.getEgressType())) {
-          if (right.isLiteral() && canConvert(right.getEgressType(), left.getEgressType())) {
-            this.right = new LiteralNode(convert(right.getReducedValueAccelerated(null, null, null), left.getEgressType()));
-          } else if (!right.getEgressType().equals(Object.class)
-                  && !(Number.class.isAssignableFrom(right.getEgressType())
-                  && Number.class.isAssignableFrom(left.getEgressType()))
-                  && ((!right.getEgressType().isPrimitive() && !left.getEgressType().isPrimitive())
-                  || (!canConvert(boxPrimitive(left.getEgressType()), boxPrimitive(right.getEgressType()))))) {
+        if (!left.getEgressType().isAssignableFrom(right.getEgressType()) && !right.getEgressType().isAssignableFrom(left.getEgressType())) {
+          if (right.isLiteral() && canConvert(left.getEgressType(), right.getEgressType())) {
+            Class targetType = isAritmeticOperation(operation) ? egressType : left.getEgressType();
+            this.right = new LiteralNode(convert(right.getReducedValueAccelerated(null, null, null), targetType), pCtx);
+          } else if ( !(areCompatible(left.getEgressType(), right.getEgressType()) ||
+                  (( operation == Operator.EQUAL || operation == Operator.NEQUAL) &&
+                     CompatibilityStrategy.areEqualityCompatible(left.getEgressType(), right.getEgressType()))) ) {
 
             throw new CompileException("incompatible types in statement: " + right.getEgressType()
-                    + " (compared from: " + left.getEgressType() + ")", left.getExpr(), left.getStart());
+                    + " (compared from: " + left.getEgressType() + ")",
+                    left.getExpr() != null ? left.getExpr() : right.getExpr(),
+                    left.getExpr() != null ? left.getStart() : right.getStart());
           }
         }
     }
@@ -106,14 +100,22 @@ public class BinaryOperation extends BooleanNode {
         rType = ParseTools.__resolveType(this.right.egressType);
       }
     }
-
-    egressType = getReturnTypeFromOp(operation, this.left.egressType, this.right.egressType);
-
   }
 
+  private boolean isAritmeticOperation(int operation) {
+    return operation <= Operator.POWER;
+  }
+
+  private boolean areCompatible(Class<?> leftClass, Class<?> rightClass) {
+    return leftClass.equals(NullType.class) || rightClass.equals(NullType.class) ||
+           ( Number.class.isAssignableFrom(rightClass) && Number.class.isAssignableFrom(leftClass) ) ||
+           ( (rightClass.isPrimitive() || leftClass.isPrimitive()) &&
+             canConvert(boxPrimitive(leftClass), boxPrimitive(rightClass)) );
+  }
 
   public Object getReducedValueAccelerated(Object ctx, Object thisValue, VariableResolverFactory factory) {
-    return doOperations(lType, left.getReducedValueAccelerated(ctx, thisValue, factory), operation, rType, right.getReducedValueAccelerated(ctx, thisValue, factory));
+    return doOperations(lType, left.getReducedValueAccelerated(ctx, thisValue, factory), operation, rType,
+        right.getReducedValueAccelerated(ctx, thisValue, factory));
   }
 
 

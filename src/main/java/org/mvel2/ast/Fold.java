@@ -38,6 +38,7 @@ public class Fold extends ASTNode {
   private ExecutableStatement constraintEx;
 
   public Fold(char[] expr, int start, int offset, int fields, ParserContext pCtx) {
+    super(pCtx);
     this.expr = expr;
     this.start = start;
     this.offset = offset;
@@ -68,6 +69,8 @@ public class Fold extends ASTNode {
         }
       }
     }
+
+    while (isWhitespace(expr[cursor])) cursor--;
 
     expectType(dataEx = (ExecutableStatement) subCompileExpression(expr, st, cursor - st, pCtx),
         Collection.class, ((fields & COMPILE_IMMEDIATE) != 0));

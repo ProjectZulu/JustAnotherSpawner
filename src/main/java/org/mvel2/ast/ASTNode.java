@@ -65,6 +65,8 @@ public class ASTNode implements Cloneable, Serializable {
 
   public static final int FQCN = 1 << 20;
 
+  public static final int STACKLANG = 1 << 22;
+
   public static final int DEFERRED_TYPE_RES = 1 << 23;
   public static final int STRONG_TYPING = 1 << 24;
   public static final int PCTX_STORED = 1 << 25;
@@ -74,6 +76,7 @@ public class ASTNode implements Cloneable, Serializable {
   public static final int DEOP = 1 << 28;
 
   public static final int DISCARD = 1 << 29;
+
 
   // *** //
 
@@ -96,6 +99,8 @@ public class ASTNode implements Cloneable, Serializable {
 
   protected int cursorPosition;
   public ASTNode nextASTNode;
+
+  protected ParserContext pCtx;
 
   public Object getReducedValueAccelerated(Object ctx, Object thisValue, VariableResolverFactory factory) {
     if (accessor != null) {
@@ -159,7 +164,7 @@ public class ASTNode implements Cloneable, Serializable {
     }
 
     if (accessor == null) {
-      return get(expr, start, offset, ctx, factory, thisValue);
+      return get(expr, start, offset, ctx, factory, thisValue, pCtx);
     }
 
     if (retVal == null) {
@@ -179,7 +184,7 @@ public class ASTNode implements Cloneable, Serializable {
       return literal;
     }
     else {
-      return get(expr, start, offset, ctx, factory, thisValue);
+      return get(expr, start, offset, ctx, factory, thisValue, pCtx);
     }
   }
 
@@ -245,57 +250,6 @@ public class ASTNode implements Cloneable, Serializable {
   public void setLiteralValue(Object literal) {
     this.literal = literal;
     this.fields |= LITERAL;
-  }
-
-  protected Object tryStaticAccess(Object thisRef, VariableResolverFactory factory) {
-    try {
-      /**
-       * Try to resolve this *smartly* as a static class reference.
-       *
-       * This starts at the end of the token and starts to step backwards to figure out whether
-       * or not this may be a static class reference.  We search for method calls simply by
-       * inspecting for ()'s.  The first union area we come to where no brackets are present is our
-       * test-point for a class reference.  If we find a class, we pass the reference to the
-       * property accessor along  with trailing methods (if any).
-       *
-       */
-      boolean meth = false;
-      int depth = 0;
-
-      int end;
-      int last = end = start + offset;
-      for (int i = last - 1; i > start; i--) {
-        switch (expr[i]) {
-          case '.':
-            if (depth == 0 && !meth) {
-              try {
-                Class.forName(new String(expr, start, i), true, currentThread().getContextClassLoader());
-
-                return get(new String(expr, last, end - last),
-                    Class.forName(new String(expr, start, last), true, currentThread().getContextClassLoader()), factory, thisRef);
-              }
-              catch (ClassNotFoundException e) {
-                return get(new String(expr, i + 1, end - i - 1),
-                    Class.forName(new String(expr, start, i), true, currentThread().getContextClassLoader()), factory, thisRef);
-              }
-            }
-            meth = false;
-            last = i;
-            break;
-          case ')':
-            depth++;
-            break;
-          case '(':
-            if (--depth == 0) meth = true;
-            break;
-        }
-      }
-    }
-    catch (Exception cnfe) {
-      // do nothing.
-    }
-
-    return null;
   }
 
   @SuppressWarnings({"SuspiciousMethodCalls"})
@@ -454,10 +408,12 @@ public class ASTNode implements Cloneable, Serializable {
     return expr;
   }
 
-  protected ASTNode() {
+  protected ASTNode(ParserContext pCtx) {
+    this.pCtx = pCtx;
   }
 
-  public ASTNode(char[] expr, int start, int offset, int fields) {
+  public ASTNode(char[] expr, int start, int offset, int fields, ParserContext pCtx) {
+    this(pCtx);
     this.fields = fields;
     this.expr = expr;
     this.start = start;
@@ -469,6 +425,10 @@ public class ASTNode implements Cloneable, Serializable {
   public String toString() {
     return isOperator() ? "<<" + DebugTools.getOperatorName(getOperator()) + ">>" :
         (PCTX_STORED & fields) != 0 ? nameCache : new String(expr, start, offset);
+  }
+
+  protected ClassLoader getClassLoader() {
+    return pCtx != null ? pCtx.getClassLoader() : currentThread().getContextClassLoader();
   }
 }
 

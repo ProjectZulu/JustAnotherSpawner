@@ -34,6 +34,7 @@ public class TypedVarNode extends ASTNode implements Assignment {
   private ExecutableStatement statement;
 
   public TypedVarNode(char[] expr, int start, int offset, int fields, Class type, ParserContext pCtx) {
+    super(pCtx);
     this.egressType = type;
     this.fields = fields;
 
@@ -57,7 +58,7 @@ public class TypedVarNode extends ASTNode implements Assignment {
 
     if ((fields & COMPILE_IMMEDIATE) != 0) {
       Class x = pCtx.getVarOrInputType(name);
-      if (x != null && !x.isAssignableFrom(egressType)) {
+      if (x != null && x != Object.class && !x.isAssignableFrom(egressType)) {
         throw new RuntimeException("statically-typed variable already defined in scope: " + name);
       }
       pCtx.addVariable(name, egressType, false);
