@@ -33,6 +33,7 @@ import static org.mvel2.util.ParseTools.*;
  * @author Christopher Brock
  */
 public class IndexedAssignmentNode extends ASTNode implements Assignment {
+  private String assignmentVar;
   private String name;
   private int register;
   private transient CompiledAccExpression accExpr;
@@ -47,6 +48,7 @@ public class IndexedAssignmentNode extends ASTNode implements Assignment {
 
   public IndexedAssignmentNode(char[] expr, int start, int offset, int fields, int operation,
                                String name, int register, ParserContext pCtx) {
+    super(pCtx);
     this.expr = expr;
     this.start = start;
     this.offset = offset;
@@ -63,6 +65,7 @@ public class IndexedAssignmentNode extends ASTNode implements Assignment {
     }
     else if ((assignStart = find(expr, start, offset, '=')) != -1) {
       this.name = createStringTrimmed(expr, start, assignStart - start);
+      this.assignmentVar = name;
 
       this.start = skipWhitespace(expr, assignStart + 1);
 
@@ -90,6 +93,7 @@ public class IndexedAssignmentNode extends ASTNode implements Assignment {
     }
     else {
       checkNameSafety(this.name = new String(expr));
+      this.assignmentVar = name;
     }
 
     if ((fields & COMPILE_IMMEDIATE) != 0) {
@@ -144,6 +148,10 @@ public class IndexedAssignmentNode extends ASTNode implements Assignment {
   }
 
   public String getAssignmentVar() {
+    return assignmentVar;
+  }
+
+  public String getVarName() {
     return name;
   }
 

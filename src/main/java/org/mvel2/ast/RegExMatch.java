@@ -40,6 +40,7 @@ public class RegExMatch extends ASTNode {
   private Pattern p;
 
   public RegExMatch(char[] expr, int start, int offset, int fields, int patternStart, int patternOffset, ParserContext pCtx) {
+    super(pCtx);
     this.expr = expr;
     this.start = start;
     this.offset = offset;
@@ -82,5 +83,17 @@ public class RegExMatch extends ASTNode {
 
   public Class getEgressType() {
     return Boolean.class;
+  }
+
+  public Pattern getPattern() {
+    return p;
+  }
+
+  public ExecutableStatement getStatement() {
+    return stmt;
+  }
+
+  public ExecutableStatement getPatternStatement() {
+    return patternStmt;
   }
 }

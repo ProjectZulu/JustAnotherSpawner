@@ -27,6 +27,8 @@ import org.mvel2.integration.VariableResolver;
 import org.mvel2.integration.VariableResolverFactory;
 import org.mvel2.integration.impl.DefaultLocalVariableResolverFactory;
 import org.mvel2.integration.impl.FunctionVariableResolverFactory;
+import org.mvel2.integration.impl.MapVariableResolverFactory;
+import org.mvel2.integration.impl.StackDemarcResolverFactory;
 
 import java.util.Map;
 
@@ -41,10 +43,19 @@ public class Function extends ASTNode implements Safe {
 
   protected String[] parameters;
   protected int parmNum;
-  protected boolean cMode = false;
+  protected boolean compiledMode = false;
+  protected boolean singleton;
 
-  public Function(String name, char[] expr, int start, int offset, int blockStart, int blockOffset,
-                  int fields, ParserContext pCtx) {
+  public Function(String name,
+                  char[] expr,
+                  int start,
+                  int offset,
+                  int blockStart,
+                  int blockOffset,
+                  int fields,
+                  ParserContext pCtx) {
+
+    super(pCtx);
     if ((this.name = name) == null || name.length() == 0) {
       this.name = null;
     }
@@ -52,10 +63,17 @@ public class Function extends ASTNode implements Safe {
 
     parmNum = (this.parameters = parseParameterDefList(expr, start, offset)).length;
 
-    pCtx.declareFunction(this);
+    //pCtx.declareFunction(this);
 
-    ParserContext ctx = new ParserContext(pCtx.getParserConfiguration());
+    ParserContext ctx = new ParserContext(pCtx.getParserConfiguration(), pCtx, true);
 
+    if (!pCtx.isFunctionContext()) {
+      singleton = true;
+      pCtx.declareFunction(this);
+    }
+    else {
+      ctx.declareFunction(this);
+    }
 
     /**
      * To prevent the function parameters from being counted as
@@ -69,8 +87,6 @@ public class Function extends ASTNode implements Safe {
     /**
      * Compile the expression so we can determine the input-output delta.
      */
-
-
     ctx.setIndexAllocation(false);
     ExpressionCompiler compiler = new ExpressionCompiler(expr, blockStart, blockOffset);
     compiler.setVerifyOnly(true);
@@ -104,7 +120,7 @@ public class Function extends ASTNode implements Safe {
       this.parameters[i++] = s;
     }
 
-    cMode = (fields & COMPILE_IMMEDIATE) != 0;
+    compiledMode = (fields & COMPILE_IMMEDIATE) != 0;
 
     this.egressType = this.compiledBlock.getKnownEgressType();
 
@@ -112,21 +128,24 @@ public class Function extends ASTNode implements Safe {
   }
 
   public Object getReducedValueAccelerated(Object ctx, Object thisValue, VariableResolverFactory factory) {
+    PrototypalFunctionInstance instance = new PrototypalFunctionInstance(this, new MapVariableResolverFactory());
     if (name != null) {
       if (!factory.isIndexedFactory() && factory.isResolveable(name))
         throw new CompileException("duplicate function: " + name, expr, start);
-      factory.createVariable(name, this);
+
+      factory.createVariable(name, instance);
     }
-    return this;
+    return instance;
   }
 
   public Object getReducedValue(Object ctx, Object thisValue, VariableResolverFactory factory) {
+    PrototypalFunctionInstance instance = new PrototypalFunctionInstance(this, new MapVariableResolverFactory());
     if (name != null) {
       if (!factory.isIndexedFactory() && factory.isResolveable(name))
         throw new CompileException("duplicate function: " + name, expr, start);
-      factory.createVariable(name, this);
+      factory.createVariable(name, instance);
     }
-    return this;
+    return instance;
   }
 
   public Object call(Object ctx, Object thisValue, VariableResolverFactory factory, Object[] parms) {
@@ -146,15 +165,18 @@ public class Function extends ASTNode implements Safe {
           }
         }
       }
-      return compiledBlock.getValue(thisValue, new FunctionVariableResolverFactory(this, factory, parameters, parms));
+      return compiledBlock.getValue(thisValue,
+          new StackDemarcResolverFactory(new FunctionVariableResolverFactory(this, factory, parameters, parms)));
     }
-    else if (cMode) {
-      return compiledBlock.getValue(thisValue, new DefaultLocalVariableResolverFactory(factory, parameters).setNoTilt(true));
+    else if (compiledMode) {
+      return compiledBlock.getValue(thisValue,
+          new StackDemarcResolverFactory(new DefaultLocalVariableResolverFactory(factory, parameters)));
     }
     else {
-      return compiledBlock.getValue(thisValue, new DefaultLocalVariableResolverFactory(factory,
-              parameters).setNoTilt(true));
+      return compiledBlock.getValue(thisValue,
+          new StackDemarcResolverFactory(new DefaultLocalVariableResolverFactory(factory, parameters)));
     }
+
   }
 
   public String getName() {
@@ -167,10 +189,6 @@ public class Function extends ASTNode implements Safe {
 
   public String[] getParameters() {
     return parameters;
-  }
-
-  public void setParameters(String[] parameters) {
-    this.parameters = parameters;
   }
 
   public boolean hasParameters() {

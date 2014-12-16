@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.mvel2.Operator.PTABLE;
 import static org.mvel2.compiler.AbstractParser.getCurrentThreadParserContext;
+import static org.mvel2.util.ASTBinaryTree.buildTree;
 import static org.mvel2.util.ParseTools.__resolveType;
 import static org.mvel2.util.ParseTools.boxPrimitive;
 
@@ -40,10 +41,10 @@ public class CompilerTools {
    *
    * @param astLinkedList          - AST to be optimized.
    * @param secondPassOptimization - perform a second pass optimization to optimize boolean expressions.
-   * @param ctx                    - The parser context
+   * @param pCtx                    - The parser context
    * @return optimized AST
    */
-  public static ASTLinkedList finalizePayload(ASTLinkedList astLinkedList, boolean secondPassOptimization, ParserContext ctx) {
+  public static ASTLinkedList finalizePayload(ASTLinkedList astLinkedList, boolean secondPassOptimization, ParserContext pCtx) {
     ASTLinkedList optimizedAst = new ASTLinkedList();
     ASTNode tk, tkOp, tkOp2;
 
@@ -71,7 +72,7 @@ public class CompilerTools {
           BinaryOperation bo;
 
           if (tk.getEgressType() == Integer.class && tk2.getEgressType() == Integer.class) {
-            bo = boOptimize(op, tk, tk2, ctx);
+            bo = boOptimize(op, tk, tk2, pCtx);
           }
           else {
             /**
@@ -90,7 +91,7 @@ public class CompilerTools {
               if (rightNode == null) break;
 
               Object val = new BinaryOperation(oper.getOperator(), inv ?
-                  new LiteralNode(signNumber(tk2.getLiteralValue())) : tk2, rightNode)
+                  new LiteralNode(signNumber(tk2.getLiteralValue()), pCtx) : tk2, rightNode, pCtx)
                   .getReducedValueAccelerated(null, null, null);
 
               if (!astLinkedList.hasMoreNodes() && BlankLiteral.INSTANCE.equals(val)) {
@@ -106,15 +107,15 @@ public class CompilerTools {
               inv = false;
 
               if (!reduc) {
-                bo = new BinaryOperation(tkOp.getOperator(), tk, new LiteralNode(p_inv ? signNumber(val) : val));
+                bo = new BinaryOperation(tkOp.getOperator(), tk, new LiteralNode(p_inv ? signNumber(val) : val, pCtx), pCtx);
               }
               else {
-                tk2 = new LiteralNode(val);
+                tk2 = new LiteralNode(val, pCtx);
               }
             }
 
             if (bo == null)
-              bo = new BinaryOperation(op, tk, tk2, ctx);
+              bo = new BinaryOperation(op, tk, tk2, pCtx);
           }
 
           tkOp2 = null;
@@ -127,35 +128,35 @@ public class CompilerTools {
               && tkOp2.getFields() != -1 && (op2 = tkOp2.getOperator()) != -1 && op2 < 21) {
 
             if (PTABLE[op2] > PTABLE[op]) {
-              //       bo.setRightMost(new BinaryOperation(op2, bo.getRightMost(), astLinkedList.nextNode(), ctx));
-              bo.setRightMost(boOptimize(op2, bo.getRightMost(), astLinkedList.nextNode(), ctx));
+              //       bo.setRightMost(new BinaryOperation(op2, bo.getRightMost(), astLinkedList.nextNode(), pCtx));
+              bo.setRightMost(boOptimize(op2, bo.getRightMost(), astLinkedList.nextNode(), pCtx));
             }
             else if (bo.getOperation() != op2 && PTABLE[op] == PTABLE[op2]) {
               if (PTABLE[bo.getOperation()] == PTABLE[op2]) {
-                //     bo = new BinaryOperation(op2, bo, astLinkedList.nextNode(), ctx);
-                bo = boOptimize(op2, bo, astLinkedList.nextNode(), ctx);
+                //     bo = new BinaryOperation(op2, bo, astLinkedList.nextNode(), pCtx);
+                bo = boOptimize(op2, bo, astLinkedList.nextNode(), pCtx);
               }
               else {
                 tk2 = astLinkedList.nextNode();
 
                 if (isIntOptimizationviolation(bo, tk2)) {
-                  bo = new BinaryOperation(bo.getOperation(), bo.getLeft(), bo.getRight(), ctx);
+                  bo = new BinaryOperation(bo.getOperation(), bo.getLeft(), bo.getRight(), pCtx);
                 }
 
-                bo.setRight(new BinaryOperation(op2, bo.getRight(), tk2, ctx));
+                bo.setRight(new BinaryOperation(op2, bo.getRight(), tk2, pCtx));
               }
             }
             else if (PTABLE[bo.getOperation()] >= PTABLE[op2]) {
-              bo = new BinaryOperation(op2, bo, astLinkedList.nextNode(), ctx);
+              bo = new BinaryOperation(op2, bo, astLinkedList.nextNode(), pCtx);
             }
             else {
               tk2 = astLinkedList.nextNode();
 
               if (isIntOptimizationviolation(bo, tk2)) {
-                bo = new BinaryOperation(bo.getOperation(), bo.getLeft(), bo.getRight(), ctx);
+                bo = new BinaryOperation(bo.getOperation(), bo.getLeft(), bo.getRight(), pCtx);
               }
 
-              bo.setRight(new BinaryOperation(op2, bo.getRight(), tk2, ctx));
+              bo.setRight(new BinaryOperation(op2, bo.getRight(), tk2, pCtx));
             }
 
             op = op2;
@@ -164,17 +165,17 @@ public class CompilerTools {
 
 
           if (tkOp2 != null && tkOp2 != tkOp) {
-            optimizeOperator(tkOp2.getOperator(), bo, tkOp2, astLinkedList, optimizedAst);
+            optimizeOperator(tkOp2.getOperator(), bo, tkOp2, astLinkedList, optimizedAst, pCtx);
           }
           else {
             optimizedAst.addTokenNode(bo);
           }
         }
         else if (tkOp.isOperator()) {
-          optimizeOperator(tkOp.getOperator(), tk, tkOp, astLinkedList, optimizedAst);
+          optimizeOperator(tkOp.getOperator(), tk, tkOp, astLinkedList, optimizedAst, pCtx);
         }
         else if (!tkOp.isAssignment() && !tkOp.isOperator() && tk.getLiteralValue() instanceof Class) {
-          optimizedAst.addTokenNode(new DeclTypedVarNode(tkOp.getName(), tkOp.getExpr(), tkOp.getStart(), tk.getOffset(), (Class) tk.getLiteralValue(), 0, ctx));
+          optimizedAst.addTokenNode(new DeclTypedVarNode(tkOp.getName(), tkOp.getExpr(), tkOp.getStart(), tk.getOffset(), (Class) tk.getLiteralValue(), 0, pCtx));
         }
         else if (tkOp.isAssignment() && tk.getLiteralValue() instanceof Class) {
           tk.discard();
@@ -217,20 +218,20 @@ public class CompilerTools {
             BooleanNode bool;
 
             if (tkOp.getOperator() == Operator.AND) {
-              bool = new And(tk, astLinkedList.nextNode(), ctx.isStrongTyping());
+              bool = new And(tk, astLinkedList.nextNode(), pCtx.isStrongTyping(), pCtx);
             }
             else {
-              bool = new Or(tk, astLinkedList.nextNode(), ctx.isStrongTyping());
+              bool = new Or(tk, astLinkedList.nextNode(), pCtx.isStrongTyping(), pCtx);
             }
 
             while (astLinkedList.hasMoreNodes() && (tkOp2 = astLinkedList.nextNode()).isOperator()
                 && (tkOp2.isOperator(Operator.AND) || tkOp2.isOperator(Operator.OR))) {
 
               if ((tkOp = tkOp2).getOperator() == Operator.AND) {
-                bool.setRightMost(new And(bool.getRightMost(), astLinkedList.nextNode(), ctx.isStrongTyping()));
+                bool.setRightMost(new And(bool.getRightMost(), astLinkedList.nextNode(), pCtx.isStrongTyping(), pCtx));
               }
               else {
-                bool = new Or(bool, astLinkedList.nextNode(), ctx.isStrongTyping());
+                bool = new Or(bool, astLinkedList.nextNode(), pCtx.isStrongTyping(), pCtx);
               }
 
             }
@@ -254,27 +255,27 @@ public class CompilerTools {
     return optimizedAst;
   }
 
-  private static BinaryOperation boOptimize(int op, ASTNode tk, ASTNode tk2, ParserContext ctx) {
+  private static BinaryOperation boOptimize(int op, ASTNode tk, ASTNode tk2, ParserContext pCtx) {
     if (tk.getEgressType() == Integer.class && tk2.getEgressType() == Integer.class) {
       switch (op) {
         case Operator.ADD:
-          return new IntAdd(tk, tk2);
+          return new IntAdd(tk, tk2, pCtx);
 
         case Operator.SUB:
-          return new IntSub(tk, tk2);
+          return new IntSub(tk, tk2, pCtx);
 
         case Operator.MULT:
-          return new IntMult(tk, tk2);
+          return new IntMult(tk, tk2, pCtx);
 
         case Operator.DIV:
-          return new IntDiv(tk, tk2);
+          return new IntDiv(tk, tk2, pCtx);
 
         default:
-          return new BinaryOperation(op, tk, tk2, ctx);
+          return new BinaryOperation(op, tk, tk2, pCtx);
       }
     }
     else {
-      return new BinaryOperation(op, tk, tk2, ctx);
+      return new BinaryOperation(op, tk, tk2, pCtx);
     }
   }
 
@@ -298,25 +299,26 @@ public class CompilerTools {
 
   private static void optimizeOperator(int operator, ASTNode tk, ASTNode tkOp,
                                        ASTLinkedList astLinkedList,
-                                       ASTLinkedList optimizedAst) {
+                                       ASTLinkedList optimizedAst,
+                                       ParserContext pCtx) {
     switch (operator) {
       case Operator.REGEX:
-        optimizedAst.addTokenNode(new RegExMatchNode(tk, astLinkedList.nextNode()));
+        optimizedAst.addTokenNode(new RegExMatchNode(tk, astLinkedList.nextNode(), pCtx));
         break;
       case Operator.CONTAINS:
-        optimizedAst.addTokenNode(new Contains(tk, astLinkedList.nextNode()));
+        optimizedAst.addTokenNode(new Contains(tk, astLinkedList.nextNode(), pCtx));
         break;
       case Operator.INSTANCEOF:
-        optimizedAst.addTokenNode(new Instance(tk, astLinkedList.nextNode()));
+        optimizedAst.addTokenNode(new Instance(tk, astLinkedList.nextNode(), pCtx));
         break;
       case Operator.CONVERTABLE_TO:
-        optimizedAst.addTokenNode((new Convertable(tk, astLinkedList.nextNode())));
+        optimizedAst.addTokenNode((new Convertable(tk, astLinkedList.nextNode(), pCtx)));
         break;
       case Operator.SIMILARITY:
-        optimizedAst.addTokenNode(new Strsim(tk, astLinkedList.nextNode()));
+        optimizedAst.addTokenNode(new Strsim(tk, astLinkedList.nextNode(), pCtx));
         break;
       case Operator.SOUNDEX:
-        optimizedAst.addTokenNode(new Soundslike(tk, astLinkedList.nextNode()));
+        optimizedAst.addTokenNode(new Soundslike(tk, astLinkedList.nextNode(), pCtx));
         break;
 
       default:
@@ -328,33 +330,11 @@ public class CompilerTools {
     return (bn instanceof IntOptimized && bn2.getEgressType() != Integer.class);
   }
 
-
-  public static Class getReturnType(ASTIterator input) {
-    ASTIterator iter = new ASTLinkedList(input.firstNode());
-
+  public static Class getReturnType(ASTIterator input, boolean strongTyping) {
     ASTNode begin = input.firstNode();
-    ASTNode n;
-    while (iter.hasMoreNodes()) {
-      n = iter.nextNode();
-
-      if (n instanceof EndOfStatement) {
-        if (iter.hasMoreNodes()) {
-          begin = iter.nextNode();
-        }
-      }
-      else if (n instanceof OperatorNode) {
-        if (n.isOperator(Operator.ADD)) {
-          if (iter.hasMoreNodes()) {
-            n = iter.nextNode();
-            if (n.getEgressType() == String.class) {
-              begin = n;
-            }
-          }
-        }
-      }
-    }
-
-    return begin == null ? Object.class : begin.getEgressType();
+    if (begin == null) return Object.class;
+    if (input.size() == 1) return begin.getEgressType();
+    return buildTree(input).getReturnType(strongTyping);
   }
 
   /**
@@ -429,7 +409,7 @@ public class CompilerTools {
       case Operator.POWER:
       case Operator.MOD:
       case Operator.DIV:
-        if (left == Object.class || right == Object.class)
+            if (left == Object.class || right == Object.class)
           return Object.class;
         else
           return __resolveType(boxPrimitive(left)) < __resolveType(boxPrimitive(right)) ? right : left;

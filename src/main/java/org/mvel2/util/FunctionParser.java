@@ -12,7 +12,6 @@ public class FunctionParser {
   private String name;
 
   private int cursor;
-  private int start;
   private int length;
 
   private int fields;
@@ -21,9 +20,16 @@ public class FunctionParser {
 
   private ExecutionStack splitAccumulator;
 
-  public FunctionParser(String functionName, int cursor, int endOffset, char[] expr, int fields, ParserContext pCtx, ExecutionStack splitAccumulator) {
+  public FunctionParser(String functionName,
+                        int cursor,
+                        int endOffset,
+                        char[] expr,
+                        int fields,
+                        ParserContext pCtx,
+                        ExecutionStack splitAccumulator) {
+
     this.name = functionName;
-    this.cursor = this.start = cursor;
+    this.cursor = cursor;
     this.length = endOffset;
 
     this.expr = expr;
@@ -91,7 +97,7 @@ public class FunctionParser {
     /**
      * Trim any whitespace from the captured block range.
      */
-    blockStart = ParseTools.trimRight(expr, start, blockStart + 1);
+    blockStart = ParseTools.trimRight(expr, blockStart + 1);
     blockEnd = ParseTools.trimLeft(expr, start, blockEnd);
 
     cursor++;
@@ -103,7 +109,7 @@ public class FunctionParser {
       /**
        * Add an EndOfStatement to the split accumulator in the parser.
        */
-      splitAccumulator.add(new EndOfStatement());
+      splitAccumulator.add(new EndOfStatement(pCtx));
     }
 
     /**

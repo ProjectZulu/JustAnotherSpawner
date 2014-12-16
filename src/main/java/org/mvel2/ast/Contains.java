@@ -18,6 +18,7 @@
 
 package org.mvel2.ast;
 
+import org.mvel2.ParserContext;
 import org.mvel2.integration.VariableResolverFactory;
 
 import static org.mvel2.util.ParseTools.containsCheck;
@@ -26,7 +27,8 @@ public class Contains extends ASTNode {
   private ASTNode stmt;
   private ASTNode stmt2;
 
-  public Contains(ASTNode stmt, ASTNode stmt2) {
+  public Contains(ASTNode stmt, ASTNode stmt2, ParserContext pCtx) {
+    super(pCtx);
     this.stmt = stmt;
     this.stmt2 = stmt2;
   }
@@ -41,5 +43,13 @@ public class Contains extends ASTNode {
 
   public Class getEgressType() {
     return Boolean.class;
+  }
+
+  public ASTNode getFirstStatement() {
+    return stmt;
+  }
+
+  public ASTNode getSecondStatement() {
+    return stmt2;
   }
 }

@@ -17,24 +17,27 @@
  */
 package org.mvel2.ast;
 
+import org.mvel2.ParserContext;
 import org.mvel2.compiler.BlankLiteral;
 import org.mvel2.integration.VariableResolverFactory;
+import org.mvel2.util.NullType;
 
 /**
  * @author Christopher Brock
  */
 public class LiteralNode extends ASTNode {
-  public LiteralNode(Object literal, Class type) {
-    this(literal);
+  public LiteralNode(Object literal, Class type, ParserContext pCtx) {
+    this(literal, pCtx);
     this.egressType = type;
   }
 
-  public LiteralNode(Object literal) {
+  public LiteralNode(Object literal, ParserContext pCtx) {
+    super(pCtx);
     if ((this.literal = literal) != null) {
       if ((this.egressType = literal.getClass()) == BlankLiteral.class) this.egressType = Object.class;
     }
     else {
-      this.egressType = Object.class;
+      this.egressType = NullType.class;
     }
   }
 

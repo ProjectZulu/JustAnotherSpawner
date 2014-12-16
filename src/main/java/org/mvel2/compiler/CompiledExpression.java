@@ -18,11 +18,12 @@
 
 package org.mvel2.compiler;
 
-import org.mvel2.ParserContext;
+import org.mvel2.ParserConfiguration;
 import org.mvel2.ast.ASTNode;
 import org.mvel2.ast.TypeCast;
 import org.mvel2.integration.VariableResolverFactory;
 import org.mvel2.integration.impl.ClassImportResolverFactory;
+import org.mvel2.integration.impl.StackResetResolverFactory;
 import org.mvel2.optimizers.AccessorOptimizer;
 import org.mvel2.optimizers.OptimizerFactory;
 import org.mvel2.util.ASTLinkedList;
@@ -47,14 +48,15 @@ public class CompiledExpression implements Serializable, ExecutableStatement {
 
   private String sourceName;
 
-  private ParserContext parserContext;
+  private ParserConfiguration parserConfiguration;
 
-  public CompiledExpression(ASTLinkedList astMap, String sourceName, Class egressType, ParserContext ctx, boolean literalOnly) {
+  public CompiledExpression(ASTLinkedList astMap, String sourceName, Class egressType, ParserConfiguration parserConfiguration, boolean literalOnly) {
     this.firstNode = astMap.firstNode();
     this.sourceName = sourceName;
     this.knownEgressType = astMap.isSingleNode() ? astMap.firstNonSymbol().getEgressType() : egressType;
     this.literalOnly = literalOnly;
-    setParserContext(ctx);
+    this.parserConfiguration = parserConfiguration;
+    this.importInjectionRequired = parserConfiguration.getImports() != null && !parserConfiguration.getImports().isEmpty();
   }
 
   public ASTNode getFirstNode() {
@@ -83,10 +85,6 @@ public class CompiledExpression implements Serializable, ExecutableStatement {
 
   public boolean isConvertableIngressEgress() {
     return convertableIngressEgress;
-  }
-
-  public void setConvertableIngressEgress(boolean convertableIngressEgress) {
-    this.convertableIngressEgress = convertableIngressEgress;
   }
 
   public void computeTypeConversionRule() {
@@ -118,21 +116,12 @@ public class CompiledExpression implements Serializable, ExecutableStatement {
         OptimizerFactory.clearThreadAccessorOptimizer();
       }
     }
-    if (importInjectionRequired) {
-      return execute(false, this, staticContext, new ClassImportResolverFactory(parserContext.getParserConfiguration(), factory, true));
-    }
-    else {
-      return execute(false, this, staticContext, factory);
-    }
+    return getDirectValue(staticContext, factory);
   }
 
   public Object getDirectValue(Object staticContext, VariableResolverFactory factory) {
-    if (importInjectionRequired) {
-      return execute(false, this, staticContext, new ClassImportResolverFactory(parserContext.getParserConfiguration(), factory, true));
-    }
-    else {
-      return execute(false, this, staticContext, factory);
-    }
+    return execute(false, this, staticContext,
+        importInjectionRequired ? new ClassImportResolverFactory(parserConfiguration, factory, true) : new StackResetResolverFactory(factory));
   }
 
   private void setupOptimizers() {
@@ -144,47 +133,24 @@ public class CompiledExpression implements Serializable, ExecutableStatement {
     return optimized;
   }
 
-  public void setOptimized(boolean optimized) {
-    this.optimized = optimized;
-  }
-
   public Class<? extends AccessorOptimizer> getAccessorOptimizer() {
     return accessorOptimizer;
-  }
-
-  public void setAccessorOptimizer(Class<? extends AccessorOptimizer> accessorOptimizer) {
-    this.accessorOptimizer = accessorOptimizer;
   }
 
   public String getSourceName() {
     return sourceName;
   }
 
-  public void setSourceName(String sourceName) {
-    this.sourceName = sourceName;
-  }
-
   public boolean intOptimized() {
     return false;
   }
 
-  public ParserContext getParserContext() {
-    return parserContext;
-  }
-
-  public void setParserContext(ParserContext parserContext) {
-    if ((this.parserContext = parserContext) != null) {
-      this.importInjectionRequired =
-          parserContext.getImports() != null && parserContext.getImports().size() != 0;
-    }
+  public ParserConfiguration getParserConfiguration() {
+    return parserConfiguration;
   }
 
   public boolean isImportInjectionRequired() {
     return importInjectionRequired;
-  }
-
-  public void setImportInjectionRequired(boolean importInjectionRequired) {
-    this.importInjectionRequired = importInjectionRequired;
   }
 
   public Object setValue(Object ctx, Object elCtx, VariableResolverFactory variableFactory, Object value) {

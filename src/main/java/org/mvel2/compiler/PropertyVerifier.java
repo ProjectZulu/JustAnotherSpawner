@@ -81,7 +81,7 @@ public class PropertyVerifier extends AbstractOptimizer {
   public PropertyVerifier(String property, ParserContext parserContext, Class root) {
     this.end = this.length = (this.expr = property.toCharArray()).length;
 
-    if (!property.isEmpty() && property.charAt(0) == '.') {
+    if (property.length() > 0 && property.charAt(0) == '.') {
       this.cursor = this.st = this.start = 1;
     }
 
@@ -182,9 +182,9 @@ public class PropertyVerifier extends AbstractOptimizer {
 
     Member member = ctx != null ? getFieldOrAccessor(ctx, property) : null;
 
-    if (MVEL.COMPILER_OPT_SUPPORT_JAVA_STYLE_CLASS_LITERALS && ctx != null) {
+    if (MVEL.COMPILER_OPT_SUPPORT_JAVA_STYLE_CLASS_LITERALS) {
       if ("class".equals(property)) {
-        return (Class<?>) ctx;
+        return Class.class;
       }
     }
 
@@ -192,16 +192,24 @@ public class PropertyVerifier extends AbstractOptimizer {
       if (pCtx.isStrictTypeEnforcement()) {
         Field f = ((Field) member);
 
-        if (f.getGenericType() != null && f.getGenericType() instanceof ParameterizedType) {
-          ParameterizedType pt = (ParameterizedType) f.getGenericType();
-          pCtx.setLastTypeParameters(pt.getActualTypeArguments());
+        if (f.getGenericType() != null) {
+          if (f.getGenericType() instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) f.getGenericType();
+            pCtx.setLastTypeParameters(pt.getActualTypeArguments());
 
-          Type[] gpt = pt.getActualTypeArguments();
-          Type[] classArgs = ((Class) pt.getRawType()).getTypeParameters();
+            Type[] gpt = pt.getActualTypeArguments();
+            Type[] classArgs = ((Class) pt.getRawType()).getTypeParameters();
 
-          if (gpt.length > 0 && paramTypes == null) paramTypes = new HashMap<String, Type>();
-          for (int i = 0; i < gpt.length; i++) {
-            paramTypes.put(classArgs[i].toString(), gpt[i]);
+            if (gpt.length > 0 && paramTypes == null) paramTypes = new HashMap<String, Type>();
+            for (int i = 0; i < gpt.length; i++) {
+              paramTypes.put(classArgs[i].toString(), gpt[i]);
+            }
+          } else if (f.getGenericType() instanceof TypeVariable) {
+            TypeVariable tv = (TypeVariable) f.getGenericType();
+            Type paramType = paramTypes.remove(tv.getName());
+            if (paramType != null && paramType instanceof Class) {
+              return (Class) paramType;
+            }
           }
         }
 
@@ -211,35 +219,17 @@ public class PropertyVerifier extends AbstractOptimizer {
         return ((Field) member).getType();
       }
     }
-    else if (member != null) {
-      Method method = (Method) member;
 
-      if (pCtx.isStrictTypeEnforcement()) {
-        //if not a field, then this is a property getter
-        Type parametricReturnType = method.getGenericReturnType();
-
-        //push return type parameters onto parser context, only if this is a parametric type
-        if (parametricReturnType instanceof ParameterizedType) {
-          pCtx.setLastTypeParameters(((ParameterizedType) parametricReturnType).getActualTypeArguments());
-          ParameterizedType pt = (ParameterizedType) parametricReturnType;
-
-          Type[] gpt = pt.getActualTypeArguments();
-          Type[] classArgs = ((Class) pt.getRawType()).getTypeParameters();
-
-          if (gpt.length > 0 && paramTypes == null) paramTypes = new HashMap<String, Type>();
-          for (int i = 0; i < gpt.length; i++) {
-            paramTypes.put(classArgs[i].toString(), gpt[i]);
-          }
-        }
-      }
-
-      Class rt = method.getReturnType();
-      return rt.isPrimitive() ? boxPrimitive(rt) : rt;
+    if (member != null) {
+      return getReturnType(ctx, (Method) member);
     }
-    else if (pCtx != null && pCtx.hasImport(property)) {
-      return pCtx.getImport(property);
+
+    if (pCtx != null && first && pCtx.hasImport(property)) {
+      Class<?> importedClass = pCtx.getImport(property);
+      if (importedClass != null) return pCtx.getImport(property);
     }
-    else if (pCtx != null && pCtx.getLastTypeParameters() != null && pCtx.getLastTypeParameters().length != 0
+
+    if (pCtx != null && pCtx.getLastTypeParameters() != null && pCtx.getLastTypeParameters().length != 0
         && ((Collection.class.isAssignableFrom(ctx) && !(switchStateReg = false))
         || (Map.class.isAssignableFrom(ctx) && (switchStateReg = true)))) {
       Type parm = pCtx.getLastTypeParameters()[switchStateReg ? 1 : 0];
@@ -252,63 +242,132 @@ public class PropertyVerifier extends AbstractOptimizer {
         return (Class) parm;
       }
     }
-    else if (pCtx != null && "length".equals(property) && ctx.isArray()) {
+
+    if (pCtx != null && "length".equals(property) && ctx.isArray()) {
       return Integer.class;
     }
-    else {
-      Object tryStaticMethodRef = tryStaticAccess();
 
-      if (tryStaticMethodRef != null) {
-        fqcn = true;
-        resolvedExternally = false;
-        if (tryStaticMethodRef instanceof Class) {
-          classLiteral = true;
-          return (Class) tryStaticMethodRef;
-        }
-        else if (tryStaticMethodRef instanceof Field) {
-          try {
-            return ((Field) tryStaticMethodRef).get(null).getClass();
-          }
-          catch (Exception e) {
-            throw new CompileException("in verifier: ", expr, start, e);
-          }
-        }
-        else {
-          try {
-            return ((Method) tryStaticMethodRef).getReturnType();
-          }
-          catch (Exception e) {
-            throw new CompileException("in verifier: ", expr, start, e);
-          }
-        }
+    Object tryStaticMethodRef = tryStaticAccess();
+
+    if (tryStaticMethodRef != null) {
+      fqcn = true;
+      resolvedExternally = false;
+      if (tryStaticMethodRef instanceof Class) {
+        classLiteral = !(MVEL.COMPILER_OPT_SUPPORT_JAVA_STYLE_CLASS_LITERALS &&
+            new String(expr, end - 6, 6).equals(".class"));
+          return classLiteral ? (Class) tryStaticMethodRef : Class.class;
       }
-      else if (ctx != null && ctx.getClass() == Class.class) {
-        for (Method m : ctx.getMethods()) {
-          if (property.equals(m.getName())) {
-            return m.getReturnType();
-          }
-        }
+      else if (tryStaticMethodRef instanceof Field) {
         try {
-          return findClass(variableFactory, ctx.getName() + "$" + property, null);
+          return ((Field) tryStaticMethodRef).get(null).getClass();
         }
-        catch (ClassNotFoundException cnfe) {
-          // fall through.
-        }
-      }
-
-      if (MVEL.COMPILER_OPT_ALLOW_NAKED_METH_CALL) {
-        Class cls = getMethod(ctx, property);
-        if (cls != Object.class) {
-          return cls;
+        catch (Exception e) {
+          throw new CompileException("in verifier: ", expr, start, e);
         }
       }
-
-      if (pCtx.isStrictTypeEnforcement()) {
-        throw new CompileException("unqualified type in strict mode for: " + property, expr, tkStart);
+      else {
+        try {
+          return ((Method) tryStaticMethodRef).getReturnType();
+        }
+        catch (Exception e) {
+          throw new CompileException("in verifier: ", expr, start, e);
+        }
       }
-
-      return Object.class;
     }
+
+    if (ctx != null) {
+      try {
+        return findClass(variableFactory, ctx.getName() + "$" + property, pCtx);
+      }
+      catch (ClassNotFoundException cnfe) {
+        // fall through.
+      }
+    }
+
+    if (pCtx!=null&& pCtx.getParserConfiguration()!=null?pCtx.getParserConfiguration().isAllowNakedMethCall():MVEL.COMPILER_OPT_ALLOW_NAKED_METH_CALL) {
+      Class cls = getMethod(ctx, property);
+      if (cls != Object.class) {
+        return cls;
+      }
+    }
+
+    if (pCtx.isStrictTypeEnforcement()) {
+      throw new CompileException("unqualified type in strict mode for: " + property, expr, tkStart);
+    }
+
+    return Object.class;
+  }
+
+  private Class getReturnType(Class context, Method m) {
+    Class declaringClass = m.getDeclaringClass();
+    if (context == declaringClass) {
+      return returnGenericType(m);
+    }
+    Type returnType = m.getGenericReturnType();
+    if (returnType instanceof TypeVariable) {
+      String typeName = ((TypeVariable)returnType).getName();
+      Type superType = context.getGenericSuperclass();
+      Class superClass = context.getSuperclass();
+      while (superClass != null && superClass != declaringClass) {
+        superType = superClass.getGenericSuperclass();
+        superClass = superClass.getSuperclass();
+      }
+      if (superClass == null) {
+        return returnGenericType(m);
+      }
+      if (superType instanceof ParameterizedType) {
+        TypeVariable[] typeParams = superClass.getTypeParameters();
+        int typePos = -1;
+        for (int i = 0; i < typeParams.length; i++) {
+          if (typeParams[i].getName().equals(typeName)) {
+            typePos = i;
+            break;
+          }
+        }
+        if (typePos < 0) {
+          return returnGenericType(m);
+        }
+        Type actualType = ((ParameterizedType)superType).getActualTypeArguments()[typePos];
+        return actualType instanceof Class ? (Class)actualType : returnGenericType(m);
+      }
+    }
+    return returnGenericType(m);
+  }
+
+  private void recordParametricReturnedType(Type parametricReturnType) {
+    //push return type parameters onto parser context, only if this is a parametric type
+    if (parametricReturnType instanceof ParameterizedType) {
+      pCtx.setLastTypeParameters(((ParameterizedType) parametricReturnType).getActualTypeArguments());
+      ParameterizedType pt = (ParameterizedType) parametricReturnType;
+
+      Type[] gpt = pt.getActualTypeArguments();
+      Type[] classArgs = ((Class) pt.getRawType()).getTypeParameters();
+
+      if (gpt.length > 0 && paramTypes == null) paramTypes = new HashMap<String, Type>();
+      for (int i = 0; i < gpt.length; i++) {
+        paramTypes.put(classArgs[i].toString(), gpt[i]);
+      }
+    }
+  }
+
+  private Class<?> returnGenericType(Method m) {
+    Type parametricReturnType = m.getGenericReturnType();
+    recordParametricReturnedType(parametricReturnType);
+    String returnTypeArg = parametricReturnType.toString();
+
+    //push return type parameters onto parser context, only if this is a parametric type
+    if (parametricReturnType instanceof ParameterizedType) {
+        pCtx.setLastTypeParameters(((ParameterizedType) parametricReturnType).getActualTypeArguments());
+    }
+
+    if (paramTypes != null && paramTypes.containsKey(returnTypeArg)) {
+        /**
+         * If the paramTypes Map contains the known type, return that type.
+         */
+        return (Class) paramTypes.get(returnTypeArg);
+    }
+
+    return m.getReturnType();
   }
 
   /**
@@ -337,10 +396,16 @@ public class PropertyVerifier extends AbstractOptimizer {
         ctx = (Class) (pCtx.getLastTypeParameters().length != 0 ? pCtx.getLastTypeParameters()[1] : Object.class);
       }
       else if (Collection.class.isAssignableFrom(ctx)) {
-        ctx = (Class) (pCtx.getLastTypeParameters().length != 0 ? pCtx.getLastTypeParameters()[0] : Object.class);
+        if (pCtx.getLastTypeParameters().length == 0 ) {
+          ctx = Object.class;
+        } else {
+          Type type = pCtx.getLastTypeParameters()[0];
+          if (type instanceof Class) ctx = (Class)type;
+          else ctx = (Class)((ParameterizedType)type).getRawType();
+        }
       }
       else if (ctx.isArray()) {
-        ctx = getBaseComponentType(ctx);
+        ctx = ctx.getComponentType();
       }
       else if (pCtx.isStrongTyping()) {
         throw new CompileException("unknown collection type: " + ctx + "; property=" + property, expr, start);
@@ -355,9 +420,6 @@ public class PropertyVerifier extends AbstractOptimizer {
     skipWhitespace();
 
     int start = cursor;
-
-    if (cursor == length)
-      throw new PropertyAccessException("unterminated '['", expr, this.start);
 
     if (scanTo(']')) {
       addFatalError("unterminated [ in token");
@@ -551,11 +613,12 @@ public class PropertyVerifier extends AbstractOptimizer {
       }
 
       if (pCtx.isStrictTypeEnforcement() && ctx.getTypeParameters().length != 0 && pCtx.getLastTypeParameters() !=
-              null && pCtx.getLastTypeParameters().length == ctx.getTypeParameters().length) {
+          null && pCtx.getLastTypeParameters().length == ctx.getTypeParameters().length) {
 
         TypeVariable[] typeVariables = ctx.getTypeParameters();
         for (int i = 0; i < typeVariables.length; i++) {
-          typeArgs.put(typeVariables[i].getName(), (Class) pCtx.getLastTypeParameters()[i]);
+          Type typeArg = pCtx.getLastTypeParameters()[i];
+          typeArgs.put(typeVariables[i].getName(), typeArg instanceof Class ? (Class) pCtx.getLastTypeParameters()[i] : Object.class);
         }
       }
 
@@ -585,7 +648,7 @@ public class PropertyVerifier extends AbstractOptimizer {
       }
     }
 
-    if (!Modifier.isPublic(m.getModifiers())) {
+    if (!Modifier.isPublic(m.getModifiers()) && pCtx.isStrictTypeEnforcement()) {
       StringAppender errorBuild = new StringAppender();
       for (int i = 0; i < args.length; i++) {
         errorBuild.append(args[i] != null ? args[i].getName() : null);
@@ -600,7 +663,7 @@ public class PropertyVerifier extends AbstractOptimizer {
           + " (scope: " + scope + "; required: public", this.tkStart);
     }
 
-    return m.getReturnType();
+    return getReturnType(ctx, m);
   }
 
   private Class getWithProperty(Class ctx) {
