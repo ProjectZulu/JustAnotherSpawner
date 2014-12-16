@@ -39,7 +39,7 @@ public class CreatureTypeBuilder {
 		this.spawnMedium = "air";
 		this.defaultBiomeCap = -1;
 		this.biomeMappingToCap = new HashMap<String, Integer>();
-		this.spawnExpression = "!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})";
+		this.spawnExpression = "!solidside(1,{0,0,0},{0,-1,0})||liquid({0,0,0},{0,0,0})||normal({0,0,0},{0,0,0})||normal({0,0,0},{0,1,0})||!opaque({0,0,0},{0,-1,0})";
 		this.iterationsPerChunk = 3;
 		this.iterationsPerPack = 4;
 	}
