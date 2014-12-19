@@ -95,10 +95,14 @@ public class JustAnotherSpawner {
 		BiomeDictionary.registerAllBiomes();
 		BiomeBlacklist biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
 		importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
-		if (globalSettings.spawningProfile.equals(GlobalSettings.profileTAGS)) {
+		if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileTAGS)) {
 			currentProfile = new TAGProfile(biomeBlacklist, importedSpawnList);
-		} else {
+		} else if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileMVEL)) {
 			currentProfile = new MVELProfile(biomeBlacklist, importedSpawnList);
+		} else {
+			throw new IllegalArgumentException(String.format(
+					"Unknown Spawning Profile [%s]. Current modes are %s or %s", globalSettings.spawningProfile,
+					GlobalSettings.profileTAGS, GlobalSettings.profileMVEL));
 		}
 		currentProfile.init();
 	}
