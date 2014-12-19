@@ -1,7 +1,7 @@
 package jas.modern.spawner.creature.handler.parsing.keys;
 
 import jas.modern.JASLog;
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.modern.spawner.biome.group.BiomeHelper;
 import jas.modern.spawner.creature.handler.parsing.ParsingHelper;
@@ -153,7 +153,7 @@ public class KeyParserBiome extends KeyParserBase {
                 biomeName = biomeName.substring(2);
             }
 
-            BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+            BiomeGroupRegistry registry = MVELProfile.worldSettings().biomeGroupRegistry();
             ImmutableMultimap<String, String> packgToBiomeGroupID = ImmutableMultimap.of();
             if (type == BiomeType.GROUP) {
                 // Cache Group as our only current public access is a copy method. This is already changed in DEV14

@@ -1,7 +1,7 @@
 package jas.legacy;
 
-import jas.api.StructureInterpreter;
 import jas.api.CompatibilityLoader;
+import jas.api.StructureInterpreter;
 import jas.legacy.spawner.biome.structure.StructureHandlerRegistry;
 
 public class CompatabilityRegister implements CompatibilityLoader {

@@ -1,11 +1,11 @@
 package jas.legacy.spawner.creature.entry;
 
-import jas.legacy.GsonHelper;
+import jas.modern.GsonHelper;
 
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -15,7 +15,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 

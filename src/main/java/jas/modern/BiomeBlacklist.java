@@ -1,18 +1,13 @@
 package jas.modern;
 
-import jas.modern.spawner.biome.group.BiomeGroupSaveObject;
 import jas.modern.spawner.biome.group.BiomeHelper;
-import jas.modern.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
 
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.TreeMap;
 
 import net.minecraft.world.biome.BiomeGenBase;
 
-import com.google.common.base.Optional;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 public class BiomeBlacklist {
     public final String FILE_VERSION = "1.0";

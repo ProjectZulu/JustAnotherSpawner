@@ -2,10 +2,11 @@ package jas.modern.command;
 
 import jas.modern.BiomeBlacklist;
 import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
+import jas.modern.spawner.CountInfo.ChunkStat;
 import jas.modern.spawner.EntityCounter;
 import jas.modern.spawner.Tags;
-import jas.modern.spawner.CountInfo.ChunkStat;
 import jas.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.modern.spawner.creature.entry.SpawnListEntry;
 import jas.modern.spawner.creature.handler.LivingHandler;
@@ -24,7 +25,6 @@ import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
@@ -93,7 +93,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = determineChunksForSpawnering(targetPlayer,
 				JustAnotherSpawner.globalSettings().chunkSpawnDistance);
 
-		Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+		Iterator<CreatureType> typeIterator = MVELProfile.worldSettings().creatureTypeRegistry()
 				.getCreatureTypes();
 		CountInfo reportCount = new CountInfo(eligibleChunksForSpawning, new EntityCounter(), new EntityCounter());
 		StringBuilder resultMessage = new StringBuilder();
@@ -104,10 +104,10 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 				continue;
 			}
 			CountInfo countInfo = new CountInfo(eligibleChunksForSpawning, new EntityCounter(), new EntityCounter());
-			LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
-			BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
-			attemptSpawnCreaturesInChunks(cycles, targetPlayer.worldObj, JustAnotherSpawner.worldSettings()
-					.livingHandlerRegistry(), JustAnotherSpawner.worldSettings().biomeSpawnListRegistry(),
+			LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
+			BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings().biomeSpawnListRegistry();
+			attemptSpawnCreaturesInChunks(cycles, targetPlayer.worldObj, MVELProfile.worldSettings()
+					.livingHandlerRegistry(), MVELProfile.worldSettings().biomeSpawnListRegistry(),
 					creatureType, biomeBlacklist, countInfo, reportCount);
 
 			float totalCount = 0;

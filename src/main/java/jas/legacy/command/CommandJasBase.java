@@ -1,7 +1,7 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -9,7 +9,6 @@ import java.util.List;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.EntityList;
 import net.minecraft.server.MinecraftServer;
 
 public abstract class CommandJasBase extends CommandBase {
@@ -108,7 +107,7 @@ public abstract class CommandJasBase extends CommandBase {
      * Helper used to add Entity names to tabCompletetion list. Names with spaces are surrounded with quotation marks.
      */
 	public static void addEntityNames(List<String> tabCompletions) {
-		for (String entityName : LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry().JASNametoEntityClass.keySet()) {
+		for (String entityName : TAGProfile.worldSettings().livingGroupRegistry().JASNametoEntityClass.keySet()) {
 			if (entityName.contains(" ")) {
 				entityName = "\"".concat(entityName).concat("\"");
 			}
@@ -120,7 +119,7 @@ public abstract class CommandJasBase extends CommandBase {
      * Helper used to add Entity category names to tabCompletetion list.
      */
     public static void addEntityTypes(List<String> tabCompletions) {
-        Iterator<CreatureType> iterator = LegacyJustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureTypes();
+        Iterator<CreatureType> iterator = TAGProfile.worldSettings().creatureTypeRegistry().getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
             tabCompletions.add(entityType.typeID);

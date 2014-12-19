@@ -1,7 +1,7 @@
 package jas.modern;
 
-import jas.api.StructureInterpreter;
 import jas.api.CompatibilityLoader;
+import jas.api.StructureInterpreter;
 import jas.modern.spawner.biome.structure.StructureHandlerRegistry;
 
 public class CompatabilityRegister implements CompatibilityLoader {

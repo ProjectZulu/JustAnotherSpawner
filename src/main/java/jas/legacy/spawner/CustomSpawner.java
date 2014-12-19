@@ -1,8 +1,5 @@
 package jas.legacy.spawner;
 
-import jas.legacy.BiomeBlacklist;
-import jas.legacy.JASLog;
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.EntityCounter.CountableInt;
 import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -11,6 +8,10 @@ import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.BiomeBlacklist;
+import jas.modern.JASLog;
+import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +77,7 @@ public class CustomSpawner {
                                 continue;
                             }
                             EntityLiving entity = (EntityLiving) object;
-                            List<LivingHandler> livingHandlers = LegacyJustAnotherSpawner.worldSettings()
+                            List<LivingHandler> livingHandlers = TAGProfile.worldSettings()
                                     .livingHandlerRegistry()
                                     .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
                             Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
@@ -115,7 +116,7 @@ public class CustomSpawner {
                 continue;
             }
             @SuppressWarnings("unchecked")
-            List<LivingHandler> livingHandlers = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry()
+            List<LivingHandler> livingHandlers = TAGProfile.worldSettings().livingHandlerRegistry()
                     .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
             Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
             creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
@@ -128,12 +129,12 @@ public class CustomSpawner {
     @SuppressWarnings("unchecked")
     public static List<Entity> getLoadedEntities(World world) {
         List<Entity> entities = new ArrayList<Entity>();
-        if (LegacyJustAnotherSpawner.globalSettings().chunkCountDistance <= 0) {
+        if (JustAnotherSpawner.globalSettings().chunkCountDistance <= 0) {
             return world.loadedEntityList;
         }
 
         HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
-                world, LegacyJustAnotherSpawner.globalSettings().chunkCountDistance);
+                world, JustAnotherSpawner.globalSettings().chunkCountDistance);
         for (ChunkCoordIntPair pair : eligibleChunksForCounting.keySet()) {
             Chunk chunk = world.getChunkFromChunkCoords(pair.chunkXPos, pair.chunkZPos);
             if (chunk != null && chunk.entityLists != null) {
@@ -244,10 +245,10 @@ public class CustomSpawner {
                                         }
 
                                         if (spawnlistentry == null) {
-                                            BiomeSpawnListRegistry biomeSpawnListRegistry = LegacyJustAnotherSpawner
-                                                    .worldSettings().biomeSpawnListRegistry();
-                                            spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(
-                                                    worldServer, creatureType, blockSpawnX, blockSpawnY, blockSpawnZ);
+											BiomeSpawnListRegistry biomeSpawnListRegistry = TAGProfile.worldSettings()
+													.biomeSpawnListRegistry();
+											spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(
+													worldServer, creatureType, blockSpawnX, blockSpawnY, blockSpawnZ);
                                             if (spawnlistentry == null) {
                                                 continue;
                                             }
@@ -367,7 +368,7 @@ public class CustomSpawner {
             int k1 = par3 + random.nextInt(par5);
             int l1 = j1;
             int i2 = k1;
-            BiomeSpawnListRegistry biomeSpawnListRegistry = LegacyJustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+            BiomeSpawnListRegistry biomeSpawnListRegistry = TAGProfile.worldSettings().biomeSpawnListRegistry();
             SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
                     world.getTopSolidOrLiquidBlock(j1, k1), k1);
             IEntityLivingData entitylivingdata = null;

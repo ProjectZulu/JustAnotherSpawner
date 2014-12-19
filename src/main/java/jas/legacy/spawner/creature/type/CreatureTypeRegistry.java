@@ -1,18 +1,15 @@
 package jas.legacy.spawner.creature.type;
 
-import jas.legacy.FileUtilities;
-import jas.legacy.GsonHelper;
-import jas.legacy.WorldProperties;
 import jas.legacy.serializer.CreatureTypeSaveObject;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
-import jas.legacy.spawner.biome.group.BiomeGroupSaveObject;
-import jas.legacy.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
+import jas.legacy.world.WorldProperties;
+import jas.modern.FileUtilities;
+import jas.modern.GsonHelper;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
 
 import net.minecraft.block.material.Material;
 

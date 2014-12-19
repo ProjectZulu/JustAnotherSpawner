@@ -2,8 +2,8 @@ package jas.legacy.spawner.creature.handler.parsing.keys;
 
 import jas.legacy.spawner.creature.handler.parsing.OptionalParser;
 import jas.legacy.spawner.creature.handler.parsing.TypeValuePair;
-import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;

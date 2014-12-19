@@ -1,5 +1,12 @@
 package jas.modern.spawner.creature.handler;
 
+import jas.modern.JASLog;
+import jas.modern.math.SetAlgebra;
+import jas.modern.math.SetAlgebra.OPERATION;
+import jas.modern.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.modern.spawner.creature.type.CreatureTypeRegistry;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,14 +16,6 @@ import java.util.Set;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
-import com.google.gson.annotations.SerializedName;
-
-import jas.modern.JASLog;
-import jas.modern.math.SetAlgebra;
-import jas.modern.math.SetAlgebra.OPERATION;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
-import jas.modern.spawner.creature.type.CreatureTypeRegistry;
 
 public class LivingHandlerBuilder {
 	private String handlerId;

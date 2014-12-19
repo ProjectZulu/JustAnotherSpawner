@@ -1,9 +1,9 @@
 package jas.legacy.spawner.creature.handler.parsing.settings;
 
-import jas.legacy.JASLog;
 import jas.legacy.spawner.creature.handler.parsing.TypeValuePair;
 import jas.legacy.spawner.creature.handler.parsing.keys.Key;
 import jas.legacy.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
+import jas.modern.JASLog;
 
 import java.util.EnumSet;
 

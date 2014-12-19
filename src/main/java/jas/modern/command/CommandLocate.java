@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.creature.handler.LivingGroupRegistry;
@@ -18,8 +18,6 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
-
-import com.google.common.collect.ImmutableCollection;
 
 public class CommandLocate extends CommandJasBase {
     public String getCommandName() {
@@ -60,8 +58,8 @@ public class CommandLocate extends CommandJasBase {
         CountInfo info = CustomSpawner.determineCountInfo(targetPlayer.worldObj);
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-            LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+            LivingGroupRegistry groupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
+            LivingHandlerRegistry handlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
 			List<LivingHandler> livingHandlers = handlerRegistry.getLivingHandlers(groupRegistry.EntityClasstoJASName
 					.get(entity.getClass()));
 			for (LivingHandler livingHandler : livingHandlers) {

@@ -1,9 +1,6 @@
 package jas.modern.spawner.creature.handler.parsing.keys;
 
-import jas.modern.JASLog;
 import jas.modern.spawner.creature.handler.parsing.ParsingHelper;
-import jas.modern.spawner.creature.handler.parsing.TypeValuePair;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
 

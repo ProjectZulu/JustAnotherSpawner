@@ -1,8 +1,8 @@
 package jas.legacy.spawner.creature.type;
 
-import jas.legacy.JASLog;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
 import jas.legacy.spawner.biome.group.BiomeHelper;
+import jas.modern.JASLog;
 
 import java.util.Collection;
 import java.util.HashMap;

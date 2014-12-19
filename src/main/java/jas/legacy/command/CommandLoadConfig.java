@@ -1,6 +1,7 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
+import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.TAGProfile;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class CommandLoadConfig extends CommandJasBase {
             throw new WrongUsageException("commands.jasloadconfig.usage", new Object[0]);
         }
 
-        LegacyJustAnotherSpawner.worldSettings().loadWorldSettings(LegacyJustAnotherSpawner.getModConfigDirectory(),
+        TAGProfile.worldSettings().loadWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
                 MinecraftServer.getServer().worldServers[0]);
     }
 

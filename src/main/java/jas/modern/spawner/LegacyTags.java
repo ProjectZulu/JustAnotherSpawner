@@ -1,6 +1,5 @@
 package jas.modern.spawner;
 
-import net.minecraft.block.Block;
 import net.minecraft.world.World;
 
 /**

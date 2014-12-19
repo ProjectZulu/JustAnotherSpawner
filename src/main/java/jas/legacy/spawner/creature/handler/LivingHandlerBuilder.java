@@ -1,11 +1,11 @@
 package jas.legacy.spawner.creature.handler;
 
+import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+
 import java.util.Locale;
 
 import com.google.gson.annotations.SerializedName;
-
-import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
-import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
 
 public class LivingHandlerBuilder {
     @SerializedName("Name")

@@ -1,5 +1,6 @@
 package jas.modern;
 
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.creature.handler.LivingHandler;
@@ -21,7 +22,7 @@ public class EntityDespawner {
     public void despawner(LivingUpdateEvent event) {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
-            LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+            LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
             CountInfo info = CustomSpawner.determineCountInfo(event.entityLiving.worldObj);
             @SuppressWarnings("unchecked")
             List<LivingHandler> livingHandlers = livingHandlerRegistry
@@ -37,7 +38,7 @@ public class EntityDespawner {
 
 	@SubscribeEvent
 	public void entityPersistance(AllowDespawn event) {
-		LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+		LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
 		@SuppressWarnings("unchecked")
 		List<LivingHandler> livingHandlers = livingHandlerRegistry
 				.getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());

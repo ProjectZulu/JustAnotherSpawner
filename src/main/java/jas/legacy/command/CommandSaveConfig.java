@@ -1,6 +1,7 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
+import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.TAGProfile;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class CommandSaveConfig extends CommandJasBase {
         if (stringArgs.length > 0) {
             throw new WrongUsageException("commands.jassaveconfig.usage", new Object[0]);
         }
-        LegacyJustAnotherSpawner.worldSettings().saveWorldSettings(LegacyJustAnotherSpawner.getModConfigDirectory(),
+        TAGProfile.worldSettings().saveWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
                 MinecraftServer.getServer().worldServers[0]);
     }
 

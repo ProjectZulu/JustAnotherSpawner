@@ -1,15 +1,11 @@
 package jas.modern.command.mods;
 
-import jas.modern.JustAnotherSpawner;
 import jas.modern.command.CommandJasBase;
-import jas.modern.modification.ModAddBiomeGroup;
 import jas.modern.modification.ModAddCreatureType;
-import jas.modern.modification.ModRemoveBiomeGroup;
 import jas.modern.modification.ModRemoveCreatureType;
-import jas.modern.modification.ModUpdateBiomeGroup;
 import jas.modern.modification.ModUpdateCreatureType;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.creature.type.CreatureType;
-import jas.modern.spawner.creature.type.CreatureTypeBuilder;
 import jas.modern.spawner.creature.type.CreatureTypeRegistry;
 
 import java.util.ArrayList;
@@ -18,8 +14,6 @@ import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-
-import com.google.common.base.Optional;
 
 public class CommandModCreatureType extends CommandJasBase {
 
@@ -73,7 +67,7 @@ public class CommandModCreatureType extends CommandJasBase {
 
 		if (creatureTypeId != null && !creatureTypeId.isEmpty()) {
 			if (operation == Ops.REMOVE) {
-				JustAnotherSpawner.worldSettings().addChange(new ModRemoveCreatureType(creatureTypeId));
+				MVELProfile.worldSettings().addChange(new ModRemoveCreatureType(creatureTypeId));
 			} else {
 				if (stringArgs.length >= 7) {
 					try {
@@ -83,11 +77,11 @@ public class CommandModCreatureType extends CommandJasBase {
 						String spawnMedium = stringArgs[5];
 						String tag = stringArgs[6];
 						if (operation == Ops.ADD) {
-							JustAnotherSpawner.worldSettings().addChange(
+							MVELProfile.worldSettings().addChange(
 									new ModAddCreatureType(creatureTypeId, spawnRate, maxNumberOfCreature,
 											chunkSpawnChance, spawnMedium, tag));
 						} else if (operation == Ops.UPDATE) {
-							JustAnotherSpawner.worldSettings().addChange(
+							MVELProfile.worldSettings().addChange(
 									new ModUpdateCreatureType(creatureTypeId, spawnRate, maxNumberOfCreature,
 											chunkSpawnChance, spawnMedium, tag));
 						}
@@ -98,10 +92,10 @@ public class CommandModCreatureType extends CommandJasBase {
 						int spawnRate = Integer.parseInt(stringArgs[2]);
 						int maxNumberOfCreature = Integer.parseInt(stringArgs[3]);
 						if (operation == Ops.ADD) {
-							JustAnotherSpawner.worldSettings().addChange(
+							MVELProfile.worldSettings().addChange(
 									new ModAddCreatureType(creatureTypeId, spawnRate, maxNumberOfCreature));
 						} else if (operation == Ops.UPDATE) {
-							JustAnotherSpawner.worldSettings().addChange(
+							MVELProfile.worldSettings().addChange(
 									new ModUpdateCreatureType(creatureTypeId, spawnRate, maxNumberOfCreature));
 						}
 					} catch (NumberFormatException e) {
@@ -135,7 +129,7 @@ public class CommandModCreatureType extends CommandJasBase {
 			return tabCompletions;
 		} else if (stringArgs.length == 2) {
 			// String creatureTypeId = stringArgs[1];
-			CreatureTypeRegistry registry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
+			CreatureTypeRegistry registry = MVELProfile.worldSettings().creatureTypeRegistry();
 			Iterator<CreatureType> iterator = registry.getCreatureTypes();
 			while (iterator.hasNext()) {
 				CreatureType type = iterator.next();

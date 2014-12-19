@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.EntityCounter;
 import jas.modern.spawner.EntityCounter.CountableInt;
 import jas.modern.spawner.creature.handler.LivingGroupRegistry;
@@ -62,8 +62,8 @@ public class CommandKillAll extends CommandJasBase {
             if (!(entity instanceof EntityLiving)) {
                 continue;
             }
-            LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-            List<LivingHandler> handlers = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+            LivingGroupRegistry groupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
+            List<LivingHandler> handlers = MVELProfile.worldSettings().livingHandlerRegistry()
                     .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
             if (handlers.isEmpty()) {
                 if (entityCategName.equals("*") && isEntityFiltered(entity, entityFilter, groupRegistry)) {

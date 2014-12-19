@@ -1,16 +1,16 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.DefaultProps;
 import jas.legacy.EntityProperties;
-import jas.legacy.JASLog;
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.creature.entry.SpawnListEntry;
 import jas.legacy.spawner.creature.handler.parsing.keys.Key;
+import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
-import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.modern.DefaultProps;
+import jas.modern.JASLog;
+import jas.modern.profile.TAGProfile;
 
 import java.io.File;
 
@@ -172,7 +172,7 @@ public class LivingHandler {
                 return false;
             }
 
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, LegacyJustAnotherSpawner.worldSettings()
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, TAGProfile.worldSettings()
                     .worldProperties().getGlobal().maxDespawnDist);
 
             if (instantDespawn) {
@@ -216,11 +216,11 @@ public class LivingHandler {
                 return;
             }
 
-            boolean validDistance = despawning.isMidDistance((int) d3, LegacyJustAnotherSpawner.worldSettings()
+            boolean validDistance = despawning.isMidDistance((int) d3, TAGProfile.worldSettings()
                     .worldProperties().getGlobal().despawnDist);
-            boolean isOfAge = despawning.isValidAge(entityProps.getAge(), LegacyJustAnotherSpawner.worldSettings()
+            boolean isOfAge = despawning.isValidAge(entityProps.getAge(), TAGProfile.worldSettings()
                     .worldProperties().getGlobal().minDespawnTime);
-            boolean instantDespawn = despawning.isMaxDistance((int) d3, LegacyJustAnotherSpawner.worldSettings()
+            boolean instantDespawn = despawning.isMaxDistance((int) d3, TAGProfile.worldSettings()
                     .worldProperties().getGlobal().maxDespawnDist);
 
             if (instantDespawn) {

@@ -1,22 +1,22 @@
 package jas.legacy.spawner.creature.entry;
 
-import jas.legacy.DefaultProps;
-import jas.legacy.FileUtilities;
-import jas.legacy.GsonHelper;
-import jas.legacy.ImportedSpawnList;
-import jas.legacy.JASLog;
-import jas.legacy.WorldProperties;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
-import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
+import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.biome.structure.StructureHandlerRegistry;
 import jas.legacy.spawner.creature.entry.BiomeSpawnsSaveObject.BiomeSpawnsSaveObjectSerializer;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
+import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
-import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.legacy.spawner.creature.type.CreatureType;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.legacy.world.WorldProperties;
+import jas.modern.DefaultProps;
+import jas.modern.FileUtilities;
+import jas.modern.GsonHelper;
+import jas.modern.ImportedSpawnList;
+import jas.modern.JASLog;
 
 import java.io.File;
 import java.lang.reflect.Type;

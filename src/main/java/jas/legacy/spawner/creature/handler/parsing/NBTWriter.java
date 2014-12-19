@@ -1,7 +1,7 @@
 package jas.legacy.spawner.creature.handler.parsing;
 
-import jas.legacy.JASLog;
-import jas.legacy.ObfuscationHelper;
+import jas.modern.JASLog;
+import jas.modern.ObfuscationHelper;
 
 import java.util.IllegalFormatException;
 import java.util.List;

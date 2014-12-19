@@ -1,12 +1,12 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.CustomSpawner;
 import jas.legacy.spawner.EntityCounter;
 import jas.legacy.spawner.EntityCounter.CountableInt;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class CommandComposition extends CommandJasBase {
         StringBuilder countedContents = new StringBuilder();
 
         boolean foundMatch = false;
-        Iterator<CreatureType> creatureTypes = LegacyJustAnotherSpawner.worldSettings().creatureTypeRegistry()
+        Iterator<CreatureType> creatureTypes = TAGProfile.worldSettings().creatureTypeRegistry()
                 .getCreatureTypes();
         while (creatureTypes.hasNext()) {
             CreatureType creatureType = creatureTypes.next();
@@ -75,7 +75,7 @@ public class CommandComposition extends CommandJasBase {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
                     }
-                    LivingGroupRegistry groupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
+                    LivingGroupRegistry groupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
                     ImmutableCollection<String> groupIDs = groupRegistry
                             .getGroupsWithEntity(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
                     /*
@@ -84,7 +84,7 @@ public class CommandComposition extends CommandJasBase {
                      */
                     Set<String> typesCounted = new HashSet<String>();
                     for (String groupID : groupIDs) {
-                        LivingHandler livingHandler = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                        LivingHandler livingHandler = TAGProfile.worldSettings().livingHandlerRegistry()
                                 .getLivingHandler(groupID);
                         if (!typesCounted.contains(creatureType.typeID)
                                 && livingHandler.creatureTypeID.equals(creatureType.typeID)) {

@@ -1,16 +1,14 @@
 package jas.legacy.serializer;
 
-import jas.legacy.GsonHelper;
 import jas.legacy.spawner.creature.type.CreatureType;
 import jas.legacy.spawner.creature.type.CreatureTypeBuilder;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.modern.GsonHelper;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.google.common.base.Optional;
 import com.google.gson.JsonDeserializationContext;
@@ -18,7 +16,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 

@@ -1,15 +1,13 @@
 package jas.modern.command.mods;
 
-import jas.modern.JustAnotherSpawner;
 import jas.modern.command.CommandJasBase;
 import jas.modern.modification.ModAddSpawnListEntry;
 import jas.modern.modification.ModRemoveSpawnListEntry;
 import jas.modern.modification.ModUpdateSpawnListEntry;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.biome.group.BiomeGroupRegistry;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry;
 import jas.modern.spawner.creature.handler.LivingHandler;
 import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +67,7 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 		if (operation == Ops.NONE) {
 			throw new WrongUsageException("commands.modbiomespawnlist.biomegroupoperatorundefined", new Object[0]);
 		} else if (operation == Ops.REMOVE) {
-			JustAnotherSpawner.worldSettings().addChange(new ModRemoveSpawnListEntry(livingGroupId, biomeGroupId));
+			MVELProfile.worldSettings().addChange(new ModRemoveSpawnListEntry(livingGroupId, biomeGroupId));
 			return;
 		}
 
@@ -79,11 +77,11 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 		int maxChunkPack = Integer.parseInt(stringArgs[6]);
 		String optionalParameters = stringArgs[7];
 		if (operation == Ops.ADD) {
-			JustAnotherSpawner.worldSettings().addChange(
+			MVELProfile.worldSettings().addChange(
 					new ModAddSpawnListEntry(livingGroupId, biomeGroupId, spawnWeight, packSize, minChunkPack,
 							maxChunkPack, optionalParameters));
 		} else if (operation == Ops.UPDATE) {
-			JustAnotherSpawner.worldSettings().addChange(
+			MVELProfile.worldSettings().addChange(
 					new ModUpdateSpawnListEntry(livingGroupId, biomeGroupId, livingGroupId, biomeGroupId, spawnWeight,
 							packSize, minChunkPack, maxChunkPack, optionalParameters));
 		}
@@ -106,7 +104,7 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 2) {
-			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+			BiomeGroupRegistry registry = MVELProfile.worldSettings().biomeGroupRegistry();
 			for (String iD : registry.iDToGroup().keySet()) {
 				if (iD.contains(" ")) {
 					tabCompletions.add("\"".concat(iD).concat("\""));
@@ -116,7 +114,7 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 3) {
-			LivingHandlerRegistry registry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+			LivingHandlerRegistry registry = MVELProfile.worldSettings().livingHandlerRegistry();
 			for (LivingHandler group : registry.getLivingHandlers()) {
 				String iD = group.livingID;
 				if (iD.contains(" ")) {

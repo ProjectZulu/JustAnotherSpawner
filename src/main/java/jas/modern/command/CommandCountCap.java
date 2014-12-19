@@ -1,9 +1,10 @@
 package jas.modern.command;
 
 import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
+import jas.modern.spawner.CountInfo.ChunkStat;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.EntityCounter;
-import jas.modern.spawner.CountInfo.ChunkStat;
 import jas.modern.spawner.EntityCounter.CountableInt;
 import jas.modern.spawner.creature.type.CreatureType;
 
@@ -77,7 +78,7 @@ public class CommandCountCap extends CommandJasBase {
             EntityCounter creatureCount = new EntityCounter();
             CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
 
-            Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+            Iterator<CreatureType> iterator = MVELProfile.worldSettings().creatureTypeRegistry()
                     .getCreatureTypes();
             StringBuilder worldTypeContents = new StringBuilder();
             worldTypeContents.append("Results World (");

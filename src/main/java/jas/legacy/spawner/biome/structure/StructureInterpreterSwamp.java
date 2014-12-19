@@ -1,7 +1,7 @@
 package jas.legacy.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
-import jas.legacy.ReflectionHelper;
+import jas.modern.ReflectionHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;

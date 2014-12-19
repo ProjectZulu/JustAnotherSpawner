@@ -1,15 +1,15 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.FileUtilities;
-import jas.legacy.GsonHelper;
-import jas.legacy.JASLog;
-import jas.legacy.TopologicalSort;
-import jas.legacy.TopologicalSortingException;
-import jas.legacy.WorldProperties;
-import jas.legacy.TopologicalSort.DirectedGraph;
 import jas.legacy.math.SetAlgebra;
 import jas.legacy.math.SetAlgebra.OPERATION;
 import jas.legacy.spawner.creature.handler.LivingGroupSaveObject.LivingGroupSaveObjectSerializer;
+import jas.legacy.world.WorldProperties;
+import jas.modern.FileUtilities;
+import jas.modern.GsonHelper;
+import jas.modern.JASLog;
+import jas.modern.TopologicalSort;
+import jas.modern.TopologicalSort.DirectedGraph;
+import jas.modern.TopologicalSortingException;
 
 import java.io.File;
 import java.lang.reflect.Modifier;
@@ -25,10 +25,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.Level;
-
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+
+import org.apache.logging.log4j.Level;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;

@@ -2,6 +2,7 @@ package jas.modern.spawner;
 
 import jas.modern.BiomeBlacklist;
 import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo.ChunkStat;
 import jas.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
@@ -46,7 +47,7 @@ public class SpawnerTicker {
 			}
 		}
 		/** TODO: Perform Updates to WorldSettings Here */
-		JustAnotherSpawner.worldSettings().applyChanges();
+		MVELProfile.worldSettings().applyChanges();
 	}
 
 	private void performSpawningInWorld(WorldServer world) {
@@ -54,7 +55,7 @@ public class SpawnerTicker {
 				|| world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
 
 			List<CreatureType> readyCreatureTypes = new ArrayList<CreatureType>();
-			Iterator<CreatureType> typeIterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+			Iterator<CreatureType> typeIterator = MVELProfile.worldSettings().creatureTypeRegistry()
 					.getCreatureTypes();
 			while (typeIterator.hasNext()) {
 				CreatureType creatureType = typeIterator.next();
@@ -78,9 +79,9 @@ public class SpawnerTicker {
 
 			for (CreatureType creatureType : readyCreatureTypes) {
 				if (creatureType.isReady(world)) {
-					LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings()
+					LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings()
 							.livingHandlerRegistry();
-					BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings()
+					BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings()
 							.biomeSpawnListRegistry();
 					CustomSpawner.spawnCreaturesInChunks(world, livingHandlerRegistry, biomeSpawnListRegistry,
 							creatureType, blacklist, countInfo);

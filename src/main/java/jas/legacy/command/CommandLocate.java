@@ -1,9 +1,9 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.CustomSpawner;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,11 +57,11 @@ public class CommandLocate extends CommandJasBase {
         Iterator<Entity> iterator = CustomSpawner.getLoadedEntities(targetPlayer.worldObj).iterator();
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
-            LivingGroupRegistry groupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
+            LivingGroupRegistry groupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
             ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
                     .get(entity.getClass()));
             for (String groupID : groupIDs) {
-                LivingHandler handler = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry()
+                LivingHandler handler = TAGProfile.worldSettings().livingHandlerRegistry()
                         .getLivingHandler(groupID);
                 if (handler != null && (entityTarget.equals("*") || handler.creatureTypeID.equals(entityTarget))
                         || entityTarget.equals(EntityList.classToStringMapping.get(entity.getClass()))) {

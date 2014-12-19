@@ -1,7 +1,7 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.GsonHelper;
-import jas.legacy.JASLog;
+import jas.modern.GsonHelper;
+import jas.modern.JASLog;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -14,7 +14,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 

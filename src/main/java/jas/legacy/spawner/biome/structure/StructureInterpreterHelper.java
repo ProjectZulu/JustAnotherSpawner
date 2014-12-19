@@ -1,6 +1,6 @@
 package jas.legacy.spawner.biome.structure;
 
-import jas.legacy.ReflectionHelper;
+import jas.modern.ReflectionHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;

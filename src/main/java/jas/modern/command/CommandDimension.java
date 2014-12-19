@@ -1,28 +1,10 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
-import jas.modern.spawner.CountInfo;
-import jas.modern.spawner.CustomSpawner;
-import jas.modern.spawner.EntityCounter;
-import jas.modern.spawner.EntityCounter.CountableInt;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry;
-import jas.modern.spawner.creature.handler.LivingHandler;
-import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
-import jas.modern.spawner.creature.type.CreatureType;
-
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.Map.Entry;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
 
 public class CommandDimension extends CommandJasBase {

@@ -1,9 +1,9 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
 import jas.legacy.spawner.creature.handler.LivingHelper;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +78,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
     }
 
     private boolean canEntityDespawnHere(EntityLiving entity) {
-        LivingHandlerRegistry livingHandlerRegistry = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry();
+        LivingHandlerRegistry livingHandlerRegistry = TAGProfile.worldSettings().livingHandlerRegistry();
         List<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers(entity.getClass());
         if (!livingHandlers.isEmpty()) {
             for (LivingHandler livingHandler : livingHandlers) {

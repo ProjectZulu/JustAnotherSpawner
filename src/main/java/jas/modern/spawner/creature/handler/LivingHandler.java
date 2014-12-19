@@ -5,6 +5,7 @@ import jas.modern.EntityProperties;
 import jas.modern.JASLog;
 import jas.modern.JustAnotherSpawner;
 import jas.modern.MVELHelper;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.Tags;
 import jas.modern.spawner.creature.entry.SpawnListEntry;
@@ -181,7 +182,7 @@ public class LivingHandler {
 				return;
 			}
 
-			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : JustAnotherSpawner.worldSettings()
+			Integer maxRange = maxDespawnRange.isPresent() ? maxDespawnRange.get() : MVELProfile.worldSettings()
 					.worldProperties().getGlobal().maxDespawnDist;
 
 			boolean instantDespawn = playerDistance > maxRange * maxRange;
@@ -193,9 +194,9 @@ public class LivingHandler {
 			if (instantDespawn) {
 				entity.setDead();
 			} else {
-				Integer minRange = minDespawnDistance.isPresent() ? minDespawnDistance.get() : JustAnotherSpawner
+				Integer minRange = minDespawnDistance.isPresent() ? minDespawnDistance.get() : MVELProfile
 						.worldSettings().worldProperties().getGlobal().despawnDist;
-				Integer minAge = despawnAge.isPresent() ? despawnAge.get() : JustAnotherSpawner.worldSettings()
+				Integer minAge = despawnAge.isPresent() ? despawnAge.get() : MVELProfile.worldSettings()
 						.worldProperties().getGlobal().minDespawnTime;
 				boolean isOfAge = entityProps.getAge() > minAge;
 				boolean validDistance = playerDistance > minRange * minRange;

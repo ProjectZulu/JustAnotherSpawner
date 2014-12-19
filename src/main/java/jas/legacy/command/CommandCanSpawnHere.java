@@ -1,7 +1,5 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
-import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
 import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.biome.structure.StructureHandler;
 import jas.legacy.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -10,6 +8,7 @@ import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHelper;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +18,6 @@ import java.util.List;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
@@ -70,16 +68,16 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
         EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-        LivingGroupRegistry groupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
+        LivingGroupRegistry groupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
         ImmutableCollection<String> groupIDs = groupRegistry.getGroupsWithEntity(groupRegistry.EntityClasstoJASName
                 .get(entity.getClass()));
         if(groupIDs.isEmpty()) {
             throw new WrongUsageException("commands.jascanspawnhere.entityhasnogroups", new Object[0]);
         }
         for (String groupID : groupIDs) {
-            LivingHandler livingHandler = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry()
+            LivingHandler livingHandler = TAGProfile.worldSettings().livingHandlerRegistry()
                     .getLivingHandler(groupID);
-            CreatureType livingType = LegacyJustAnotherSpawner.worldSettings().creatureTypeRegistry()
+            CreatureType livingType = TAGProfile.worldSettings().creatureTypeRegistry()
                     .getCreatureType(livingHandler.creatureTypeID);
             if (livingType == null) {
                 commandSender.addChatMessage(new ChatComponentText(String.format(
@@ -145,7 +143,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     }
 
 	private boolean isValidEntityName(String entityName) {
-		LivingGroupRegistry livingGroupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
+		LivingGroupRegistry livingGroupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
 		for (String mapping : livingGroupRegistry.JASNametoEntityClass.keySet()) {
 			if (entityName.equals(mapping)) {
 				return true;
@@ -157,7 +155,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) {
         EntityLiving entity;
         try {
-        	LivingGroupRegistry livingGroupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
+        	LivingGroupRegistry livingGroupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
         	
             @SuppressWarnings("unchecked")
             Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(entityName);
@@ -173,7 +171,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(String livingGroupID, EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (StructureHandler StructureHandler : LegacyJustAnotherSpawner.worldSettings().structureHandlerRegistry()
+        for (StructureHandler StructureHandler : TAGProfile.worldSettings().structureHandlerRegistry()
                 .handlers()) {
             structureName = StructureHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
@@ -198,13 +196,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
         BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
-        BiomeSpawnListRegistry biomeSpawnListRegistry = LegacyJustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+        BiomeSpawnListRegistry biomeSpawnListRegistry = TAGProfile.worldSettings().biomeSpawnListRegistry();
         for (SpawnListEntry spawnListEntry : biomeSpawnListRegistry.getSpawnListFor(livingType.typeID, packageBiome)) {
             if (spawnListEntry.livingGroupID.equals(livingGroupID)) {
                 matchingSpawnListEntries.add(spawnListEntry);
             }
         }
-        String shortName = LegacyJustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping().get(packageBiome);
+        String shortName = TAGProfile.worldSettings().biomeGroupRegistry().biomePckgToMapping().get(packageBiome);
         return shortName == null ? biome.biomeName : shortName;
     }
 

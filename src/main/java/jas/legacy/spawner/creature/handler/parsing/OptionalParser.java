@@ -1,9 +1,8 @@
 package jas.legacy.spawner.creature.handler.parsing;
 
-import jas.legacy.JASLog;
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.creature.handler.parsing.keys.Key;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
+import jas.modern.JASLog;
 
 import java.util.HashMap;
 

@@ -1,7 +1,7 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.JASLog;
-import jas.legacy.ReflectionHelper;
+import jas.modern.JASLog;
+import jas.modern.ReflectionHelper;
 
 import java.lang.reflect.InvocationTargetException;
 

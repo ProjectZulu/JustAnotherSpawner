@@ -2,6 +2,7 @@ package jas.legacy;
 
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
+import jas.modern.profile.TAGProfile;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class EntityDespawner {
     public void despawner(LivingUpdateEvent event) {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
-            LivingHandlerRegistry livingHandlerRegistry = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry();
+            LivingHandlerRegistry livingHandlerRegistry = TAGProfile.worldSettings().livingHandlerRegistry();
             @SuppressWarnings("unchecked")
             List<LivingHandler> livingHandlers = livingHandlerRegistry
                     .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());

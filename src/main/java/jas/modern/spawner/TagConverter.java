@@ -3,8 +3,8 @@ package jas.modern.spawner;
 import jas.modern.spawner.creature.handler.parsing.ParsingHelper;
 import jas.modern.spawner.creature.handler.parsing.keys.Key;
 import jas.modern.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import com.google.common.base.Optional;
 

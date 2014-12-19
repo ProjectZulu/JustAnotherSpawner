@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.creature.handler.LivingHandler;
@@ -80,7 +80,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
     }
 
     private boolean canEntityDespawnHere(EntityLiving entity) {
-        LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+        LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
         List<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers(entity.getClass());
         CountInfo info = CustomSpawner.determineCountInfo(entity.worldObj);
         if (!livingHandlers.isEmpty()) {

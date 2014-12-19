@@ -1,23 +1,20 @@
 package jas.modern.spawner.creature.entry;
 
 import jas.modern.DefaultProps;
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.creature.handler.LivingHandler;
-import jas.modern.spawner.creature.handler.parsing.keys.Key;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.io.Serializable;
 import java.util.Locale;
 
-import org.mvel2.MVEL;
-
-import com.google.common.base.Optional;
-
 import net.minecraft.util.WeightedRandom;
 import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
+
+import org.mvel2.MVEL;
+
+import com.google.common.base.Optional;
 
 /**
  * Every SpawnListEntry is assumed Unique for a EntityLivingClass given biome Spawn.
@@ -70,7 +67,7 @@ public class SpawnListEntry extends WeightedRandom.Item {
 
     // TODO: Remove This. Hidden static dependency bad. Unnecessary. Alternatively, pass in livingHandlerRegistry
     public LivingHandler getLivingHandler() {
-        return JustAnotherSpawner.worldSettings().livingHandlerRegistry().getLivingHandler(livingGroupID);
+        return MVELProfile.worldSettings().livingHandlerRegistry().getLivingHandler(livingGroupID);
     }
 
     public static void setupConfigCategory(Configuration config) {

@@ -1,13 +1,12 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.FileUtilities;
-import jas.legacy.GsonHelper;
-import jas.legacy.ImportedSpawnList;
-import jas.legacy.JASLog;
-import jas.legacy.WorldProperties;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 import jas.legacy.spawner.creature.type.CreatureType;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.legacy.world.WorldProperties;
+import jas.modern.FileUtilities;
+import jas.modern.GsonHelper;
+import jas.modern.ImportedSpawnList;
 
 import java.io.File;
 import java.lang.reflect.Type;

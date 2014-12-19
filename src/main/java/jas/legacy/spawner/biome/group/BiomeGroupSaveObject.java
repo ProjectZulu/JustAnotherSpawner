@@ -1,8 +1,8 @@
 package jas.legacy.spawner.biome.group;
 
-import jas.legacy.DefaultProps;
-import jas.legacy.GsonHelper;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
+import jas.modern.DefaultProps;
+import jas.modern.GsonHelper;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -22,7 +22,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
 
 public class BiomeGroupSaveObject {
     public final String fileVersion = "1.0";

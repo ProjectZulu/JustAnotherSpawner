@@ -1,9 +1,5 @@
 package jas.modern.spawner.creature.entry;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import jas.modern.spawner.creature.handler.LivingHandlerBuilder;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import com.google.common.base.Optional;

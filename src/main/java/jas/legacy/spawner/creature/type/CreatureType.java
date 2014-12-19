@@ -1,11 +1,11 @@
 package jas.legacy.spawner.creature.type;
 
-import jas.legacy.DefaultProps;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
 import jas.legacy.spawner.creature.handler.parsing.keys.Key;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsCreatureTypeSpawn;
+import jas.modern.DefaultProps;
 
 import java.io.File;
 import java.util.Map;

@@ -2,6 +2,7 @@ package jas.modern.command;
 
 import jas.modern.JustAnotherSpawner;
 import jas.modern.modification.ModLoadConfig;
+import jas.modern.profile.MVELProfile;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class CommandLoadConfig extends CommandJasBase {
         if (stringArgs.length > 0) {
             throw new WrongUsageException("commands.jasloadconfig.usage", new Object[0]);
         }
-        JustAnotherSpawner.worldSettings().addChange(new ModLoadConfig(JustAnotherSpawner.getModConfigDirectory(),
+        MVELProfile.worldSettings().addChange(new ModLoadConfig(JustAnotherSpawner.getModConfigDirectory(),
                 MinecraftServer.getServer().worldServers[0]));
     }
 

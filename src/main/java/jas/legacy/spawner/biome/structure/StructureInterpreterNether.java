@@ -1,7 +1,7 @@
 package jas.legacy.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
-import jas.legacy.ReflectionHelper;
+import jas.modern.ReflectionHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,8 +12,8 @@ import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
+import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 

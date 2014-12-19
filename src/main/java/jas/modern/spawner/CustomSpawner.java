@@ -3,12 +3,11 @@ package jas.modern.spawner;
 import jas.modern.BiomeBlacklist;
 import jas.modern.JASLog;
 import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo.ChunkStat;
-import jas.modern.spawner.EntityCounter.CountableInt;
 import jas.modern.spawner.biome.group.BiomeHelper;
 import jas.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.modern.spawner.creature.entry.SpawnListEntry;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry;
 import jas.modern.spawner.creature.handler.LivingHandler;
 import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.modern.spawner.creature.type.CreatureType;
@@ -18,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -89,7 +87,7 @@ public class CustomSpawner {
 								continue;
 							}
 							EntityLiving entity = (EntityLiving) object;
-							List<LivingHandler> livingHandlers = JustAnotherSpawner.worldSettings()
+							List<LivingHandler> livingHandlers = MVELProfile.worldSettings()
 									.livingHandlerRegistry()
 									.getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
 							Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
@@ -118,7 +116,7 @@ public class CustomSpawner {
 				continue;
 			}
 			@SuppressWarnings("unchecked")
-			List<LivingHandler> livingHandlers = JustAnotherSpawner.worldSettings().livingHandlerRegistry()
+			List<LivingHandler> livingHandlers = MVELProfile.worldSettings().livingHandlerRegistry()
 					.getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
 			Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
 			creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
@@ -332,7 +330,7 @@ public class CustomSpawner {
 			int l1 = j1;
 			int i2 = k1;
 			int topHeight = world.getTopSolidOrLiquidBlock(j1, k1);
-			BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+			BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings().biomeSpawnListRegistry();
 			SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
 					topHeight, k1);
 			IEntityLivingData entitylivingdata = null;

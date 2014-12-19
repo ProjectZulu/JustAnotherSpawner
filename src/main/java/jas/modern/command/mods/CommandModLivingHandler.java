@@ -1,10 +1,10 @@
 package jas.modern.command.mods;
 
-import jas.modern.JustAnotherSpawner;
 import jas.modern.command.CommandJasBase;
 import jas.modern.modification.ModAddLivingHandler;
 import jas.modern.modification.ModRemoveLivingHandler;
 import jas.modern.modification.ModUpdateLivingHandler;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.creature.handler.LivingHandler;
 import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.modern.spawner.creature.type.CreatureType;
@@ -69,16 +69,16 @@ public class CommandModLivingHandler extends CommandJasBase {
 		if (operation == Ops.NONE) {
 			throw new WrongUsageException("commands.modlivinghandler.livinggroupoperatorundefined", new Object[0]);
 		} else if (operation == Ops.REMOVE) {
-			JustAnotherSpawner.worldSettings().addChange(new ModRemoveLivingHandler(handlerId));
+			MVELProfile.worldSettings().addChange(new ModRemoveLivingHandler(handlerId));
 		} else {
 			String creatureTypeID = stringArgs[1];
 			boolean shouldSpawn = Boolean.parseBoolean(stringArgs[1]);
 			String optionalParameters = stringArgs[1];
 			if (operation == Ops.ADD) {
-				JustAnotherSpawner.worldSettings().addChange(
+				MVELProfile.worldSettings().addChange(
 						new ModAddLivingHandler(handlerId, creatureTypeID, shouldSpawn, optionalParameters));
 			} else if (operation == Ops.UPDATE) {
-				JustAnotherSpawner.worldSettings().addChange(
+				MVELProfile.worldSettings().addChange(
 						new ModUpdateLivingHandler(handlerId, creatureTypeID, shouldSpawn, optionalParameters));
 			}
 		}
@@ -100,7 +100,7 @@ public class CommandModLivingHandler extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 2) {
-			LivingHandlerRegistry registry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+			LivingHandlerRegistry registry = MVELProfile.worldSettings().livingHandlerRegistry();
 			for (LivingHandler handler : registry.getLivingHandlers()) {
 				String iD = handler.livingID;
 				if (iD.contains(" ")) {
@@ -111,7 +111,7 @@ public class CommandModLivingHandler extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else {
-			CreatureTypeRegistry registry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
+			CreatureTypeRegistry registry = MVELProfile.worldSettings().creatureTypeRegistry();
 			Iterator<CreatureType> iterator = registry.getCreatureTypes();
 			while (iterator.hasNext()) {
 				CreatureType type = iterator.next();

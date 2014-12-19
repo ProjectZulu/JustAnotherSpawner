@@ -2,7 +2,6 @@ package jas.modern.spawner.creature.handler;
 
 import jas.modern.DefaultProps;
 import jas.modern.GsonHelper;
-import jas.modern.JASLog;
 import jas.modern.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
 
 import java.io.File;
@@ -26,7 +25,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
 
 public class LivingGroupSaveObject {
     public final TreeMap<String, String> fmlToJASName;

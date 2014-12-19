@@ -1,9 +1,6 @@
 package jas.modern.spawner;
 
-import jas.modern.JustAnotherSpawner;
-
-import java.util.List;
-
+import jas.modern.profile.MVELProfile;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -104,7 +101,7 @@ public class TagsObjective {
 		for (int i = 0; i < world.loadedEntityList.size(); ++i) {
 			Entity entity = (Entity) world.loadedEntityList.get(i);
 			if (entity.isEntityAlive()) {
-				String entityName = JustAnotherSpawner.worldSettings().livingGroupRegistry().EntityClasstoJASName
+				String entityName = MVELProfile.worldSettings().livingGroupRegistry().EntityClasstoJASName
 						.get(entity.getClass());
 				for (String searchName : searchNames) {
 					if (!searchName.trim().equals("") && searchName.equalsIgnoreCase(entityName)) {

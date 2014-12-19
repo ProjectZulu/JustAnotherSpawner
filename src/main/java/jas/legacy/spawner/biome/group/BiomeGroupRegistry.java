@@ -1,15 +1,15 @@
 package jas.legacy.spawner.biome.group;
 
-import jas.legacy.FileUtilities;
-import jas.legacy.GsonHelper;
-import jas.legacy.JASLog;
-import jas.legacy.TopologicalSort;
-import jas.legacy.TopologicalSortingException;
-import jas.legacy.WorldProperties;
-import jas.legacy.TopologicalSort.DirectedGraph;
 import jas.legacy.math.SetAlgebra;
 import jas.legacy.math.SetAlgebra.OPERATION;
 import jas.legacy.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
+import jas.legacy.world.WorldProperties;
+import jas.modern.FileUtilities;
+import jas.modern.GsonHelper;
+import jas.modern.JASLog;
+import jas.modern.TopologicalSort;
+import jas.modern.TopologicalSort.DirectedGraph;
+import jas.modern.TopologicalSortingException;
 
 import java.io.File;
 import java.util.ArrayList;

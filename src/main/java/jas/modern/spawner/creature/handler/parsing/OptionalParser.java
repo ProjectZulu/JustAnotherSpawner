@@ -1,7 +1,6 @@
 package jas.modern.spawner.creature.handler.parsing;
 
 import jas.modern.JASLog;
-import jas.modern.JustAnotherSpawner;
 import jas.modern.spawner.creature.handler.parsing.keys.Key;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 

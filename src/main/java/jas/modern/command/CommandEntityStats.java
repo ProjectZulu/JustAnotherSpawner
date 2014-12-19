@@ -3,21 +3,18 @@ package jas.modern.command;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.sourceforge.jeval.function.math.MathFunctions;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 
 public class CommandEntityStats extends CommandJasBase {
 

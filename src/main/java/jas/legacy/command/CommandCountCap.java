@@ -1,11 +1,12 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.CustomSpawner;
-import jas.legacy.spawner.EntityCounter;
 import jas.legacy.spawner.CustomSpawner.ChunkStat;
+import jas.legacy.spawner.EntityCounter;
 import jas.legacy.spawner.EntityCounter.CountableInt;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,12 +73,12 @@ public class CommandCountCap extends CommandJasBase {
             }
             World world = worlds[i];
             HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
-                    world, LegacyJustAnotherSpawner.globalSettings().chunkSpawnDistance);
+                    world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
             EntityCounter creatureTypeCount = new EntityCounter();
             EntityCounter creatureCount = new EntityCounter();
             CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
 
-            Iterator<CreatureType> iterator = LegacyJustAnotherSpawner.worldSettings().creatureTypeRegistry()
+            Iterator<CreatureType> iterator = TAGProfile.worldSettings().creatureTypeRegistry()
                     .getCreatureTypes();
             StringBuilder worldTypeContents = new StringBuilder();
             worldTypeContents.append("Results World (");

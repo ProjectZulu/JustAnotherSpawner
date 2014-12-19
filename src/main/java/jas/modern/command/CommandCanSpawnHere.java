@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.Tags;
@@ -71,15 +71,15 @@ public class CommandCanSpawnHere extends CommandJasBase {
         }
 
 		EntityLiving entity = getTargetEntity(entityName, targetPlayer);
-		LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-		LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+		LivingGroupRegistry groupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
+		LivingHandlerRegistry handlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
 		List<LivingHandler> livingHandlers = handlerRegistry.getLivingHandlers(groupRegistry.EntityClasstoJASName
 				.get(entity.getClass()));
 		if (livingHandlers.isEmpty()) {
 			throw new WrongUsageException("commands.jascanspawnhere.entityhasnogroups", new Object[0]);
 		}
 		for (LivingHandler livingHandler : livingHandlers) {
-			CreatureType livingType = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+			CreatureType livingType = MVELProfile.worldSettings().creatureTypeRegistry()
 					.getCreatureType(livingHandler.creatureTypeID);
 			if (livingType == null) {
 				commandSender.addChatMessage(new ChatComponentText(String.format(
@@ -148,7 +148,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 	}
 
 	private boolean isValidEntityName(String entityName) {
-		LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+		LivingGroupRegistry livingGroupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
 		for (String mapping : livingGroupRegistry.JASNametoEntityClass.keySet()) {
 			if (entityName.equals(mapping)) {
 				return true;
@@ -160,7 +160,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) {
         EntityLiving entity;
         try {
-        	LivingGroupRegistry livingGroupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
+        	LivingGroupRegistry livingGroupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
         	
             @SuppressWarnings("unchecked")
             Class<? extends EntityLiving> entityClass = livingGroupRegistry.JASNametoEntityClass.get(entityName);
@@ -176,7 +176,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
     private String getMatchingStructureSpawnListEntries(String livingGroupID, EntityLiving entity,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
         String structureName;
-        for (StructureHandler StructureHandler : JustAnotherSpawner.worldSettings().structureHandlerRegistry()
+        for (StructureHandler StructureHandler : MVELProfile.worldSettings().structureHandlerRegistry()
                 .handlers()) {
             structureName = StructureHandler.getStructure(entity.worldObj, (int) entity.posX, (int) entity.posY,
                     (int) entity.posZ);
@@ -201,13 +201,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
         BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
-        BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings().biomeSpawnListRegistry();
+        BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings().biomeSpawnListRegistry();
         for (SpawnListEntry spawnListEntry : biomeSpawnListRegistry.getSpawnListFor(livingType.typeID, packageBiome)) {
             if (spawnListEntry.livingGroupID.equals(livingGroupID)) {
                 matchingSpawnListEntries.add(spawnListEntry);
             }
         }
-        String shortName = JustAnotherSpawner.worldSettings().biomeGroupRegistry().biomePckgToMapping().get(packageBiome);
+        String shortName = MVELProfile.worldSettings().biomeGroupRegistry().biomePckgToMapping().get(packageBiome);
         return shortName == null ? biome.biomeName : shortName;
     }
 

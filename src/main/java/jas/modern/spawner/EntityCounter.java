@@ -1,6 +1,5 @@
 package jas.modern.spawner;
 
-import java.util.Enumeration;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 

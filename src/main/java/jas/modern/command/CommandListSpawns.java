@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.biome.group.BiomeHelper;
 import jas.modern.spawner.biome.structure.StructureHandler;
 import jas.modern.spawner.creature.entry.BiomeSpawnListRegistry;
@@ -84,7 +84,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private String getTargetAtPlayer(EntityPlayerMP player) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = MVELProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
@@ -120,7 +120,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<CreatureType> iterator = JustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureTypes();
+        Iterator<CreatureType> iterator = MVELProfile.worldSettings().creatureTypeRegistry().getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
             if (entityCategName.equals("*") || entityType.typeID.equalsIgnoreCase(entityCategName)) {
@@ -131,7 +131,7 @@ public class CommandListSpawns extends CommandJasBase {
                     biomeContents.append(", ");
                 }
                 biomeContents.append("\u00A71").append(entityType.typeID).append("\u00A7r| ");
-                BiomeSpawnListRegistry biomeSpawnListRegistry = JustAnotherSpawner.worldSettings()
+                BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings()
                         .biomeSpawnListRegistry();
                 Iterator<SpawnListEntry> spawnListIterator = biomeSpawnListRegistry.getSpawnListFor(entityType.typeID,
                         biomeStructureName).iterator();
@@ -165,7 +165,7 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = MVELProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler type = iterator.next();
@@ -187,7 +187,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = MVELProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
@@ -268,7 +268,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addStructureNames(List<String> tabCompletions) {
-        Iterator<StructureHandler> iterator = JustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = MVELProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();

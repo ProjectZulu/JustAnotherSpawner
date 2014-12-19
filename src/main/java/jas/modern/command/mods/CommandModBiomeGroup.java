@@ -1,11 +1,10 @@
 package jas.modern.command.mods;
 
-import jas.modern.JustAnotherSpawner;
 import jas.modern.command.CommandJasBase;
 import jas.modern.modification.ModAddBiomeGroup;
 import jas.modern.modification.ModRemoveBiomeGroup;
-import jas.modern.modification.ModSaveConfig;
 import jas.modern.modification.ModUpdateBiomeGroup;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.biome.group.BiomeGroupRegistry;
 
 import java.util.ArrayList;
@@ -13,7 +12,6 @@ import java.util.List;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.server.MinecraftServer;
 
 public class CommandModBiomeGroup extends CommandJasBase {
 
@@ -75,13 +73,13 @@ public class CommandModBiomeGroup extends CommandJasBase {
 		if (biomeGroupID != null && !biomeGroupID.isEmpty()) {
 			switch (operation) {
 			case ADD:
-				JustAnotherSpawner.worldSettings().addChange(new ModAddBiomeGroup(biomeGroupID, groupContents));
+				MVELProfile.worldSettings().addChange(new ModAddBiomeGroup(biomeGroupID, groupContents));
 				break;
 			case REMOVE:
-				JustAnotherSpawner.worldSettings().addChange(new ModRemoveBiomeGroup(biomeGroupID));
+				MVELProfile.worldSettings().addChange(new ModRemoveBiomeGroup(biomeGroupID));
 				break;
 			case UPDATE:
-				JustAnotherSpawner.worldSettings().addChange(new ModUpdateBiomeGroup(biomeGroupID, groupContents));
+				MVELProfile.worldSettings().addChange(new ModUpdateBiomeGroup(biomeGroupID, groupContents));
 				break;
 			case NONE:
 				throw new WrongUsageException("commands.modbiomegroup.biomegroupoperatorundefined", new Object[0]);
@@ -107,7 +105,7 @@ public class CommandModBiomeGroup extends CommandJasBase {
 			}
 			return tabCompletions;
 		} else if (stringArgs.length == 2) {
-			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+			BiomeGroupRegistry registry = MVELProfile.worldSettings().biomeGroupRegistry();
 			for (String iD : registry.iDToGroup().keySet()) {
 				if (iD.contains(" ")) {
 					tabCompletions.add("\"".concat(iD).concat("\""));
@@ -117,7 +115,7 @@ public class CommandModBiomeGroup extends CommandJasBase {
 			}
 			return tabCompletions; // BiomeGroupID can be anything when adding
 		} else {
-			BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+			BiomeGroupRegistry registry = MVELProfile.worldSettings().biomeGroupRegistry();
 			for (String mapping : registry.biomeMappingToPckg().keySet()) {
 				if (mapping.contains(" ")) {
 					tabCompletions.add("\"".concat(mapping).concat("\""));

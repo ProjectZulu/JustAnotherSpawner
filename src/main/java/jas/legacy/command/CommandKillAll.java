@@ -1,11 +1,11 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.EntityCounter;
 import jas.legacy.spawner.EntityCounter.CountableInt;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,8 +62,8 @@ public class CommandKillAll extends CommandJasBase {
             if (!(entity instanceof EntityLiving)) {
                 continue;
             }
-            LivingGroupRegistry groupRegistry = LegacyJustAnotherSpawner.worldSettings().livingGroupRegistry();
-            List<LivingHandler> handlers = LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry()
+            LivingGroupRegistry groupRegistry = TAGProfile.worldSettings().livingGroupRegistry();
+            List<LivingHandler> handlers = TAGProfile.worldSettings().livingHandlerRegistry()
                     .getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
             if (handlers.isEmpty()) {
                 if (entityCategName.equals("*") && isEntityFiltered(entity, entityFilter, groupRegistry)) {

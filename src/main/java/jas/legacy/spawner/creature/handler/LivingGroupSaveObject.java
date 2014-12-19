@@ -1,9 +1,8 @@
 package jas.legacy.spawner.creature.handler;
 
-import jas.legacy.DefaultProps;
-import jas.legacy.GsonHelper;
-import jas.legacy.JASLog;
 import jas.legacy.spawner.creature.handler.LivingGroupRegistry.LivingGroup;
+import jas.modern.DefaultProps;
+import jas.modern.GsonHelper;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -26,7 +25,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.SerializedName;
 
 public class LivingGroupSaveObject {
     public final TreeMap<String, String> fmlToJASName;

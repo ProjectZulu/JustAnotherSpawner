@@ -1,15 +1,14 @@
 package jas.legacy.spawner.creature.handler.parsing.keys;
 
-import jas.legacy.JASLog;
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.biome.group.BiomeGroupRegistry;
 import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.creature.handler.parsing.ParsingHelper;
 import jas.legacy.spawner.creature.handler.parsing.TypeValuePair;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.modern.JASLog;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 import net.minecraft.entity.EntityLiving;
@@ -153,7 +152,7 @@ public class KeyParserBiome extends KeyParserBase {
                 biomeName = biomeName.substring(2);
             }
 
-            BiomeGroupRegistry registry = LegacyJustAnotherSpawner.worldSettings().biomeGroupRegistry();
+            BiomeGroupRegistry registry = TAGProfile.worldSettings().biomeGroupRegistry();
             ImmutableMultimap<String, String> packgToBiomeGroupID = ImmutableMultimap.of();
             if (type == BiomeType.GROUP) {
                 // Cache Group as our only current public access is a copy method. This is already changed in DEV14

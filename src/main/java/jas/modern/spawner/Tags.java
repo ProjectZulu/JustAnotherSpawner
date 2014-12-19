@@ -2,7 +2,7 @@ package jas.modern.spawner;
 
 import jas.api.ITameable;
 import jas.modern.JASLog;
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.TagsUtility.Conditional;
 import jas.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.modern.spawner.biome.group.BiomeHelper;
@@ -245,7 +245,7 @@ public class Tags {
 					type = "GROUP";
 				}
 				BiomeGenBase biome = wrld.biomeAt(xCoord, zCoord);
-				BiomeGroupRegistry registry = JustAnotherSpawner.worldSettings().biomeGroupRegistry();
+				BiomeGroupRegistry registry = MVELProfile.worldSettings().biomeGroupRegistry();
 				if (type.equals("GROUP")) {
 					ImmutableMultimap<String, String> packgToBiomeGroupID = registry.packgNameToGroupIDs();
 					if (packgToBiomeGroupID.get(BiomeHelper.getPackageName(biome)).contains(biomeName.substring(2))) {

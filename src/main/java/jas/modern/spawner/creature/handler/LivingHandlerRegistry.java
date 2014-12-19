@@ -27,10 +27,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
-import org.mvel2.MVEL;
-
 import com.google.common.base.CharMatcher;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSetMultimap;

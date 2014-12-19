@@ -1,6 +1,6 @@
 package jas.modern.command;
 
-import jas.modern.JustAnotherSpawner;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.CountInfo;
 import jas.modern.spawner.CustomSpawner;
 import jas.modern.spawner.EntityCounter;
@@ -23,8 +23,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
-
-import com.google.common.collect.ImmutableCollection;
 
 public class CommandComposition extends CommandJasBase {
     public String getCommandName() {
@@ -61,7 +59,7 @@ public class CommandComposition extends CommandJasBase {
         StringBuilder countedContents = new StringBuilder();
 
         boolean foundMatch = false;
-        Iterator<CreatureType> creatureTypes = JustAnotherSpawner.worldSettings().creatureTypeRegistry()
+        Iterator<CreatureType> creatureTypes = MVELProfile.worldSettings().creatureTypeRegistry()
                 .getCreatureTypes();
         while (creatureTypes.hasNext()) {
             CreatureType creatureType = creatureTypes.next();
@@ -77,8 +75,8 @@ public class CommandComposition extends CommandJasBase {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
                     }
-                    LivingGroupRegistry groupRegistry = JustAnotherSpawner.worldSettings().livingGroupRegistry();
-                    LivingHandlerRegistry handlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+                    LivingGroupRegistry groupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
+                    LivingHandlerRegistry handlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
 					List<LivingHandler> livingHandlers = handlerRegistry
 							.getLivingHandlers(groupRegistry.EntityClasstoJASName.get(entity.getClass()));
 

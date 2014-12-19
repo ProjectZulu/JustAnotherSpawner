@@ -1,11 +1,11 @@
 package jas.legacy.spawner.biome.structure;
 
-import jas.legacy.GsonHelper;
 import jas.legacy.spawner.creature.entry.SpawnListEntry;
 import jas.legacy.spawner.creature.entry.SpawnListEntryBuilder;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.LivingHandlerRegistry;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.modern.GsonHelper;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

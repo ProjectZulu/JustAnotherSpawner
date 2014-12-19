@@ -4,9 +4,6 @@ import jas.modern.GsonHelper;
 import jas.modern.JASLog;
 import jas.modern.spawner.TagConverter;
 import jas.modern.spawner.creature.handler.parsing.keys.Key;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsDespawning;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsSpawning;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.lang.reflect.Type;

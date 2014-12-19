@@ -2,14 +2,13 @@ package jas.modern.spawner.creature.handler.parsing.keys;
 
 import jas.modern.spawner.creature.handler.parsing.OptionalParser;
 import jas.modern.spawner.creature.handler.parsing.TypeValuePair;
-import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
+import jas.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;

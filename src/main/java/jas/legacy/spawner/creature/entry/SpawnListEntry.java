@@ -1,11 +1,11 @@
 package jas.legacy.spawner.creature.entry;
 
-import jas.legacy.DefaultProps;
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.creature.handler.LivingHandler;
 import jas.legacy.spawner.creature.handler.parsing.keys.Key;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsPostSpawning;
 import jas.legacy.spawner.creature.handler.parsing.settings.OptionalSettingsSpawnListSpawning;
+import jas.modern.DefaultProps;
+import jas.modern.profile.TAGProfile;
 
 import java.util.Locale;
 
@@ -67,7 +67,7 @@ public class SpawnListEntry extends WeightedRandom.Item {
 
     // TODO: Remove This. Hidden static dependency bad. Unnecessary. Alternatively, pass in livingHandlerRegistry
     public LivingHandler getLivingHandler() {
-        return LegacyJustAnotherSpawner.worldSettings().livingHandlerRegistry().getLivingHandler(livingGroupID);
+        return TAGProfile.worldSettings().livingHandlerRegistry().getLivingHandler(livingGroupID);
     }
 
     public static void setupConfigCategory(Configuration config) {

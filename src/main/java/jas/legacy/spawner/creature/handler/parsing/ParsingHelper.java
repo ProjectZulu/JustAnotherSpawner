@@ -1,7 +1,7 @@
 package jas.legacy.spawner.creature.handler.parsing;
 
-import jas.legacy.JASLog;
 import jas.legacy.spawner.creature.type.CreatureTypeRegistry;
+import jas.modern.JASLog;
 
 public class ParsingHelper {
 

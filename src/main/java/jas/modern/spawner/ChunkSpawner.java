@@ -2,7 +2,7 @@ package jas.modern.spawner;
 
 import jas.modern.BiomeBlacklist;
 import jas.modern.JustAnotherSpawner;
-import jas.modern.spawner.creature.handler.LivingGroupRegistry;
+import jas.modern.profile.MVELProfile;
 import jas.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.modern.spawner.creature.type.CreatureType;
 import jas.modern.spawner.creature.type.CreatureTypeRegistry;
@@ -11,8 +11,8 @@ import java.util.Iterator;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.eventhandler.Event.Result;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class ChunkSpawner {
 
@@ -30,11 +30,11 @@ public class ChunkSpawner {
                 && event.world.getGameRules().getGameRuleBooleanValue("doCustomMobSpawning")) {
             int k = event.chunkX * 16;
             int l = event.chunkZ * 16;
-            if (JustAnotherSpawner.worldSettings() == null
-                    || JustAnotherSpawner.worldSettings().livingHandlerRegistry() == null) {
+            if (MVELProfile.worldSettings() == null
+                    || MVELProfile.worldSettings().livingHandlerRegistry() == null) {
                 return;
             }
-            CreatureTypeRegistry creatureTypeRegistry = JustAnotherSpawner.worldSettings().creatureTypeRegistry();
+            CreatureTypeRegistry creatureTypeRegistry = MVELProfile.worldSettings().creatureTypeRegistry();
             Iterator<CreatureType> iterator = creatureTypeRegistry.getCreatureTypes();
             BiomeGenBase spawnBiome = event.world.getBiomeGenForCoords(k + 16, l + 16);
 
@@ -47,7 +47,7 @@ public class ChunkSpawner {
             while (iterator.hasNext()) {
                 CreatureType creatureType = iterator.next();
                 if (creatureType.chunkSpawnChance > 0.0f) {
-                    LivingHandlerRegistry livingHandlerRegistry = JustAnotherSpawner.worldSettings().livingHandlerRegistry();
+                    LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
                     CustomSpawner.performWorldGenSpawning(event.world, creatureType, livingHandlerRegistry, spawnBiome,
                             k + 8, l + 8, 16, 16, event.rand);
                 }

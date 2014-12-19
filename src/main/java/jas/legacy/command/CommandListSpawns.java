@@ -1,11 +1,11 @@
 package jas.legacy.command;
 
-import jas.legacy.LegacyJustAnotherSpawner;
 import jas.legacy.spawner.biome.group.BiomeHelper;
 import jas.legacy.spawner.biome.structure.StructureHandler;
 import jas.legacy.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.legacy.spawner.creature.entry.SpawnListEntry;
 import jas.legacy.spawner.creature.type.CreatureType;
+import jas.modern.profile.TAGProfile;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -84,7 +84,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private String getTargetAtPlayer(EntityPlayerMP player) {
-        Iterator<StructureHandler> iterator = LegacyJustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = TAGProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
@@ -120,7 +120,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<CreatureType> iterator = LegacyJustAnotherSpawner.worldSettings().creatureTypeRegistry().getCreatureTypes();
+        Iterator<CreatureType> iterator = TAGProfile.worldSettings().creatureTypeRegistry().getCreatureTypes();
         while (iterator.hasNext()) {
             CreatureType entityType = iterator.next();
             if (entityCategName.equals("*") || entityType.typeID.equalsIgnoreCase(entityCategName)) {
@@ -131,7 +131,7 @@ public class CommandListSpawns extends CommandJasBase {
                     biomeContents.append(", ");
                 }
                 biomeContents.append("\u00A71").append(entityType.typeID).append("\u00A7r| ");
-                BiomeSpawnListRegistry biomeSpawnListRegistry = LegacyJustAnotherSpawner.worldSettings()
+                BiomeSpawnListRegistry biomeSpawnListRegistry = TAGProfile.worldSettings()
                         .biomeSpawnListRegistry();
                 Iterator<SpawnListEntry> spawnListIterator = biomeSpawnListRegistry.getSpawnListFor(entityType.typeID,
                         biomeStructureName).iterator();
@@ -165,7 +165,7 @@ public class CommandListSpawns extends CommandJasBase {
             return false;
         }
 
-        Iterator<StructureHandler> iterator = LegacyJustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = TAGProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler type = iterator.next();
@@ -187,7 +187,7 @@ public class CommandListSpawns extends CommandJasBase {
 
         boolean structureMatch = false;
         boolean entityMatch = false;
-        Iterator<StructureHandler> iterator = LegacyJustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = TAGProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();
@@ -268,7 +268,7 @@ public class CommandListSpawns extends CommandJasBase {
     }
 
     private void addStructureNames(List<String> tabCompletions) {
-        Iterator<StructureHandler> iterator = LegacyJustAnotherSpawner.worldSettings().structureHandlerRegistry().handlers()
+        Iterator<StructureHandler> iterator = TAGProfile.worldSettings().structureHandlerRegistry().handlers()
                 .iterator();
         while (iterator.hasNext()) {
             StructureHandler handler = iterator.next();

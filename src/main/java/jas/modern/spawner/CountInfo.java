@@ -1,16 +1,10 @@
 package jas.modern.spawner;
 
-import jas.modern.spawner.CountInfo.ChunkStat;
-import jas.modern.spawner.creature.type.CreatureType;
-
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 
