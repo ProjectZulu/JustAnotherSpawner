@@ -7,6 +7,13 @@ public class GlobalSettings {
 	public static transient String profileTAGS = "TAGS";
 
     public String FILE_VERSION = "1.0";
+    @SerializedName("___GLOBAL SETTINGS___")
+    public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
+    @SerializedName("Spawning Profile")
+    public String spawningProfile = profileMVEL;
+    @SerializedName("Sort entities by biome")
+    public boolean globalSortCreatureByBiome = true;
+
     @SerializedName("___VANILLA COMPATABILITY___")
     public final String VANILLA_COMMENT = "These options are used to disable the vanilla spawning system in a friendly way";
     @SerializedName("Turn gamerule spawning off on start")
@@ -26,14 +33,6 @@ public class GlobalSettings {
     public int chunkCountDistance = 8;
     @SerializedName("Generate Zero-Weight Spawn Entries")
     public boolean shouldGenerateZeroSpawnEntries;
-
-    @SerializedName("___GLOBAL SETTINGS___")
-    public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
-    @SerializedName("Spawning Profile")
-    public String spawningProfile = profileMVEL;
-    @SerializedName("Sort entities by biome")
-    public boolean globalSortCreatureByBiome = true;
-
     public GlobalSettings() {
         spawnerTickSpacing = 0;
         globalSortCreatureByBiome = true;
