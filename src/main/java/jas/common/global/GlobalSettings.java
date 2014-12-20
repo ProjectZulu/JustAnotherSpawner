@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class GlobalSettings {
 	public static transient String profileMVEL = "MVEL";
-	public static transient String profileTAGS = "TAGS";
+	public static transient String profileTAGS = "BASIC";
 
-    public String FILE_VERSION = "1.0";
+	public String FILE_VERSION = "1.0";
     @SerializedName("___GLOBAL SETTINGS___")
     public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
     @SerializedName("Spawning Profile")
