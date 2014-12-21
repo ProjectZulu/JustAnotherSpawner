@@ -44,7 +44,7 @@ public class CommandKillAll extends CommandJasBase {
         }
 
         EntityPlayerMP targetPlayer;
-        if (stringArgs.length > 1) {
+        if (stringArgs.length > 0) {
             targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
             targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());

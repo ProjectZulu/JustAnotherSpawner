@@ -16,7 +16,9 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
 
 public class CommandKillAll extends CommandJasBase {
@@ -44,7 +46,7 @@ public class CommandKillAll extends CommandJasBase {
         }
 
         EntityPlayerMP targetPlayer;
-        if (stringArgs.length > 1) {
+        if (stringArgs.length > 0) {
             targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
             targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
