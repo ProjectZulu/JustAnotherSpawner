@@ -41,7 +41,7 @@ public class JustAnotherSpawner {
 	@Instance(DefaultProps.MODID)
 	public static JustAnotherSpawner modInstance;
 
-	@SidedProxy(clientSide = "jas.modern.proxy.ClientProxy", serverSide = "jas.modern.proxy.CommonProxy")
+	@SidedProxy(clientSide = "jas.spawner.modern.proxy.ClientProxy", serverSide = "jas.spawner.modern.proxy.CommonProxy")
 	public static CommonProxy proxy;
 
 	/* Only Populated after {@link#FMLPreInitializationEvent} */
