@@ -11,6 +11,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -30,27 +32,26 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
         return Collections.emptyList();
     }
 
-    @Override
-    public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
-                ChunkProviderGenerate.class);
-        if (chunkProviderGenerate != null) {
-            MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, ChunkProviderGenerate.class, chunkProviderGenerate,
-                    "strongholdGenerator", "field_73225_u");
-            String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
-            if (stronghold != null) {
-                return stronghold;
-            }
-
-            MapGenStructure mineshaftGen = getStructureGen(MapGenMineshaft.class, ChunkProviderGenerate.class, chunkProviderGenerate,
-                    "mineshaftGenerator", "field_73223_w");
-            String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
-            if (mineshaft != null) {
-                return mineshaft;
-            }
-        }
-        return null;
-    }
+	@Override
+	public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
+		ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
+		if (chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate) {
+			ChunkProviderGenerate chunkProviderGenerate = (ChunkProviderGenerate) chunkprovider.currentChunkProvider;
+			if (chunkProviderGenerate != null) {
+				MapGenStructure strongholdGen = chunkProviderGenerate.strongholdGenerator;
+				String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
+				if (stronghold != null) {
+					return stronghold;
+				}
+				MapGenStructure mineshaftGen = chunkProviderGenerate.mineshaftGenerator;
+				String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
+				if (mineshaft != null) {
+					return mineshaft;
+				}
+			}
+		}
+		return null;
+	}
 
     private MapGenStructure getStructureGen(Class<? extends MapGenStructure> fieldClass, Class<?> containingClass, Object containerInstance,
             String fieldName, String obfName) {

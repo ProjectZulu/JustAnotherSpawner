@@ -1,7 +1,6 @@
 package jas.spawner.legacy.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
-import jas.common.helper.ReflectionHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +14,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 
 public class StructureInterpreterNether implements StructureInterpreter {
@@ -42,25 +42,18 @@ public class StructureInterpreterNether implements StructureInterpreter {
 
     @Override
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-        ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(world,
-                ChunkProviderHell.class);
-        if (biome instanceof BiomeGenHell && chunkProviderHell != null) {
-            MapGenNetherBridge genNetherBridge;
-            try {
-                genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c", chunkProviderHell,
-                        MapGenNetherBridge.class);
-            } catch (NoSuchFieldException e) {
-                genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
-                        MapGenNetherBridge.class);
-            }
-            if (genNetherBridge != null && genNetherBridge.hasStructureAt(xCoord, yCoord, zCoord)) {
-                return "NetherBridge";
-            }
-        } else {
-//            JASLog.info("Biome or Chunkprovider is wrong, %s, %s", biome, chunkProviderHell);
-        }
-        return null;
+		BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
+		ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
+		if (chunkprovider.currentChunkProvider instanceof ChunkProviderHell) {
+			ChunkProviderHell chunkProviderHell = (ChunkProviderHell) chunkprovider.currentChunkProvider;
+			if (biome instanceof BiomeGenHell && chunkProviderHell != null) {
+				MapGenNetherBridge genNetherBridge = chunkProviderHell.genNetherBridge;
+				if (genNetherBridge != null && genNetherBridge.hasStructureAt(xCoord, yCoord, zCoord)) {
+					return "NetherBridge";
+				}
+			}
+		}
+		return null;
     }
 
     @Override
