@@ -31,12 +31,6 @@ public class StructureHandlerRegistry {
         return structureHandlers;
     }
 
-    static {
-        structureInterpreters.add(new StructureInterpreterSwamp());
-        structureInterpreters.add(new StructureInterpreterNether());
-        structureInterpreters.add(new StructureInterpreterOverworldStructures());
-    }
-
     public static void registerInterpreter(StructureInterpreter structureInterpreter) {
         structureInterpreters.add(structureInterpreter);
     }

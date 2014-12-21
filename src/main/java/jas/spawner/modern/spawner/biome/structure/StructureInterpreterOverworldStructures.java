@@ -3,6 +3,7 @@ package jas.spawner.modern.spawner.biome.structure;
 import jas.api.StructureInterpreter;
 import jas.common.helper.ReflectionHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,63 +15,100 @@ import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraftforge.event.world.WorldEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class StructureInterpreterOverworldStructures implements StructureInterpreter {
 
-    public static final String STRONGHOLD_KEY = "Stronghold";
-    public static final String MINESHAFT_KEY = "Mineshaft";
+	public static final String STRONGHOLD_KEY = "Stronghold";
+	public static final String MINESHAFT_KEY = "Mineshaft";
 
-    @Override
-    public Collection<String> getStructureKeys() {
-        return Arrays.asList(STRONGHOLD_KEY, MINESHAFT_KEY);
-    }
+	private WeakReference<MapGenStructure> strongholdRef = new WeakReference(null);
+	private WeakReference<MapGenStructure> mineshaftRef = new WeakReference(null);
 
-    @Override
-    public Collection<SpawnListEntry> getStructureSpawnList(String structureKey) {
-        return Collections.emptyList();
-    }
+	@Override
+	public Collection<String> getStructureKeys() {
+		return Arrays.asList(STRONGHOLD_KEY, MINESHAFT_KEY);
+	}
 
-    @Override
-    public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
-                ChunkProviderGenerate.class);
-        if (chunkProviderGenerate != null) {
-            MapGenStructure strongholdGen = getStructureGen(MapGenStronghold.class, ChunkProviderGenerate.class, chunkProviderGenerate,
-                    "strongholdGenerator", "field_73225_u");
-            String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
-            if (stronghold != null) {
-                return stronghold;
-            }
+	@Override
+	public Collection<SpawnListEntry> getStructureSpawnList(String structureKey) {
+		return Collections.emptyList();
+	}
 
-            MapGenStructure mineshaftGen = getStructureGen(MapGenMineshaft.class, ChunkProviderGenerate.class, chunkProviderGenerate,
-                    "mineshaftGenerator", "field_73223_w");
-            String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
-            if (mineshaft != null) {
-                return mineshaft;
-            }
-        }
-        return null;
-    }
+	@Override
+	public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
+		MapGenStructure strongholdGen = strongholdRef.get();
+		MapGenStructure mineshaftGen = mineshaftRef.get();
+		if (strongholdGen == null || mineshaftGen == null) {
+			ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
+					ChunkProviderGenerate.class);
+			if (chunkProviderGenerate == null) {
+				return null;
+			}
+			if (strongholdGen == null) {
+				refreshStronghold(chunkProviderGenerate);
+			}
+			if (strongholdGen == null) {
+				refreshMineshaft(chunkProviderGenerate);
+			}
+		}
 
-    private MapGenStructure getStructureGen(Class<? extends MapGenStructure> fieldClass, Class<?> containingClass, Object containerInstance,
-            String fieldName, String obfName) {
-        MapGenStructure structure;
-        try {
-            structure = ReflectionHelper.getCatchableFieldFromReflection(obfName, containingClass, containerInstance,
-                    fieldClass);
-        } catch (NoSuchFieldException e) {
-            structure = ReflectionHelper.getFieldFromReflection(fieldName, containingClass, containerInstance, fieldClass);
-        }
-        return structure;
-    }
+		String stronghold = isLocationStructure(strongholdGen, STRONGHOLD_KEY, xCoord, yCoord, zCoord);
+		if (stronghold != null) {
+			return stronghold;
+		}
 
-    private String isLocationStructure(MapGenStructure structure, String structureKey, int xCoord, int yCoord,
-            int zCoord) {
-        return structure != null ? structure.hasStructureAt(xCoord, yCoord, zCoord) ? structureKey : null : null;
-    }
+		String mineshaft = isLocationStructure(mineshaftGen, MINESHAFT_KEY, xCoord, yCoord, zCoord);
+		if (mineshaft != null) {
+			return mineshaft;
+		}
+		return null;
+	}
 
-    @Override
-    public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
-        return world.provider.dimensionId == 0;
-    }
+	private MapGenStructure refreshStronghold(ChunkProviderGenerate chunkProviderGenerate) {
+		MapGenStructure structure = getStructure(chunkProviderGenerate, MapGenStronghold.class, "strongholdGenerator",
+				"field_73225_u");
+		strongholdRef = new WeakReference(structure);
+		return structure;
+	}
+
+	private MapGenStructure refreshMineshaft(ChunkProviderGenerate chunkProviderGenerate) {
+		MapGenStructure structure = getStructure(chunkProviderGenerate, MapGenMineshaft.class, "mineshaftGenerator",
+				"field_73223_w");
+		mineshaftRef = new WeakReference(structure);
+		return structure;
+	}
+
+	private MapGenStructure getStructure(ChunkProviderGenerate chunkProviderGenerate,
+			Class<? extends MapGenStructure> fieldClass, String fieldName, String obfName) {
+		MapGenStructure structure;
+		try {
+			structure = ReflectionHelper.getCatchableFieldFromReflection(obfName, ChunkProviderGenerate.class,
+					chunkProviderGenerate, fieldClass);
+		} catch (NoSuchFieldException e) {
+			structure = ReflectionHelper.getFieldFromReflection(fieldName, ChunkProviderGenerate.class,
+					chunkProviderGenerate, fieldClass);
+		}
+		return structure;
+	}
+
+	private String isLocationStructure(MapGenStructure structure, String structureKey, int xCoord, int yCoord,
+			int zCoord) {
+		return structure != null ? structure.hasStructureAt(xCoord, yCoord, zCoord) ? structureKey : null : null;
+	}
+
+	@Override
+	public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
+		return world.provider.dimensionId == 0;
+	}
+
+	@SubscribeEvent
+	/** Overworld is unloaded, reset references */
+	public void worldLoad(WorldEvent.Unload event) {
+		if (event.world.provider.dimensionId == 0) {
+			strongholdRef = new WeakReference(null);
+			mineshaftRef = new WeakReference(null);
+		}
+	}
 }
