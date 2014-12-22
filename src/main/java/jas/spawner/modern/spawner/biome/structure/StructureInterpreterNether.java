@@ -17,14 +17,13 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraftforge.event.world.WorldEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class StructureInterpreterNether implements StructureInterpreter {
-
-	private HashMap<Integer, WeakReference<MapGenStructure>> structureRefs = new HashMap<Integer, WeakReference<MapGenStructure>>();
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -49,14 +48,16 @@ public class StructureInterpreterNether implements StructureInterpreter {
 
 	@Override
 	public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-		MapGenStructure genNetherBridge = getOrDefault(world.provider.dimensionId).get();
+		MapGenStructure genNetherBridge = null;
 		if (genNetherBridge == null) {
 			BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-			ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(world,
-					ChunkProviderHell.class);
+			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
+			ChunkProviderHell chunkProviderHell = chunkprovider.currentChunkProvider instanceof ChunkProviderHell ? (ChunkProviderHell) chunkprovider.currentChunkProvider
+					: null;
 			if (chunkProviderHell == null || !(biome instanceof BiomeGenHell)) {
 				return null;
 			}
+			genNetherBridge = chunkProviderHell.genNetherBridge;
 			try {
 				genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c", chunkProviderHell,
 						MapGenNetherBridge.class);
@@ -64,7 +65,6 @@ public class StructureInterpreterNether implements StructureInterpreter {
 				genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
 						MapGenNetherBridge.class);
 			}
-			structureRefs.put(world.provider.dimensionId, new WeakReference(genNetherBridge));
 		}
 
 		if (genNetherBridge != null && genNetherBridge.hasStructureAt(xCoord, yCoord, zCoord)) {
@@ -73,26 +73,11 @@ public class StructureInterpreterNether implements StructureInterpreter {
 		return null;
 	}
 
-	private WeakReference<MapGenStructure> getOrDefault(int dimensionID) {
-		WeakReference<MapGenStructure> ref = structureRefs.get(dimensionID);
-		if (ref == null) {
-			ref = new WeakReference(null);
-			structureRefs.put(dimensionID, ref);
-		}
-		return ref;
-	}
-
 	@Override
 	public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
 		if (biomeGenBase.biomeName.equals(BiomeGenBase.hell.biomeName)) {
 			return true;
 		}
 		return false;
-	}
-
-	@SubscribeEvent
-	/** Clearout appropriate dimension cache when World is unloaded */
-	public void worldLoad(WorldEvent.Unload event) {
-		structureRefs.remove(event.world.provider.dimensionId);
 	}
 }

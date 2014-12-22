@@ -17,6 +17,7 @@ import net.minecraft.world.biome.BiomeGenHell;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.biome.BiomeGenSwamp;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraftforge.event.world.WorldEvent;
@@ -47,8 +48,9 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 		MapGenStructure mapGenScatteredFeature = getOrDefault(world.provider.dimensionId).get();
 		if (mapGenScatteredFeature == null) {
 			BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
-			ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
-					ChunkProviderGenerate.class);
+			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
+			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
+					: null;
 			if (chunkProviderGenerate == null || !(biome instanceof BiomeGenSwamp)) {
 				return null;
 			}

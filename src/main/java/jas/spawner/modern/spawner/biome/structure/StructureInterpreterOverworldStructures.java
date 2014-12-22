@@ -12,6 +12,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -41,8 +43,9 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 		MapGenStructure strongholdGen = strongholdRef.get();
 		MapGenStructure mineshaftGen = mineshaftRef.get();
 		if (strongholdGen == null || mineshaftGen == null) {
-			ChunkProviderGenerate chunkProviderGenerate = StructureInterpreterHelper.getInnerChunkProvider(world,
-					ChunkProviderGenerate.class);
+			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
+			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
+					: null;
 			if (chunkProviderGenerate == null) {
 				return null;
 			}
