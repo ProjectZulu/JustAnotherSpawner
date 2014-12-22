@@ -9,8 +9,8 @@ public class GlobalSettings {
 	public String FILE_VERSION = "1.0";
     @SerializedName("___GLOBAL SETTINGS___")
     public final String GLOBAL_COMMENT = "These are Global properties to set their World-Specific counterparts";
-    @SerializedName("Spawning Profile")
-    public String spawningProfile = profileMVEL;
+//    @SerializedName("Spawning Profile")
+//    public String spawningProfile = profileMVEL;
     @SerializedName("Sort entities by biome")
     public boolean globalSortCreatureByBiome = true;
 
@@ -42,6 +42,6 @@ public class GlobalSettings {
         disabledVanillaChunkSpawning = true;
         chunkSpawnDistance = 8;
         chunkCountDistance = 8;
-        spawningProfile = profileMVEL;
+//        spawningProfile = profileMVEL;
     }
 }
