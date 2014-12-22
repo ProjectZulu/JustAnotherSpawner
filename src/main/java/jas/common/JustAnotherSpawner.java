@@ -6,7 +6,6 @@ import jas.common.global.ImportedSpawnList;
 import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;
 import jas.common.helper.ReflectionHelper;
-import jas.spawner.legacy.TAGProfile;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.proxy.CommonProxy;
@@ -17,12 +16,18 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.world.GameRules;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
+import com.google.common.collect.ArrayTable;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+import com.google.common.collect.TreeBasedTable;
 import com.google.gson.Gson;
 
 import cpw.mods.fml.common.Mod;
@@ -96,6 +101,8 @@ public class JustAnotherSpawner {
 		BiomeDictionary.registerAllBiomes();
 		BiomeBlacklist biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
 		importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
+		importedSpawnList.exportImportedSpawnlistToFile(modConfigDirectoryFile);
+		
 //		if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileTAGS)) {
 //			currentProfile = new TAGProfile(biomeBlacklist, importedSpawnList);
 //		} else if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileMVEL)) {
@@ -107,7 +114,7 @@ public class JustAnotherSpawner {
 //		}
 		currentProfile.init();
 	}
-
+	
 	@EventHandler
 	public void serverStart(FMLServerStartingEvent event) {
 		currentProfile.serverStart(event);
