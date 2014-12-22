@@ -1,11 +1,16 @@
 package jas.common;
 
-import jas.api.CompatibilityRegistrationEvent;
-import jas.common.command.CommandJAS;
-import jas.common.proxy.CommonProxy;
-import jas.common.spawner.ChunkSpawner;
-import jas.common.spawner.SpawnerTicker;
-import jas.common.spawner.biome.structure.StructureInterpreterHelper;
+import jas.common.global.BiomeBlacklist;
+import jas.common.global.GlobalSettings;
+import jas.common.global.ImportedSpawnList;
+import jas.common.helper.FileUtilities;
+import jas.common.helper.GsonHelper;
+import jas.common.helper.ReflectionHelper;
+import jas.spawner.legacy.TAGProfile;
+import jas.spawner.modern.DefaultProps;
+import jas.spawner.modern.MVELProfile;
+import jas.spawner.modern.proxy.CommonProxy;
+import jas.spawner.modern.spawner.biome.structure.StructureInterpreterHelper;
 
 import java.io.File;
 import java.util.Iterator;
@@ -18,11 +23,8 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
 
-import org.mvel2.optimizers.OptimizerFactory;
-
 import com.google.gson.Gson;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -36,85 +38,80 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, dependencies = "after:*", useMetadata = true)
 public class JustAnotherSpawner {
 
-    @Instance(DefaultProps.MODID)
-    public static JustAnotherSpawner modInstance;
+	@Instance(DefaultProps.MODID)
+	public static JustAnotherSpawner modInstance;
 
-    @SidedProxy(clientSide = "jas.common.proxy.ClientProxy", serverSide = "jas.common.proxy.CommonProxy")
-    public static CommonProxy proxy;
+	@SidedProxy(clientSide = "jas.spawner.modern.proxy.ClientProxy", serverSide = "jas.spawner.modern.proxy.CommonProxy")
+	public static CommonProxy proxy;
 
-    /* Only Populated after {@link#FMLPreInitializationEvent} */
-    private static File modConfigDirectoryFile;
+	/* Only Populated after {@link#FMLPreInitializationEvent} */
+	private static File modConfigDirectoryFile;
 
-    public static File getModConfigDirectory() {
-        return modConfigDirectoryFile;
-    }
+	public static File getModConfigDirectory() {
+		return modConfigDirectoryFile;
+	}
 
 	private static ImportedSpawnList importedSpawnList;
 
 	public static ImportedSpawnList importedSpawnList() {
 		return importedSpawnList;
 	}
-    
-	BiomeBlacklist biomeBlacklist;
 
-	public BiomeBlacklist biomeBlacklist() {
-		return biomeBlacklist;
+	private static GlobalSettings globalSettings;
+
+	public static GlobalSettings globalSettings() {
+		return globalSettings;
 	}
-    
-    private static GlobalSettings globalSettings;
 
-    public static GlobalSettings globalSettings() {
-        return globalSettings;
-    }
+	private static Profile currentProfile;
 
-    private static WorldSettings worldSettings;
+	public static Profile profile() {
+		return currentProfile;
+	}
 
-    public static WorldSettings worldSettings() {
-        return worldSettings;
-    }
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		modConfigDirectoryFile = event.getModConfigurationDirectory();
+		Gson gson = GsonHelper.createGson(true);
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {    	
-        modConfigDirectoryFile = event.getModConfigurationDirectory();
-        Gson gson = GsonHelper.createGson(true);
+		File globalSettingsFile = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "GlobalProperties.cfg");
+		globalSettings = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(globalSettingsFile, false),
+				GlobalSettings.class, gson);
+		GsonHelper.writeToGson(FileUtilities.createWriter(globalSettingsFile, true), globalSettings, gson);
 
-        File globalSettingsFile = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "GlobalProperties.cfg");
-        globalSettings = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(globalSettingsFile, false),
-                GlobalSettings.class, gson);
-        GsonHelper.writeToGson(FileUtilities.createWriter(globalSettingsFile, true), globalSettings, gson);
+		File loggingSettings = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "LoggingProperties.cfg");
+		JASLog jasLog = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(loggingSettings, false),
+				JASLog.class, gson);
+		JASLog.setLogger(jasLog);
+		GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
+		MinecraftForge.EVENT_BUS.register(this);
+	}
 
-        File loggingSettings = new File(modConfigDirectoryFile, DefaultProps.MODDIR + "LoggingProperties.cfg");
-        JASLog jasLog = GsonHelper.readOrCreateFromGson(FileUtilities.createReader(loggingSettings, false), JASLog.class, gson);
-        JASLog.setLogger(jasLog);
-        GsonHelper.writeToGson(FileUtilities.createWriter(loggingSettings, true), jasLog, gson);
+	@EventHandler
+	public void load(FMLInitializationEvent event) {
+	}
 
-        MinecraftForge.EVENT_BUS.register(this);
-//        OptimizerFactory.setDefaultOptimizer("reflective");
-//    	TagsObject tags = new TagsObject();
-//		Serializable expression = MVEL.compileExpression("sky()==false");
-//		Boolean restult = (Boolean) MVEL.executeExpression(expression, tags);
-    }
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		BiomeDictionary.registerAllBiomes();
+		BiomeBlacklist biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
+		importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
+//		if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileTAGS)) {
+//			currentProfile = new TAGProfile(biomeBlacklist, importedSpawnList);
+//		} else if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileMVEL)) {
+			currentProfile = new MVELProfile(biomeBlacklist, importedSpawnList);
+//		} else {
+//			throw new IllegalArgumentException(String.format(
+//					"Unknown Spawning Profile [%s]. Current modes are %s or %s", globalSettings.spawningProfile,
+//					GlobalSettings.profileTAGS, GlobalSettings.profileMVEL));
+//		}
+		currentProfile.init();
+	}
 
-    @EventHandler
-    public void load(FMLInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new EntityDespawner());
-    }
-
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
-        BiomeDictionary.registerAllBiomes();
-        biomeBlacklist = new BiomeBlacklist(modConfigDirectoryFile);
-        MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
-        FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
-        importedSpawnList = new ImportedSpawnList(biomeBlacklist, globalSettings.emptyVanillaSpawnLists);
-        MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
-    }
-
-    @EventHandler
-    public void serverStart(FMLServerStartingEvent event) {
-        worldSettings = new WorldSettings(modConfigDirectoryFile, event.getServer().worldServers[0], importedSpawnList);
-        event.registerServerCommand(new CommandJAS(this));
-		if (globalSettings.emptyVanillaSpawnLists) {
+	@EventHandler
+	public void serverStart(FMLServerStartingEvent event) {
+		currentProfile.serverStart(event);
+		if (JustAnotherSpawner.globalSettings().emptyVanillaSpawnLists) {
 			JASLog.log().info("Removing Netherbridge spawnlist");
 			ChunkProviderHell chunkProviderHell = StructureInterpreterHelper.getInnerChunkProvider(
 					event.getServer().worldServers[1], ChunkProviderHell.class);
@@ -140,18 +137,18 @@ public class JustAnotherSpawner {
 		}
 	}
 
-    @SubscribeEvent
-    public void worldLoad(WorldEvent.Load event) {
-        GameRules gameRule = event.world.getGameRules();
-        if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
-            JASLog.log().info("Setting GameRule doMobSpawning for %s-%s to false",
-                    event.world.getWorldInfo().getWorldName(), event.world.provider.dimensionId);
-            gameRule.setOrCreateGameRule("doMobSpawning", "false");
-        }
+	@SubscribeEvent
+	public void worldLoad(WorldEvent.Load event) {
+		GameRules gameRule = event.world.getGameRules();
+		if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
+			JASLog.log().info("Setting GameRule doMobSpawning for %s-%s to false",
+					event.world.getWorldInfo().getWorldName(), event.world.provider.dimensionId);
+			gameRule.setOrCreateGameRule("doMobSpawning", "false");
+		}
 
-        String ruleName = "doCustomMobSpawning";
-        if (!gameRule.hasRule(ruleName)) {
-            gameRule.addGameRule(ruleName, "true");
-        }
-    }
+		String ruleName = "doCustomMobSpawning";
+		if (!gameRule.hasRule(ruleName)) {
+			gameRule.addGameRule(ruleName, "true");
+		}
+	}
 }
