@@ -1,10 +1,10 @@
-package jas.spawner.refactor.ConfigLoader;
+package jas.spawner.refactor.configloader;
 
 import jas.common.JASLog;
 import jas.common.helper.GsonHelper;
 import jas.spawner.modern.spawner.TagConverter;
 import jas.spawner.modern.spawner.creature.handler.parsing.keys.Key;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.VersionedFile;
+import jas.spawner.refactor.configloader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.entities.LivingHandlerBuilder;
 
 import java.lang.reflect.Type;

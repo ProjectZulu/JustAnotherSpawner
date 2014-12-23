@@ -1,7 +1,7 @@
 package jas.spawner.refactor;
 
 import jas.common.JustAnotherSpawner;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
 
 import java.io.File;
 

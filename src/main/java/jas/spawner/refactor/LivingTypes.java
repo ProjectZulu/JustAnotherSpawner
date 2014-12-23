@@ -2,9 +2,9 @@ package jas.spawner.refactor;
 
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.Tags;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
-import jas.spawner.refactor.ConfigLoader.LivingTypeLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.LoadedFile;
+import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.LivingTypeLoader;
+import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.mvel.MVELExpression;
 
 import java.util.Collection;

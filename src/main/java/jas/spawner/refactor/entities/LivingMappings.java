@@ -1,8 +1,8 @@
 package jas.spawner.refactor.entities;
 
 import jas.common.JASLog;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
-import jas.spawner.refactor.ConfigLoader.EntityGroupingLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.EntityGroupingLoader;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

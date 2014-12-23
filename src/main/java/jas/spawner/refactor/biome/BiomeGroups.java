@@ -1,8 +1,8 @@
 package jas.spawner.refactor.biome;
 
-import jas.spawner.refactor.ConfigLoader.BiomeGroupLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
+import jas.spawner.refactor.configloader.BiomeGroupLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.Group.ReversibleGroups;

@@ -2,8 +2,8 @@ package jas.spawner.refactor.biome;
 
 import jas.common.JASLog;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
-import jas.spawner.refactor.ConfigLoader.BiomeGroupLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
+import jas.spawner.refactor.configloader.BiomeGroupLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
 import jas.spawner.refactor.entities.Mappings;
 
 import java.util.Collection;

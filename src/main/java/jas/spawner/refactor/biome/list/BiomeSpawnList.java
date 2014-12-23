@@ -1,13 +1,13 @@
 package jas.spawner.refactor.biome.list;
 
-import jas.spawner.refactor.ConfigLoader.BiomeSpawnListLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.biome.BiomeAttributes;
 import jas.spawner.refactor.biome.BiomeDictionaryGroups;
 import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
+import jas.spawner.refactor.configloader.BiomeSpawnListLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.Group.Groups;

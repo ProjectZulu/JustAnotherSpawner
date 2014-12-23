@@ -1,10 +1,10 @@
 package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
-import jas.spawner.refactor.ConfigLoader.EntityGroupingLoader;
-import jas.spawner.refactor.ConfigLoader.LivingHandlerLoader;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.LoadedFile;
+import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.EntityGroupingLoader;
+import jas.spawner.refactor.configloader.LivingHandlerLoader;
+import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.LivingAttributes;

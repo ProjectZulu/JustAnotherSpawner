@@ -1,11 +1,11 @@
-package jas.spawner.refactor.ConfigLoader;
+package jas.spawner.refactor.configloader;
 
 import jas.common.helper.GsonHelper;
 import jas.spawner.modern.spawner.TagConverter;
 import jas.spawner.refactor.LivingTypes;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.LivingTypes.LivingType;
 import jas.spawner.refactor.LivingTypes.LivingTypeBuilder;
+import jas.spawner.refactor.configloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
 import java.util.Collection;

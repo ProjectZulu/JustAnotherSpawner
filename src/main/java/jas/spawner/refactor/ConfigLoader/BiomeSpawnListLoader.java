@@ -1,12 +1,12 @@
-package jas.spawner.refactor.ConfigLoader;
+package jas.spawner.refactor.configloader;
 
 import jas.common.helper.GsonHelper;
 import jas.spawner.modern.spawner.TagConverter;
 import jas.spawner.modern.spawner.creature.handler.parsing.keys.Key;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
+import jas.spawner.refactor.configloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
 import java.util.HashSet;

@@ -1,8 +1,8 @@
-package jas.spawner.refactor.ConfigLoader;
+package jas.spawner.refactor.configloader;
 
 import jas.common.helper.GsonHelper;
-import jas.spawner.refactor.ConfigLoader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.biome.BiomeGroupBuilder;
+import jas.spawner.refactor.configloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

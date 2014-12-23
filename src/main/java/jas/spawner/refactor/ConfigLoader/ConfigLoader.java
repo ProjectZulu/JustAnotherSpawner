@@ -1,4 +1,4 @@
-package jas.spawner.refactor.ConfigLoader;
+package jas.spawner.refactor.configloader;
 
 import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;

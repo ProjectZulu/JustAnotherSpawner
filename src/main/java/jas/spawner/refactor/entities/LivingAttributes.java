@@ -1,7 +1,7 @@
 package jas.spawner.refactor.entities;
 
-import jas.spawner.refactor.ConfigLoader.ConfigLoader;
-import jas.spawner.refactor.ConfigLoader.EntityGroupingLoader;
+import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.EntityGroupingLoader;
 import jas.spawner.refactor.entities.Group.Groups;
 import jas.spawner.refactor.entities.LivingGroupBuilder.LivingGroup;
 
