@@ -54,8 +54,8 @@ public class CommandLocate extends CommandJasBase {
         StringBuilder countedContents = new StringBuilder();
         countedContents.append("Locations: ");
         boolean foundMatch = false;
-        Iterator<Entity> iterator = CustomSpawner.getLoadedEntities(targetPlayer.worldObj).iterator();
-        CountInfo info = CustomSpawner.determineCountInfo(targetPlayer.worldObj);
+        Iterator<Entity> iterator = CustomSpawner.spawnCounter.countLoadedEntities(targetPlayer.worldObj).iterator();
+        CountInfo info = CustomSpawner.spawnCounter.countEntities(targetPlayer.worldObj);
         while (iterator.hasNext()) {
             Entity entity = iterator.next();
             LivingGroupRegistry groupRegistry = MVELProfile.worldSettings().livingGroupRegistry();

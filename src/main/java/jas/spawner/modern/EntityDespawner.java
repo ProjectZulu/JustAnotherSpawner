@@ -22,7 +22,7 @@ public class EntityDespawner {
         if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
                 && !event.entityLiving.worldObj.isRemote) {
             LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
-            CountInfo info = CustomSpawner.determineCountInfo(event.entityLiving.worldObj);
+            CountInfo info = CustomSpawner.spawnCounter.countEntities(event.entityLiving.worldObj);
             @SuppressWarnings("unchecked")
             List<LivingHandler> livingHandlers = livingHandlerRegistry
                     .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());

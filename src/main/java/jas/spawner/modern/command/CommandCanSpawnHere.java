@@ -86,7 +86,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 						"Entity %s is of type NONE and thus will never spawn.", entityName)));
 				return;
 			}
-			CountInfo countInfo = CustomSpawner.determineCountInfo(entity.worldObj);
+			CountInfo countInfo = CustomSpawner.spawnCounter.countEntities(entity.worldObj);
 
 			/* Get local spawnlist. Reminder: Biomes are only used when a structure is absent or empty */
 			boolean isBiome = false;

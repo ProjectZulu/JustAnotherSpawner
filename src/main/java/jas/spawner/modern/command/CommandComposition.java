@@ -70,8 +70,8 @@ public class CommandComposition extends CommandJasBase {
                 EntityCounter creatureCount = new EntityCounter();
                 EntityCounter despawnCreatureCount = new EntityCounter();
                 foundMatch = true;
-                CountInfo info = CustomSpawner.determineCountInfo(targetPlayer.worldObj);
-                for (Entity entity : CustomSpawner.getLoadedEntities(targetPlayer.worldObj)) {
+                CountInfo info = CustomSpawner.spawnCounter.countEntities(targetPlayer.worldObj);
+                for (Entity entity : CustomSpawner.spawnCounter.countLoadedEntities(targetPlayer.worldObj)) {
                     if (!(entity instanceof EntityLiving)) {
                         continue;
                     }

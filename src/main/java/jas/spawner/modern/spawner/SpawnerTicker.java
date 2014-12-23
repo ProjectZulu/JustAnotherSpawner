@@ -67,16 +67,7 @@ public class SpawnerTicker {
 			if (readyCreatureTypes.isEmpty()) {
 				return;
 			}
-
-			HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner
-					.determineChunksForSpawnering(world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
-
-			EntityCounter creatureTypeCount = new EntityCounter();
-			EntityCounter creatureCount = new EntityCounter();
-			CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
-
-			CountInfo countInfo = new CountInfo(eligibleChunksForSpawning, creatureTypeCount, creatureCount);
-
+			CountInfo countInfo = CustomSpawner.spawnCounter.countEntities(world);
 			for (CreatureType creatureType : readyCreatureTypes) {
 				if (creatureType.isReady(world)) {
 					LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings()

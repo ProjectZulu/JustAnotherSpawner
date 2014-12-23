@@ -5,6 +5,7 @@ import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
+import jas.spawner.modern.spawner.Counter.SpawnCounter;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.spawner.modern.spawner.creature.entry.SpawnListEntry;
@@ -42,133 +43,7 @@ import org.apache.logging.log4j.Level;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CustomSpawner {
-
-	public static CountInfo determineCountInfo(World world) {
-		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = CustomSpawner.determineChunksForSpawnering(
-				world, JustAnotherSpawner.globalSettings().chunkSpawnDistance);
-		EntityCounter creatureTypeCount = new EntityCounter();
-		EntityCounter creatureCount = new EntityCounter();
-		CustomSpawner.countEntityInChunks(world, creatureTypeCount, creatureCount);
-		return new CountInfo(eligibleChunksForSpawning, creatureTypeCount, creatureCount);
-	}
-
-	/**
-	 * Populates eligibleChunksForSpawning with All Valid Chunks. Unlike its vanilla counterpart
-	 * {@link SpawnerAnimals#findChunksForSpawning} this does not spawn a Creature.
-	 * 
-	 * @param worldServer
-	 * @param par1
-	 *            should Spawn spawnHostileMobs
-	 * @param par2
-	 *            should Spawn spawnPeacefulMobs
-	 * @param par3
-	 *            worldInfo.getWorldTotalTime() % 400L == 0L
-	 */
-	public static final HashMap<ChunkCoordIntPair, ChunkStat> determineChunksForSpawnering(World worldServer,
-			int chunkDistance) {
-		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForSpawning = new HashMap<ChunkCoordIntPair, ChunkStat>();
-		for (int i = 0; i < worldServer.playerEntities.size(); ++i) {
-			EntityPlayer entityplayer = (EntityPlayer) worldServer.playerEntities.get(i);
-			int posX = MathHelper.floor_double(entityplayer.posX / 16.0D);
-			int posZ = MathHelper.floor_double(entityplayer.posZ / 16.0D);
-
-			for (int xOffset = -chunkDistance; xOffset <= chunkDistance; ++xOffset) {
-				for (int zOffset = -chunkDistance; zOffset <= chunkDistance; ++zOffset) {
-					boolean flag3 = xOffset == -chunkDistance || xOffset == chunkDistance || zOffset == -chunkDistance
-							|| zOffset == chunkDistance;
-					ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
-					ChunkStat chunkStat = new ChunkStat(flag3);
-					Chunk chunk = worldServer.getChunkFromChunkCoords(chunkcoordintpair.chunkXPos,
-							chunkcoordintpair.chunkZPos);
-					for (@SuppressWarnings("rawtypes")
-					List entityLists : chunk.entityLists) {
-						for (Object object : entityLists) {
-							if (object == null || !(object instanceof EntityLiving)) {
-								continue;
-							}
-							EntityLiving entity = (EntityLiving) object;
-							List<LivingHandler> livingHandlers = MVELProfile.worldSettings()
-									.livingHandlerRegistry()
-									.getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
-							Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
-							chunkStat.entityClassCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
-							for (String creatureTypeID : livingTypes) {
-								chunkStat.entityTypeCount.incrementOrPutIfAbsent(creatureTypeID, 1);
-							}
-						}
-					}
-
-					eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);
-				}
-			}
-		}
-		return eligibleChunksForSpawning;
-	}
-
-	/**
-	 * Count and Cache the Amount of Loaded Entities
-	 * 
-	 * @param worldServer
-	 */
-	public static void countEntityInChunks(World worldServer, EntityCounter creatureType, EntityCounter creatureCount) {
-		for (Entity entity : getLoadedEntities(worldServer)) {
-			if (entity == null) {
-				continue;
-			}
-			@SuppressWarnings("unchecked")
-			List<LivingHandler> livingHandlers = MVELProfile.worldSettings().livingHandlerRegistry()
-					.getLivingHandlers((Class<? extends EntityLiving>) entity.getClass());
-			Set<String> livingTypes = getApplicableLivingTypes(livingHandlers);
-			creatureCount.incrementOrPutIfAbsent(entity.getClass().getSimpleName(), 1);
-			for (String creatureTypeID : livingTypes) {
-				creatureType.incrementOrPutIfAbsent(creatureTypeID, 1);
-			}
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public static List<Entity> getLoadedEntities(World world) {
-		List<Entity> entities = new ArrayList<Entity>();
-		if (JustAnotherSpawner.globalSettings().chunkCountDistance <= 0) {
-			return world.loadedEntityList;
-		}
-
-		HashMap<ChunkCoordIntPair, ChunkStat> eligibleChunksForCounting = CustomSpawner.determineChunksForSpawnering(
-				world, JustAnotherSpawner.globalSettings().chunkCountDistance);
-		for (ChunkCoordIntPair pair : eligibleChunksForCounting.keySet()) {
-			Chunk chunk = world.getChunkFromChunkCoords(pair.chunkXPos, pair.chunkZPos);
-			if (chunk != null && chunk.entityLists != null) {
-				for (int i = 0; i < chunk.entityLists.length; i++) {
-					@SuppressWarnings("rawtypes")
-					List loadedEntities = chunk.entityLists[i];
-					for (int j = 0; j < loadedEntities.size(); j++) {
-						Entity entity = (Entity) loadedEntities.get(j);
-						if (entity == null) {
-							continue;
-						}
-						entities.add(entity);
-					}
-				}
-			}
-		}
-		return entities;
-	}
-
-	/**
-	 * Helper method get the number of unique livingTypes from the applicable livinghandlers
-	 * 
-	 * Used when counting entities such that entities with the same type twice are counted once. i.e. is Skeleton is in
-	 * three groups two which are MONSTER one which is AMBIENT, it counts once as a monster and once as an ambient
-	 */
-	private static Set<String> getApplicableLivingTypes(Collection<LivingHandler> livingHandlers) {
-		Set<String> livingTypes = new HashSet<String>();
-		for (LivingHandler livingHandler : livingHandlers) {
-			if (livingHandler != null) {
-				livingTypes.add(livingHandler.creatureTypeID);
-			}
-		}
-		return livingTypes;
-	}
+	public static SpawnCounter spawnCounter = new SpawnCounter();
 
 	/**
 	 * Performs Actual Creature Spawning inside eligibleChunks. {@link determineChunksForSpawnering} needs to be run to
@@ -343,7 +218,7 @@ public class CustomSpawner {
 			}
 			int i1 = spawnListEntry.minChunkPack
 					+ random.nextInt(1 + spawnListEntry.maxChunkPack - spawnListEntry.minChunkPack);
-			CountInfo countInfo = CustomSpawner.determineCountInfo(world);
+			CountInfo countInfo = CustomSpawner.spawnCounter.countEntities(world);
 			for (int j2 = 0; j2 < i1; ++j2) {
 				boolean flag = false;
 				Tags tags = new Tags(world, countInfo, j1, topHeight, k1);
