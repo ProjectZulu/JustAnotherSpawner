@@ -82,7 +82,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
     private boolean canEntityDespawnHere(EntityLiving entity) {
         LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
         List<LivingHandler> livingHandlers = livingHandlerRegistry.getLivingHandlers(entity.getClass());
-        CountInfo info = CustomSpawner.determineCountInfo(entity.worldObj);
+        CountInfo info = CustomSpawner.spawnCounter.countEntities(entity.worldObj);
         if (!livingHandlers.isEmpty()) {
             for (LivingHandler livingHandler : livingHandlers) {
                 if (livingHandler.canDespawn(entity, info)) {
