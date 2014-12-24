@@ -1,4 +1,4 @@
-package jas.spawner.refactor.biome;
+package jas.spawner.refactor.biome.list;
 
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
@@ -6,7 +6,8 @@ import jas.spawner.modern.spawner.creature.handler.LivingHelper;
 import jas.spawner.refactor.LivingHandlers;
 import jas.spawner.refactor.LivingTypes;
 import jas.spawner.refactor.LivingTypes.LivingType;
-import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
+import jas.spawner.refactor.biome.BiomeGroups;
+import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.entities.ListContentGroup;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
