@@ -2,9 +2,11 @@ package jas.spawner.refactor.biome;
 
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
+import jas.spawner.refactor.entities.ListContentGroup;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.Group.Groups;
+import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
+import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +26,7 @@ public class BiomeDictionaryGroups implements Groups {
 
 	@Override
 	public String key() {
-		return "D|";
+		return "D.";
 	}
 
 	@Override
@@ -43,20 +45,25 @@ public class BiomeDictionaryGroups implements Groups {
 		/* Define Group for each BiomeDictionary Type */
 		for (Type type : BiomeDictionary.Type.values()) {
 			BiomeGroupBuilder attributeGroup = new BiomeGroupBuilder(type.toString());
-			for (BiomeGenBase biome : BiomeDictionary.getBiomesForType(type)) {
-				attributeGroup.contents().add(biomeMappings.keyToMapping().get(BiomeHelper.getPackageName(biome)));
+			StringBuilder expressionBuilder = new StringBuilder();
+			BiomeGenBase[] types = BiomeDictionary.getBiomesForType(type);
+			if (types.length != 0) {
+				expressionBuilder.append("Builder().");
+				for (int i = 0; i < types.length; i++) {
+					BiomeGenBase biome = types[i];
+					expressionBuilder.append("A('")
+							.append(biomeMappings.keyToMapping().get(BiomeHelper.getPackageName(biome))).append("')");
+				}
 			}
+			attributeGroup.setContents(expressionBuilder.toString());
 			attributeGroups.addGroup(attributeGroup);
 		}
 
-		List<BiomeGroupBuilder> sortedAttributes = Group.Sorter.getSortedGroups(attributeGroups);
 		ListMultimap<String, String> mappingToGroupIDBuilder = ArrayListMultimap.create();
-		attributeGroups.clear();
-
+		ExpressionContext context = new ExpressionContext(biomeMappings);
 		ImmutableMapGroupsBuilder<BiomeGroup> attributeBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>("D|");
-		for (BiomeGroupBuilder biomeGroup : sortedAttributes) {
-			Group.Parser.parseGroupContents(biomeGroup, biomeMappings, attributeGroups);
-			attributeGroups.addGroup(biomeGroup);
+		for (BiomeGroupBuilder biomeGroup : attributeGroups.iDToGroup().values()) {
+			Group.Parser.parseGroupContents(biomeGroup, context);
 			attributeBuilder.addGroup(biomeGroup.build());
 			for (String pckgName : biomeGroup.results()) {
 				mappingToGroupIDBuilder.get(pckgName).add(biomeGroup.iD());

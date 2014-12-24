@@ -44,7 +44,7 @@ public class LivingAttributes implements Groups {
 			}
 		}
 
-		List<LivingGroupBuilder> sortedAttributes = Group.Sorter.getSortedGroups(attributeGroups);
+		List<LivingGroupBuilder> sortedAttributes = ListContentGroup.Sorter.getSortedGroups(attributeGroups);
 		ImmutableMapGroupsBuilder<LivingGroup> iDToAttributeBuilder = new ImmutableMapGroupsBuilder("A|");
 		for (LivingGroupBuilder livingGroup : sortedAttributes) {
 			LivingGroup group = livingGroup.build(mappings, iDToAttributeBuilder);

@@ -5,20 +5,17 @@ import jas.spawner.refactor.biome.BiomeGroupBuilder;
 import jas.spawner.refactor.configloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
@@ -73,7 +70,7 @@ public class BiomeGroupLoader implements VersionedFile {
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String BIOME_MAPPINGS = "Biome Mappings";
 		public final String ATTRIBUTE_GROUPS = "Attribute Groups";
-		public final String CONTENTS_KEY = "contents";
+		// public final String CONTENTS_KEY = "contents";
 
 		@Deprecated
 		public final String BIOME_GROUPS = "Biome Groups";
@@ -97,13 +94,7 @@ public class BiomeGroupLoader implements VersionedFile {
 				for (Entry<String, BiomeGroupBuilder> innerEntry : outerEntry.getValue().entrySet()) {
 					String groupName = innerEntry.getKey();
 					BiomeGroupBuilder group = innerEntry.getValue();
-					JsonArray contents = new JsonArray();
-					for (String content : group.contents()) {
-						contents.add(new JsonPrimitive(content));
-					}
-					JsonObject contentsObject = new JsonObject();
-					contentsObject.add(CONTENTS_KEY, contents);
-					biomeObject.add(groupName, contentsObject);
+					biomeObject.addProperty(groupName, group.content());
 				}
 				attributeObject.add(configName, biomeObject);
 			}
@@ -117,13 +108,8 @@ public class BiomeGroupLoader implements VersionedFile {
 				for (Entry<String, BiomeGroupBuilder> innerEntry : outerEntry.getValue().entrySet()) {
 					String groupName = innerEntry.getKey();
 					BiomeGroupBuilder group = innerEntry.getValue();
-					JsonArray contents = new JsonArray();
-					for (String content : group.contents()) {
-						contents.add(new JsonPrimitive(content));
-					}
-					JsonObject contentsObject = new JsonObject();
-					contentsObject.add(CONTENTS_KEY, contents);
-					biomeObject.add(groupName, contentsObject);
+					biomeObject.addProperty(groupName, group.content());
+
 				}
 				biomeGroupObject.add(configName, biomeObject);
 			}
@@ -159,13 +145,8 @@ public class BiomeGroupLoader implements VersionedFile {
 					JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
 					for (Entry<String, JsonElement> innerEntry : innerObject.entrySet()) {
 						String groupName = innerEntry.getKey();
-						JsonArray contentsArray = innerEntry.getValue().getAsJsonObject().get(CONTENTS_KEY)
-								.getAsJsonArray();
-						ArrayList<String> contents = new ArrayList<String>();
-						for (JsonElement jsonElement : contentsArray) {
-							contents.add(jsonElement.getAsString());
-						}
-						groupNameToBiomeGroup.put(groupName, new BiomeGroupBuilder(groupName, configName, contents));
+						String expression = innerEntry.getValue().getAsString();
+						groupNameToBiomeGroup.put(groupName, new BiomeGroupBuilder(groupName, configName, expression));
 					}
 				}
 			}
@@ -186,13 +167,8 @@ public class BiomeGroupLoader implements VersionedFile {
 					JsonObject innerObject = outerEntry.getValue().getAsJsonObject();
 					for (Entry<String, JsonElement> innerEntry : innerObject.entrySet()) {
 						String groupName = innerEntry.getKey();
-						JsonArray contentsArray = innerEntry.getValue().getAsJsonObject().get(CONTENTS_KEY)
-								.getAsJsonArray();
-						ArrayList<String> contents = new ArrayList<String>();
-						for (JsonElement jsonElement : contentsArray) {
-							contents.add(jsonElement.getAsString());
-						}
-						groupNameToBiomeGroup.put(groupName, new BiomeGroupBuilder(groupName, configName, contents));
+						String expression = innerEntry.getValue().getAsString();
+						groupNameToBiomeGroup.put(groupName, new BiomeGroupBuilder(groupName, configName, expression));
 					}
 				}
 			}

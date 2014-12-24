@@ -3,10 +3,10 @@ package jas.spawner.refactor;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.refactor.biome.BiomeAttributes;
 import jas.spawner.refactor.biome.BiomeDictionaryGroups;
+import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
 import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.biome.SpawnEntryGenerator;
-import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
 import jas.spawner.refactor.biome.list.BiomeSpawnList;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
@@ -14,8 +14,10 @@ import jas.spawner.refactor.configloader.BiomeSpawnListLoader;
 import jas.spawner.refactor.configloader.ConfigLoader;
 import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
+import jas.spawner.refactor.entities.ListContentGroup;
 import jas.spawner.refactor.entities.Group.Groups;
+import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
+import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
 
 import java.util.HashSet;
@@ -48,9 +50,9 @@ public class BiomeSpawnLists {
 		livingHandlers = new LivingHandlers(this);
 		livingTypes = new LivingTypes();
 		biomeMappings = new BiomeMappings(loader);
-		biomeAttributes = new BiomeAttributes(loader, biomeMappings);
-		biomeGroups = new BiomeGroups(loader, biomeMappings);
 		dictionaryGroups = new BiomeDictionaryGroups(biomeMappings);
+		biomeAttributes = new BiomeAttributes(loader, biomeMappings, dictionaryGroups);
+		biomeGroups = new BiomeGroups(loader, biomeMappings, dictionaryGroups, biomeAttributes);
 
 		ImmutableMapGroupsBuilder<SpawnListEntryBuilder> mapsBuilder = new ImmutableMapGroupsBuilder<SpawnListEntryBuilder>(
 				BiomeSpawnList.key);
@@ -91,15 +93,11 @@ public class BiomeSpawnLists {
 				}
 			}
 		}
-
+		ExpressionContext context = new ExpressionContext(biomeMappings, dictionaryGroups, biomeAttributes, biomeGroups);
 		ImmutableMapGroupsBuilder<SpawnListEntry> mappingBuilder = new ImmutableMapGroupsBuilder<SpawnListEntry>(
 				BiomeSpawnList.key);
-		List<SpawnListEntryBuilder> sortedBuilders = Group.Sorter.getSortedGroups(mapsBuilder);
-		mapsBuilder.clear();
-		for (SpawnListEntryBuilder builder : sortedBuilders) {
-			Group.Parser.parseGroupContents(builder, biomeMappings, new Groups[] { biomeAttributes, biomeGroups,
-					dictionaryGroups, mapsBuilder });
-			mapsBuilder.addGroup(builder);
+		for (SpawnListEntryBuilder builder : mapsBuilder.iDToGroup().values()) {
+			Group.Parser.parseGroupContents(builder, context);
 			mappingBuilder.addGroup(builder.build());
 		}
 		spawnList = new BiomeSpawnList(mappingBuilder);

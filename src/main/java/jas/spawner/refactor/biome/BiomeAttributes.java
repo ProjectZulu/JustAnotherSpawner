@@ -4,10 +4,11 @@ import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
 import jas.spawner.refactor.configloader.BiomeGroupLoader;
 import jas.spawner.refactor.configloader.ConfigLoader;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
+import jas.spawner.refactor.entities.Group.Groups;
+import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
 import jas.spawner.refactor.entities.Group.ReversibleGroups;
+import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -23,7 +24,7 @@ public class BiomeAttributes implements ReversibleGroups {
 
 	@Override
 	public String key() {
-		return "A|";
+		return "A.";
 	}
 
 	@Override
@@ -36,11 +37,11 @@ public class BiomeAttributes implements ReversibleGroups {
 		return mappingToGroupID;
 	}
 
-	public BiomeAttributes(ConfigLoader loader, BiomeMappings biomeMappings) {
-		loadFromConfig(loader, biomeMappings);
+	public BiomeAttributes(ConfigLoader loader, BiomeMappings biomeMappings, Groups dictionary) {
+		loadFromConfig(loader, biomeMappings, dictionary);
 	}
 
-	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings) {
+	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings, Groups dictionary) {
 		BiomeGroupLoader savedStats = loader.biomeGroupLoader.saveObject;
 		ImmutableMapGroupsBuilder<BiomeGroupBuilder> attributeGroups = new ImmutableMapGroupsBuilder<BiomeGroupBuilder>(
 				"A|");
@@ -55,14 +56,11 @@ public class BiomeAttributes implements ReversibleGroups {
 			}
 		}
 
-		List<BiomeGroupBuilder> sortedAttributes = Group.Sorter.getSortedGroups(attributeGroups);
+		ExpressionContext context = new ExpressionContext(biomeMappings, dictionary);
 		ListMultimap<String, String> packgNameToAttribIDsBuilder = ArrayListMultimap.create();
-		attributeGroups.clear();
-
 		ImmutableMapGroupsBuilder<BiomeGroup> attributeBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>("A|");
-		for (BiomeGroupBuilder biomeGroup : sortedAttributes) {
-			Group.Parser.parseGroupContents(biomeGroup, biomeMappings, attributeGroups);
-			attributeGroups.addGroup(biomeGroup);
+		for (BiomeGroupBuilder biomeGroup : attributeGroups.iDToGroup().values()) {
+			Group.Parser.parseGroupContents(biomeGroup, context);
 			attributeBuilder.addGroup(biomeGroup.build());
 			for (String pckgName : biomeGroup.results()) {
 				packgNameToAttribIDsBuilder.get(pckgName).add(biomeGroup.iD());

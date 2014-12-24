@@ -1,5 +1,8 @@
 package jas.spawner.refactor.entities;
 
+import jas.spawner.refactor.entities.Group.MutableContentGroup;
+import jas.spawner.refactor.mvel.MVELExpression;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -8,10 +11,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import jas.spawner.refactor.entities.Group.MutableGroup;
-import jas.spawner.refactor.mvel.MVELExpression;
-
-public class LivingHandlerBuilder implements MutableGroup {
+public class LivingHandlerBuilder implements MutableContentGroup<List<String>> {
 	private String livingHandlerID;
 	private String canSpawn;
 	private String canDspwn;
@@ -43,7 +43,7 @@ public class LivingHandlerBuilder implements MutableGroup {
 		this.postSpawn = livingHandler.postSpawn.expression;
 	}
 
-	public static class LivingHandler implements Group {
+	public static class LivingHandler implements ListContentGroup {
 		public final String livingHandlerID;
 		public final MVELExpression<Boolean> canSpawn;
 		public final MVELExpression<Boolean> canDspwn;
@@ -78,7 +78,7 @@ public class LivingHandlerBuilder implements MutableGroup {
 		}
 
 		@Override
-		public List<String> contents() {
+		public List<String> content() {
 			return contents;
 		}
 	}
@@ -150,7 +150,7 @@ public class LivingHandlerBuilder implements MutableGroup {
 	}
 
 	@Override
-	public List<String> contents() {
+	public List<String> content() {
 		return contents;
 	}
 

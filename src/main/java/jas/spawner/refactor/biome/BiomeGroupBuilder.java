@@ -1,27 +1,23 @@
 package jas.spawner.refactor.biome;
 
-import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.Group.MutableGroup;
+import jas.spawner.refactor.entities.Group.MutableContentGroup;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public class BiomeGroupBuilder implements MutableGroup {
+public class BiomeGroupBuilder implements MutableContentGroup<String> {
 	private String groupID;
 	private String configName;
 	private transient Set<String> pckgNames = new HashSet<String>();
 	/** String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-	private ArrayList<String> contents;
+	private String expression;
 
 	public BiomeGroupBuilder() {
 		this.groupID = "";
 		this.configName = "";
-		contents = new ArrayList<String>();
+		this.expression = "";
 	}
 
 	public BiomeGroupBuilder(String groupID) {
@@ -32,13 +28,13 @@ public class BiomeGroupBuilder implements MutableGroup {
 		} else {
 			this.configName = "";
 		}
-		contents = new ArrayList<String>();
+		this.expression = "";
 	}
 
-	public BiomeGroupBuilder(String groupID, String configName, ArrayList<String> contents) {
+	public BiomeGroupBuilder(String groupID, String configName, String expression) {
 		this.groupID = groupID;
 		this.configName = configName;
-		this.contents = new ArrayList<String>(contents);
+		this.expression = expression;
 	}
 
 	public BiomeGroup build() {
@@ -61,18 +57,18 @@ public class BiomeGroupBuilder implements MutableGroup {
 		this.configName = configName;
 	}
 
-	public static class BiomeGroup implements Group {
+	public static class BiomeGroup implements ContentGroup<String> {
 		public final String groupID;
 		public final String configName;
 		private final ImmutableSet<String> pckgNames;
 		/** String Used to Build Group Content Names i.e. {desert,A|Forest,glacier} */
-		private final ImmutableList<String> contents;
+		private final String expression;
 
 		private BiomeGroup(BiomeGroupBuilder builder) {
 			this.groupID = builder.getGroupID();
 			this.configName = builder.getConfigName();
 			this.pckgNames = ImmutableSet.<String> builder().addAll(builder.pckgNames).build();
-			this.contents = ImmutableList.<String> builder().addAll(builder.contents).build();
+			this.expression = builder.expression;
 		}
 
 		@Override
@@ -86,8 +82,8 @@ public class BiomeGroupBuilder implements MutableGroup {
 		}
 
 		@Override
-		public List<String> contents() {
-			return contents;
+		public String content() {
+			return expression;
 		}
 	}
 
@@ -102,17 +98,17 @@ public class BiomeGroupBuilder implements MutableGroup {
 	}
 
 	@Override
-	public List<String> contents() {
-		return contents;
+	public String content() {
+		return expression;
 	}
-
+	
 	@Override
 	public void setResults(Set<String> results) {
 		this.pckgNames = results;
 	}
-
+	
 	@Override
-	public void setContents(List<String> contents) {
-		this.contents = new ArrayList(contents);
+	public void setContents(String expression) {
+		this.expression = expression;
 	}
 }

@@ -1,7 +1,7 @@
 package jas.spawner.refactor.biome.list;
 
-import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.Group.MutableGroup;
+import jas.spawner.refactor.entities.Group.MutableContentGroup;
+import jas.spawner.refactor.entities.ListContentGroup;
 import jas.spawner.refactor.mvel.MVELExpression;
 
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public class SpawnListEntryBuilder implements MutableGroup {
+public class SpawnListEntryBuilder implements MutableContentGroup<String> {
 	private transient Set<String> mappings;
 	/** String Used to Build Mappings i.e. {desert,A|Forest,glacier} */
-	private List<String> contents;
+	private String contents;
 	private String spawnListEntryID;
 
 	private String livingHandlerID;
@@ -39,7 +39,7 @@ public class SpawnListEntryBuilder implements MutableGroup {
 		this.setCanSpawn("");
 		this.setPostSpawn("");
 		this.setEntityToSpawn("");
-		this.setContents(new ArrayList<String>());
+		this.setContents("");
 		this.setResults(new HashSet<String>());
 		this.recalculateEntryID();
 	}
@@ -55,7 +55,7 @@ public class SpawnListEntryBuilder implements MutableGroup {
 		this.setPostSpawn("");
 		this.setEntityToSpawn("");
 
-		this.setContents(Arrays.asList(biomeExpression.split("?=[&+-/]")));
+		this.setContents(biomeExpression);
 		this.setResults(new HashSet<String>());
 		this.recalculateEntryID();
 	}
@@ -80,11 +80,11 @@ public class SpawnListEntryBuilder implements MutableGroup {
 		spawnListEntryID = livingHandlerID + livingTypeID + contents.toString();
 	}
 
-	public static class SpawnListEntry implements Group {
+	public static class SpawnListEntry implements ContentGroup<String> {
 		public final String spawnListEntryID;
 		private final transient ImmutableSet<String> mappings;
 		/** String Used to Build Mappings i.e. {desert,A|Forest,glacier} */
-		private final transient ImmutableList<String> contents;
+		private final transient String contents;
 
 		public final String livingHandlerID;
 		public final String livingTypeID;
@@ -99,7 +99,7 @@ public class SpawnListEntryBuilder implements MutableGroup {
 		private SpawnListEntry(SpawnListEntryBuilder builder) {
 			this.spawnListEntryID = builder.spawnListEntryID;
 			this.mappings = ImmutableSet.<String> builder().addAll(builder.results()).build();
-			this.contents = ImmutableList.<String> builder().addAll(builder.contents()).build();
+			this.contents = builder.content();
 			this.livingHandlerID = builder.spawnListEntryID;
 			this.livingTypeID = builder.spawnListEntryID;
 			this.weight = new MVELExpression<Integer>(builder.getWeight());
@@ -121,7 +121,7 @@ public class SpawnListEntryBuilder implements MutableGroup {
 		}
 
 		@Override
-		public List<String> contents() {
+		public String content() {
 			return contents;
 		}
 	}
@@ -207,7 +207,7 @@ public class SpawnListEntryBuilder implements MutableGroup {
 	}
 
 	@Override
-	public List<String> contents() {
+	public String content() {
 		return contents;
 	}
 
@@ -217,8 +217,8 @@ public class SpawnListEntryBuilder implements MutableGroup {
 	}
 
 	@Override
-	public void setContents(List<String> contents) {
-		this.contents = new ArrayList<String>(contents);
+	public void setContents(String contents) {
+		this.contents = contents;
 		recalculateEntryID();
 	}
 }

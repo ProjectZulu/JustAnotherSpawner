@@ -11,7 +11,7 @@ public class MVELHelper {
 		return typedExecuteExpression(Boolean.class, compiledExpression, contextObject, errorMessage);
 	}
 
-	public static <T> T typedExecuteExpression(Class<T> typeClass, Object compiledExpression, Tags contextObject,
+	public static <T> T typedExecuteExpression(Class<T> typeClass, Object compiledExpression, Object contextObject,
 			String... errorMessage) {
 		try {
 			return (T) MVEL.executeExpression(compiledExpression, contextObject);

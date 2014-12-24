@@ -2,18 +2,18 @@ package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.refactor.configloader.ConfigLoader;
+import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.configloader.EntityGroupingLoader;
 import jas.spawner.refactor.configloader.LivingHandlerLoader;
-import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
-import jas.spawner.refactor.entities.Group;
+import jas.spawner.refactor.entities.ListContentGroup;
+import jas.spawner.refactor.entities.Group.ReversibleGroups;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.LivingAttributes;
 import jas.spawner.refactor.entities.LivingGroupBuilder;
-import jas.spawner.refactor.entities.LivingHandlerBuilder;
-import jas.spawner.refactor.entities.LivingMappings;
-import jas.spawner.refactor.entities.Group.ReversibleGroups;
 import jas.spawner.refactor.entities.LivingGroupBuilder.LivingGroup;
+import jas.spawner.refactor.entities.LivingHandlerBuilder;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
+import jas.spawner.refactor.entities.LivingMappings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -98,12 +98,12 @@ public class LivingHandlers implements ReversibleGroups {
 			livingBuilders.addGroup(new LivingHandlerBuilder(mapping));
 		}
 
-		List<LivingHandlerBuilder> sortedHandlers = Group.Sorter.getSortedGroups(livingBuilders);
+		List<LivingHandlerBuilder> sortedHandlers = ListContentGroup.Sorter.getSortedGroups(livingBuilders);
 		livingBuilders.clear();
 		ImmutableMapGroupsBuilder<LivingHandler> livingHandlers = new ImmutableMapGroupsBuilder<LivingHandler>(key);
 		Builder<String, String> mappingToGroupIDBuilder = ImmutableListMultimap.<String, String> builder();
 		for (LivingHandlerBuilder builder : sortedHandlers) {
-			Group.Parser.parseGroupContents(builder, mappings, livingBuilders);
+			ListContentGroup.Parser.parseGroupContents(builder, mappings, livingBuilders);
 			livingBuilders.addGroup(builder);
 			livingHandlers.addGroup(builder.build());
 			for (String mapping : builder.results()) {

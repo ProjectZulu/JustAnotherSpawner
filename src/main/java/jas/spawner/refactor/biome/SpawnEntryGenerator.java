@@ -7,9 +7,10 @@ import jas.spawner.refactor.LivingHandlers;
 import jas.spawner.refactor.LivingTypes;
 import jas.spawner.refactor.LivingTypes.LivingType;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
+import jas.spawner.refactor.entities.ListContentGroup;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.LivingMappings;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
+import jas.spawner.refactor.entities.LivingMappings;
 
 import java.util.Collection;
 
@@ -46,7 +47,7 @@ public class SpawnEntryGenerator {
 			LivingHandler livingHandler, LivingMappings livingMappings, BiomeMappings biomeMappings) {
 		String livingHandlerID = livingHandler.livingHandlerID;
 		String livingTypeID = guessCreatureTypeOfGroup(world, livingMappings, livingHandler.results());
-		String biomeExpression = BiomeGroups.key.concat(newBiomeMapping);
+		String biomeExpression = "Builder().A(" + BiomeGroups.key.concat(newBiomeMapping) + ")";
 		int[] stats = findVanillaSpawnListEntryData(newBiomeMapping, livingHandler, biomeMappings, livingMappings);
 		SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression);
 		builder.setWeight(Integer.toString(stats[0]));
@@ -61,7 +62,7 @@ public class SpawnEntryGenerator {
 			LivingMappings livingMappings, BiomeMappings biomeMappings) {
 		String livingHandlerID = livingHandler.livingHandlerID;
 		String livingTypeID = guessCreatureTypeOfGroup(world, livingMappings, livingHandler.results());
-		String biomeExpression = BiomeGroups.key.concat(newBiomeGroup.iD());
+		String biomeExpression = "Builder().A(" + BiomeGroups.key.concat(newBiomeGroup.iD()) + ")";
 
 		for (String biomeMapping : newBiomeGroup.results()) {
 			int[] stats = findVanillaSpawnListEntryData(biomeMapping, livingHandler, biomeMappings, livingMappings);
@@ -132,7 +133,7 @@ public class SpawnEntryGenerator {
 		return new int[] { 0, 0, 4 };
 	}
 
-	private int[] findVanillaSpawnListEntryData(Group biomeGroup, LivingHandler livingHandler,
+	private int[] findVanillaSpawnListEntryData(ListContentGroup biomeGroup, LivingHandler livingHandler,
 			BiomeMappings biomeMappings, LivingMappings livingMappings) {
 		for (String biomeMapping : biomeGroup.results()) {
 			String packString = biomeMappings.mappingToKey().get(biomeMapping);

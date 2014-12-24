@@ -1,6 +1,6 @@
 package jas.spawner.refactor.entities;
 
-import jas.spawner.refactor.entities.Group.MutableGroup;
+import jas.spawner.refactor.entities.Group.MutableContentGroup;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,7 +10,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-public class LivingGroupBuilder implements MutableGroup {
+public class LivingGroupBuilder implements MutableContentGroup<List<String>> {
 	public final String groupID;
 	public String configName;
 	public transient Set<String> entityJASNames = new HashSet<String>();
@@ -69,8 +69,8 @@ public class LivingGroupBuilder implements MutableGroup {
 	 * 
 	 * Requires Previous processed Attribtues and Entity Mappings
 	 */
-	public LivingGroup build(Mappings mappings, Groups<Group> attributes) {
-		Group.Parser.parseGroupContents(this, mappings, attributes);
+	public LivingGroup build(Mappings mappings, Groups<ListContentGroup> attributes) {
+		ListContentGroup.Parser.parseGroupContents(this, mappings, attributes);
 		return new LivingGroup(this);
 	}
 
@@ -80,7 +80,7 @@ public class LivingGroupBuilder implements MutableGroup {
 				entityJASNames.toString().concat(" from ").concat(contents.toString()));
 	}
 
-	public class LivingGroup implements Group {
+	public class LivingGroup implements ListContentGroup {
 		public final String groupID;
 		public final String configName;
 		public final transient ImmutableSet<String> entityJASNames;
@@ -98,7 +98,7 @@ public class LivingGroupBuilder implements MutableGroup {
 		}
 
 		@Override
-		public List<String> contents() {
+		public List<String> content() {
 			return contents;
 		}
 
@@ -140,7 +140,7 @@ public class LivingGroupBuilder implements MutableGroup {
 	}
 
 	@Override
-	public List<String> contents() {
+	public List<String> content() {
 		return contents;
 	}
 

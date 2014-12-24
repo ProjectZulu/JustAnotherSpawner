@@ -9,7 +9,7 @@ public class SetAlgebra<T> {
         UNION, INTERSECT, COMPLEMENT;
     }
 
-    public static <T> Set<T> operate(Set<T> leftSet, Set<T> rightSet, OPERATION operation) {
+    public static <T> Set<T> operate(Set<T> leftSet, Collection<T> rightSet, OPERATION operation) {
         switch (operation) {
         case UNION:
             leftSet.addAll(rightSet);
