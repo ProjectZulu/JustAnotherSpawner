@@ -22,6 +22,7 @@ public class BiomeGroups implements ReversibleGroups {
 	private ImmutableMap<String, BiomeGroup> iDToGroup;
 	private ImmutableListMultimap<String, String> mappingToGroupID;
 	public static String key = "G.";
+
 	@Override
 	public String key() {
 		return key;
@@ -44,8 +45,7 @@ public class BiomeGroups implements ReversibleGroups {
 
 	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings, Groups attributes, Groups dictionary) {
 		BiomeGroupLoader savedStats = loader.biomeGroupLoader.saveObject;
-		ImmutableMapGroupsBuilder<BiomeGroupBuilder> biomeGroups = new ImmutableMapGroupsBuilder<BiomeGroupBuilder>(
-				key);
+		ImmutableMapGroupsBuilder<BiomeGroupBuilder> biomeGroups = new ImmutableMapGroupsBuilder<BiomeGroupBuilder>(key);
 		if (savedStats.getConfigNameToAttributeGroups().isPresent()) {
 			for (TreeMap<String, BiomeGroupBuilder> entries : savedStats.getConfigNameToAttributeGroups().get()
 					.values()) {
@@ -56,8 +56,16 @@ public class BiomeGroups implements ReversibleGroups {
 				}
 			}
 		}
+
+		/* Create new BiomeGroup for each new Mapping */
+		for (String newMapping : biomeMappings.newMappings()) {
+			BiomeGroupBuilder builder = new BiomeGroupBuilder(newMapping);
+			builder.setContents("Builder().A(" + newMapping + ")");
+			biomeGroups.addGroup(builder);
+		}
+
 		ExpressionContext context = new ExpressionContext(biomeMappings, dictionary, attributes);
-		ListMultimap<String, String> packgNameToBGIDsBuilder = ArrayListMultimap.create();		
+		ListMultimap<String, String> packgNameToBGIDsBuilder = ArrayListMultimap.create();
 		ImmutableMapGroupsBuilder<BiomeGroup> biomeGroupBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>(key);
 		for (BiomeGroupBuilder biomeGroup : biomeGroups.iDToGroup().values()) {
 			Group.Parser.parseGroupContents(biomeGroup, context);
