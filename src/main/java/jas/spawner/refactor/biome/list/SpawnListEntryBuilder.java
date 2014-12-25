@@ -44,7 +44,8 @@ public class SpawnListEntryBuilder implements MutableContentGroup<String> {
 		this.recalculateEntryID();
 	}
 
-	public SpawnListEntryBuilder(String livingHandlerID, String livingTypeID, String biomeExpression) {
+	public SpawnListEntryBuilder(String livingHandlerID, String livingTypeID, String biomeExpression,
+			String entityExpression) {
 		this.setLivingHandlerID(livingHandlerID);
 		this.setLivingTypeID(livingTypeID);
 		this.setWeight("0");
@@ -53,7 +54,7 @@ public class SpawnListEntryBuilder implements MutableContentGroup<String> {
 
 		this.setCanSpawn("");
 		this.setPostSpawn("");
-		this.setEntityToSpawn("");
+		this.setEntityToSpawn(entityExpression);
 
 		this.setContents(biomeExpression);
 		this.setResults(new HashSet<String>());
@@ -139,66 +140,74 @@ public class SpawnListEntryBuilder implements MutableContentGroup<String> {
 		return livingHandlerID;
 	}
 
-	public void setLivingHandlerID(String livingHandlerID) {
+	public SpawnListEntryBuilder setLivingHandlerID(String livingHandlerID) {
 		this.livingHandlerID = livingHandlerID;
 		recalculateEntryID();
+		return this;
 	}
 
 	public String getLivingTypeID() {
 		return livingTypeID;
 	}
 
-	public void setLivingTypeID(String livingTypeID) {
+	public SpawnListEntryBuilder setLivingTypeID(String livingTypeID) {
 		this.livingTypeID = livingTypeID;
 		recalculateEntryID();
+		return this;
 	}
 
 	public String getWeight() {
 		return weight;
 	}
 
-	public void setWeight(String weight) {
+	public SpawnListEntryBuilder setWeight(String weight) {
 		this.weight = weight;
+		return this;
 	}
 
 	public String getPassivePackSize() {
 		return passivePackSize;
 	}
 
-	public void setPassivePackSize(String passivePackSize) {
+	public SpawnListEntryBuilder setPassivePackSize(String passivePackSize) {
 		this.passivePackSize = passivePackSize;
+		return this;
 	}
 
 	public String getChunkPackSize() {
 		return chunkPackSize;
 	}
 
-	public void setChunkPackSize(String chunkPackSize) {
+	public SpawnListEntryBuilder setChunkPackSize(String chunkPackSize) {
 		this.chunkPackSize = chunkPackSize;
+		return this;
 	}
 
 	public String getCanSpawn() {
 		return canSpawn;
 	}
 
-	public void setCanSpawn(String canSpawn) {
+	public SpawnListEntryBuilder setCanSpawn(String canSpawn) {
 		this.canSpawn = canSpawn;
+		return this;
 	}
 
 	public String getPostSpawn() {
 		return postSpawn;
 	}
 
-	public void setPostSpawn(String postSpawn) {
+	public SpawnListEntryBuilder setPostSpawn(String postSpawn) {
 		this.postSpawn = postSpawn;
+		return this;
 	}
 
 	public String getEntityToSpawn() {
 		return entityToSpawn;
 	}
 
-	public void setEntityToSpawn(String entityToSpawn) {
+	public SpawnListEntryBuilder setEntityToSpawn(String entityToSpawn) {
 		this.entityToSpawn = entityToSpawn;
+		return this;
 	}
 
 	@Override

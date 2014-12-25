@@ -49,13 +49,15 @@ public class SpawnEntryGenerator {
 		String livingHandlerID = livingHandler.livingHandlerID;
 		String livingTypeID = guessCreatureTypeOfGroup(world, livingMappings, livingHandler.results());
 		String biomeExpression = "Builder().A(" + BiomeGroups.key.concat(newBiomeMapping) + ")";
+		String entityExpression = LivingHandlers.key.concat(livingHandler.iD());
+
 		int[] stats = findVanillaSpawnListEntryData(newBiomeMapping, livingHandler, biomeMappings, livingMappings);
-		SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression);
+		SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression,
+				entityExpression);
 		builder.setWeight(Integer.toString(stats[0]));
 		builder.setPassivePackSize("3");
 		builder.setChunkPackSize(new StringBuilder().append(stats[0]).append("+ util.rand(1 + ").append(stats[2])
 				.append("-").append(stats[1]).append(")").toString());
-		builder.setEntityToSpawn(LivingHandlers.key.concat(livingHandler.iD()));
 		return builder;
 	}
 
@@ -64,19 +66,19 @@ public class SpawnEntryGenerator {
 		String livingHandlerID = livingHandler.livingHandlerID;
 		String livingTypeID = guessCreatureTypeOfGroup(world, livingMappings, livingHandler.results());
 		String biomeExpression = "Builder().A(" + BiomeGroups.key.concat(newBiomeGroup.iD()) + ")";
-
+		String entityExpression = LivingHandlers.key.concat(livingHandler.iD());
 		for (String biomeMapping : newBiomeGroup.results()) {
 			int[] stats = findVanillaSpawnListEntryData(biomeMapping, livingHandler, biomeMappings, livingMappings);
-			SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression);
+			SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression,
+					entityExpression);
 			builder.setWeight(Integer.toString(stats[0]));
 			builder.setPassivePackSize("3");
 			builder.setChunkPackSize(new StringBuilder().append(stats[0]).append("+ util.rand(1 + ").append(stats[2])
 					.append("-").append(stats[1]).append(")").toString());
-			builder.setEntityToSpawn(LivingHandlers.key.concat(livingHandler.iD()));
 			return builder;
 		}
 
-		return new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression);
+		return new SpawnListEntryBuilder(livingHandlerID, livingTypeID, biomeExpression, entityExpression);
 	}
 
 	private String guessCreatureTypeOfGroup(World world, LivingMappings mappings, Collection<String> entityJASNames) {

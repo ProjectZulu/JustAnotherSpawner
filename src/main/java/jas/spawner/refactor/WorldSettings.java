@@ -38,4 +38,8 @@ public class WorldSettings {
 			return dimSpawnSettings != null ? dimSpawnSettings : defaultSpawnSettings;
 		}
 	}
+	
+	public BiomeSpawnLists getBiomeSpawnListRegistry(World world) {
+		return defaultSpawnSettings.biomeGroupRegistry();
+	}
 }

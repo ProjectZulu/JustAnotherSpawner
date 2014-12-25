@@ -200,78 +200,28 @@ public class BiomeSpawnListLoader implements VersionedFile {
 							.entrySet()) {
 						String tertKey = tertEntries.getKey();
 						JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
-
-						String biomeGroupId = BiomeGroups.key.concat(saveObject.sortCreatureByBiome ? primKey : tertKey);
+						String biomeGroupId = BiomeGroups.key
+								.concat(saveObject.sortCreatureByBiome ? primKey : tertKey);
 						String livingGroup = saveObject.sortCreatureByBiome ? tertKey : secKey;
-						// String livingHandlerID = saveObject.sortCreatureByBiome ? tertKey : secKey;
-
 						String livingType = saveObject.sortCreatureByBiome ? secKey : primKey;
-						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingGroup, livingType, biomeGroupId);
-						if (fileVersion.equals("3.0")) {
+						String entityExpression = GsonHelper.getMemberOrDefault(entityValueObject, ENTITY_SPAWN, "");
+						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(livingGroup, livingType,
+								biomeGroupId, entityExpression);
 
-						} else if (fileVersion.equals("1.0")) {
-							JsonElement element = entityValueObject.get(ENTITY_STAT_KEY);
-							int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
-							builder.setWeight(Integer.toString(stats[0]));
-							builder.setPassivePackSize(Integer.toString(stats[1]));
-							builder.setChunkPackSize(new StringBuilder().append(stats[1]).append("+ util.rand(1 + ")
-									.append(stats[3]).append("-").append(stats[2]).append(")").toString());
-							builder.setEntityToSpawn(livingGroup);
-							// Hack, will not convert well if LivingHandler.contents was used thoroughly
+						String weightExpression = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_WEIGHT, "0");
+						String chunkPackSize = GsonHelper.getMemberOrDefault(entityValueObject, CHUNK_PACKSIZE,
+								"0 + util.rand(1 + 4 - 0)");
+						String passivePackSize = GsonHelper
+								.getMemberOrDefault(entityValueObject, PASSIVE_PACKSIZE, "3");
+						String spawnExp = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_TAG_KEY, "");
+						String postspawnExp = GsonHelper.getMemberOrDefault(entityValueObject, POSTSPAWN_KEY, "");
+						builder.setWeight(weightExpression);
 
-							String canSpawnExpression = "";
-							String postSpawnExpression = "";
-							if (fileVersion.equals("1.0")) {
-								String optionalParameters = GsonHelper.getMemberOrDefault(entityValueObject,
-										ENTITY_TAG_KEY, "");
-								String[] parts = optionalParameters.split("\\{");
-								for (String string : optionalParameters.split("\\{")) {
-									String parsed = string.replace("}", "");
-									String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-									TagConverter conv = null;
-									if (Key.spawn.keyParser.isMatch(titletag)) {
-										conv = new TagConverter(parsed);
-										if (!conv.expression.trim().equals("")) {
-											canSpawnExpression = conv.expression;
-										}
-									} else if (Key.postspawn.keyParser.isMatch(titletag)) {
-										conv = new TagConverter(parsed);
-										if (!conv.expression.trim().equals("")) {
-											postSpawnExpression = conv.expression;
-										}
-									}
-								}
-							} else {
-								String spawnTag = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_TAG_KEY, "");
-								String spawnOperand = GsonHelper.getMemberOrDefault(entityValueObject,
-										SPAWN_OPERAND_KEY, "");
-								canSpawnExpression = spawnTag;
-								String postspawnTag = GsonHelper.getMemberOrDefault(entityValueObject, POSTSPAWN_KEY,
-										"");
-								postSpawnExpression = postspawnTag;
-							}
-							builder.setCanSpawn(canSpawnExpression);
-							builder.setPostSpawn(postSpawnExpression);
-						}
 						tertMap.put(tertKey, builder);
 					}
 				}
 			}
 			return saveObject;
 		}
-
-		private int[] stringToStats(String stats) {
-			String[] parts = stats.split("-");
-			int[] result = new int[4];
-			for (int i = 0; i < 4; i++) {
-				try {
-					result[i] = i < parts.length ? Integer.parseInt(parts[i]) : 0;
-				} catch (NumberFormatException e) {
-					result[i] = 0;
-				}
-			}
-			return result;
-		}
-
 	}
 }

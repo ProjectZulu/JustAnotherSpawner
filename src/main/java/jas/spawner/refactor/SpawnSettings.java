@@ -27,11 +27,15 @@ public class SpawnSettings {
 		biomeGroupRegistry = new BiomeSpawnLists(world, worldProperties, loader, JustAnotherSpawner.importedSpawnList());
 	}
 
-	public LivingHandlers livingHandlers() {
-		return null; // biomeGroupRegistry.livinghandlers;
+	public BiomeSpawnLists biomeGroupRegistry() {
+		return biomeGroupRegistry;
 	}
 
-	public LivingHandlers livingTypes() {
-		return null; // biomeGroupRegistry.livingTypes;
-	}
+//	public LivingHandlers livingHandlers() {
+//		return null; // biomeGroupRegistry.livinghandlers;
+//	}
+//
+//	public LivingHandlers livingTypes() {
+//		return null; // biomeGroupRegistry.livingTypes;
+//	}
 }

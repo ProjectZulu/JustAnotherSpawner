@@ -1,6 +1,8 @@
 package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
+import jas.spawner.modern.spawner.biome.group.BiomeHelper;
+import jas.spawner.refactor.LivingTypes.LivingType;
 import jas.spawner.refactor.biome.BiomeAttributes;
 import jas.spawner.refactor.biome.BiomeDictionaryGroups;
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
@@ -14,17 +16,17 @@ import jas.spawner.refactor.configloader.BiomeSpawnListLoader;
 import jas.spawner.refactor.configloader.ConfigLoader;
 import jas.spawner.refactor.configloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.ListContentGroup;
-import jas.spawner.refactor.entities.Group.Groups;
 import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
 
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeGenBase;
 
 import com.google.common.base.CharMatcher;
 
@@ -40,6 +42,10 @@ public class BiomeSpawnLists {
 
 	private BiomeSpawnList spawnList;
 
+	public BiomeSpawnList getSpawnList() {
+		return spawnList;
+	}
+	
 	public BiomeSpawnLists(World world, WorldProperties worldProperties, ConfigLoader loader,
 			ImportedSpawnList importedSpawnList) {
 		loadFromConfig(world, loader, worldProperties, importedSpawnList);
@@ -118,5 +124,19 @@ public class BiomeSpawnLists {
 			}
 			return modID;
 		}
+	}
+
+	public Collection<String> livingTypesForEntity(World world, Entity entity) {
+		BiomeGenBase biome = world.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
+		String pckgeName = BiomeHelper.getPackageName(biome);
+		String jasBiomeName = biomeMappings.keyToMapping().get(pckgeName);
+
+		Collection<String> livingTypes = new HashSet<String>();
+		for (String spawnListEntryID : spawnList.mappingToID().get(jasBiomeName)) {
+			SpawnListEntry spawnEntry = spawnList.iDToGroup().get(spawnListEntryID);
+			// This doesn't work we have no way to check if SpawnListEntry corresponds to Entity entity
+			// livingTypes.add(spawnEntry.livingTypeID);
+		}
+		return livingTypes;
 	}
 }
