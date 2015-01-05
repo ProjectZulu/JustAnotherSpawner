@@ -134,6 +134,7 @@ public class CreatureType {
 	 * @return
 	 */
 	public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord) {
+		Block block = world.getBlock(xCoord, yCoord, zCoord);
 		return !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
 				&& world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium;
 	}
@@ -158,12 +159,12 @@ public class CreatureType {
 						&& !world.getBlock(xCoord, yCoord + 1, zCoord).isNormalCube();
 			} else if (!World.doesBlockHaveSolidTopSurface(world, xCoord, yCoord - 1, zCoord)) {
 				return false;
-			} else {
+			} else {				
 				Block l = world.getBlock(xCoord, yCoord - 1, zCoord);
 				boolean spawnBlock = (l != null && canCreatureSpawn(l, world, xCoord, yCoord - 1, zCoord));
-				return spawnBlock && l != Blocks.bedrock && !world.getBlock(xCoord, yCoord, zCoord).isBlockNormalCube()
+				return spawnBlock && l != Blocks.bedrock && !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
 						&& !world.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()
-						&& !world.getBlock(xCoord, yCoord + 1, zCoord).isBlockNormalCube();
+						&& !world.getBlock(xCoord, yCoord + 1, zCoord).isNormalCube();
 			}
 		}
 	}
