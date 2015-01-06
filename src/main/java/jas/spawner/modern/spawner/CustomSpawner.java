@@ -54,43 +54,36 @@ public class CustomSpawner {
 	 */
 	public static final void spawnCreaturesInChunks(WorldServer worldServer,
 			LivingHandlerRegistry livingHandlerRegistry, BiomeSpawnListRegistry biomeSpawnListRegistry,
-			CreatureType creatureType, BiomeBlacklist blacklist, CountInfo countInfo) {
-		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
-
-		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
-				countInfo.eligibleChunkLocations());
-		Collections.shuffle(eligibleChunksForSpawning);
-		
+			CreatureType creatureType, BiomeBlacklist blacklist, CountInfo countInfo) {		
 		final int entityTypeCap = creatureType.maxNumberOfCreature * countInfo.eligibleChunkLocations().size() / 256;
 		int globalEntityTypeCount = countInfo.getGlobalEntityTypeCount(creatureType.typeID);
 		if (globalEntityTypeCount > entityTypeCap) {
 			return;
 		}
-		for (ChunkCoordIntPair chunkCoord : eligibleChunksForSpawning) {
+		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
+		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
+				countInfo.eligibleChunkLocations());
+		Collections.shuffle(eligibleChunksForSpawning);
+		labelChunkStart: for (ChunkCoordIntPair chunkCoord : eligibleChunksForSpawning) {
 			ChunkStat chunkStat = countInfo.getChunkStat(chunkCoord);
 			if (chunkStat.isEdge) {
 				continue;
 			}
-			// TODO: CreatureType.passiveSpawnAttempts
 			countInfo.resetEntitiesSpawnedThisLoop();
 			for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
 				ChunkPosition startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
 						chunkCoord.chunkXPos, chunkCoord.chunkZPos);
-				SpawnListEntry spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer,
-						creatureType, startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
-				if (spawnlistentry == null) {
-					continue;
-				}
-				Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
-						startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
-				Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
-						spawnlistentry.livingGroupID, worldServer.rand, tags);
-				if (livingToSpawn == null) {
-					continue;
-				}
-				LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
+				
+				SpawnListEntry spawnlistentry = null;
+				Class<? extends EntityLiving> livingToSpawn = null;
+				LivingHandler handler = null;
 				countInfo.resetEntitiesPackCount();
+				
+				// CreatureType
+				if (!creatureType.canSpawnHere(worldServer, countInfo, startSpawningPoint)) {
+					continue;
+				}
 				for (int numEntAttempts = 0; numEntAttempts < creatureType.iterationsPerPack; ++numEntAttempts) {
 					// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
 					final int horVar = 6;
@@ -102,7 +95,7 @@ public class CustomSpawner {
 					// Biome BlackList
 					if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
 							spawningPoint.chunkPosY))) {
-						continue;
+						break;
 					}
 
 					if (isNearPlayerOrOrigin(worldServer, serverOriginPoint, spawningPoint.chunkPosX,
@@ -110,22 +103,34 @@ public class CustomSpawner {
 						continue;
 					}
 
-					// CreatureType
-					if (!creatureType.canSpawnHere(worldServer, countInfo, spawningPoint)) {
-						continue;
+					// Set SpawnList Specific attributes, set only for outer loop (when SpawnListEntry == null), is done
+					// in inner loop after creatureType.canSpawnHere for performance reasons
+					// (regsitry.getSpawnListEntryToSpawn is not cheap)
+					if (spawnlistentry == null) {
+						spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer, creatureType,
+								startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
+								startSpawningPoint.chunkPosZ);
+						if (spawnlistentry == null) {
+							break;
+						}
+						Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
+								startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
+						livingToSpawn = livingHandlerRegistry.getRandomEntity(spawnlistentry.livingGroupID,
+								worldServer.rand, tags);
+						if (livingToSpawn == null) {
+							break;
+						}
+						handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
 					}
 
-					// LivingCap and PackSize
+					// LivingCap
 					{
 						int globalEntityClassCount = countInfo.getGlobalEntityClassCount(livingToSpawn);
 						int livingCap = handler.getLivingCap();
 
 						if (livingCap > 0 && globalEntityClassCount >= livingCap) {
 							spawnlistentry = null;
-							continue;
-						}
-						if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
-							continue;
+							break;
 						}
 					}
 
@@ -171,6 +176,11 @@ public class CustomSpawner {
 										(int) entityliving.posX, (int) entityliving.posZ)));
 						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry, countInfo);
 						countInfo.countSpawn(entityliving, creatureType.typeID);
+						
+						// Living PackSize
+						if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
+							continue labelChunkStart;
+						}
 					}
 				}
 			}

@@ -218,7 +218,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
         {
             boolean tempSpawning = targetPlayer.preventEntitySpawning;
             targetPlayer.preventEntitySpawning = false;
-			Tags tags = new Tags(entity.worldObj, countInfo, (int) entity.posX, (int) entity.posY, (int) entity.posZ);
+    		Tags tags = new Tags(entity.worldObj, countInfo, MathHelper.floor_double(entity.posX),
+    				MathHelper.floor_double(entity.boundingBox.minY), MathHelper.floor_double(entity.posZ));
 
 			boolean canTypeSpawn = livingType.canSpawnAtLocation(entity.worldObj, tags, (int) entity.posX, (int) entity.posY,
 					(int) entity.posZ);
@@ -251,7 +252,8 @@ public class CommandCanSpawnHere extends CommandJasBase {
     }
 
     private String canEntityTypeSpawnHere(EntityPlayer targetPlayer, EntityLiving entity, CreatureType livingType, CountInfo countInfo) {
-		Tags tags = new Tags(entity.worldObj, countInfo, (int) entity.posX, (int) entity.posY, (int) entity.posZ);
+		Tags tags = new Tags(entity.worldObj, countInfo, MathHelper.floor_double(entity.posX),
+				MathHelper.floor_double(entity.boundingBox.minY), MathHelper.floor_double(entity.posZ));
 
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
