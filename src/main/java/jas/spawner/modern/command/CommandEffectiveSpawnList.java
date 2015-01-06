@@ -148,8 +148,9 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 	}
 
 	/**
-	 * Performs Actual Creature Spawning inside eligibleChunks. {@link determineChunksForSpawnering} needs to be run to
-	 * populate eligibleChunksForSpawning with spawnable chunks
+	 * Simulates spawning as if Entity Count was always 0. {@link determineChunksForSpawnering} needs to be run to
+	 * populate eligibleChunksForSpawning with spawnable chunks. Entities / other players already in the World may
+	 * interfere with spawning as they occupy positions in the world
 	 * 
 	 * @param creatureType CreatureType spawnList that is being Spawned
 	 */
@@ -173,20 +174,10 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 					IEntityLivingData entitylivingdata = null;
 					ChunkPosition startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
 							chunkCoord.chunkXPos, chunkCoord.chunkZPos);
-					SpawnListEntry spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer,
-							creatureType, startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
-							startSpawningPoint.chunkPosZ);
-					if (spawnlistentry == null) {
-						continue;
-					}
-					Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
-							startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
-					Class<? extends EntityLiving> livingToSpawn = livingHandlerRegistry.getRandomEntity(
-							spawnlistentry.livingGroupID, worldServer.rand, tags);
-					if (livingToSpawn == null) {
-						continue;
-					}
-					LivingHandler handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
+
+					SpawnListEntry spawnlistentry = null;
+					Class<? extends EntityLiving> livingToSpawn = null;
+					LivingHandler handler = null;
 					countInfo.resetEntitiesPackCount();
 					for (int numEntAttempts = 0; numEntAttempts < creatureType.iterationsPerPack; ++numEntAttempts) {
 						// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
@@ -207,7 +198,24 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						if (!creatureType.canSpawnHere(worldServer, countInfo, spawningPoint)) {
 							continue;
 						}
-
+						
+						if (spawnlistentry == null) {
+							spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer, creatureType,
+									startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
+									startSpawningPoint.chunkPosZ);
+							if (spawnlistentry == null) {
+								break;
+							}
+							Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
+									startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
+							livingToSpawn = livingHandlerRegistry.getRandomEntity(spawnlistentry.livingGroupID,
+									worldServer.rand, tags);
+							if (livingToSpawn == null) {
+								break;
+							}
+							handler = livingHandlerRegistry.getLivingHandler(spawnlistentry.livingGroupID);
+						}
+						
 						// LivingCap and PackSize
 						{
 							int globalEntityClassCount = countInfo.getGlobalEntityClassCount(livingToSpawn);
@@ -215,9 +223,6 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 
 							if (livingCap > 0 && globalEntityClassCount >= livingCap) {
 								spawnlistentry = null;
-								continue;
-							}
-							if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
 								continue;
 							}
 						}
@@ -243,6 +248,10 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 								|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
 										entityliving, spawnlistentry, countInfo))) {
 							reportCount.countSpawn(entityliving, creatureType.typeID);
+							
+							if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
+								continue;
+							}
 						}
 					}
 				}
