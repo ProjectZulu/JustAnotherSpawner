@@ -7,11 +7,11 @@ import org.mvel2.MVEL;
 
 public class MVELHelper {
 
-	public static boolean executeExpression(Object compiledExpression, Tags contextObject, String... errorMessage) {
+	public static boolean executeExpression(Object compiledExpression, Object contextObject, String... errorMessage) {
 		return typedExecuteExpression(Boolean.class, compiledExpression, contextObject, errorMessage);
 	}
 
-	public static <T> T typedExecuteExpression(Class<T> typeClass, Object compiledExpression, Tags contextObject,
+	public static <T> T typedExecuteExpression(Class<T> typeClass, Object compiledExpression, Object contextObject,
 			String... errorMessage) {
 		try {
 			return (T) MVEL.executeExpression(compiledExpression, contextObject);

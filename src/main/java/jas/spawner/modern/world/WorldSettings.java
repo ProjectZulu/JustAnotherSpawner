@@ -3,6 +3,7 @@ package jas.spawner.modern.world;
 import jas.common.JustAnotherSpawner;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.DefaultProps;
+import jas.spawner.modern.eventspawn.EventSpawnRegistry;
 import jas.spawner.modern.modification.ModLoadConfig;
 import jas.spawner.modern.modification.Modification;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
@@ -25,18 +26,20 @@ import net.minecraft.world.World;
  */
 public final class WorldSettings {
 	private WorldProperties worldProperties;
+	private EventSpawnRegistry eventSpawnRegistry;
 	private BiomeGroupRegistry biomeGroupRegistry;
 	private CreatureTypeRegistry creatureTypeRegistry;
 	private LivingHandlerRegistry livingHandlerRegistry;
 	private StructureHandlerRegistry structureHandlerRegistry;
 	private BiomeSpawnListRegistry biomeSpawnListRegistry;
 	private LivingGroupRegistry livingGroupRegistry;
-
+	
 	private ImportedSpawnList importedSpawnList;
 
 	public WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
 		this.importedSpawnList = importedSpawnList;
 		this.worldProperties = new WorldProperties();
+		this.eventSpawnRegistry = new EventSpawnRegistry(worldProperties);
 		this.biomeGroupRegistry = new BiomeGroupRegistry(worldProperties);
 		this.livingGroupRegistry = new LivingGroupRegistry(worldProperties);
 		this.creatureTypeRegistry = new CreatureTypeRegistry(biomeGroupRegistry, worldProperties);
@@ -68,6 +71,7 @@ public final class WorldSettings {
 			}
 		}
 		worldProperties.saveToConfig(configDirectory);
+		eventSpawnRegistry.saveToConfig(configDirectory);
 		biomeGroupRegistry.saveToConfig(configDirectory);
 		livingGroupRegistry.saveToConfig(configDirectory);
 		creatureTypeRegistry.saveCurrentToConfig(configDirectory);
@@ -78,6 +82,7 @@ public final class WorldSettings {
 
 	public void loadWorldSettings(File modConfigDirectoryFile, World world) {
 		worldProperties.loadFromConfig(modConfigDirectoryFile, world);
+		eventSpawnRegistry.loadFromConfig(modConfigDirectoryFile);
 		biomeGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 		livingGroupRegistry.loadFromConfig(modConfigDirectoryFile);
 		creatureTypeRegistry.loadFromConfig(modConfigDirectoryFile);
@@ -92,6 +97,10 @@ public final class WorldSettings {
 
 	public WorldProperties worldProperties() {
 		return worldProperties;
+	}
+	
+	public EventSpawnRegistry eventSpawnRegistry() {
+		return eventSpawnRegistry;
 	}
 
 	public BiomeGroupRegistry biomeGroupRegistry() {
