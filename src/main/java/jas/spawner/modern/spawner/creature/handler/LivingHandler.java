@@ -263,7 +263,7 @@ public class LivingHandler {
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 			MVELHelper.executeExpression(compPostSpawnExpression.get(), tags,
-					"Error processing compiled handler postSpawn expression for " + livingID + livingID + ": "
+					"Error processing compiled handler postSpawn expression for " + livingID + ": "
 							+ postspawnExpression);
 		}
 
@@ -273,7 +273,7 @@ public class LivingHandler {
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
-			MVELHelper.executeExpression(spawnListEntry.getOptionalPostSpawning(), tags,
+			MVELHelper.executeExpression(spawnListEntry.getOptionalPostSpawning().get(), tags,
 					"Error processing compiled spawnlistentry postSpawn expression for " + livingID);
 		}
 	}

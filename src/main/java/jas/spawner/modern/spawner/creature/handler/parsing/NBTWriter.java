@@ -76,7 +76,7 @@ public class NBTWriter {
 						return tag.getTag(operations[0]);
 					} else {
 						String[] values = new String[operations.length - 2];
-						for (int i = 2; i < values.length; i++) {
+						for (int i = 2; i < operations.length; i++) {
 							values[i - 2] = operations[i];
 						}
 						NBTBase child = createChildTag((byte) childtag, values);
