@@ -37,14 +37,16 @@ public class EntityDespawner {
 
 	@SubscribeEvent
 	public void entityPersistance(AllowDespawn event) {
-		LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
-		@SuppressWarnings("unchecked")
-		List<LivingHandler> livingHandlers = livingHandlerRegistry
-				.getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
-		for (LivingHandler livingHandler : livingHandlers) {
-			if (livingHandler != null && livingHandler.getDespawning() != null
-					&& livingHandler.getDespawning().isPresent()) {
-				event.setResult(Result.DENY);
+		if (!event.entity.worldObj.isRemote) {
+			LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
+			@SuppressWarnings("unchecked")
+			List<LivingHandler> livingHandlers = livingHandlerRegistry
+					.getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
+			for (LivingHandler livingHandler : livingHandlers) {
+				if (livingHandler != null && livingHandler.getDespawning() != null
+						&& livingHandler.getDespawning().isPresent()) {
+					event.setResult(Result.DENY);
+				}
 			}
 		}
 	}
