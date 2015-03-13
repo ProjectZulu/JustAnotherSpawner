@@ -71,8 +71,8 @@ public class NBTWriter {
 				NBTTagCompound tag = (NBTTagCompound) curTag;
 				String[] operations = tagOperation.split("/");
 				try {
-					int childtag = ParsingHelper.parseFilteredInteger(operations[1], 0, "childTag|" + tagOperation);
-					if (tag.hasKey(operations[0])) {
+					int childtag = ParsingHelper.parseFilteredInteger(operations[1], 12, "childTag|" + tagOperation);
+					if (tag.hasKey(operations[0]) && TagParser.getByID(childtag) != TagParser.UNKNOWN) {
 						return tag.getTag(operations[0]);
 					} else {
 						String[] values = new String[operations.length - 2];
