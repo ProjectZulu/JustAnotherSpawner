@@ -1,13 +1,15 @@
 package jas.spawner.modern.eventspawn.context;
 
+import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
+import jas.spawner.modern.eventspawn.SpawnBuilder;
+
 import java.util.Locale;
 
-import jas.spawner.modern.eventspawn.SpawnBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class BlockContext {
+public class BlockContext implements Context {
 	private BlockEvent event;
 
 	public BlockContext(BlockEvent event) {
@@ -104,7 +106,6 @@ public class BlockContext {
 		}
 	}
 
-	
 	public boolean isBlock(String blockName) {
 		return blockName().equals(blockName);
 	}
@@ -114,6 +115,6 @@ public class BlockContext {
 	}
 
 	public SpawnBuilder spawn(String entityMapping) {
-		return new SpawnBuilder(entityMapping, event.x + 0.5D, event.y, event.z + 0.5D);
+		return new SingleSpawnBuilder(entityMapping, event.x + 0.5D, event.y, event.z + 0.5D);
 	}
 }

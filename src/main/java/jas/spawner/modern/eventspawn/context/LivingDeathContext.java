@@ -1,10 +1,11 @@
 package jas.spawner.modern.eventspawn.context;
 
+import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
 import jas.spawner.modern.eventspawn.SpawnBuilder;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
-public class LivingDeathContext {
+public class LivingDeathContext implements Context {
 	private LivingDeathEvent event;
 
 	public LivingDeathContext(LivingDeathEvent event) {
@@ -40,6 +41,6 @@ public class LivingDeathContext {
 	}
 
 	public SpawnBuilder spawn(String entityMapping) {
-		return new SpawnBuilder(entityMapping, event.entity.posX, event.entity.posY, event.entity.posZ);
+		return new SingleSpawnBuilder(entityMapping, event.entity.posX, event.entity.posY, event.entity.posZ);
 	}
 }

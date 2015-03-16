@@ -1,20 +1,18 @@
 package jas.spawner.modern.eventspawn.context;
 
+import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
 import jas.spawner.modern.eventspawn.SpawnBuilder;
 
 import java.util.List;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayer.EnumStatus;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 
-public class PlayerSleepContext {
+public class PlayerSleepContext implements Context {
 	private PlayerSleepInBedEvent event;
 
 	public PlayerSleepContext(PlayerSleepInBedEvent event) {
@@ -71,7 +69,7 @@ public class PlayerSleepContext {
 	}
 	
 	public SpawnBuilder spawn(String entityMapping) {
-		return new SpawnBuilder(entityMapping, event.entity.posX, event.entity.posY, event.entity.posZ);
+		return new SingleSpawnBuilder(entityMapping, event.entity.posX, event.entity.posY, event.entity.posZ);
 	}
 }
 
