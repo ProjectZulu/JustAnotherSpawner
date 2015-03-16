@@ -12,10 +12,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 
-public class PlayerSleepContext implements Context {
+public class PlayerSleepContext extends CommonContext {
 	private PlayerSleepInBedEvent event;
 
 	public PlayerSleepContext(PlayerSleepInBedEvent event) {
+		super(event.entity.worldObj, event.x, event.y, event.z);
 		this.event = event;
 	}
 

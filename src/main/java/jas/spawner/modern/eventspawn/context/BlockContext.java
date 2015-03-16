@@ -9,10 +9,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class BlockContext implements Context {
+public class BlockContext extends CommonContext {
 	private BlockEvent event;
 
 	public BlockContext(BlockEvent event) {
+		super(event.world, event.x, event.y, event.z);
 		this.event = event;
 	}
 	

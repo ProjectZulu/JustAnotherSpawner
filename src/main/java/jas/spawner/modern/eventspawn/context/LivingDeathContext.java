@@ -3,12 +3,15 @@ package jas.spawner.modern.eventspawn.context;
 import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
 import jas.spawner.modern.eventspawn.SpawnBuilder;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
-public class LivingDeathContext implements Context {
+public class LivingDeathContext extends CommonContext {
 	private LivingDeathEvent event;
 
 	public LivingDeathContext(LivingDeathEvent event) {
+		super(event.entity.worldObj, MathHelper.floor_double(event.entity.posX), MathHelper
+				.floor_double(event.entity.posY), MathHelper.floor_double(event.entity.posZ));
 		this.event = event;
 	}
 
