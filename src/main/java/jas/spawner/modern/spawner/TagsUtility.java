@@ -1,21 +1,23 @@
 package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
+import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 
 /**
  * Tags that serve no purpose but as intermediate methods for calculations
  */
-public class TagsUtility {
+public class TagsUtility implements UtilityFunctions {
 	private World world;
-	private Tags parent;
+	private BaseFunctions parent;
 
 	public static abstract class Conditional {
 		public abstract boolean isMatch(World world, int xCoord, int yCoord, int zCoord);
 	}
 
-	public TagsUtility(World world, Tags parent) {
+	public TagsUtility(World world, BaseFunctions parent) {
 		this.world = world;
 		this.parent = parent;
 	}
@@ -42,8 +44,8 @@ public class TagsUtility {
 		for (int i = -xRange; i <= xRange; i++) {
 			for (int k = -zRange; k <= zRange; k++) {
 				for (int j = -yRange; j <= yRange; j++) {
-					if (condition.isMatch(world, parent.posX + i + xOffset, parent.posY + j + yOffset, parent.posZ + k
-							+ zOffset)) {
+					if (condition.isMatch(world, parent.posX() + i + xOffset, parent.posY() + j + yOffset,
+							parent.posZ() + k + zOffset)) {
 						return true;
 					}
 				}
@@ -51,7 +53,7 @@ public class TagsUtility {
 		}
 		return false;
 	}
-	
+
 	public String material(Material material) {
 		if (material == Material.air) {
 			return "air";
@@ -126,11 +128,10 @@ public class TagsUtility {
 		}
 	}
 
-
 	public int rand(int value) {
 		return world.rand.nextInt(value);
 	}
-	
+
 	public void log(String string) {
 		JASLog.log().info("[TAG_LOG]".concat(string));
 	}

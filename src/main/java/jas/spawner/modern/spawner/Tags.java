@@ -7,6 +7,12 @@ import jas.spawner.modern.spawner.TagsUtility.Conditional;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.modern.spawner.creature.handler.parsing.NBTWriter;
+import jas.spawner.modern.spawner.tags.CountFunctions;
+import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.LegacyFunctions;
+import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
+import jas.spawner.modern.spawner.tags.UtilityFunctions;
+import jas.spawner.modern.spawner.tags.WorldFunctions;
 
 import java.util.IllegalFormatException;
 
@@ -24,7 +30,7 @@ import com.google.common.collect.ImmutableMultimap;
 /**
  * Passed to MVEL to be evaluated
  */
-public class Tags {
+public class Tags implements BaseFunctions {
 	private World world;
 	public Optional<EntityLiving> entity;
 	public final int posX;
@@ -280,5 +286,45 @@ public class Tags {
 			JASLog.log().severe("Skipping NBT Write due to %s", e.getMessage());
 		}
 		return false;
+	}
+
+	@Override
+	public int posX() {
+		return posX;
+	}
+
+	@Override
+	public int posY() {
+		return posY;
+	}
+
+	@Override
+	public int posZ() {
+		return posZ;
+	}
+
+	@Override
+	public ObjectiveFunctions obj() {
+		return obj;
+	}
+
+	@Override
+	public UtilityFunctions util() {
+		return util;
+	}
+
+	@Override
+	public LegacyFunctions lgcy() {
+		return lgcy;
+	}
+
+	@Override
+	public WorldFunctions wrld() {
+		return wrld;
+	}
+
+	@Override
+	public CountFunctions count() {
+		return count;
 	}
 }

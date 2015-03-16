@@ -1,7 +1,6 @@
 package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
-import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
@@ -14,28 +13,19 @@ import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.spawner.modern.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.ChunkPosition;
-import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import org.apache.logging.log4j.Level;
