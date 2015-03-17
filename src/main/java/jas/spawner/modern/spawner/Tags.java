@@ -11,6 +11,7 @@ import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
 import jas.spawner.modern.spawner.tags.LegacyFunctions;
 import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
+import jas.spawner.modern.spawner.tags.TimeFunctions;
 import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import jas.spawner.modern.spawner.tags.WorldFunctions;
 
@@ -42,7 +43,8 @@ public class Tags implements BaseFunctions {
 	public final TagsUtility util;
 	public final WorldAccessor wrld;
 	public final CountAccessor count;
-	
+	public final TimeHelper time;
+
 	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ) {
 		this.world = world;
 		this.posX = posX;
@@ -53,6 +55,7 @@ public class Tags implements BaseFunctions {
 		util = new TagsUtility(world, this);
 		wrld = new WorldAccessor(world);
 		count = new CountAccessor(countInfo, this);
+		time = new TimeHelper(world);
 		entity = Optional.absent();
 	}
 
@@ -66,6 +69,7 @@ public class Tags implements BaseFunctions {
 		util = new TagsUtility(world, this);
 		wrld = new WorldAccessor(world);
 		count = new CountAccessor(countInfo, this);
+		time = new TimeHelper(world);
 		this.entity = Optional.of(entity);
 	}
 
@@ -326,5 +330,10 @@ public class Tags implements BaseFunctions {
 	@Override
 	public CountFunctions count() {
 		return count;
+	}
+	
+	@Override
+	public TimeFunctions time() {
+		return time;
 	}
 }

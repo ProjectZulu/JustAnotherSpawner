@@ -23,12 +23,14 @@ import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.LegacyTags;
 import jas.spawner.modern.spawner.TagsObjective;
 import jas.spawner.modern.spawner.TagsUtility;
+import jas.spawner.modern.spawner.TimeHelper;
 import jas.spawner.modern.spawner.WorldAccessor;
 import jas.spawner.modern.spawner.TagsUtility.Conditional;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
 import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.LegacyFunctions;
 import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
+import jas.spawner.modern.spawner.tags.TimeFunctions;
 import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import jas.spawner.modern.spawner.tags.WorldFunctions;
 
@@ -43,6 +45,7 @@ public abstract class CommonContext implements Context, BaseFunctions {
 	public final LegacyTags lgcy;
 	public final TagsUtility util;
 	public final WorldAccessor wrld;
+	public final TimeFunctions time;
 
 	public CommonContext(World world, int posX, int posY, int posZ) {
 		this.world = world;
@@ -53,6 +56,7 @@ public abstract class CommonContext implements Context, BaseFunctions {
 		lgcy = new LegacyTags(world, this);
 		util = new TagsUtility(world, this);
 		wrld = new WorldAccessor(world);
+		time = new TimeHelper(world);
 	}
 
 	@Override
@@ -93,5 +97,10 @@ public abstract class CommonContext implements Context, BaseFunctions {
 	@Override
 	public CountFunctions count() {
 		throw new UnsupportedOperationException("Count Functions are not supported for SpawnEvent objects");
+	}
+
+	@Override
+	public TimeFunctions time() {
+		return time;
 	}
 }

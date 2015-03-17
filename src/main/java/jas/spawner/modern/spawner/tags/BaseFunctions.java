@@ -17,5 +17,6 @@ public interface BaseFunctions {
 	public WorldFunctions wrld();
 
 	public CountFunctions count();
-
+	
+	public TimeFunctions time();
 }
