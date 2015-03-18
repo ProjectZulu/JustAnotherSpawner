@@ -11,6 +11,7 @@ public class DefaultProps {
 
     public static final String ENTITYHANDLERDIR = "EntityHandlers/";
     public static final String ENTITYSPAWNRDIR = "SpawnListEntries/";
+    public static final String EVENTSPAWNDIR = "EventSpawns/";
 
     public static final String GUIDIR = "/mods/jas/gui/";
 

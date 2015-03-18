@@ -1,20 +1,16 @@
 package jas.spawner.modern.spawner;
 
-import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.spawner.modern.spawner.creature.type.CreatureType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;

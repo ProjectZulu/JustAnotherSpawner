@@ -1,57 +1,36 @@
-package jas.spawner.modern.spawner;
+package jas.spawner.modern.eventspawn.context;
 
-import jas.common.JASLog;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.UtilityFunctions;
+import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
+import jas.spawner.modern.eventspawn.SpawnBuilder;
+
+import java.util.Locale;
+
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.world.World;
+import net.minecraftforge.event.world.BlockEvent;
 
-/**
- * Tags that serve no purpose but as intermediate methods for calculations
- */
-public class TagsUtility implements UtilityFunctions {
-	private World world;
-	private BaseFunctions parent;
+public class BlockContext extends CommonContext {
+	private BlockEvent event;
 
-	public static abstract class Conditional {
-		public abstract boolean isMatch(World world, int xCoord, int yCoord, int zCoord);
+	public BlockContext(BlockEvent event) {
+		super(event.world, event.x, event.y, event.z);
+		this.event = event;
+	}
+	
+	public String blockName() {
+		return Block.blockRegistry.getNameForObject(event.block);
 	}
 
-	public TagsUtility(World world, BaseFunctions parent) {
-		this.world = world;
-		this.parent = parent;
+	public int blockMeta() {
+		return event.blockMetadata;
 	}
 
-	public boolean inRange(int current, int minRange, int maxRange) {
-		boolean isValid = !(current <= maxRange && current >= minRange);
-		if (minRange <= maxRange) {
-			isValid = (current <= maxRange && current >= minRange);
-		} else {
-			isValid = !(current < minRange && current > maxRange);
-		}
-		return isValid;
+	public boolean isMaterial(String materialName) {
+		return material().equals(materialName.toLowerCase(Locale.US));
 	}
 
-	public boolean searchAndEvaluateBlock(Conditional condition, Integer[] searchRange, Integer[] searchOffsets) {
-		Integer xRange = searchRange.length == 3 ? searchRange[0] : searchRange[0];
-		Integer yRange = searchRange.length == 3 ? searchRange[1] : searchRange[0];
-		Integer zRange = searchRange.length == 3 ? searchRange[2] : searchRange[0];
-
-		Integer xOffset = searchOffsets.length == 3 ? searchOffsets[0] : searchOffsets[0];
-		Integer yOffset = searchOffsets.length == 3 ? searchOffsets[1] : searchOffsets[0];
-		Integer zOffset = searchOffsets.length == 3 ? searchOffsets[2] : searchOffsets[0];
-
-		for (int i = -xRange; i <= xRange; i++) {
-			for (int k = -zRange; k <= zRange; k++) {
-				for (int j = -yRange; j <= yRange; j++) {
-					if (condition.isMatch(world, parent.posX() + i + xOffset, parent.posY() + j + yOffset,
-							parent.posZ() + k + zOffset)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
+	public String material() {
+		return material(event.world.getBlock(event.x, event.y, event.z).getMaterial());
 	}
 
 	public String material(Material material) {
@@ -128,11 +107,15 @@ public class TagsUtility implements UtilityFunctions {
 		}
 	}
 
-	public int rand(int value) {
-		return world.rand.nextInt(value);
+	public boolean isBlock(String blockName) {
+		return blockName().equals(blockName);
 	}
 
-	public void log(String string) {
-		JASLog.log().info("[TAG_LOG]".concat(string));
+	public boolean isBlock(String blockName, int blockMeta) {
+		return blockMeta == event.blockMetadata && blockName().equals(blockName);
+	}
+
+	public SpawnBuilder spawn(String entityMapping) {
+		return new SingleSpawnBuilder(entityMapping, event.x + 0.5D, event.y, event.z + 0.5D);
 	}
 }

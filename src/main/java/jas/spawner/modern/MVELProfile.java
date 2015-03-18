@@ -7,6 +7,8 @@ import jas.common.Profile;
 import jas.common.global.BiomeBlacklist;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.command.CommandJAS;
+import jas.spawner.modern.eventspawn.EventSpawnRegistry;
+import jas.spawner.modern.eventspawn.EventSpawnTrigger;
 import jas.spawner.modern.spawner.ChunkSpawner;
 import jas.spawner.modern.spawner.SpawnerTicker;
 import jas.spawner.modern.spawner.biome.structure.StructureInterpreterNether;
@@ -36,6 +38,9 @@ public class MVELProfile implements Profile {
 	@Override
 	public void init() {
 		MinecraftForge.EVENT_BUS.register(new EntityDespawner());
+		EventSpawnTrigger spawnTrigger = new EventSpawnTrigger(this);
+		MinecraftForge.EVENT_BUS.register(spawnTrigger);
+		FMLCommonHandler.instance().bus().register(spawnTrigger);
 		MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
 		FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
 		MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
