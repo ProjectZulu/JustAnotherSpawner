@@ -1,7 +1,9 @@
 package jas.spawner.modern.spawner.creature.type;
 
+import jas.common.JustAnotherSpawner;
 import jas.common.helper.MVELHelper;
 import jas.spawner.modern.DefaultProps;
+import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.Tags;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
@@ -46,7 +48,7 @@ public class CreatureType {
 
 	public final int iterationsPerChunk;
 	public final int iterationsPerPack;
-	
+
 	private Optional<Serializable> compSpawnExpression = Optional.absent();
 	public final BiomeGroupRegistry biomeGroupRegistry;
 
@@ -135,8 +137,15 @@ public class CreatureType {
 	 */
 	public boolean isValidMedium(World world, int xCoord, int yCoord, int zCoord) {
 		Block block = world.getBlock(xCoord, yCoord, zCoord);
-		return !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
-				&& world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium;
+		if (spawnMedium == Material.air) {
+			return !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
+					&& (world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium || (!world
+							.getBlock(xCoord, yCoord, zCoord).getMaterial().blocksMovement() && !world
+							.getBlock(xCoord, yCoord, zCoord).getMaterial().isLiquid()));
+		} else {
+			return !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
+					&& world.getBlock(xCoord, yCoord, zCoord).getMaterial() == spawnMedium;
+		}
 	}
 
 	/**
@@ -159,7 +168,7 @@ public class CreatureType {
 						&& !world.getBlock(xCoord, yCoord + 1, zCoord).isNormalCube();
 			} else if (!World.doesBlockHaveSolidTopSurface(world, xCoord, yCoord - 1, zCoord)) {
 				return false;
-			} else {				
+			} else {
 				Block l = world.getBlock(xCoord, yCoord - 1, zCoord);
 				boolean spawnBlock = (l != null && canCreatureSpawn(l, world, xCoord, yCoord - 1, zCoord));
 				return spawnBlock && l != Blocks.bedrock && !world.getBlock(xCoord, yCoord, zCoord).isNormalCube()
