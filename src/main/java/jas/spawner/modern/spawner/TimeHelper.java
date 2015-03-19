@@ -1,7 +1,7 @@
 package jas.spawner.modern.spawner;
 
-import jas.spawner.modern.spawner.tags.BaseFunctions;
 import jas.spawner.modern.spawner.tags.TimeFunctions;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
 public class TimeHelper implements TimeFunctions {
@@ -11,6 +11,14 @@ public class TimeHelper implements TimeFunctions {
 		this.world = world;
 	}
 
+	public int worldTime() {
+		return (int) (world.getWorldTime());
+	}
+
+	public int day() {
+		return MathHelper.floor_double(world.getWorldTime() / 24000) + 1;
+	}
+	
 	/** Time between [0, 24000] */
 	public int timeOfDay() {
 		return (int) (world.getWorldTime() % 24000);

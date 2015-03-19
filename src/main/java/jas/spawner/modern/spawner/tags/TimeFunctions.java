@@ -1,6 +1,13 @@
 package jas.spawner.modern.spawner.tags;
 
+import net.minecraft.util.MathHelper;
+
 public interface TimeFunctions {
+
+	public int worldTime();
+
+	public int day();
+
 	public int timeOfDay();
 
 	public boolean isMidnight();
