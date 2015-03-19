@@ -91,7 +91,8 @@ public class EventSpawnRegistry {
 		}
 		if (eventSpawns.isEmpty()) {
 			List<EventSpawn> defaultSleepSpawn = new ArrayList<EventSpawn>();
-			defaultSleepSpawn.add(new EventSpawn(EventTrigger.SLEEP, ""));
+			defaultSleepSpawn.add(new EventSpawn(EventTrigger.SLEEP,
+					"if(false){ spawn('Zombie').offset(5).alsoSpawn('Zombie',0,0,0) }"));
 			eventSpawns.put(EventTrigger.SLEEP, defaultSleepSpawn);
 		}
 	}
