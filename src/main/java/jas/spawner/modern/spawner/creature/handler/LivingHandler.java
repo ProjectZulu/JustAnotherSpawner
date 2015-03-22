@@ -18,6 +18,7 @@ import java.io.Serializable;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import org.apache.logging.log4j.Level;
 import org.mvel2.MVEL;
@@ -25,6 +26,8 @@ import org.mvel2.MVEL;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class LivingHandler {
 
@@ -107,12 +110,18 @@ public class LivingHandler {
 	public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
 		boolean canLivingSpawn = isValidLiving(entity, info);
 		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry, info);
-
-		if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND) || spawnListEntry.spawnOperand.isPresent()
-				&& spawnListEntry.spawnOperand.get() == Operand.AND) {
-			return canLivingSpawn && canSpawnListSpawn;
+		Result canSpawn = ForgeEventFactory.canEntitySpawn(entity, entity.worldObj, (int) entity.posX,
+				(int) entity.posY, (int) entity.posZ);
+		if ((canSpawn == Result.ALLOW || canSpawn == Result.DENY)
+				&& !(compSpawnExpression.isPresent() || spawnListEntry.getOptionalSpawning().isPresent())) {
+			return canSpawn == Result.ALLOW;
 		} else {
-			return canLivingSpawn || canSpawnListSpawn;
+			if ((spawnOperand.isPresent() && spawnOperand.get() == Operand.AND)
+					|| spawnListEntry.spawnOperand.isPresent() && spawnListEntry.spawnOperand.get() == Operand.AND) {
+				return canLivingSpawn && canSpawnListSpawn;
+			} else {
+				return canLivingSpawn || canSpawnListSpawn;
+			}
 		}
 	}
 

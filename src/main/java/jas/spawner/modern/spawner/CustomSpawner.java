@@ -139,18 +139,7 @@ public class CustomSpawner {
 					entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServer.rand.nextFloat() * 360.0F,
 							0.0F);
 
-					Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer, spawnX, spawnY,
-							spawnZ);
-					if (canSpawn == Result.ALLOW
-							|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
-									entityliving, spawnlistentry, countInfo))) {
-						if (canSpawn == Result.ALLOW) {
-							JASLog.log()
-									.warning(
-											"JAS is spawning entity %s, irrespective of JAS LH & SLE conditions as part of LivingSpawnEvent compatabillity.",
-											(String) EntityList.classToStringMapping.get(entityliving.getClass()));
-						}
-
+					if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);

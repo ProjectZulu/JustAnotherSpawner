@@ -242,11 +242,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ,
 								worldServer.rand.nextFloat() * 360.0F, 0.0F);
 
-						Result canSpawn = ForgeEventFactory.canEntitySpawn(entityliving, worldServer, spawnX, spawnY,
-								spawnZ);
-						if (canSpawn == Result.ALLOW
-								|| (canSpawn == Result.DEFAULT && spawnlistentry.getLivingHandler().getCanSpawnHere(
-										entityliving, spawnlistentry, countInfo))) {
+						if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
 							reportCount.countSpawn(entityliving, creatureType.typeID);
 							
 							if (countInfo.getEntitiesSpawnedThisLoop() >= spawnlistentry.packSize) {
