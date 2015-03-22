@@ -17,8 +17,11 @@ import java.io.File;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
+import net.minecraftforge.event.ForgeEventFactory;
 
 import org.apache.logging.log4j.Level;
+
+import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class LivingHandler {
 
@@ -134,16 +137,23 @@ public class LivingHandler {
      * @param spawnListEntry SpawnListEntry the Entity belongs to
      * @return True if location is valid For entity to spawn, false otherwise
      */
-    public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
-        boolean canLivingSpawn = isValidLiving(entity);
-        boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
-
-        if (spawning.getOperand() == Operand.AND || spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
-            return canLivingSpawn && canSpawnListSpawn;
-        } else {
-            return canLivingSpawn || canSpawnListSpawn;
-        }
-    }
+	public final boolean getCanSpawnHere(EntityLiving entity, SpawnListEntry spawnListEntry) {
+		boolean canLivingSpawn = isValidLiving(entity);
+		boolean canSpawnListSpawn = isValidSpawnList(entity, spawnListEntry);
+		Result canSpawn = ForgeEventFactory.canEntitySpawn(entity, entity.worldObj, (int) entity.posX,
+				(int) entity.posY, (int) entity.posZ);
+		if ((canSpawn == Result.ALLOW || canSpawn == Result.DENY)
+				&& !(spawning.isOptionalEnabled() || spawnListEntry.getOptionalSpawning().isOptionalEnabled())) {
+			return canSpawn == Result.ALLOW;
+		} else {
+			if (spawning.getOperand() == Operand.AND
+					|| spawnListEntry.getOptionalSpawning().getOperand() == Operand.AND) {
+				return canLivingSpawn && canSpawnListSpawn;
+			} else {
+				return canLivingSpawn || canSpawnListSpawn;
+			}
+		}
+	}
 
     /**
      * Evaluates if this Entity in its current location / state would be capable of despawning eventually
