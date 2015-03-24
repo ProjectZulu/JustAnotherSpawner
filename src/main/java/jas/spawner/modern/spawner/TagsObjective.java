@@ -106,7 +106,8 @@ public class TagsObjective implements ObjectiveFunctions {
 				String entityName = MVELProfile.worldSettings().livingGroupRegistry().EntityClasstoJASName.get(entity
 						.getClass());
 				for (String searchName : searchNames) {
-					if (!searchName.trim().equals("") && searchName.equalsIgnoreCase(entityName)) {
+					if (!searchName.trim().equals("")
+							&& (searchName.equals("*") || searchName.equalsIgnoreCase(entityName))) {
 						int distance = (int) Math
 								.sqrt(entity.getDistanceSq(parent.posX(), parent.posY(), parent.posZ()));
 						if (parent.util().inRange(distance, minRange, maxRange)) {
@@ -127,7 +128,8 @@ public class TagsObjective implements ObjectiveFunctions {
 			if (entity.isEntityAlive()) {
 				String entityName = EntityList.getEntityString(entity);
 				for (String searchName : searchNames) {
-					if (!searchName.trim().equals("") && searchName.equalsIgnoreCase(entityName)) {
+					if (!searchName.trim().equals("")
+							&& (searchName.equals("*") || searchName.equalsIgnoreCase(entityName))) {
 						int distance = (int) Math
 								.sqrt(entity.getDistanceSq(parent.posX(), parent.posY(), parent.posZ()));
 						if (parent.util().inRange(distance, minRange, maxRange)) {
