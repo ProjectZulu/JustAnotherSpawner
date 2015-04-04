@@ -106,6 +106,6 @@ task configureChangelog(dependsOn: generateChangelog) {
 	def MAX_CHAR = 40000
 	def maxLength = (CHARS.length() < MAX_CHAR)?CHARS.length():MAX_CHAR
     CHARS = CHARS.substring(0, maxLength)
-	curse.releaseType = CHARS
+	curse.changelog = CHARS
 }
 curse.dependsOn configureChangelog
