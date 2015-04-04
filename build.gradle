@@ -15,11 +15,28 @@ buildscript {
     }
 }
 
+apply plugin: 'java'
 apply plugin: 'forge'
+apply plugin: 'curseforge'
 
 version = "0.16.18"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
+
+curse {
+    projectId = '228952'
+    apiKey = project.curseForgeApiKey
+	
+	displayName = project.archivesBaseName + " v" + project.version
+	releaseType = rType //'release'
+    additionalArtifact "$project.buildDir/libs/" + project.archivesBaseName + "-" + project.version + "-sources.jar"
+
+	//additionalArtifact devJar
+	//artifact = file('some/other/file.jar').text
+    //addGameVersion '1.7.10', '1.7.2'
+    //relatedProject 'forgeservertools'
+    //relatedProject 'forgeservertools': 'embeddedLibrary'
+}
 
 repositories {
 	//mavenCentral()
@@ -35,31 +52,30 @@ repositories {
 }
 
 dependencies {
-	compile 'net.sourceforge.jeval:jeval:0.9.4'
-	compile 'org.mvel:mvel2:2.2.0.Final'
+	//compile 'net.sourceforge.jeval:jeval:0.9.4'
+	//compile 'org.mvel:mvel2:2.2.0.Final'
+	// compile 'com.beust:jcommander:1.30' //JCommander command line arguments
 }
 
 minecraft {
 	version = "1.7.10-10.13.0.1180"
     assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
+	
+	// replacing version information
+    replace "@MC_VERSION@", project.minecraft.version
+    replace "@VERSION@", project.version
+    replaceIn "DefaultProps.java"
 }
 
-//task fatJar(type: Jar) {
-//    baseName = project.name + '-all'
-//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-//    with jar
-//}
-
-processResources
-{
+processResources {
 	// this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
 	
+	
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
         // replace version and mcversion
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
@@ -69,3 +85,27 @@ processResources
         exclude 'mcmod.info'
     }
 }
+
+task generateChangelog(type : Exec) {
+    commandLine "GEN-CHANGELOG.bat"
+}
+
+task addInfoToJar(dependsOn: generateChangelog, type: Copy) {
+	from 'CHANGELOG.md', 'README.md'
+    into 'build/resources/main'
+}
+jar.dependsOn addInfoToJar
+
+task sourceJar(type: Jar, dependsOn:["sourceMainJava", "generateChangelog"]) {
+    from "build/sources/java", "CHANGELOG.md", "README.md" 
+    classifier = 'sources'
+}
+
+task configureChangelog(dependsOn: generateChangelog) {
+	def CHARS = file('CHANGELOG_MOST_RECENT.md').text
+	def MAX_CHAR = 40000
+	def maxLength = (CHARS.length() < MAX_CHAR)?CHARS.length():MAX_CHAR
+    CHARS = CHARS.substring(0, maxLength)
+	curse.releaseType = CHARS
+}
+curse.dependsOn configureChangelog

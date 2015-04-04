@@ -1,1 +1,1 @@
-gradlew.bat setupDecompWorkspace
+gradlew setupDevWorkspace

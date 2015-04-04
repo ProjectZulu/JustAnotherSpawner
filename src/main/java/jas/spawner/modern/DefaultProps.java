@@ -3,7 +3,8 @@ package jas.spawner.modern;
 public class DefaultProps {
     public static final String MODID = "JustAnotherSpawner";
     public static final String MODNAME = "Just Another Spawner";
-    public static final String VERSION = "0.14.0";
+    public static final String VERSION = "@VERSION@";
+    public static final String MC_VERSIONS = "@MC_VERSION@"; // MC version compiled against
     public static final double GSON_VERSION = 1.0D;
     public static final String MODDIR = "/JustAnotherSpawner/";
     public static final String GLOBALSETTINGSDIR = MODDIR;

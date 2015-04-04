@@ -1,1 +1,1 @@
-gradlew.bat --gui
+gradlew --gui

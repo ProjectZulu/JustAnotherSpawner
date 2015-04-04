@@ -1,2 +1,2 @@
-gradlew.bat build
+gradlew build sourceJar -PrType=beta
 PAUSE

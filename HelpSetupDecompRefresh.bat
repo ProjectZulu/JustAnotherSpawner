@@ -1,1 +1,1 @@
-gradlew.bat setupDecompWorkspace --refresh-dependencies
+gradlew setupDevWorkspace --refresh-dependencies
