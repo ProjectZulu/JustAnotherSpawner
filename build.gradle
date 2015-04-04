@@ -30,12 +30,7 @@ curse {
 	displayName = project.archivesBaseName + " v" + project.version
 	releaseType = rType //'release'
     additionalArtifact "$project.buildDir/libs/" + project.archivesBaseName + "-" + project.version + "-sources.jar"
-
-	//additionalArtifact devJar
-	//artifact = file('some/other/file.jar').text
-    //addGameVersion '1.7.10', '1.7.2'
-    //relatedProject 'forgeservertools'
-    //relatedProject 'forgeservertools': 'embeddedLibrary'
+    relatedProject 'jas-compatability-addon': 'optionalLibrary'
 }
 
 repositories {
