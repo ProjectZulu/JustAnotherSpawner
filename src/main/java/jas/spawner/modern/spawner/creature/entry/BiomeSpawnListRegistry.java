@@ -246,9 +246,10 @@ public final class BiomeSpawnListRegistry {
                     SpawnListEntry spawnListEntry = null;
                     try {
                         spawnListEntry = builder.build();
-                    } catch (Exception e) {
-                        JASLog.log().severe("Error building %s. Entry will be ignored [%s].", builder);
-                    }
+					} catch (Exception e) {
+						JASLog.log().severe("Error building SpawnListEntryBuilder %s. Entry will be ignored [%s].",
+								builder.getLivingGroupId(), builder);
+					}
 					if (spawnListEntry != null) {
                         saveFilesProcessed.add(getSaveFileName(spawnListEntry.livingGroupID));
                         addSpawn(spawnListEntry, validEntriesBuilder, invalidEntriesBuilder);
