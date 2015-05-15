@@ -19,6 +19,7 @@ import java.util.IllegalFormatException;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -219,6 +220,8 @@ public class Tags implements BaseFunctions {
 			return ((ITameable) entity.get()).isTamed();
 		} else if (entity.get() instanceof EntityTameable) {
 			return ((EntityTameable) entity.get()).isTamed();
+		} else if (entity.get() instanceof EntityHorse) {
+			return ((EntityHorse) entity.get()).isTame();
 		}
 		return false;
 	}
