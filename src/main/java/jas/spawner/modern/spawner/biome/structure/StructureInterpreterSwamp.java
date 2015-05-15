@@ -51,7 +51,8 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
 			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
 					: null;
-			if (chunkProviderGenerate == null || !(biome instanceof BiomeGenSwamp)) {
+			if (chunkProviderGenerate == null || !(biome instanceof BiomeGenSwamp)
+					|| !areMapFeaturesEnabled(chunkProviderGenerate)) {
 				return null;
 			}
 			try {
@@ -68,6 +69,20 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 			return "WitchHut";
 		}
 		return null;
+	}
+	
+	private boolean areMapFeaturesEnabled(ChunkProviderGenerate chunkProviderGenerate) {
+		Boolean areMapFeaturesEnabled = false;
+		if (chunkProviderGenerate != null) {
+			try {
+				areMapFeaturesEnabled = ReflectionHelper.getCatchableFieldFromReflection("field_73229_q",
+						ChunkProviderGenerate.class, chunkProviderGenerate, Boolean.class);
+			} catch (NoSuchFieldException e) {
+				areMapFeaturesEnabled = ReflectionHelper.getFieldFromReflection("mapFeaturesEnabled",
+						ChunkProviderGenerate.class, chunkProviderGenerate, Boolean.class);
+			}
+		}
+		return areMapFeaturesEnabled;
 	}
 
 	private WeakReference<MapGenStructure> getOrDefault(int dimensionID) {
