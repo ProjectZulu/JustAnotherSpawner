@@ -1,6 +1,7 @@
 package jas.spawner.modern.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
+import jas.common.JASLog;
 import jas.common.helper.ReflectionHelper;
 
 import java.lang.ref.WeakReference;
@@ -46,7 +47,7 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
 			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
 					: null;
-			if (chunkProviderGenerate == null) {
+			if (chunkProviderGenerate == null || !areMapFeaturesEnabled(chunkProviderGenerate)) {
 				return null;
 			}
 			if (strongholdGen == null) {
@@ -83,6 +84,20 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 		return structure;
 	}
 
+	private boolean areMapFeaturesEnabled(ChunkProviderGenerate chunkProviderGenerate) {
+		Boolean areMapFeaturesEnabled = false;
+		if (chunkProviderGenerate != null) {
+			try {
+				areMapFeaturesEnabled = ReflectionHelper.getCatchableFieldFromReflection("field_73229_q",
+						ChunkProviderGenerate.class, chunkProviderGenerate, Boolean.class);
+			} catch (NoSuchFieldException e) {
+				areMapFeaturesEnabled = ReflectionHelper.getFieldFromReflection("mapFeaturesEnabled",
+						ChunkProviderGenerate.class, chunkProviderGenerate, Boolean.class);
+			}
+		}
+		return areMapFeaturesEnabled;
+	}
+	
 	private MapGenStructure getStructure(ChunkProviderGenerate chunkProviderGenerate,
 			Class<? extends MapGenStructure> fieldClass, String fieldName, String obfName) {
 		MapGenStructure structure;
