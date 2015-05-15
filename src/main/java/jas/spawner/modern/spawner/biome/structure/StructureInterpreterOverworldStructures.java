@@ -15,6 +15,7 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -113,7 +114,23 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 
 	private String isLocationStructure(MapGenStructure structure, String structureKey, int xCoord, int yCoord,
 			int zCoord) {
-		return structure != null ? structure.hasStructureAt(xCoord, yCoord, zCoord) ? structureKey : null : null;
+		if (structure == null) {
+			return null;
+		}
+		World structureWorld;
+		try {
+			structureWorld = ReflectionHelper.getCatchableFieldFromReflection("field_75039_c", MapGenBase.class,
+					structure, World.class);
+		} catch (NoSuchFieldException e) {
+			structureWorld = ReflectionHelper.getFieldFromReflection("worldObj", MapGenBase.class, structure,
+					World.class);
+		}
+
+		if (structureWorld != null && structure.hasStructureAt(xCoord, yCoord, zCoord)) {
+			return structureKey;
+		} else {
+			return null;
+		}
 	}
 
 	@Override

@@ -18,6 +18,7 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.biome.BiomeGenSwamp;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraftforge.event.world.WorldEvent;
@@ -64,8 +65,20 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 			}
 			structureRefs.put(world.provider.dimensionId, new WeakReference(mapGenScatteredFeature));
 		}
+		
+		if (mapGenScatteredFeature == null) {
+			return null;
+		}
+		World structureWorld;
+		try {
+			structureWorld = ReflectionHelper.getCatchableFieldFromReflection("field_75039_c", MapGenBase.class,
+					mapGenScatteredFeature, World.class);
+		} catch (NoSuchFieldException e) {
+			structureWorld = ReflectionHelper.getFieldFromReflection("worldObj", MapGenBase.class,
+					mapGenScatteredFeature, World.class);
+		}
 
-		if (mapGenScatteredFeature != null && mapGenScatteredFeature.hasStructureAt(xCoord, yCoord, zCoord)) {
+		if (structureWorld != null && mapGenScatteredFeature.hasStructureAt(xCoord, yCoord, zCoord)) {
 			return "WitchHut";
 		}
 		return null;
