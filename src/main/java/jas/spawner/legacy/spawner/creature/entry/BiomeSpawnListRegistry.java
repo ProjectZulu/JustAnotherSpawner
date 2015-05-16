@@ -77,16 +77,20 @@ public final class BiomeSpawnListRegistry {
         }
     }
 
-    private void logSpawning(SpawnListEntry spawnListEntry, LivingHandler handler, boolean success) {
-        if (success) {
-            JASLog.log().info("Adding SpawnListEntry %s of type %s to BiomeGroup %s", spawnListEntry.livingGroupID,
-                    handler.creatureTypeID, spawnListEntry.locationGroup);
-        } else {
-            JASLog.log().debug(Level.INFO,
-                    "Not adding Generated SpawnListEntry of %s due to Weight %s or ShouldSpawn %s, BiomeGroup: %s",
-                    spawnListEntry.livingGroupID, spawnListEntry.itemWeight, handler, spawnListEntry.locationGroup);
-        }
-    }
+	private void logSpawning(SpawnListEntry spawnListEntry, LivingHandler handler, boolean success) {
+		if (success) {
+			JASLog.log().logSpawnListEntry(spawnListEntry.livingGroupID, "Biome: " + spawnListEntry.locationGroup,
+					success, "of type " + handler.creatureTypeID);
+		} else {
+			JASLog.log()
+					.logSpawnListEntry(
+							spawnListEntry.livingGroupID,
+							"Biome: " + spawnListEntry.locationGroup,
+							success,
+							String.format("due to Weight %s or ShouldSpawn %s", spawnListEntry.itemWeight,
+									handler.shouldSpawn));
+		}
+	}
 
     /**
      * Returns an Immutable copy of every BiomeGroup SpawnList applicable to the provided creature type and biome.
@@ -218,6 +222,7 @@ public final class BiomeSpawnListRegistry {
         File entriesDir = BiomeSpawnListRegistry.getFile(configDirectory,
                 worldProperties.getFolderConfiguration().saveName, "");
         File[] files = FileUtilities.getFileInDirectory(entriesDir, ".cfg");
+        JASLog.log().info("Starting to load and configure Biome SpawnListEntry data");
         for (File entriesFile : files) {
             BiomeSpawnsSaveObject saveObject = GsonHelper.readOrCreateFromGson(
                     FileUtilities.createReader(entriesFile, false), BiomeSpawnsSaveObject.class, gson,
@@ -271,6 +276,7 @@ public final class BiomeSpawnListRegistry {
                 .putAll(validEntriesBuilder).build();
         this.invalidSpawnListEntries = ImmutableTable.<String, String, Set<SpawnListEntry>> builder()
                 .putAll(invalidEntriesBuilder).build();
+        JASLog.log().info("Finished loading and configuring Biome SpawnListEntry data");
     }
 
     private void extractSaveEntriesFromSpawnList(

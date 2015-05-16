@@ -89,6 +89,7 @@ public class StructureHandler {
         ListMultimap<String, SpawnListEntry> structureKeysToSpawnList = ArrayListMultimap.create();
         ListMultimap<String, SpawnListEntry> structureKeysToDisabledpawnList = ArrayListMultimap.create();
 
+        JASLog.log().info("Starting to load and configure Structure SpawnListEntry data");
         for (String structureKey : structureKeys) {
             Collection<SpawnListEntryBuilder> spawnList = readSpawnLists.get(structureKey);
             if (spawnList == null) {
@@ -121,15 +122,17 @@ public class StructureHandler {
 
                 if (!handler.creatureTypeID.equals(CreatureTypeRegistry.NONE)) {
                     if (spawnEntry.itemWeight > 0 && handler.shouldSpawn) {
-                        JASLog.log().info("Adding SpawnListEntry %s of type %s to StructureKey %s", handler.groupID,
-                                handler.creatureTypeID, structureKey);
+						JASLog.log().logSpawnListEntry(handler.groupID, "Structure: " + structureKey, true,
+						"of type " + handler.creatureTypeID);
                         structureKeysToSpawnList.put(structureKey, spawnEntry);
                     } else {
                         structureKeysToDisabledpawnList.put(structureKey, spawnEntry);
-                        JASLog.log().debug(
-                                Level.INFO,
-                                "Not adding Structure SpawnListEntry of %s to StructureKey %s due to Weight %s or ShouldSpawn %s.",
-                                handler.groupID, structureKey, spawnEntry.itemWeight, handler.shouldSpawn);
+						JASLog.log().logSpawnListEntry(
+								handler.groupID,
+								"Structure: " + structureKey,
+								false,
+								String.format("due to Weight %s or ShouldSpawn %s", spawnEntry.itemWeight,
+										handler.shouldSpawn));
                     }
                 } else {
                     JASLog.log().debug(Level.INFO,
@@ -143,6 +146,7 @@ public class StructureHandler {
                 .putAll(structureKeysToSpawnList).build();
         this.structureKeysToDisabledpawnList = ImmutableListMultimap.<String, SpawnListEntry> builder()
                 .putAll(structureKeysToDisabledpawnList).build();
+        JASLog.log().info("Finished loading and configuring Structure SpawnListEntry data");
     }
 
     public static File getFile(File configDirectory, String saveName) {
