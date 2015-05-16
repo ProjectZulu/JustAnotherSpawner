@@ -34,6 +34,7 @@ public class JASLog {
     public final String FILE_VERSION = "1.0";
     private final LogType SPAWNING;
     private final LogType DEBUG;
+    private final LogType SETUP_SPAWNLISTENTRY;
     private final LogType SPAWNING_NAME;
     private final LogType SPAWNING_TYPE;
     private final LogType SPAWNING_POS;
@@ -46,6 +47,7 @@ public class JASLog {
         SPAWNING_TYPE = new LogType(true);
         SPAWNING_POS = new LogType(true);
         SPAWNING_BIOME = new LogType(true);
+        SETUP_SPAWNLISTENTRY = new LogType(true);
     }
 
     public static void setLogger(JASLog log) {
@@ -83,6 +85,17 @@ public class JASLog {
             log(level, format, data);
         }
     }
+    
+	public void logSpawnListEntry(String livingGroupID, String LocationID, boolean success, String detail) {
+		if (SETUP_SPAWNLISTENTRY.isEnabled) {
+			if (success) {
+				JASLog.log().info("Adding SpawnListEntry %s to BiomeGroup %s %s", livingGroupID, detail, LocationID);
+			} else {
+				JASLog.log().debug(Level.INFO, "Not adding generated SpawnListEntry of %s to %s %s",
+						livingGroupID, LocationID, detail);
+			}
+		}
+	}
 
     public void logSpawn(boolean chunkSpawn, String entityName, String creatureType, int xCoord, int yCoord,
             int zCoord, String biomeName) {
