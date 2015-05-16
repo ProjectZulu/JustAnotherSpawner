@@ -242,24 +242,25 @@ public class CustomSpawner {
 							exception.printStackTrace();
 							continue;
 						}
-
 						entityliving.setLocationAndAngles(f, f1, f2, random.nextFloat() * 360.0F, 0.0F);
-						JASLog.log().logSpawn(
-								true,
-								(String) EntityList.classToStringMapping.get(entityliving.getClass()),
-								spawnListEntry.getLivingHandler().creatureTypeID,
-								(int) entityliving.posX,
-								(int) entityliving.posY,
-								(int) entityliving.posZ,
-								BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
-										(int) entityliving.posX, (int) entityliving.posZ)));
-						world.spawnEntityInWorld(entityliving);
-						if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
-							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+						if (spawnListEntry.getLivingHandler().getCanSpawnHere(entityliving, spawnListEntry, countInfo)) {
+							JASLog.log().logSpawn(
+									true,
+									(String) EntityList.classToStringMapping.get(entityliving.getClass()),
+									spawnListEntry.getLivingHandler().creatureTypeID,
+									(int) entityliving.posX,
+									(int) entityliving.posY,
+									(int) entityliving.posZ,
+									BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+											(int) entityliving.posX, (int) entityliving.posZ)));
+							world.spawnEntityInWorld(entityliving);
+							if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
+								entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+							}
+							spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry, countInfo);
+							countInfo.countSpawn(entityliving, creatureType.typeID);
+							flag = true;
 						}
-						spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry, countInfo);
-						countInfo.countSpawn(entityliving, creatureType.typeID);
-						flag = true;
 					} else {
 						JASLog.log().debug(Level.INFO,
 								"Entity not Spawned due to invalid creatureType location. Creature Type was %s",
