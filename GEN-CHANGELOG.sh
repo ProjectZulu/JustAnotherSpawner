@@ -1,7 +1,6 @@
 echo '```' > CHANGELOG.md
 
 prevTag="NONE"
-tagList=$(git tag -l | sort -n -t. -k1,1 -k2,2 -k3,3 -k4,4)
 firstPrint="TRUE"
 
 for tag in $(git tag -l | sort -nr -t. -k1,1 -k2,2 -k3,3 -k4,4)
@@ -10,7 +9,12 @@ do
 		echo "##########################" >> CHANGELOG.md
 		echo "Changelog version $prevTag" >> CHANGELOG.md
 		echo "##########################" >> CHANGELOG.md
-		if [ "$tag" == "0.1.0" ]; then
+		if [ "$tag" == "1.0.0" ]; then
+			git log --graph --oneline --pretty="%ad: %B" --minimal --date=short $tag..$prevTag >> CHANGELOG.md
+		
+			echo "##########################" >> CHANGELOG.md
+			echo "Changelog version $tag" >> CHANGELOG.md
+			echo "##########################" >> CHANGELOG.md
 			git log --graph --oneline --pretty="%ad: %B" --minimal --date=short $tag >> CHANGELOG.md
 		else 
 			git log --graph --oneline --pretty="%ad: %B" --minimal --date=short $tag..$prevTag >> CHANGELOG.md
