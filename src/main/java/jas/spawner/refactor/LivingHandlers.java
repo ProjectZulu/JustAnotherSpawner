@@ -36,6 +36,9 @@ public class LivingHandlers implements ReversibleGroups {
 	private ImmutableMap<String, LivingHandler> livingHandlers;
 	private ImmutableListMultimap<String, String> mappingToGroupID;
 
+	private LivingMappings mappings;
+	private LivingAttributes attributes;
+
 	public LivingHandler getLivingHandler(String handlerID) {
 		return livingHandlers.get(handlerID);
 	}
@@ -57,29 +60,15 @@ public class LivingHandlers implements ReversibleGroups {
 		return mappingToGroupID;
 	}
 
-	private LivingMappings mappings;
-	private LivingAttributes attributes;
-
-	public LivingMappings livingMappings() {
-		return mappings;
-	}
-
-	public LivingAttributes livingAttributes() {
-		return attributes;
-	}
-
-	/** BiomeSpawnLists is added so that LivingHandlers can pass on changes to its dependency */
-	private BiomeSpawnLists biomeRegistry;
-
-	public LivingHandlers(BiomeSpawnLists biomeRegistry) {
-		this.biomeRegistry = biomeRegistry;
+	public LivingHandlers(LivingMappings livingMappings, LivingAttributes livingAttributes) {
+		this.mappings = livingMappings;
+		this.attributes = livingAttributes;
 	}
 
 	public void loadFromConfig(ConfigLoader loader, World world, ImportedSpawnList spawnList) {
 		mappings = new LivingMappings(loader);
 		attributes = new LivingAttributes(loader, mappings);
 
-		// Set<LivingHandlerBuilder> livingHandlers = new HashSet<LivingHandlerBuilder>();
 		ImmutableMapGroupsBuilder<LivingHandlerBuilder> livingBuilders = new ImmutableMapGroupsBuilder<LivingHandlerBuilder>(
 				key);
 		for (Entry<String, LoadedFile<LivingHandlerLoader>> entry : loader.livingHandlerLoaders.entrySet()) {
@@ -98,13 +87,10 @@ public class LivingHandlers implements ReversibleGroups {
 			livingBuilders.addGroup(new LivingHandlerBuilder(mapping));
 		}
 
-		List<LivingHandlerBuilder> sortedHandlers = ListContentGroup.Sorter.getSortedGroups(livingBuilders);
-		livingBuilders.clear();
 		ImmutableMapGroupsBuilder<LivingHandler> livingHandlers = new ImmutableMapGroupsBuilder<LivingHandler>(key);
 		Builder<String, String> mappingToGroupIDBuilder = ImmutableListMultimap.<String, String> builder();
-		for (LivingHandlerBuilder builder : sortedHandlers) {
-			ListContentGroup.Parser.parseGroupContents(builder, mappings, livingBuilders);
-			livingBuilders.addGroup(builder);
+		for (LivingHandlerBuilder builder : livingBuilders.iDToGroup().values()) {
+			ListContentGroup.Parser.parseGroupContents(builder, mappings, attributes);
 			livingHandlers.addGroup(builder.build());
 			for (String mapping : builder.results()) {
 				mappingToGroupIDBuilder.put(mapping, builder.iD());
@@ -145,15 +131,7 @@ public class LivingHandlers implements ReversibleGroups {
 		if (universalCFG) {
 			return "Universal";
 		} else {
-			String modID;
-			String[] mobNameParts = groupID.split("\\.");
-			if (mobNameParts.length >= 2) {
-				String regexRetain = "qwertyuiopasdfghjklzxcvbnm0QWERTYUIOPASDFGHJKLZXCVBNM123456789";
-				modID = CharMatcher.anyOf(regexRetain).retainFrom(mobNameParts[0]);
-			} else {
-				modID = "Vanilla";
-			}
-			return modID;
+			return LivingHelper.guessModID(groupID);
 		}
 	}
 }

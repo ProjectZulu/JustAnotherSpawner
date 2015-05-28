@@ -16,7 +16,7 @@ public class LivingAttributes implements Groups {
 
 	@Override
 	public String key() {
-		return "A|";
+		return "A.";
 	}
 
 	@Override

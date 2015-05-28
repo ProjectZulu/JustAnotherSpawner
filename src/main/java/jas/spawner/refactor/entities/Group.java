@@ -44,20 +44,14 @@ public interface Group {
 
 	public static class Parser {
 
-		public interface Context {
+		public interface Context<T> {
 
-			public BiomeGenBase biome(String mapping);
+			public BiomeGenBase biome(T mapping);
 
 			public ResultsBuilder Builder();
 		}
 
-		public static class ExpressionContext implements Context {
-			public Map<String, Collection<String>> A;
-			public Map<String, Collection<String>> G;
-			public Map<String, Collection<String>> D;
-			private ArrayListMultimap<String, Integer> pckgNameToBiomeID;
-			private Mappings<String, String> mappings;
-
+		public static class ExpressionContext extends ExpressionContext2<String> {
 			public ExpressionContext(Mappings<String, String> mappings) {
 				this(mappings, null, null);
 			}
@@ -71,6 +65,30 @@ public interface Group {
 			}
 
 			public ExpressionContext(Mappings<String, String> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
+				super(mappings, dGroups, aGroups, gGroups);
+			}
+		}
+		
+		public static class ExpressionContext2<T> implements Context<T> {
+			public Map<String, Collection<String>> A;
+			public Map<String, Collection<String>> G;
+			public Map<String, Collection<String>> D;
+			private ArrayListMultimap<String, Integer> pckgNameToBiomeID;
+			private Mappings<String, T> mappings;
+
+			public ExpressionContext2(Mappings<String, T> mappings) {
+				this(mappings, null, null);
+			}
+
+			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups) {
+				this(mappings, dGroups, null, null);
+			}
+
+			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups, Groups aGroups) {
+				this(mappings, dGroups, aGroups, null);
+			}
+
+			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
 				this.mappings = mappings;
 				pckgNameToBiomeID = ArrayListMultimap.create();
 				for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
@@ -92,7 +110,7 @@ public interface Group {
 			}
 
 			@Override
-			public BiomeGenBase biome(String mapping) {
+			public BiomeGenBase biome(T mapping) {
 				String packageName = mappings.mappingToKey().get(mapping);
 				int biomeID = pckgNameToBiomeID.get(packageName).get(0);
 				return BiomeGenBase.getBiomeGenArray()[biomeID];
@@ -104,8 +122,8 @@ public interface Group {
 			}
 		}
 
-		private static class ResultsBuilder {
-			private Set<String> resultMappings = new HashSet<String>();
+		public static class ResultsBuilder {
+			public Set<String> resultMappings = new HashSet<String>();
 
 			public ResultsBuilder() {
 			}

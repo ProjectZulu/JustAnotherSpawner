@@ -1,20 +1,22 @@
-package jas.spawner.refactor.configsloader;
+package jas.spawner.refactor.structure;
 
 import jas.common.helper.GsonHelper;
-import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
+import jas.spawner.refactor.configsloader.BiomeSpawnListLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
+import jas.spawner.refactor.structure.StructureHandlerBuilder.StructureHandler;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Table;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -23,47 +25,59 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class BiomeSpawnListLoader implements VersionedFile {
+import cpw.mods.fml.common.Loader;
+
+/**
+ * @param sortCreatureByBiome Determines order of entity headings
+ * @SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT), <LivingExpression, SpawnListEntry>>>
+ * @!SortByBiome:<CreatureType(MONSTER/AMBIENT), <LivingExpression, <LocationExp, SpawnListEntry>>>
+ * 
+ * @PrimKey == sortCreatureByBiome ? Location : Type
+ * @Sec_Key == sortCreatureByBiome ? Type : LivingExpression
+ * @TertKey == sortCreatureByBiome ? LivingExpression : Location
+ */
+public class StructureHandlerLoader implements VersionedFile {
 	private String version;
+	private boolean sortCreatureByBiome;
 
 	// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT), <LivingExpression, SpawnListEntry>>>
 	// !SortByBiome:<CreatureType(MONSTER/AMBIENT), <LivingExpression, <LocationExp, SpawnListEntry>>>
-	private TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> biomeToTypeToCreature;
-	private boolean sortCreatureByBiome;
+	private final TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primToSecToTertToEntry;
 
-	public BiomeSpawnListLoader() {
+	public StructureHandlerLoader(boolean sortCreatureByBiome) {
 		this.version = Serializer.FILE_VERSION;
+		this.sortCreatureByBiome = sortCreatureByBiome;
+		primToSecToTertToEntry = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
 	}
 
-	private BiomeSpawnListLoader(Boolean sortCreatureByBiome) {
-		biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
+	public StructureHandlerLoader(boolean sortCreatureByBiome, List<StructureHandler> structureHandlers) {
+		this.version = Serializer.FILE_VERSION;
 		this.sortCreatureByBiome = sortCreatureByBiome;
-	}
+		primToSecToTertToEntry = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
 
-	public BiomeSpawnListLoader(Table<String, String, Set<SpawnListEntry>> validSpawnListEntries,
-			boolean sortCreatureByBiome) {
-		this.sortCreatureByBiome = sortCreatureByBiome;
-		biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
+		for (StructureHandler structureHandler : structureHandlers) {
+			for (String structureKey : structureHandler.getStructureKeys()) {
+				for (SpawnListEntry spawnListEntry : structureHandler.structureKeysToSpawnList.get(structureKey)) {
+					putEntry(new SpawnListEntryBuilder(spawnListEntry), primToSecToTertToEntry);
+				}
 
-		for (Set<SpawnListEntry> spawnLists : validSpawnListEntries.values()) {
-			for (SpawnListEntry spawnListEntry : spawnLists) {
-				putEntry(spawnListEntry.locContents, spawnListEntry.livingTypeID, spawnListEntry.entityContents,
-						new SpawnListEntryBuilder(spawnListEntry), biomeToTypeToCreature);
+				for (SpawnListEntry spawnListEntry : structureHandler.structureKeysToDisabledpawnList.get(structureKey)) {
+					putEntry(new SpawnListEntryBuilder(spawnListEntry), primToSecToTertToEntry);
+				}
 			}
 		}
 	}
 
-	private void putEntry(String locationExpression, String livingType, String livingExpression,
-			SpawnListEntryBuilder spawnListEntry,
-			TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primMap) {
-		String primKey = sortCreatureByBiome ? locationExpression : livingType;
-		String secoKey = sortCreatureByBiome ? livingType : livingExpression;
-		String tertKey = sortCreatureByBiome ? livingExpression : locationExpression;
+	private void putEntry(SpawnListEntryBuilder spawnListEntry,
+			TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> keyMap) {
+		String primKey = getPrimaryKey(spawnListEntry);
+		String secoKey = getSecondaryKey(spawnListEntry);
+		String tertKey = getTertiaryKey(spawnListEntry);
 
-		TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = primMap.get(primKey);
+		TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = keyMap.get(primKey);
 		if (secMap == null) {
 			secMap = new TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>();
-			primMap.put(primKey, secMap);
+			keyMap.put(primKey, secMap);
 		}
 		TreeMap<String, SpawnListEntryBuilder> tertMap = secMap.get(secoKey);
 		if (tertMap == null) {
@@ -73,26 +87,39 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		tertMap.put(tertKey, spawnListEntry);
 	}
 
-	public Set<SpawnListEntryBuilder> getBuilders() {
-		Set<SpawnListEntryBuilder> builders = new HashSet<SpawnListEntryBuilder>();
-		for (TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap : biomeToTypeToCreature.values()) {
-			for (TreeMap<String, SpawnListEntryBuilder> tertMap : secMap.values()) {
-				builders.addAll(tertMap.values());
-			}
-		}
-		return builders;
-	}
-
 	@Override
 	public String getVersion() {
 		return version;
 	}
+	
+	public HashMap<String, Collection<SpawnListEntryBuilder>> locKeyToSpawnlist() {
+		HashMap<String, Collection<SpawnListEntryBuilder>> structureKeyToSpawnList = new HashMap<String, Collection<SpawnListEntryBuilder>>();
+		for (Entry<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primEntry : primToSecToTertToEntry
+				.entrySet()) {
+			String primKey = primEntry.getKey();
+			for (Entry<String, TreeMap<String, SpawnListEntryBuilder>> secEntrty : primEntry.getValue().entrySet()) {
+				String secKey = secEntrty.getKey();
+				for (Entry<String, SpawnListEntryBuilder> tertEntrty : secEntrty.getValue().entrySet()) {
+					String tertKey = tertEntrty.getKey();
+					String structureLocation = getLocationExpFromKey(primKey, secKey, tertKey);
 
-	public static class Serializer implements JsonSerializer<BiomeSpawnListLoader>,
-			JsonDeserializer<BiomeSpawnListLoader> {
+					Collection<SpawnListEntryBuilder> spawnList = structureKeyToSpawnList.get(structureLocation);
+					if (spawnList == null) {
+						spawnList = new HashSet<SpawnListEntryBuilder>();
+						structureKeyToSpawnList.put(structureLocation, spawnList);
+					}
+					spawnList.add(tertEntrty.getValue());
+				}
+			}
+		}
+		return structureKeyToSpawnList;
+	}
+
+	public static class Serializer implements JsonSerializer<StructureHandlerLoader>,
+			JsonDeserializer<StructureHandlerLoader> {
 		public final static String FILE_VERSION = "3.0";
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
-		public final String SORT_MODE_KEY = "SORTED_BY_BIOME";
+		public final String SORT_MODE_KEY = "SORTED_BY_LOCATION";
 		public final String SPAWN_LIST_KEY = "SPAWN_LIST_ENTRIES";
 
 		public final String SPAWN_WEIGHT = "WEIGHT";
@@ -104,30 +131,20 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		public final String MODID_KEY = "MOD_ID";
 		public final String LIVING_HANDLER_KEY = "LIVING_HANDLER";
 
-		// private String livingTypeID; // Included in FileFormat
-		// private String locContents; // Included in FileFormat
-		// private String entityContents; // Included in FileFormat
-
-		@Deprecated
-		public final String ENTITY_STAT_KEY = "Weight-PassivePackMax-ChunkPackMin-ChunkPackMax";
-		@Deprecated
-		public final String SPAWN_OPERAND_KEY = "Spawn Operand";
-		@Deprecated
-		public final String ENTITY_TAG_KEY = "Tags";
-
 		private final boolean defaultSortByBiome;
 
 		public Serializer(boolean defaultSortByBiome) {
 			this.defaultSortByBiome = defaultSortByBiome;
 		}
 
+		// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT), <LivingExpression, SpawnListEntry>>>
 		@Override
-		public JsonElement serialize(BiomeSpawnListLoader loader, Type type, JsonSerializationContext context) {
+		public JsonElement serialize(StructureHandlerLoader loader, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
 			endObject.addProperty(SORT_MODE_KEY, loader.sortCreatureByBiome);
 			JsonObject primObject = new JsonObject();
-			for (Entry<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primEnts : loader.biomeToTypeToCreature
+			for (Entry<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primEnts : loader.primToSecToTertToEntry
 					.entrySet()) {
 				String primKey = primEnts.getKey();
 				JsonObject secObject = new JsonObject();
@@ -138,7 +155,7 @@ public class BiomeSpawnListLoader implements VersionedFile {
 						String tertKey = tertEnts.getKey();
 						JsonObject entityValueObject = new JsonObject();
 						SpawnListEntryBuilder builder = tertEnts.getValue();
-						entityValueObject.addProperty(MODID_KEY, builder.getModID());
+						// entityValueObject.addProperty(MODID_KEY, builder.getModID()); // This could be enabled later
 						if (!"".equals(builder.getWeight())) {
 							entityValueObject.addProperty(SPAWN_WEIGHT, builder.getWeight());
 						}
@@ -169,23 +186,24 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		}
 
 		@Override
-		public BiomeSpawnListLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
+		public StructureHandlerLoader deserialize(JsonElement object, Type typeOfT, JsonDeserializationContext context)
 				throws JsonParseException {
 			JsonObject endObject = object.getAsJsonObject();
 			String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
-			BiomeSpawnListLoader saveObject = new BiomeSpawnListLoader(GsonHelper.getMemberOrDefault(endObject,
+			StructureHandlerLoader loader = new StructureHandlerLoader(GsonHelper.getMemberOrDefault(endObject,
 					SORT_MODE_KEY, defaultSortByBiome));
+
 			JsonObject primObject = GsonHelper.getMemberOrDefault(endObject, SPAWN_LIST_KEY, new JsonObject());
 			for (Entry<String, JsonElement> primEntries : primObject.entrySet()) {
 				String primKey = primEntries.getKey();
 				if (primKey == null || primKey.trim().equals("")) {
 					continue;
 				}
-				TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = saveObject.biomeToTypeToCreature
+				TreeMap<String, TreeMap<String, SpawnListEntryBuilder>> secMap = loader.primToSecToTertToEntry
 						.get(primKey);
 				if (secMap == null) {
 					secMap = new TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>();
-					saveObject.biomeToTypeToCreature.put(primKey, secMap);
+					loader.primToSecToTertToEntry.put(primKey, secMap);
 				}
 				for (Entry<String, JsonElement> secEntries : GsonHelper.getAsJsonObject(primEntries.getValue())
 						.entrySet()) {
@@ -202,9 +220,9 @@ public class BiomeSpawnListLoader implements VersionedFile {
 							.entrySet()) {
 						String tertKey = tertEntries.getKey();
 						JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
-						String locExp = saveObject.sortCreatureByBiome ? primKey : tertKey;
-						String livExp = saveObject.sortCreatureByBiome ? tertKey : secKey;
-						String livingType = saveObject.sortCreatureByBiome ? secKey : primKey;
+						String locExp = loader.getLocationExpFromKey(primKey, secKey, tertKey);
+						String livExp = loader.getLivingExpFromKey(primKey, secKey, tertKey);
+						String livingType = loader.getLivingTypeFromKey(primKey, secKey, tertKey);
 						String modID = GsonHelper.getMemberOrDefault(entityValueObject, MODID_KEY,
 								SpawnListEntryBuilder.defaultFileName);
 						String livingHandlerID = GsonHelper.getMemberOrDefault(entityValueObject, LIVING_HANDLER_KEY,
@@ -231,7 +249,31 @@ public class BiomeSpawnListLoader implements VersionedFile {
 					}
 				}
 			}
-			return saveObject;
+			return loader;
 		}
+	}
+
+	private String getPrimaryKey(SpawnListEntryBuilder builder) {
+		return sortCreatureByBiome ? builder.getLocContent() : builder.getLivingTypeID();
+	}
+
+	private String getSecondaryKey(SpawnListEntryBuilder builder) {
+		return sortCreatureByBiome ? builder.getLivingTypeID() : builder.getEntContent();
+	}
+
+	private String getTertiaryKey(SpawnListEntryBuilder builder) {
+		return sortCreatureByBiome ? builder.getEntContent() : builder.getLocContent();
+	}
+
+	private String getLocationExpFromKey(String primKey, String secKey, String tertKey) {
+		return sortCreatureByBiome ? primKey : tertKey;
+	}
+
+	private String getLivingExpFromKey(String primKey, String secKey, String tertKey) {
+		return sortCreatureByBiome ? tertKey : secKey;
+	}
+
+	private String getLivingTypeFromKey(String primKey, String secKey, String tertKey) {
+		return sortCreatureByBiome ? secKey : primKey;
 	}
 }

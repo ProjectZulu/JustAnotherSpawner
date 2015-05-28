@@ -4,6 +4,7 @@ import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.refactor.WorldProperties;
+import jas.spawner.refactor.structure.StructureHandlerLoader;
 
 import java.io.File;
 import java.lang.reflect.Type;
@@ -29,8 +30,10 @@ public class ConfigLoader {
 	public LoadedFile<LivingTypeLoader> livingTypeLoader;
 	public LoadedFile<EntityGroupingLoader> livingGroupLoader;
 	public Map<String, LoadedFile<LivingHandlerLoader>> livingHandlerLoaders;
+	public Map<String, LoadedFile<LivingHandlerLoader>> despawnRulesLoaders;
 	public LoadedFile<BiomeGroupLoader> biomeGroupLoader;
 	public Map<String, LoadedFile<BiomeSpawnListLoader>> biomeSpawnListLoaders;
+	public LoadedFile<StructureHandlerLoader> structureHandlerLoader;
 
 	/** Used for Saving */
 	public ConfigLoader() {
@@ -39,10 +42,12 @@ public class ConfigLoader {
 
 	public ConfigLoader(File settingDirectory, WorldProperties worldProperties) {
 		Type[] types = new java.lang.reflect.Type[] { LivingTypeLoader.class, EntityGroupingLoader.class,
-				LivingHandlerLoader.class, BiomeGroupLoader.class, BiomeSpawnListLoader.class };
+				LivingHandlerLoader.class, BiomeGroupLoader.class, BiomeSpawnListLoader.class,
+				StructureHandlerLoader.class };
 		Object[] serializers = new Object[] { new LivingTypeLoader.Serializer(), new EntityGroupingLoader.Serializer(),
 				new LivingHandlerLoader.Serializer(), new BiomeGroupLoader.Serializer(),
-				new BiomeSpawnListLoader.Serializer(worldProperties.getFolderConfiguration().sortCreatureByBiome) };
+				new BiomeSpawnListLoader.Serializer(worldProperties.getFolderConfiguration().sortCreatureByBiome),
+				new StructureHandlerLoader.Serializer(worldProperties.getFolderConfiguration().sortCreatureByBiome) };
 		Gson gson = GsonHelper.createGson(true, types, serializers);
 
 		this.livingTypeLoader = new LoadedFile(GsonHelper.readOrCreateFromGson(
@@ -75,6 +80,10 @@ public class ConfigLoader {
 					new LoadedFile(GsonHelper.readOrCreateFromGson(FileUtilities.createReader(file, false),
 							BiomeSpawnListLoader.class, gson)));
 		}
+
+		this.structureHandlerLoader = new LoadedFile<StructureHandlerLoader>(GsonHelper.readOrCreateFromGson(
+				FileUtilities.createReader(new File(settingDirectory, "/" + "StructureSpawns.cfg"), false),
+				StructureHandlerLoader.class, gson));
 	}
 
 	public static File getFile(File configDirectory, String saveName, String fileName) {
