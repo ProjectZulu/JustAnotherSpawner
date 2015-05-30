@@ -2,12 +2,14 @@ package jas.spawner.refactor;
 
 import jas.common.JASLog;
 import jas.common.helper.ReflectionHelper;
+import jas.spawner.refactor.entities.LivingMappings;
 
 import java.lang.reflect.InvocationTargetException;
 
 import com.google.common.base.CharMatcher;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
@@ -37,6 +39,14 @@ public class LivingHelper {
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException,
 			NoSuchMethodException, SecurityException {
 		return entityClass.getConstructor(new Class[] { World.class }).newInstance(new Object[] { world });
+	}
+
+	public static Class<? extends EntityLiving> getEntityfromFMLName(String fmlName) {
+		return (Class<? extends EntityLiving>) EntityList.stringToClassMapping.get(fmlName);
+	}
+
+	public static Class<? extends EntityLiving> getEntityfromJASName(String jasName, LivingMappings mappings) {
+		return getEntityfromFMLName(mappings.mappingToKey().get(jasName));
 	}
 
 	/**

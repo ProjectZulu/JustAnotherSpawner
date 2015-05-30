@@ -2,9 +2,9 @@ package jas.spawner.refactor.configsloader;
 
 import jas.common.helper.GsonHelper;
 import jas.spawner.modern.spawner.TagConverter;
+import jas.spawner.refactor.LivingTypeBuilder;
+import jas.spawner.refactor.LivingTypeBuilder.LivingType;
 import jas.spawner.refactor.LivingTypes;
-import jas.spawner.refactor.LivingTypes.LivingType;
-import jas.spawner.refactor.LivingTypes.LivingTypeBuilder;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;

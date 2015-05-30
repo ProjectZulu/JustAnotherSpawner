@@ -1,7 +1,9 @@
 package jas.spawner.refactor.entities;
 
+import jas.spawner.legacy.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.spawner.modern.math.SetAlgebra;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
+import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.mvel.MVELExpression;
 
 import java.util.Collection;
@@ -16,6 +18,10 @@ import net.minecraft.world.biome.BiomeGenBase;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 
+/**
+ * Note: Generics of Group is kinda fucked. results explicitly used String return type for results whereas Mappings
+ * allows and type to be used. Group as well as subclasses and Groups should reflect this.
+ */
 public interface Group {
 	public String iD();
 
@@ -45,57 +51,79 @@ public interface Group {
 	public static class Parser {
 
 		public interface Context<T> {
-
-			public BiomeGenBase biome(T mapping);
-
 			public ResultsBuilder Builder();
 		}
 
-		public static class ExpressionContext extends ExpressionContext2<String> {
-			public ExpressionContext(Mappings<String, String> mappings) {
-				this(mappings, null, null);
-			}
-
-			public ExpressionContext(Mappings<String, String> mappings, Groups dGroups) {
-				this(mappings, dGroups, null, null);
-			}
-
-			public ExpressionContext(Mappings<String, String> mappings, Groups dGroups, Groups aGroups) {
-				this(mappings, dGroups, aGroups, null);
-			}
-
-			public ExpressionContext(Mappings<String, String> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
-				super(mappings, dGroups, aGroups, gGroups);
-			}
-		}
-		
-		public static class ExpressionContext2<T> implements Context<T> {
-			public Map<String, Collection<String>> A;
-			public Map<String, Collection<String>> G;
-			public Map<String, Collection<String>> D;
+		public static class LocationContext<L extends Group> extends ContextBase<String> {
 			private ArrayListMultimap<String, Integer> pckgNameToBiomeID;
-			private Mappings<String, T> mappings;
 
-			public ExpressionContext2(Mappings<String, T> mappings) {
+			public LocationContext(BiomeMappings mappings) {
 				this(mappings, null, null);
 			}
 
-			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups) {
+			public LocationContext(BiomeMappings mappings, Groups dGroups) {
 				this(mappings, dGroups, null, null);
 			}
 
-			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups, Groups aGroups) {
+			public LocationContext(BiomeMappings mappings, Groups dGroups, Groups aGroups) {
 				this(mappings, dGroups, aGroups, null);
 			}
 
-			public ExpressionContext2(Mappings<String, T> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
-				this.mappings = mappings;
+			public LocationContext(BiomeMappings mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
+				super(mappings, dGroups, aGroups, gGroups);
 				pckgNameToBiomeID = ArrayListMultimap.create();
 				for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
 					if (biome != null) {
 						pckgNameToBiomeID.put(BiomeHelper.getPackageName(biome), biome.biomeID);
 					}
 				}
+			}
+
+			public BiomeGenBase biome(String mapping) {
+				String packageName = mappings.mappingToKey().get(mapping);
+				int biomeID = pckgNameToBiomeID.get(packageName).get(0);
+				return BiomeGenBase.getBiomeGenArray()[biomeID];
+			}
+		}
+
+		public static class LivingContext extends ContextBase<String> {
+			public LivingContext(LivingMappings mappings) {
+				this(mappings, null, null);
+			}
+
+			public LivingContext(LivingMappings mappings, Groups dGroups) {
+				this(mappings, dGroups, null, null);
+			}
+
+			public LivingContext(LivingMappings mappings, Groups dGroups, Groups aGroups) {
+				this(mappings, dGroups, aGroups, null);
+			}
+
+			public LivingContext(LivingMappings mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
+				super(mappings, dGroups, aGroups, gGroups);
+			}
+		}
+
+		public static class ContextBase</* K, */T> implements Context<T> {
+			public Map<String, Collection<String>> A;
+			public Map<String, Collection<String>> G;
+			public Map<String, Collection<String>> D;
+			protected Mappings<String, T> mappings;
+
+			public ContextBase(Mappings<String, T> mappings) {
+				this(mappings, null, null);
+			}
+
+			public ContextBase(Mappings<String, T> mappings, Groups dGroups) {
+				this(mappings, dGroups, null, null);
+			}
+
+			public ContextBase(Mappings<String, T> mappings, Groups dGroups, Groups aGroups) {
+				this(mappings, dGroups, aGroups, null);
+			}
+
+			public ContextBase(Mappings<String, T> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
+				this.mappings = mappings;
 				A = aGroups != null ? convert(aGroups) : new HashMap<String, Collection<String>>();
 				G = gGroups != null ? convert(gGroups) : new HashMap<String, Collection<String>>();
 				D = dGroups != null ? convert(dGroups) : new HashMap<String, Collection<String>>();
@@ -107,13 +135,6 @@ public interface Group {
 					map.put(entry.getKey(), entry.getValue().results());
 				}
 				return map;
-			}
-
-			@Override
-			public BiomeGenBase biome(T mapping) {
-				String packageName = mappings.mappingToKey().get(mapping);
-				int biomeID = pckgNameToBiomeID.get(packageName).get(0);
-				return BiomeGenBase.getBiomeGenArray()[biomeID];
 			}
 
 			@Override
@@ -151,7 +172,7 @@ public interface Group {
 			public ResultsBuilder R(Collection<String> mappings) {
 				remove(mappings);
 				return this;
-				}
+			}
 
 			public ResultsBuilder I(Collection<String> mappings) {
 				intersection(mappings);

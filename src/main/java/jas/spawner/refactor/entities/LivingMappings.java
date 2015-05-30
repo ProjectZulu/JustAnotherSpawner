@@ -2,7 +2,7 @@ package jas.spawner.refactor.entities;
 
 import jas.common.JASLog;
 import jas.spawner.refactor.configsloader.ConfigLoader;
-import jas.spawner.refactor.configsloader.EntityGroupingLoader;
+import jas.spawner.refactor.configsloader.LivingSettingsLoader;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 
-public class LivingMappings implements Mappings<Class<? extends EntityLiving>, String> {
+public class LivingMappings implements Mappings<String, String> {
 	private final HashMap<String, String> entityPackageToPrefix;
 	private final String UNKNOWN_PREFIX;
 	{
@@ -33,17 +33,17 @@ public class LivingMappings implements Mappings<Class<? extends EntityLiving>, S
 	}
 
 	private List<String> newMappings;
-	private ImmutableBiMap<Class<? extends EntityLiving>, String> EntityClasstoJASName;
-	private ImmutableBiMap<String, Class<? extends EntityLiving>> JASNametoEntityClass;
+	private ImmutableBiMap<String, String> FMLnametoJASName;
+	private ImmutableBiMap<String, String> JASNametoFMLName;
 
 	public LivingMappings(ConfigLoader loader) {
 		loadFromConfig(loader);
 	}
 
 	private void loadFromConfig(ConfigLoader loader) {
-		EntityGroupingLoader entityGroupLoader = loader.livingGroupLoader.saveObject;
+		LivingSettingsLoader entityGroupLoader = loader.livingGroupLoader.saveObject;
 		List<String> newJASNames = new ArrayList<String>();
-		BiMap<Class<? extends EntityLiving>, String> entityClassToJASNameBuilder = HashBiMap.create();
+		BiMap<String, String> FMLnametoJASNameBuilder = HashBiMap.create();
 		for (Entry<String, String> entry : entityGroupLoader.fmlToJASName.entrySet()) {
 			Class<?> entityClass = (Class<?>) EntityList.stringToClassMapping.get(entry.getKey());
 			if (entityClass == null || !EntityLiving.class.isAssignableFrom(entityClass)
@@ -53,7 +53,13 @@ public class LivingMappings implements Mappings<Class<? extends EntityLiving>, S
 			}
 			@SuppressWarnings("unchecked")
 			Class<? extends EntityLiving> livingClass = (Class<? extends EntityLiving>) entityClass;
-			entityClassToJASNameBuilder.put(livingClass, entry.getValue());
+			String fmlName = (String) EntityList.classToStringMapping.get(livingClass);
+			if (fmlName == null || fmlName.trim().equals("")) {
+				JASLog.log().severe("Entity class %s does not have a registered name currently [%s]", livingClass,
+						fmlName);
+			} else {
+				FMLnametoJASNameBuilder.put(fmlName, entry.getValue());
+			}
 		}
 		@SuppressWarnings("unchecked")
 		Set<Entry<Class<?>, String>> fmlNames = EntityList.classToStringMapping.entrySet();
@@ -85,9 +91,18 @@ public class LivingMappings implements Mappings<Class<? extends EntityLiving>, S
 						.debug(Level.INFO, "Found new mapping FML,JasName pair [%s,%s] ", entry.getValue(), jasName);
 				newJASNames.add(jasName);
 				processedEntitiesAndJASNames.put(livingClass, jasName);
-				entityClassToJASNameBuilder.forcePut(livingClass, jasName);
+				String fmlName = (String) EntityList.classToStringMapping.get(livingClass);
+				if (fmlName == null || fmlName.trim().equals("")) {
+					JASLog.log().severe("Entity class %s does not have a registered name currently[%s]", livingClass,
+							fmlName);
+				} else {
+					FMLnametoJASNameBuilder.forcePut(fmlName, jasName);
+				}
 			}
 		}
+
+		this.FMLnametoJASName = ImmutableBiMap.<String, String> builder().putAll(FMLnametoJASNameBuilder).build();
+		this.JASNametoFMLName = FMLnametoJASName.inverse();
 	}
 
 	/**
@@ -124,12 +139,12 @@ public class LivingMappings implements Mappings<Class<? extends EntityLiving>, S
 	}
 
 	@Override
-	public ImmutableBiMap<Class<? extends EntityLiving>, String> keyToMapping() {
-		return EntityClasstoJASName;
+	public ImmutableBiMap<String, String> keyToMapping() {
+		return FMLnametoJASName;
 	}
 
 	@Override
-	public ImmutableBiMap<String, Class<? extends EntityLiving>> mappingToKey() {
-		return JASNametoEntityClass;
+	public ImmutableBiMap<String, String> mappingToKey() {
+		return JASNametoFMLName;
 	}
 }

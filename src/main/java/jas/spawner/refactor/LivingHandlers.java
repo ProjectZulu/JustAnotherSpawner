@@ -1,10 +1,9 @@
 package jas.spawner.refactor;
 
-import jas.common.global.ImportedSpawnList;
 import jas.spawner.refactor.configsloader.ConfigLoader;
-import jas.spawner.refactor.configsloader.EntityGroupingLoader;
-import jas.spawner.refactor.configsloader.LivingHandlerLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.LoadedFile;
+import jas.spawner.refactor.configsloader.LivingHandlerLoader;
+import jas.spawner.refactor.configsloader.LivingSettingsLoader;
 import jas.spawner.refactor.entities.Group.ReversibleGroups;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 import jas.spawner.refactor.entities.ListContentGroup;
@@ -19,25 +18,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import net.minecraft.world.World;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableListMultimap.Builder;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 
-public class LivingHandlers implements ReversibleGroups {
+public class LivingHandlers implements ReversibleGroups<LivingHandler> {
 	/* Mapping from GroupID to LivingHandler */
 	private ImmutableMap<String, LivingHandler> livingHandlers;
 	private ImmutableListMultimap<String, String> mappingToGroupID;
-
-	private LivingMappings mappings;
-	private LivingAttributes attributes;
 
 	public LivingHandler getLivingHandler(String handlerID) {
 		return livingHandlers.get(handlerID);
@@ -60,15 +54,11 @@ public class LivingHandlers implements ReversibleGroups {
 		return mappingToGroupID;
 	}
 
-	public LivingHandlers(LivingMappings livingMappings, LivingAttributes livingAttributes) {
-		this.mappings = livingMappings;
-		this.attributes = livingAttributes;
+	public LivingHandlers(ConfigLoader loader, LivingMappings mappings, LivingAttributes attributes) {
+		loadFromConfig(loader, mappings, attributes);
 	}
 
-	public void loadFromConfig(ConfigLoader loader, World world, ImportedSpawnList spawnList) {
-		mappings = new LivingMappings(loader);
-		attributes = new LivingAttributes(loader, mappings);
-
+	public void loadFromConfig(ConfigLoader loader, LivingMappings mappings, LivingAttributes attributes) {
 		ImmutableMapGroupsBuilder<LivingHandlerBuilder> livingBuilders = new ImmutableMapGroupsBuilder<LivingHandlerBuilder>(
 				key);
 		for (Entry<String, LoadedFile<LivingHandlerLoader>> entry : loader.livingHandlerLoaders.entrySet()) {
@@ -100,12 +90,13 @@ public class LivingHandlers implements ReversibleGroups {
 		this.mappingToGroupID = mappingToGroupIDBuilder.build();
 	}
 
-	public void saveToConfig(WorldProperties worldProperties, ConfigLoader loader) {
+	public void saveToConfig(WorldProperties worldProperties, ConfigLoader loader, LivingMappings mappings,
+			LivingAttributes attributes) {
 		Collection<LivingGroupBuilder> livGrpBuilders = new ArrayList<LivingGroupBuilder>();
 		for (LivingGroup attribute : attributes.iDToGroup().values()) {
 			livGrpBuilders.add(new LivingGroupBuilder(attribute));
 		}
-		loader.livingGroupLoader = new LoadedFile(new EntityGroupingLoader(mappings.keyToMapping(), livGrpBuilders));
+		loader.livingGroupLoader = new LoadedFile(new LivingSettingsLoader(mappings.keyToMapping(), livGrpBuilders));
 
 		Map<String, Collection<LivingHandlerBuilder>> fileNameToLivingHandlers = new HashMap<String, Collection<LivingHandlerBuilder>>();
 		for (LivingHandler handler : livingHandlers.values()) {

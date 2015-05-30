@@ -37,6 +37,13 @@ public class BiomeGroupBuilder implements MutableContentGroup<String> {
 		this.expression = expression;
 	}
 
+	public BiomeGroupBuilder(BiomeGroup biomeGroup) {
+		this.groupID = biomeGroup.groupID;
+		this.configName = biomeGroup.configName;
+		this.expression = biomeGroup.expression;
+		this.pckgNames = biomeGroup.pckgNames;
+	}
+
 	public BiomeGroup build() {
 		return new BiomeGroup(this);
 	}
@@ -101,12 +108,12 @@ public class BiomeGroupBuilder implements MutableContentGroup<String> {
 	public String content() {
 		return expression;
 	}
-	
+
 	@Override
 	public void setResults(Set<String> results) {
 		this.pckgNames = results;
 	}
-	
+
 	@Override
 	public void setContents(String expression) {
 		this.expression = expression;

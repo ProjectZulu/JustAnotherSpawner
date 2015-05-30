@@ -24,22 +24,21 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class EntityGroupingLoader implements VersionedFile {
+public class LivingSettingsLoader implements VersionedFile {
 	private String version;
 	public final TreeMap<String, String> fmlToJASName;
 	public Optional<TreeMap<String, TreeMap<String, LivingGroupBuilder>>> configNameToAttributeGroups;
 
-	public EntityGroupingLoader() {
+	public LivingSettingsLoader() {
 		this.fmlToJASName = new TreeMap<String, String>();
 		this.configNameToAttributeGroups = Optional.absent();
 		this.version = Serializer.FILE_VERSION;
 	}
 
-	public EntityGroupingLoader(Map<Class<? extends EntityLiving>, String> classNamesToJASNames,
-			Collection<LivingGroupBuilder> attributeGroups) {
+	public LivingSettingsLoader(Map<String, String> classNamesToJASNames, Collection<LivingGroupBuilder> attributeGroups) {
 		this.fmlToJASName = new TreeMap<String, String>();
-		for (Entry<Class<? extends EntityLiving>, String> entry : classNamesToJASNames.entrySet()) {
-			String fmlName = (String) EntityList.classToStringMapping.get(entry.getKey());
+		for (Entry<String, String> entry : classNamesToJASNames.entrySet()) {
+			String fmlName = entry.getKey();
 			fmlToJASName.put(fmlName, entry.getValue());
 		}
 		this.configNameToAttributeGroups = Optional.of(new TreeMap<String, TreeMap<String, LivingGroupBuilder>>());
@@ -64,8 +63,8 @@ public class EntityGroupingLoader implements VersionedFile {
 		return version;
 	}
 
-	public static class Serializer implements JsonSerializer<EntityGroupingLoader>,
-			JsonDeserializer<EntityGroupingLoader> {
+	public static class Serializer implements JsonSerializer<LivingSettingsLoader>,
+			JsonDeserializer<LivingSettingsLoader> {
 		public final static String FILE_VERSION = "2.0";
 		public final static String FILE_VERSION_KEY = "File Version";
 		public final static String ENTITY_MAP_KEY = "CustomEntityNames";
@@ -76,7 +75,7 @@ public class EntityGroupingLoader implements VersionedFile {
 		public final static String GROUP_KEY = "EntityGroups";
 
 		@Override
-		public JsonElement serialize(EntityGroupingLoader saveObject, Type type, JsonSerializationContext context) {
+		public JsonElement serialize(LivingSettingsLoader saveObject, Type type, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, FILE_VERSION);
 
@@ -110,8 +109,8 @@ public class EntityGroupingLoader implements VersionedFile {
 		}
 
 		@Override
-		public EntityGroupingLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context) {
-			EntityGroupingLoader saveObject = new EntityGroupingLoader();
+		public LivingSettingsLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context) {
+			LivingSettingsLoader saveObject = new LivingSettingsLoader();
 			JsonObject endObject = object.getAsJsonObject();
 			String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
 

@@ -3,16 +3,13 @@ package jas.spawner.refactor.biome.list;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.LivingHelper;
+import jas.spawner.refactor.LivingTypeBuilder.LivingType;
 import jas.spawner.refactor.LivingTypes;
-import jas.spawner.refactor.LivingTypes.LivingType;
 import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.entities.Group;
-import jas.spawner.refactor.entities.ListContentGroup;
-import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
 import jas.spawner.refactor.entities.LivingMappings;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import net.minecraft.entity.EntityLiving;
@@ -90,7 +87,7 @@ public class SpawnEntryGenerator {
 	private String guessCreatureTypeOfGroup(World world, LivingMappings mappings, String... entityJASNames) {
 		/* Find entity and inquire as to type */
 		for (String jasName : entityJASNames) {
-			Class<? extends EntityLiving> livingClass = mappings.mappingToKey().get(jasName);
+			Class<? extends EntityLiving> livingClass = LivingHelper.getEntityfromJASName(jasName, mappings);
 			EntityLiving creature = LivingHelper.createCreature(livingClass, world);
 			for (EnumCreatureType type : EnumCreatureType.values()) {
 				boolean isType = creature != null ? creature.isCreatureType(type, true) : type.getClass()
@@ -107,7 +104,8 @@ public class SpawnEntryGenerator {
 					for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry entry : importedSpawnList
 							.getSpawnableCreatureList(biome, creatureType)) {
 						for (String jasName : entityJASNames) {
-							Class<? extends EntityLiving> livingClass = mappings.mappingToKey().get(jasName);
+							Class<? extends EntityLiving> livingClass = LivingHelper.getEntityfromJASName(jasName,
+									mappings);
 							if (entry.entityClass.equals(livingClass)) {
 								LivingType type = livingTypes.getLivingType(creatureType.toString());
 								if (type != null) {
@@ -128,7 +126,8 @@ public class SpawnEntryGenerator {
 		for (Integer biomeID : pckgNameToBiomeID.get(locationMappings.mappingToKey().get(locationMapping))) {
 			Collection<net.minecraft.world.biome.BiomeGenBase.SpawnListEntry> spawnListEntries = importedSpawnList
 					.getSpawnableCreatureList(biomeID);
-			Class<? extends EntityLiving> livingClass = livingMappings.mappingToKey().get(livingMapping);
+			Class<? extends EntityLiving> livingClass = LivingHelper
+					.getEntityfromJASName(livingMapping, livingMappings);
 			for (net.minecraft.world.biome.BiomeGenBase.SpawnListEntry spawnListEntry : spawnListEntries) {
 				if (spawnListEntry.entityClass.equals(livingClass)) {
 					return new int[] { spawnListEntry.itemWeight, spawnListEntry.minGroupCount,

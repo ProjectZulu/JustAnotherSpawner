@@ -1,11 +1,11 @@
 package jas.spawner.refactor.biome;
 
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
-import jas.spawner.refactor.configsloader.BiomeGroupLoader;
+import jas.spawner.refactor.configsloader.BiomeSettingsLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.Group.Groups;
-import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
+import jas.spawner.refactor.entities.Group.Parser.LocationContext;
 import jas.spawner.refactor.entities.Group.ReversibleGroups;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
@@ -42,7 +42,7 @@ public class BiomeAttributes implements ReversibleGroups {
 	}
 
 	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings, Groups dictionary) {
-		BiomeGroupLoader savedStats = loader.biomeGroupLoader.saveObject;
+		BiomeSettingsLoader savedStats = loader.biomeGroupLoader.saveObject;
 		ImmutableMapGroupsBuilder<BiomeGroupBuilder> attributeGroups = new ImmutableMapGroupsBuilder<BiomeGroupBuilder>(
 				"A|");
 		if (savedStats.getConfigNameToAttributeGroups().isPresent()) {
@@ -56,7 +56,7 @@ public class BiomeAttributes implements ReversibleGroups {
 			}
 		}
 
-		ExpressionContext context = new ExpressionContext(biomeMappings, dictionary);
+		LocationContext context = new LocationContext(biomeMappings, dictionary);
 		ListMultimap<String, String> packgNameToAttribIDsBuilder = ArrayListMultimap.create();
 		ImmutableMapGroupsBuilder<BiomeGroup> attributeBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>("A|");
 		for (BiomeGroupBuilder biomeGroup : attributeGroups.iDToGroup().values()) {

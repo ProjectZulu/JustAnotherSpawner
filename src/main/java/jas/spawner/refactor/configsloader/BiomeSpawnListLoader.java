@@ -1,19 +1,17 @@
 package jas.spawner.refactor.configsloader;
 
 import jas.common.helper.GsonHelper;
-import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Table;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -39,17 +37,14 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
 		this.sortCreatureByBiome = sortCreatureByBiome;
 	}
-
-	public BiomeSpawnListLoader(Table<String, String, Set<SpawnListEntry>> validSpawnListEntries,
-			boolean sortCreatureByBiome) {
+	
+	public BiomeSpawnListLoader(Collection<SpawnListEntryBuilder> spawnListEntries, boolean sortCreatureByBiome) {
 		this.sortCreatureByBiome = sortCreatureByBiome;
 		biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
 
-		for (Set<SpawnListEntry> spawnLists : validSpawnListEntries.values()) {
-			for (SpawnListEntry spawnListEntry : spawnLists) {
-				putEntry(spawnListEntry.locContents, spawnListEntry.livingTypeID, spawnListEntry.entityContents,
-						new SpawnListEntryBuilder(spawnListEntry), biomeToTypeToCreature);
-			}
+		for (SpawnListEntryBuilder spawnListEntry : spawnListEntries) {
+			putEntry(spawnListEntry.getLocContent(), spawnListEntry.getLivingTypeID(), spawnListEntry.getEntContent(),
+					spawnListEntry, biomeToTypeToCreature);
 		}
 	}
 

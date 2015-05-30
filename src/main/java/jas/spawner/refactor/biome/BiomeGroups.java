@@ -1,11 +1,11 @@
 package jas.spawner.refactor.biome;
 
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
-import jas.spawner.refactor.configsloader.BiomeGroupLoader;
+import jas.spawner.refactor.configsloader.BiomeSettingsLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.Group.Groups;
-import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
+import jas.spawner.refactor.entities.Group.Parser.LocationContext;
 import jas.spawner.refactor.entities.Group.ReversibleGroups;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
@@ -39,12 +39,13 @@ public class BiomeGroups implements ReversibleGroups {
 		return mappingToGroupID;
 	}
 
-	public BiomeGroups(ConfigLoader loader, BiomeMappings biomeMappings, Groups attributes, Groups dictionary) {
-		loadFromConfig(loader, biomeMappings, attributes, dictionary);
+	public BiomeGroups(ConfigLoader loader, BiomeMappings biomeMappings, Groups dictionary, BiomeAttributes attributes) {
+		loadFromConfig(loader, biomeMappings, dictionary, attributes);
 	}
 
-	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings, Groups attributes, Groups dictionary) {
-		BiomeGroupLoader savedStats = loader.biomeGroupLoader.saveObject;
+	private void loadFromConfig(ConfigLoader loader, BiomeMappings biomeMappings, Groups dictionary,
+			BiomeAttributes attributes) {
+		BiomeSettingsLoader savedStats = loader.biomeGroupLoader.saveObject;
 		ImmutableMapGroupsBuilder<BiomeGroupBuilder> biomeGroups = new ImmutableMapGroupsBuilder<BiomeGroupBuilder>(key);
 		if (savedStats.getConfigNameToAttributeGroups().isPresent()) {
 			for (TreeMap<String, BiomeGroupBuilder> entries : savedStats.getConfigNameToAttributeGroups().get()
@@ -64,7 +65,7 @@ public class BiomeGroups implements ReversibleGroups {
 			biomeGroups.addGroup(builder);
 		}
 
-		ExpressionContext context = new ExpressionContext(biomeMappings, dictionary, attributes);
+		LocationContext context = new LocationContext(biomeMappings, dictionary, attributes);
 		ListMultimap<String, String> packgNameToBGIDsBuilder = ArrayListMultimap.create();
 		ImmutableMapGroupsBuilder<BiomeGroup> biomeGroupBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>(key);
 		for (BiomeGroupBuilder biomeGroup : biomeGroups.iDToGroup().values()) {

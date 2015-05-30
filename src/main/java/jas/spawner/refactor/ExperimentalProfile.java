@@ -5,6 +5,7 @@ import jas.common.JustAnotherSpawner;
 import jas.common.Profile;
 import jas.common.global.BiomeBlacklist;
 import jas.common.global.ImportedSpawnList;
+import jas.spawner.modern.DefaultProps;
 
 import java.io.File;
 
@@ -16,9 +17,6 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
  * Experimental Profile. SpawnListEntry is the center spawning object, each entry specifies the corresponding
  * LivingHandler and LivingType
  * 
- * For despawning/counting/in World Entities each hold the LivingHandler and SpawnListEntry that apply to them
- * internally via NBT/Forge.EntityProps.
- * 
  * Notable issue is behavior of entities after changes to LivingType/LivingHandler name and how those do not propegate
  * to already spawned entities; or cannot do so with clumsily detailing defaults elsewhere OR removing the ability to
  * scriptify EntitySpawn expression (change to Array?).
@@ -27,6 +25,7 @@ public class ExperimentalProfile implements Profile {
 	private static WorldSettings worldSettings;
 	private static BiomeBlacklist biomeBlacklist;
 	private static ImportedSpawnList importedSpawnList;
+	public static final String PROFILE_FOLDER = "EXPERIMENTAL/";
 
 	@Override
 	public void init() {
@@ -44,7 +43,8 @@ public class ExperimentalProfile implements Profile {
 
 	@Override
 	public void loadFromConfig(File configDirectory, World world) {
-		worldSettings = new WorldSettings(configDirectory, world, importedSpawnList);
+		File profileDir = new File(DefaultProps.WORLDSETTINGSDIR + PROFILE_FOLDER);
+		worldSettings = new WorldSettings(profileDir, world, importedSpawnList);
 	}
 
 	@Override

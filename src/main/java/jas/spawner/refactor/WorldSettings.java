@@ -1,7 +1,6 @@
 package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
-import jas.spawner.modern.DefaultProps;
 
 import java.io.File;
 import java.util.HashMap;
@@ -10,24 +9,25 @@ import net.minecraft.world.World;
 
 public class WorldSettings {
 	private WorldProperties worldProperties;
-
-	SpawnSettings defaultSpawnSettings;
+	private SpawnSettings defaultSpawnSettings;
 	private HashMap<Integer, SpawnSettings> dimSpawnOverrides;
 
-	public WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
-		worldProperties = new WorldProperties();
-		loadWorldSettings(modConfigDirectoryFile, world);
-		saveWorldSettings(modConfigDirectoryFile, world);
+	public WorldSettings(File profileDirectory, World world, ImportedSpawnList importedSpawnList) {
+		this.worldProperties = new WorldProperties();
+		this.loadWorldSettings(profileDirectory, world);
+		this.saveWorldSettings(profileDirectory, world);
 	}
 
-	public void loadWorldSettings(File modConfigDirectoryFile, World world) {
-		File defaultWorldSettingDirectory = new File(DefaultProps.WORLDSETTINGSDIR
+	public void loadWorldSettings(File profileDirectory, World world) {
+		File defaultWorldSettingDirectory = new File(profileDirectory
 				+ worldProperties.getFolderConfiguration().saveName + "/");
 		defaultSpawnSettings = new SpawnSettings(world, worldProperties, defaultWorldSettingDirectory);
 	}
 
-	public void saveWorldSettings(File modConfigDirectoryFile, World world) {
-
+	public void saveWorldSettings(File profileDirectory, World world) {
+		File defaultWorldSettingDirectory = new File(profileDirectory
+				+ worldProperties.getFolderConfiguration().saveName + "/");
+		defaultSpawnSettings.saveToConfig(world, worldProperties, defaultWorldSettingDirectory);
 	}
 
 	public SpawnSettings getSpawnSettings(World world) {
@@ -38,7 +38,7 @@ public class WorldSettings {
 			return dimSpawnSettings != null ? dimSpawnSettings : defaultSpawnSettings;
 		}
 	}
-	
+
 	public BiomeSpawnLists getBiomeSpawnListRegistry(World world) {
 		return defaultSpawnSettings.biomeGroupRegistry();
 	}

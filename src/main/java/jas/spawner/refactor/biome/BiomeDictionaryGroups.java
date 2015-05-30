@@ -4,7 +4,7 @@ import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
 import jas.spawner.refactor.entities.Group;
 import jas.spawner.refactor.entities.Group.Groups;
-import jas.spawner.refactor.entities.Group.Parser.ExpressionContext;
+import jas.spawner.refactor.entities.Group.Parser.LocationContext;
 import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
 import java.util.Map;
@@ -58,7 +58,7 @@ public class BiomeDictionaryGroups implements Groups {
 		}
 
 		ListMultimap<String, String> mappingToGroupIDBuilder = ArrayListMultimap.create();
-		ExpressionContext context = new ExpressionContext(biomeMappings);
+		LocationContext context = new LocationContext(biomeMappings);
 		ImmutableMapGroupsBuilder<BiomeGroup> attributeBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>("D|");
 		for (BiomeGroupBuilder biomeGroup : attributeGroups.iDToGroup().values()) {
 			Group.Parser.parseGroupContents(biomeGroup, context);

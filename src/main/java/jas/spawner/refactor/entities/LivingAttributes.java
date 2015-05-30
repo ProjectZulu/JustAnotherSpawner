@@ -1,7 +1,7 @@
 package jas.spawner.refactor.entities;
 
 import jas.spawner.refactor.configsloader.ConfigLoader;
-import jas.spawner.refactor.configsloader.EntityGroupingLoader;
+import jas.spawner.refactor.configsloader.LivingSettingsLoader;
 import jas.spawner.refactor.entities.Group.Groups;
 import jas.spawner.refactor.entities.LivingGroupBuilder.LivingGroup;
 
@@ -29,9 +29,9 @@ public class LivingAttributes implements Groups {
 	}
 
 	private void loadFromConfig(ConfigLoader loader, Mappings mappings) {
-		EntityGroupingLoader savedStats = loader.livingGroupLoader.saveObject;
+		LivingSettingsLoader savedStats = loader.livingGroupLoader.saveObject;
 		ImmutableMapGroupsBuilder<LivingGroupBuilder> attributeGroups = new ImmutableMapGroupsBuilder<LivingGroupBuilder>(
-				"A|");
+				key());
 		if (savedStats.configNameToAttributeGroups.isPresent()) {
 			Collection<TreeMap<String, LivingGroupBuilder>> mapOfGroups = savedStats.configNameToAttributeGroups.get()
 					.values();

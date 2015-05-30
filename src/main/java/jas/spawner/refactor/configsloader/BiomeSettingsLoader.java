@@ -19,21 +19,22 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class BiomeGroupLoader implements VersionedFile {
+public class BiomeSettingsLoader implements VersionedFile {
 	private String fileVersion;
 
 	public final TreeMap<String, String> biomeMappings;
 	private Optional<TreeMap<String, TreeMap<String, BiomeGroupBuilder>>> configNameToAttributeGroups;
 	private Optional<TreeMap<String, TreeMap<String, BiomeGroupBuilder>>> configNameToBiomeGroups;
 
-	public BiomeGroupLoader() {
+	public BiomeSettingsLoader() {
 		fileVersion = Serializer.FILE_VERSION;
 		this.biomeMappings = new TreeMap<String, String>();
 		this.configNameToAttributeGroups = Optional.absent();
 		this.configNameToBiomeGroups = Optional.absent();
 	}
 
-	public BiomeGroupLoader(Map<String, String> biomeMappings, Collection<BiomeGroupBuilder> attributeGroups) {
+	public BiomeSettingsLoader(Map<String, String> biomeMappings, Collection<BiomeGroupBuilder> attributeGroups,
+			Collection<BiomeGroupBuilder> biomeGroups) {
 		this.biomeMappings = new TreeMap<String, String>(biomeMappings);
 		this.configNameToBiomeGroups = Optional.of(new TreeMap<String, TreeMap<String, BiomeGroupBuilder>>());
 		this.configNameToAttributeGroups = Optional.of(new TreeMap<String, TreeMap<String, BiomeGroupBuilder>>());
@@ -65,7 +66,7 @@ public class BiomeGroupLoader implements VersionedFile {
 		return fileVersion;
 	}
 
-	public static class Serializer implements JsonSerializer<BiomeGroupLoader>, JsonDeserializer<BiomeGroupLoader> {
+	public static class Serializer implements JsonSerializer<BiomeSettingsLoader>, JsonDeserializer<BiomeSettingsLoader> {
 		public static final String FILE_VERSION = "2.0";
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String BIOME_MAPPINGS = "Biome Mappings";
@@ -76,7 +77,7 @@ public class BiomeGroupLoader implements VersionedFile {
 		public final String BIOME_GROUPS = "Biome Groups";
 
 		@Override
-		public JsonElement serialize(BiomeGroupLoader saveObject, Type type, JsonSerializationContext context) {
+		public JsonElement serialize(BiomeSettingsLoader saveObject, Type type, JsonSerializationContext context) {
 			JsonObject endObject = new JsonObject();
 			endObject.addProperty(FILE_VERSION_KEY, saveObject.fileVersion);
 
@@ -118,9 +119,9 @@ public class BiomeGroupLoader implements VersionedFile {
 		}
 
 		@Override
-		public BiomeGroupLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
+		public BiomeSettingsLoader deserialize(JsonElement object, Type type, JsonDeserializationContext context)
 				throws JsonParseException {
-			BiomeGroupLoader saveObject = new BiomeGroupLoader();
+			BiomeSettingsLoader saveObject = new BiomeSettingsLoader();
 			JsonObject endObject = object.getAsJsonObject();
 			String fileVersion = GsonHelper.getMemberOrDefault(endObject, FILE_VERSION_KEY, FILE_VERSION);
 

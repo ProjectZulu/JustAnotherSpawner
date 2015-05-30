@@ -2,7 +2,7 @@ package jas.spawner.refactor.biome;
 
 import jas.common.JASLog;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
-import jas.spawner.refactor.configsloader.BiomeGroupLoader;
+import jas.spawner.refactor.configsloader.BiomeSettingsLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.entities.Mappings;
 
@@ -25,7 +25,7 @@ public class BiomeMappings implements Mappings<String, String> {
 	}
 
 	private void loadFromConfig(ConfigLoader loader) {
-		BiomeGroupLoader biomeLoader = loader.biomeGroupLoader.saveObject;
+		BiomeSettingsLoader biomeLoader = loader.biomeGroupLoader.saveObject;
 		newMappings = new HashSet<String>();
 		HashBiMap<String, String> biomeMappingToPckgBuilder = HashBiMap.create();
 		BiMap<String, String> biomePckgToMappingBuilder = biomeMappingToPckgBuilder.inverse();

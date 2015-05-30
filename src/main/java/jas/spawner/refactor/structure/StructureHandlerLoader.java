@@ -91,7 +91,7 @@ public class StructureHandlerLoader implements VersionedFile {
 	public String getVersion() {
 		return version;
 	}
-	
+
 	public HashMap<String, Collection<SpawnListEntryBuilder>> locKeyToSpawnlist() {
 		HashMap<String, Collection<SpawnListEntryBuilder>> structureKeyToSpawnList = new HashMap<String, Collection<SpawnListEntryBuilder>>();
 		for (Entry<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primEntry : primToSecToTertToEntry
