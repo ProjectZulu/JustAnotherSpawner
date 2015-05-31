@@ -82,7 +82,7 @@ public class LivingHelper {
 	}
 
 	/**
-	 * Check the entity to see if it can despawn
+	 * Check the entity to see if it can despawn via vanilla
 	 * 
 	 * @param livingClass Class of Desired Creature
 	 * @return

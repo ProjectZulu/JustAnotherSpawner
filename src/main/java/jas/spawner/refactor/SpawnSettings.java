@@ -122,10 +122,6 @@ public class SpawnSettings {
 		loadFromConfig(world, worldProperties, settingsDirectory);
 	}
 
-	public BiomeSpawnLists biomeGroupRegistry() {
-		return biomeGroupRegistry;
-	}
-
 	public void loadFromConfig(World world, WorldProperties worldProperties, File settingsDirectory) {
 		ConfigLoader loader = new ConfigLoader(settingsDirectory, worldProperties);
 		this.livingTypes = new LivingTypes(loader);
@@ -145,5 +141,49 @@ public class SpawnSettings {
 		this.livingSettings.saveToConfig(worldProperties, loader);
 		this.structureHandlers.saveToConfig(worldProperties, loader);
 		this.biomeGroupRegistry.saveToConfig(worldProperties, loader);
+	}
+
+	public LivingTypes livingTypes() {
+		return livingTypes;
+	}
+
+	public DespawnRules despawnRules() {
+		return despawnRules;
+	}
+
+	public BiomeMappings biomeMappings() {
+		return biomeSettings.biomeMappings;
+	}
+
+	public BiomeDictionaryGroups dictionaryGroups() {
+		return biomeSettings.dictionaryGroups;
+	}
+
+	public BiomeAttributes biomeAttributes() {
+		return biomeSettings.biomeAttributes;
+	}
+
+	public BiomeGroups biomeGroups() {
+		return biomeSettings.biomeGroups;
+	}
+
+	public LivingMappings livingMappings() {
+		return livingSettings.livingMappings;
+	}
+
+	public LivingAttributes livingAttributes() {
+		return livingSettings.livingAttributes;
+	}
+
+	public LivingHandlers livingHandlers() {
+		return livingSettings.livingHandlers;
+	}
+
+	public StructureHandlers structureHandlers() {
+		return structureHandlers;
+	}
+
+	public BiomeSpawnLists biomeGroupRegistry() {
+		return biomeGroupRegistry;
 	}
 }
