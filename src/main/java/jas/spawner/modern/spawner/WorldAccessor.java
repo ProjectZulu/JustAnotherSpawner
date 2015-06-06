@@ -30,7 +30,7 @@ public class WorldAccessor implements WorldFunctions {
 	public String blockNameAt(Integer offsetX, Integer offsetY, Integer offsetZ) {
 		return Block.blockRegistry.getNameForObject(blockAt(offsetX, offsetY, offsetZ));
 	}
-	
+
 	public Block blockAt(int coordX, int coordY, int coordZ) {
 		return world.getBlock(coordX, coordY, coordZ);
 	}
@@ -66,12 +66,17 @@ public class WorldAccessor implements WorldFunctions {
 	public int dimension() {
 		return world.provider.dimensionId;
 	}
-	
+
 	public long totalTime() {
 		return world.getWorldInfo().getWorldTotalTime();
 	}
 
 	public long timeOfDay() {
 		return world.getWorldInfo().getWorldTime();
+	}
+
+	@Override
+	public boolean isClearWeather() {
+		return !world.isRaining();
 	}
 }

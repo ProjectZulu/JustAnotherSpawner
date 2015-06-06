@@ -33,4 +33,6 @@ public interface WorldFunctions {
 	public long totalTime();
 
 	public long timeOfDay();
+	
+	public boolean isClearWeather();
 }
