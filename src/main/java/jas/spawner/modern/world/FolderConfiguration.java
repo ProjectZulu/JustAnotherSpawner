@@ -57,6 +57,6 @@ public class FolderConfiguration {
     }
 
     public static File getFile(File configDirectory) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + "SaveConfigGson.cfg");
+        return new File(configDirectory, "SaveConfigGson.cfg");
     }
 }

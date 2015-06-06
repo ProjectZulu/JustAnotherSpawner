@@ -288,7 +288,7 @@ public class LivingHandler {
 	}
 
 	public static File getFile(File configDirectory, String saveName, String fileName) {
-		String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYHANDLERDIR;
+		String filePath = saveName + "/" + DefaultProps.ENTITYHANDLERDIR;
 		if (fileName != null && !fileName.equals("")) {
 			filePath = filePath.concat(fileName).concat(".cfg");
 		}

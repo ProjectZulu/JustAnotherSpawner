@@ -44,7 +44,7 @@ public class EntityDespawner {
 				int xCoord = MathHelper.floor_double(event.entityLiving.posX);
 				int yCoord = MathHelper.floor_double(event.entityLiving.boundingBox.minY);
 				int zCoord = MathHelper.floor_double(event.entityLiving.posZ);
-				CountInfo countInfo = SpawnerLogic.countEntities(event.entityLiving.worldObj);
+				CountInfo countInfo = SpawnerLogic.counter.countEntities(event.entityLiving.worldObj);
 				Tags tags = new Tags(event.entityLiving.worldObj, countInfo, xCoord, yCoord, zCoord,
 						(EntityLiving) event.entityLiving);
 				SpawnerLogic.despawnEntity((EntityLiving) event.entityLiving, tags, despawnRule);

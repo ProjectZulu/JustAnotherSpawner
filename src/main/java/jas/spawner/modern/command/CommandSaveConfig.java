@@ -1,9 +1,11 @@
 package jas.spawner.modern.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.modification.ModSaveConfig;
 
+import java.io.File;
 import java.util.List;
 
 import net.minecraft.command.ICommandSender;
@@ -32,9 +34,10 @@ public class CommandSaveConfig extends CommandJasBase {
 		if (stringArgs.length > 0) {
 			throw new WrongUsageException("commands.jassaveconfig.usage", new Object[0]);
 		}
+		File profileDir = new File(JustAnotherSpawner.getModConfigDirectory(), DefaultProps.MODDIR
+				+ DefaultProps.WORLDSETTINGSDIR + MVELProfile.PROFILE_FOLDER);
 		MVELProfile.worldSettings().addChange(
-				new ModSaveConfig(JustAnotherSpawner.getModConfigDirectory(),
-						MinecraftServer.getServer().worldServers[0]));
+				new ModSaveConfig(profileDir, MinecraftServer.getServer().worldServers[0]));
 	}
 
     /**

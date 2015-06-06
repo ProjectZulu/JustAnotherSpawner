@@ -24,6 +24,7 @@ public class WorldGlobalSettings {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/WorldGlobalProperties.cfg");
+		return new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR + saveName
+				+ "/WorldGlobalProperties.cfg");
     }
 }

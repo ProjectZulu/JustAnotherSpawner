@@ -28,6 +28,7 @@ public class MVELProfile implements Profile {
 	private static WorldSettings worldSettings;
 	private static BiomeBlacklist biomeBlacklist;
 	private static ImportedSpawnList importedSpawnList;
+	public static final String PROFILE_FOLDER = "Basic/";
 
 	public MVELProfile(BiomeBlacklist biomeBlacklist, ImportedSpawnList importedSpawnList) {
 		this.biomeBlacklist = biomeBlacklist;
@@ -50,16 +51,26 @@ public class MVELProfile implements Profile {
 	public void serverStart(FMLServerStartingEvent event) {
 		event.registerServerCommand(new CommandJAS(biomeBlacklist));
 		loadFromConfig(JustAnotherSpawner.getModConfigDirectory(), event.getServer().worldServers[0]);
+		saveToConfig(JustAnotherSpawner.getModConfigDirectory(), event.getServer().worldServers[0]);
 	}
 
 	@Override
-	public void loadFromConfig(File modConfigDirectoryFile, World server) {
-		worldSettings = new WorldSettings(modConfigDirectoryFile, server, importedSpawnList);
+	public void loadFromConfig(File jasConfigDirectory, World server) {
+		File profileDir = new File(jasConfigDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR
+				+ PROFILE_FOLDER);
+		// This is part of Profile Specific directories, remove in 0.18
+		if (!profileDir.exists()) {
+			profileDir = new File(jasConfigDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR);
+		}
+		worldSettings = new WorldSettings(profileDir, server, importedSpawnList);
 	}
 
 	@Override
-	public void saveToConfig(File configDirectory, World world) {
-		worldSettings.saveWorldSettings(configDirectory, world);
+	public void saveToConfig(File jasConfigDirectory, World world) {
+		File profileDir = new File(jasConfigDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR
+				+ PROFILE_FOLDER);
+//		profileDir = new File(jasConfigDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR);
+		worldSettings.saveWorldSettings(profileDir, world);
 	}
 
 	public static ImportedSpawnList importedSpawnList() {

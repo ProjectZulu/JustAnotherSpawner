@@ -98,7 +98,7 @@ public class EventSpawnRegistry {
 	}
 
 	private File getFile(File configDirectory, String saveName, String fileName) {
-		String filePath = DefaultProps.WORLDSETTINGSDIR.concat(saveName).concat("/").concat(DefaultProps.EVENTSPAWNDIR);
+		String filePath = saveName.concat("/").concat(DefaultProps.EVENTSPAWNDIR);
 		if (fileName != null && !fileName.equals("")) {
 			filePath = filePath.concat(fileName);
 		}

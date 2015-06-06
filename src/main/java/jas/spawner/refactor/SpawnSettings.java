@@ -10,7 +10,6 @@ import jas.spawner.refactor.biome.BiomeGroups;
 import jas.spawner.refactor.biome.BiomeMappings;
 import jas.spawner.refactor.configsloader.BiomeSettingsLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader;
-import jas.spawner.refactor.configsloader.LivingHandlerLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.configsloader.LivingSettingsLoader;
 import jas.spawner.refactor.despawn.DespawnRules;
@@ -23,7 +22,6 @@ import jas.spawner.refactor.structure.StructureHandlers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 import net.minecraft.world.World;
 
@@ -142,7 +140,7 @@ public class SpawnSettings {
 		this.structureHandlers.saveToConfig(worldProperties, loader);
 		this.biomeGroupRegistry.saveToConfig(worldProperties, loader);
 	}
-
+	
 	public LivingTypes livingTypes() {
 		return livingTypes;
 	}
@@ -185,5 +183,13 @@ public class SpawnSettings {
 
 	public BiomeSpawnLists biomeGroupRegistry() {
 		return biomeGroupRegistry;
+	}
+
+	public BiomeSettings biomeSettings() {
+		return biomeSettings;
+	}
+
+	public LivingSettings livingSettings() {
+		return livingSettings;
 	}
 }

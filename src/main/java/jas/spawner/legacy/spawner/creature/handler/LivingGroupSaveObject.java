@@ -56,7 +56,8 @@ public class LivingGroupSaveObject {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "LivingGroups.cfg");
+		return new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR + saveName + "/"
+				+ "LivingGroups.cfg");
     }
 
     private TreeMap<String, LivingGroup> getOrCreate(TreeMap<String, TreeMap<String, LivingGroup>> map, String key) {

@@ -39,6 +39,10 @@ public class WorldSettings {
 		}
 	}
 
+	public WorldProperties worldProperties() {
+		return worldProperties;
+	}
+
 	public BiomeSpawnLists getBiomeSpawnListRegistry(World world) {
 		return defaultSpawnSettings.biomeGroupRegistry();
 	}

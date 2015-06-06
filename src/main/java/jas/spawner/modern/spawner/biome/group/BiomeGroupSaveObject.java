@@ -59,7 +59,7 @@ public class BiomeGroupSaveObject {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "BiomeGroups.cfg");
+        return new File(configDirectory, saveName + "/" + "BiomeGroups.cfg");
     }
 
     private TreeMap<String, BiomeGroup> getOrCreate(TreeMap<String, TreeMap<String, BiomeGroup>> map, String key) {

@@ -10,6 +10,7 @@ import jas.spawner.modern.DefaultProps;
 import java.io.File;
 
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -29,7 +30,7 @@ public class ExperimentalProfile implements Profile {
 
 	@Override
 	public void init() {
-		// MinecraftForge.EVENT_BUS.register(new EntityDespawner());
+		MinecraftForge.EVENT_BUS.register(new EntityDespawner(this));
 		// MinecraftForge.TERRAIN_GEN_BUS.register(new ChunkSpawner(biomeBlacklist));
 		// FMLCommonHandler.instance().bus().register(new SpawnerTicker(biomeBlacklist));
 		// MinecraftForge.EVENT_BUS.post(new CompatibilityRegistrationEvent(new CompatabilityRegister()));
@@ -43,7 +44,7 @@ public class ExperimentalProfile implements Profile {
 
 	@Override
 	public void loadFromConfig(File configDirectory, World world) {
-		File profileDir = new File(DefaultProps.WORLDSETTINGSDIR + PROFILE_FOLDER);
+		File profileDir = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + PROFILE_FOLDER);
 		worldSettings = new WorldSettings(profileDir, world, importedSpawnList);
 	}
 
@@ -69,11 +70,11 @@ public class ExperimentalProfile implements Profile {
 		// StructureInterpreter overworld = new StructureInterpreterOverworldStructures();
 		// MinecraftForge.EVENT_BUS.register(overworld);
 		// event.loader.registerObject(overworld);
-		//
+
 		// StructureInterpreter swamp = new StructureInterpreterSwamp();
 		// MinecraftForge.EVENT_BUS.register(swamp);
 		// event.loader.registerObject(swamp);
-		//
+
 		// StructureInterpreter nether = new StructureInterpreterNether();
 		// MinecraftForge.EVENT_BUS.register(nether);
 		// event.loader.registerObject(nether);

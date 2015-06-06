@@ -1,5 +1,8 @@
 package jas.spawner.modern.modification;
 
+import jas.common.JustAnotherSpawner;
+import jas.spawner.modern.DefaultProps;
+import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.world.WorldSettings;
 
 import java.io.File;

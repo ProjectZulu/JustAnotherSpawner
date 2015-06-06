@@ -3,6 +3,7 @@ package jas.spawner.modern.world;
 import jas.common.JustAnotherSpawner;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.DefaultProps;
+import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.eventspawn.EventSpawnRegistry;
 import jas.spawner.modern.modification.ModLoadConfig;
 import jas.spawner.modern.modification.Modification;
@@ -36,7 +37,7 @@ public final class WorldSettings {
 	
 	private ImportedSpawnList importedSpawnList;
 
-	public WorldSettings(File modConfigDirectoryFile, World world, ImportedSpawnList importedSpawnList) {
+	public WorldSettings(File configDirectory, World world, ImportedSpawnList importedSpawnList) {
 		this.importedSpawnList = importedSpawnList;
 		this.worldProperties = new WorldProperties();
 		this.eventSpawnRegistry = new EventSpawnRegistry(worldProperties);
@@ -46,14 +47,14 @@ public final class WorldSettings {
 		this.livingHandlerRegistry = new LivingHandlerRegistry(livingGroupRegistry, creatureTypeRegistry,
 				worldProperties);
 		structureHandlerRegistry = new StructureHandlerRegistry(livingHandlerRegistry, worldProperties);
-		loadWorldSettings(modConfigDirectoryFile, world);
+		loadWorldSettings(configDirectory, world);
 	}
 
 	public void saveWorldSettings(File configDirectory, World world) {
 		if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.getFolderConfiguration().universalDirectory) {
 			worldProperties.setSavedUniversalDirectory(worldProperties.getFolderConfiguration().universalDirectory);
-			File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-					+ worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYHANDLERDIR);
+			File entityFolder = new File(configDirectory, worldProperties.getFolderConfiguration().saveName + "/"
+					+ DefaultProps.ENTITYHANDLERDIR);
 			File[] entityFileList = entityFolder.listFiles();
 			if (entityFileList != null) {
 				for (File file : entityFolder.listFiles()) {
@@ -61,8 +62,8 @@ public final class WorldSettings {
 				}
 			}
 
-			File spawnFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-					+ worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSPAWNRDIR);
+			File spawnFolder = new File(configDirectory, worldProperties.getFolderConfiguration().saveName + "/"
+					+ DefaultProps.ENTITYSPAWNRDIR);
 			File[] spawnFileList = entityFolder.listFiles();
 			if (spawnFileList != null) {
 				for (File file : spawnFolder.listFiles()) {
@@ -92,7 +93,6 @@ public final class WorldSettings {
 		biomeSpawnListRegistry = new BiomeSpawnListRegistry(worldProperties, biomeGroupRegistry, livingGroupRegistry,
 				creatureTypeRegistry, livingHandlerRegistry, structureHandlerRegistry);
 		biomeSpawnListRegistry.loadFromConfig(modConfigDirectoryFile, importedSpawnList);
-		saveWorldSettings(modConfigDirectoryFile, world);
 	}
 
 	public WorldProperties worldProperties() {
@@ -141,11 +141,11 @@ public final class WorldSettings {
 				modification.applyModification(biomeSpawnListRegistry);
 				modification.applyModification(this);
 			}
-			
-			this.saveWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
-					MinecraftServer.getServer().worldServers[0]);
-			this.loadWorldSettings(JustAnotherSpawner.getModConfigDirectory(),
-					MinecraftServer.getServer().worldServers[0]);
+			File profileDir = new File(JustAnotherSpawner.getModConfigDirectory(), DefaultProps.MODDIR
+					+ DefaultProps.WORLDSETTINGSDIR + MVELProfile.PROFILE_FOLDER);
+
+			this.saveWorldSettings(profileDir, MinecraftServer.getServer().worldServers[0]);
+			this.loadWorldSettings(profileDir, MinecraftServer.getServer().worldServers[0]);
 
 			//TODO? update: To ensure changes propagate, such as disabled entities are removed from SpawnListRegistry
 			// Better than relying on save/load to clear out trash

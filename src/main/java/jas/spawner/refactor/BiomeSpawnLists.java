@@ -131,7 +131,7 @@ public class BiomeSpawnLists {
 		}
 	}
 
-	private Collection<String> livingTypesForEntity(World world, Entity entity, LivingSettings livingSettings,
+	public Collection<String> livingTypesForEntity(World world, Entity entity, LivingSettings livingSettings,
 			BiomeSettings biomeSettings) {
 		BiomeGenBase biome = world.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
 		String pckgeName = BiomeHelper.getPackageName(biome);
