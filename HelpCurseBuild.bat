@@ -1,2 +1,2 @@
-gradlew build sourceJar curse -PrType=release
+gradlew build sourceJar curse
 PAUSE

@@ -22,13 +22,14 @@ apply plugin: 'curseforge'
 version = "0.17.0"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
+def rType = "release"
 
 curse {
     projectId = '228952'
     apiKey = project.curseForgeApiKey
 	
 	displayName = project.archivesBaseName + " v" + project.version
-	releaseType = rType //'release'
+	releaseType = rType //i.e. 'release'
     additionalArtifact "$project.buildDir/libs/" + project.archivesBaseName + "-" + project.version + "-sources.jar"
     relatedProject 'jas-compatability-addon': 'optionalLibrary'
 }
