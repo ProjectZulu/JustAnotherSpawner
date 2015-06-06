@@ -205,6 +205,7 @@ public class CreatureType {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "CreatureType.cfg");
+		return new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR + saveName + "/"
+				+ "CreatureType.cfg");
     }
 }

@@ -179,6 +179,11 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 					Class<? extends EntityLiving> livingToSpawn = null;
 					LivingHandler handler = null;
 					countInfo.resetEntitiesPackCount();
+					
+					// CreatureType
+					if (!creatureType.canSpawnHere(worldServer, countInfo, startSpawningPoint)) {
+						continue;
+					}
 					for (int numEntAttempts = 0; numEntAttempts < creatureType.iterationsPerPack; ++numEntAttempts) {
 						// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
 						final int horVar = 6;
@@ -191,11 +196,6 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						// Biome BlackList
 						if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
 								spawningPoint.chunkPosY))) {
-							continue;
-						}
-
-						// CreatureType
-						if (!creatureType.canSpawnHere(worldServer, countInfo, spawningPoint)) {
 							continue;
 						}
 						

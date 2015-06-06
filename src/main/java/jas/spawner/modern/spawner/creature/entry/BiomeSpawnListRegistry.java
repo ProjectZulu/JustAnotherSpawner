@@ -394,7 +394,7 @@ public final class BiomeSpawnListRegistry {
 	}
 
 	public static File getFile(File configDirectory, String saveName, String fileName) {
-		String filePath = DefaultProps.WORLDSETTINGSDIR + saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
+		String filePath = saveName + "/" + DefaultProps.ENTITYSPAWNRDIR;
 		if (fileName != null && !fileName.equals("")) {
 			filePath = filePath.concat(fileName).concat(".cfg");
 		}

@@ -220,7 +220,7 @@ public class CreatureType {
 	}
 
 	public static File getFile(File configDirectory, String saveName) {
-		return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "CreatureType.cfg");
+		return new File(configDirectory, saveName + "/" + "CreatureType.cfg");
 	}
 
 	public boolean canSpawnHere(World worldServer, CountInfo countInfo, ChunkPosition spawningPoint) {

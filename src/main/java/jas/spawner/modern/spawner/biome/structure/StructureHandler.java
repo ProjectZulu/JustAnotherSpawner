@@ -153,7 +153,7 @@ public class StructureHandler {
 	}
 
 	public static File getFile(File configDirectory, String saveName) {
-		return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "StructureSpawns.cfg");
+		return new File(configDirectory, saveName + "/" + "StructureSpawns.cfg");
 	}
 
 	public void addSpawnListEntry(LivingHandlerRegistry livingHandlerRegistry, String structureKey,

@@ -56,7 +56,7 @@ public class FolderConfiguration {
         return currentStats = stats;
     }
 
-    public static File getFile(File configDirectory) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + "SaveConfigGson.cfg");
-    }
+	public static File getFile(File configDirectory) {
+		return new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR + "SaveConfigGson.cfg");
+	}
 }

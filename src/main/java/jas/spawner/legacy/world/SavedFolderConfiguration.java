@@ -24,6 +24,7 @@ public class SavedFolderConfiguration {
     }
 
     public static File getFile(File configDirectory, String saveName) {
-        return new File(configDirectory, DefaultProps.WORLDSETTINGSDIR + saveName + "/" + "temporarySaveSettings.cfg");
+		return new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR + saveName + "/"
+				+ "temporarySaveSettings.cfg");
     }
 }

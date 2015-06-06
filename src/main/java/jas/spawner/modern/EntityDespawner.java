@@ -17,23 +17,23 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class EntityDespawner {
 
-    @SubscribeEvent
-    public void despawner(LivingUpdateEvent event) {
-        if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
-                && !event.entityLiving.worldObj.isRemote) {
-            LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
-            CountInfo info = CustomSpawner.spawnCounter.countEntities(event.entityLiving.worldObj);
-            @SuppressWarnings("unchecked")
-            List<LivingHandler> livingHandlers = livingHandlerRegistry
-                    .getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
-            for (LivingHandler livingHandler : livingHandlers) {
-                if (livingHandler != null && livingHandler.getDespawning() != null
-                        && livingHandler.getDespawning().isPresent()) {
-                    livingHandler.despawnEntity((EntityLiving) event.entityLiving, info);
-                }
-            }
-        }
-    }
+	@SubscribeEvent
+	public void despawner(LivingUpdateEvent event) {
+		if (event.entityLiving instanceof EntityLiving && event.entityLiving.ticksExisted % 60 == 0
+				&& !event.entityLiving.worldObj.isRemote) {
+			LivingHandlerRegistry livingHandlerRegistry = MVELProfile.worldSettings().livingHandlerRegistry();
+			CountInfo info = CustomSpawner.spawnCounter.countEntities(event.entityLiving.worldObj);
+			@SuppressWarnings("unchecked")
+			List<LivingHandler> livingHandlers = livingHandlerRegistry
+					.getLivingHandlers((Class<? extends EntityLiving>) event.entityLiving.getClass());
+			for (LivingHandler livingHandler : livingHandlers) {
+				if (livingHandler != null && livingHandler.getDespawning() != null
+						&& livingHandler.getDespawning().isPresent()) {
+					livingHandler.despawnEntity((EntityLiving) event.entityLiving, info);
+				}
+			}
+		}
+	}
 
 	@SubscribeEvent
 	public void entityPersistance(AllowDespawn event) {
@@ -50,11 +50,11 @@ public class EntityDespawner {
 			}
 		}
 	}
-    
-    @SubscribeEvent
-    public void entityConstructed(EntityConstructing event) {
-        if (event.entity instanceof EntityLivingBase) {
-            event.entity.registerExtendedProperties(EntityProperties.JAS_PROPERTIES, new EntityProperties());
-        }
-    }
+
+	@SubscribeEvent
+	public void entityConstructed(EntityConstructing event) {
+		if (event.entity instanceof EntityLivingBase) {
+			event.entity.registerExtendedProperties(EntityProperties.JAS_PROPERTIES, new EntityProperties());
+		}
+	}
 }

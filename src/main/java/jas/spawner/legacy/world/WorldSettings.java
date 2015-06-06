@@ -42,17 +42,17 @@ public final class WorldSettings {
     public void saveWorldSettings(File configDirectory, World world) {
         if (worldProperties.getSavedFileConfiguration().universalDirectory != worldProperties.getFolderConfiguration().universalDirectory) {
             worldProperties.setSavedUniversalDirectory(worldProperties.getFolderConfiguration().universalDirectory);
-            File entityFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                    + worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYHANDLERDIR);
-            File[] entityFileList = entityFolder.listFiles();
+			File entityFolder = new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR
+					+ worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYHANDLERDIR);
+			File[] entityFileList = entityFolder.listFiles();
             if (entityFileList != null) {
                 for (File file : entityFolder.listFiles()) {
                     file.delete();
                 }
             }
 
-            File spawnFolder = new File(configDirectory, DefaultProps.WORLDSETTINGSDIR
-                    + worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSPAWNRDIR);
+			File spawnFolder = new File(configDirectory, DefaultProps.MODDIR + DefaultProps.WORLDSETTINGSDIR
+					+ worldProperties.getFolderConfiguration().saveName + "/" + DefaultProps.ENTITYSPAWNRDIR);
             File[] spawnFileList = entityFolder.listFiles();
             if (spawnFileList != null) {
                 for (File file : spawnFolder.listFiles()) {

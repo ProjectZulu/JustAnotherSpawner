@@ -1,6 +1,8 @@
 package jas.spawner.modern.spawner;
 
 import jas.spawner.modern.MVELProfile;
+import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -13,36 +15,36 @@ import net.minecraft.world.chunk.Chunk;
  * This is for tags that return a concrete value to be used in checks. Many could be determined by using WorldAccessor
  * but are provided for brevity and less advanced users.
  */
-public class TagsObjective {
+public class TagsObjective implements ObjectiveFunctions {
 	private World world;
 	// TagObject where usual working parameters such as pos are found
-	public Tags parent;
+	public BaseFunctions parent;
 
-	public TagsObjective(World world, Tags parent) {
+	public TagsObjective(World world, BaseFunctions parent) {
 		this.parent = parent;
 		this.world = world;
 	}
 
 	public String block() {
-		return parent.wrld.blockNameAt(parent.posX, parent.posY, parent.posZ);
+		return parent.wrld().blockNameAt(parent.posX(), parent.posY(), parent.posZ());
 	}
 
 	public int light() {
-		return parent.wrld.lightAt(parent.posX, parent.posY, parent.posZ);
+		return parent.wrld().lightAt(parent.posX(), parent.posY(), parent.posZ());
 	}
 
 	public int torchlight() {
-		return parent.wrld.torchlightAt(parent.posX, parent.posY, parent.posZ);
+		return parent.wrld().torchlightAt(parent.posX(), parent.posY(), parent.posZ());
 	}
 
 	public int origin() {
-		return parent.wrld.originDis(parent.posX, parent.posY, parent.posZ);
+		return parent.wrld().originDis(parent.posX(), parent.posY(), parent.posZ());
 	}
 
 	public String material() {
-		return parent.util.material(world.getBlock(parent.posX, parent.posY, parent.posZ).getMaterial());
+		return parent.util().material(world.getBlock(parent.posX(), parent.posY(), parent.posZ()).getMaterial());
 	}
-	
+
 	public int difficulty() {
 		switch (world.difficultySetting) {
 		case PEACEFUL:
@@ -61,8 +63,8 @@ public class TagsObjective {
 	 * Finds the highest block on the x, z coordinate that is solid and returns its y coord. Args x, z
 	 */
 	public int highestResistentBlock() {
-		int par1 = parent.posX;
-		int par2 = parent.posZ;
+		int par1 = parent.posX();
+		int par2 = parent.posZ();
 		Chunk chunk = world.getChunkFromBlockCoords(par1, par2);
 		int k = chunk.getTopFilledSegment() + 15;
 		par1 &= 15;
@@ -83,7 +85,7 @@ public class TagsObjective {
 		for (int i = 0; i < world.playerEntities.size(); ++i) {
 			EntityPlayer player = (EntityPlayer) world.playerEntities.get(i);
 			if (player.isEntityAlive()) {
-				int distance = (int) Math.sqrt(player.getDistanceSq(parent.posX, parent.posY, parent.posZ));
+				int distance = (int) Math.sqrt(player.getDistanceSq(parent.posX(), parent.posY(), parent.posZ()));
 				if (maxRange >= minRange && distance >= minRange && distance <= maxRange) {
 					count++;
 					continue;
@@ -101,13 +103,14 @@ public class TagsObjective {
 		for (int i = 0; i < world.loadedEntityList.size(); ++i) {
 			Entity entity = (Entity) world.loadedEntityList.get(i);
 			if (entity.isEntityAlive()) {
-				String entityName = MVELProfile.worldSettings().livingGroupRegistry().EntityClasstoJASName
-						.get(entity.getClass());
+				String entityName = MVELProfile.worldSettings().livingGroupRegistry().EntityClasstoJASName.get(entity
+						.getClass());
 				for (String searchName : searchNames) {
 					if (!searchName.trim().equals("")
 							&& (searchName.equals("*") || searchName.equalsIgnoreCase(entityName))) {
-						int distance = (int) Math.sqrt(entity.getDistanceSq(parent.posX, parent.posY, parent.posZ));
-						if (parent.util.inRange(distance, minRange, maxRange)) {
+						int distance = (int) Math
+								.sqrt(entity.getDistanceSq(parent.posX(), parent.posY(), parent.posZ()));
+						if (parent.util().inRange(distance, minRange, maxRange)) {
 							count++;
 							continue;
 						}
@@ -127,8 +130,9 @@ public class TagsObjective {
 				for (String searchName : searchNames) {
 					if (!searchName.trim().equals("")
 							&& (searchName.equals("*") || searchName.equalsIgnoreCase(entityName))) {
-						int distance = (int) Math.sqrt(entity.getDistanceSq(parent.posX, parent.posY, parent.posZ));
-						if (parent.util.inRange(distance, minRange, maxRange)) {
+						int distance = (int) Math
+								.sqrt(entity.getDistanceSq(parent.posX(), parent.posY(), parent.posZ()));
+						if (parent.util().inRange(distance, minRange, maxRange)) {
 							count++;
 							continue;
 						}

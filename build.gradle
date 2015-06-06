@@ -19,16 +19,17 @@ apply plugin: 'java'
 apply plugin: 'forge'
 apply plugin: 'curseforge'
 
-version = "0.16.19"
+version = "0.17.0"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
+def rType = "release"
 
 curse {
     projectId = '228952'
     apiKey = project.curseForgeApiKey
 	
 	displayName = project.archivesBaseName + " v" + project.version
-	releaseType = rType //'release'
+	releaseType = rType //i.e. 'release'
     additionalArtifact "$project.buildDir/libs/" + project.archivesBaseName + "-" + project.version + "-sources.jar"
     relatedProject 'jas-compatability-addon': 'optionalLibrary'
 }
@@ -53,8 +54,8 @@ dependencies {
 }
 
 minecraft {
-	version = "1.7.10-10.13.0.1180"
-    assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
+	version = "1.7.10-10.13.2.1291" //"1.7.10-10.13.0.1180"
+    runDir = "eclipse" //assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
 	
 	// replacing version information
     replace "@MC_VERSION@", project.minecraft.version

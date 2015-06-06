@@ -1,2 +1,2 @@
-gradlew build sourceJar -PrType=beta
+gradlew build sourceJar
 PAUSE
