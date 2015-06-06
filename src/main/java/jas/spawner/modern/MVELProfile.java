@@ -28,7 +28,7 @@ public class MVELProfile implements Profile {
 	private static WorldSettings worldSettings;
 	private static BiomeBlacklist biomeBlacklist;
 	private static ImportedSpawnList importedSpawnList;
-	public static final String PROFILE_FOLDER = "Basic/";
+	public static final String PROFILE_FOLDER = "BASIC/";
 
 	public MVELProfile(BiomeBlacklist biomeBlacklist, ImportedSpawnList importedSpawnList) {
 		this.biomeBlacklist = biomeBlacklist;
