@@ -11,9 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.util.BlockPos;
 
 public final class CommandJAS extends CommandJasBase {
 
@@ -83,7 +85,7 @@ public final class CommandJAS extends CommandJasBase {
     }
 
     @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
+    public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         if (stringArgs.length == 0) {
             throw new WrongUsageException("commands.jas.usage", new Object[0]);
         }
@@ -97,13 +99,13 @@ public final class CommandJAS extends CommandJasBase {
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         if (stringArgs.length == 1) {
             return getStringsMatchingLastWord(stringArgs, new ArrayList<String>(commands.keySet()));
         } else if (stringArgs.length > 1) {
             CommandWrapper command = commands.get(stringArgs[0]);
             if (command != null) {
-                return command.command.addTabCompletionOptions(commandSender, truncateArgs(stringArgs));
+                return command.command.addTabCompletionOptions(commandSender, truncateArgs(stringArgs), blockPos);
             }
         }
         return null;

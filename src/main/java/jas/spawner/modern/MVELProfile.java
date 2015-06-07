@@ -7,7 +7,6 @@ import jas.common.Profile;
 import jas.common.global.BiomeBlacklist;
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.command.CommandJAS;
-import jas.spawner.modern.eventspawn.EventSpawnRegistry;
 import jas.spawner.modern.eventspawn.EventSpawnTrigger;
 import jas.spawner.modern.spawner.ChunkSpawner;
 import jas.spawner.modern.spawner.SpawnerTicker;
@@ -20,9 +19,9 @@ import java.io.File;
 
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class MVELProfile implements Profile {
 	private static WorldSettings worldSettings;

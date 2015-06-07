@@ -2,6 +2,7 @@ package jas.spawner.modern.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
 import jas.common.helper.ReflectionHelper;
+import jas.common.helper.VanillaHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraftforge.event.world.WorldEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class StructureInterpreterNether implements StructureInterpreter {
 
@@ -50,14 +51,14 @@ public class StructureInterpreterNether implements StructureInterpreter {
 	public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
 		MapGenStructure genNetherBridge = null;
 		if (genNetherBridge == null) {
-			BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
+			BiomeGenBase biome = VanillaHelper.getBiomeForCoords(world, xCoord, zCoord);
 			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
-			ChunkProviderHell chunkProviderHell = chunkprovider.currentChunkProvider instanceof ChunkProviderHell ? (ChunkProviderHell) chunkprovider.currentChunkProvider
+			ChunkProviderHell chunkProviderHell = chunkprovider.serverChunkGenerator instanceof ChunkProviderHell ? (ChunkProviderHell) chunkprovider.serverChunkGenerator
 					: null;
 			if (chunkProviderHell == null || !(biome instanceof BiomeGenHell)) {
 				return null;
 			}
-			genNetherBridge = chunkProviderHell.genNetherBridge;
+//			genNetherBridge = chunkProviderHell.genNetherBridge;
 			try {
 				genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c", chunkProviderHell,
 						MapGenNetherBridge.class);
@@ -67,7 +68,7 @@ public class StructureInterpreterNether implements StructureInterpreter {
 			}
 		}
 
-		if (genNetherBridge != null && genNetherBridge.hasStructureAt(xCoord, yCoord, zCoord)) {
+		if (VanillaHelper.isStructureAt(genNetherBridge, xCoord, yCoord, zCoord)) {
 			return "NetherBridge";
 		}
 		return null;

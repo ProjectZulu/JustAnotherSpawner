@@ -10,8 +10,10 @@ import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.util.BlockPos;
 
 public class CommandModBiomeGroup extends CommandJasBase {
 
@@ -54,7 +56,7 @@ public class CommandModBiomeGroup extends CommandJasBase {
 	}
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length <= 1) {
 			throw new WrongUsageException("commands.modbiomegroup.usage", new Object[0]);
 		}
@@ -94,7 +96,7 @@ public class CommandModBiomeGroup extends CommandJasBase {
 	 * completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		List<String> tabCompletions = new ArrayList<String>();
 		if (stringArgs.length == 1) {

@@ -1,6 +1,7 @@
 package jas.spawner.modern.spawner.creature.handler.parsing.keys;
 
 import jas.common.JASLog;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.spawner.creature.handler.parsing.TypeValuePair;
 import jas.spawner.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
@@ -40,7 +41,7 @@ public class KeyParserFill extends KeyParserBase {
     public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
             TypeValuePair typeValuePair, HashMap<String, Object> valueCache) {
         boolean isInverted = (Boolean) typeValuePair.getValue();
-        boolean isFillerBlock = world.getBiomeGenForCoords(xCoord, zCoord).fillerBlock == world.getBlock(xCoord,
+        boolean isFillerBlock = VanillaHelper.getBiomeForCoords(world, xCoord, zCoord).fillerBlock == world.getBlock(xCoord,
                 yCoord - 1, zCoord);
         return isInverted ? isFillerBlock : !isFillerBlock;
     }

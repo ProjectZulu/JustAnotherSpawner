@@ -2,7 +2,7 @@ package jas.spawner.modern.spawner.tags;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.biome.BiomeGenBase;
 
 public interface WorldFunctions {
@@ -22,7 +22,7 @@ public interface WorldFunctions {
 
 	public Material materialAt(int coordX, int coordY, int coordZ);
 
-	public ChunkCoordinates originPos();
+	public BlockPos originPos();
 
 	public boolean skyVisibleAt(int coordX, int coordY, int coordZ);
 

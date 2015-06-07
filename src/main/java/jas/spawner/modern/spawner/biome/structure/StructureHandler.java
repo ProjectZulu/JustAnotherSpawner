@@ -2,6 +2,7 @@ package jas.spawner.modern.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
 import jas.common.JASLog;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.spawner.creature.entry.SpawnListEntry;
 import jas.spawner.modern.spawner.creature.entry.SpawnListEntryBuilder;
@@ -76,7 +77,7 @@ public class StructureHandler {
 	}
 
 	public boolean doesHandlerApply(World world, int xCoord, int yCoord, int zCoord) {
-		return interpreter.shouldUseHandler(world, world.getBiomeGenForCoords(xCoord, zCoord));
+		return interpreter.shouldUseHandler(world, VanillaHelper.getBiomeForCoords(world, xCoord, zCoord));
 	}
 
 	/**

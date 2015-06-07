@@ -6,14 +6,14 @@ import jas.spawner.refactor.entities.LivingMappings;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.google.common.base.CharMatcher;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
+
+import com.google.common.base.CharMatcher;
 
 public class LivingHelper {
 

@@ -1,29 +1,21 @@
 package jas.spawner.refactor.configsloader;
 
-import jas.common.JASLog;
 import jas.common.helper.GsonHelper;
-import jas.spawner.modern.spawner.TagConverter;
-import jas.spawner.modern.spawner.creature.handler.parsing.keys.Key;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.entities.LivingHandlerBuilder;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 

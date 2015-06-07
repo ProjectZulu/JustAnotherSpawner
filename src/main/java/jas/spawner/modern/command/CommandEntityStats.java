@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -109,7 +111,7 @@ public class CommandEntityStats extends CommandJasBase {
 	}
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length > 0) {
 			throw new WrongUsageException("commands.jasentitystats.usage", new Object[0]);
 		}
@@ -151,7 +153,7 @@ public class CommandEntityStats extends CommandJasBase {
 	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		return Collections.emptyList();
 	}
 }

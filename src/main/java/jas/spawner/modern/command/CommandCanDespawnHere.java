@@ -10,11 +10,13 @@ import jas.spawner.modern.spawner.creature.handler.LivingHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 
 public class CommandCanDespawnHere extends CommandJasBase {
@@ -30,13 +32,13 @@ public class CommandCanDespawnHere extends CommandJasBase {
     }
 
     @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
+    public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         if (stringArgs.length == 0 || stringArgs.length > 2) {
             throw new WrongUsageException("commands.jascandespawnhere.usage", new Object[0]);
         }
 
         EntityPlayer targetPlayer = stringArgs.length == 1 ? getPlayer(commandSender,
-                commandSender.getCommandSenderName()) : getPlayer(commandSender, stringArgs[0]);
+                commandSender.getName()) : getPlayer(commandSender, stringArgs[0]);
         String entityName = stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
         if (!isValidEntityName(entityName)) {
             throw new WrongUsageException("commands.jascanspawnhere.entitynotfound", new Object[0]);
@@ -64,7 +66,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
         return false;
     }
 
-    private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) {
+    private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) throws CommandException {
         EntityLiving entity;
         try {
             @SuppressWarnings("unchecked")
@@ -95,7 +97,7 @@ public class CommandCanDespawnHere extends CommandJasBase {
     }
 
     @Override
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         stringArgs = correctedParseArgs(stringArgs, false);
         List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {

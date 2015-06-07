@@ -1,12 +1,8 @@
 package jas.spawner.card;
 
-import java.util.Collection;
-import java.util.Map;
-
-import com.google.common.collect.BiMap;
-
 import jas.spawner.refactor.entities.Group.Groups;
-import jas.spawner.refactor.entities.Mappings;
+
+import java.util.Map;
 
 public class CardRegistry implements Groups<Card> {
 

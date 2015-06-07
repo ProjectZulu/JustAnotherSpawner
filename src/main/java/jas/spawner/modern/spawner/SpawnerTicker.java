@@ -13,10 +13,10 @@ import java.util.List;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.ServerTickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 
 public class SpawnerTicker {
 

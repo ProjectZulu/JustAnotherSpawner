@@ -1,6 +1,5 @@
 package jas.spawner.modern.eventspawn;
 
-import jas.common.JASLog;
 import jas.common.helper.MVELHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.eventspawn.EventSpawnRegistry.EventSpawn;
@@ -15,11 +14,7 @@ import java.util.List;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.Phase;
-import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
-import cpw.mods.fml.common.gameevent.TickEvent.WorldTickEvent;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class EventSpawnTrigger {
 	public enum EventTrigger {
@@ -64,8 +59,8 @@ public class EventSpawnTrigger {
 						}
 					}
 				}
-			} else if (ContextHelper.isBlockTree(event.world, event.x, event.y, event.z, event.block,
-					event.blockMetadata)) {
+			} else if (ContextHelper.isBlockTree(event.world, event.pos.getX(), event.pos.getY(), event.pos.getZ(),
+					event.block, event.blockMetadata)) {
 				List<EventSpawn> list = profile.worldSettings().eventSpawnRegistry()
 						.getEventsForTrigger(EventTrigger.BREAK_TREE);
 				if (!list.isEmpty()) {

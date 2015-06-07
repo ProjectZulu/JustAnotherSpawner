@@ -1,5 +1,7 @@
 package jas.client.gui.elements;
 
+import java.io.IOException;
+
 import jas.spawner.modern.DefaultProps;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.ResourceLocation;
@@ -42,7 +44,7 @@ public class GuiSpawner extends GuiPanel {
 
     @Override
     @SuppressWarnings("incomplete-switch")
-    protected void actionPerformed(GuiButton button) {
+    protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
         if (button.enabled) {
 

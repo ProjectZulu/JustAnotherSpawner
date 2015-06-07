@@ -12,9 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
+import net.minecraftforge.fml.common.toposort.ModSortingException.SortingExceptionData;
 
-import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
+import com.google.common.collect.Sets;
 
 /** Groups composed of a Mapping Object where each is defined by a unique String */
 public interface ListContentGroup extends ContentGroup<List<String>> {

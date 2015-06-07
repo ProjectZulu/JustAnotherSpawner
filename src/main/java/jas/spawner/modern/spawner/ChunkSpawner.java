@@ -2,6 +2,7 @@ package jas.spawner.modern.spawner;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.spawner.modern.spawner.creature.type.CreatureType;
@@ -11,8 +12,8 @@ import java.util.Iterator;
 
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ChunkSpawner {
 
@@ -36,7 +37,7 @@ public class ChunkSpawner {
             }
             CreatureTypeRegistry creatureTypeRegistry = MVELProfile.worldSettings().creatureTypeRegistry();
             Iterator<CreatureType> iterator = creatureTypeRegistry.getCreatureTypes();
-            BiomeGenBase spawnBiome = event.world.getBiomeGenForCoords(k + 16, l + 16);
+            BiomeGenBase spawnBiome = VanillaHelper.getBiomeForCoords(event.world, k + 16, l + 16);
 
             if (spawnBiome == null || blacklist.isBlacklisted(spawnBiome)) {
                 return;

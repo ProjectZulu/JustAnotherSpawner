@@ -1,6 +1,7 @@
 package jas.spawner.modern.spawner.creature.handler.parsing.keys;
 
 import jas.common.JASLog;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
@@ -163,7 +164,7 @@ public class KeyParserBiome extends KeyParserBase {
 
             for (int i = -rangeX; i <= rangeX; i++) {
                 for (int k = -rangeZ; k <= rangeZ; k++) {
-                    BiomeGenBase biome = world.getBiomeGenForCoords(xCoord + offsetX + i, zCoord + offsetZ + k);
+                    BiomeGenBase biome = VanillaHelper.getBiomeForCoords(world, xCoord + offsetX + i, zCoord + offsetZ + k);
                     boolean isBiome = false;
                     switch (type) {
                     case ATTRIBUTE: {

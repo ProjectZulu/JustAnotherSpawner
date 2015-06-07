@@ -1,5 +1,6 @@
 package jas.spawner.modern.command;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.modern.spawner.biome.structure.StructureHandler;
@@ -11,9 +12,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.biome.BiomeGenBase;
 
@@ -41,7 +44,7 @@ public class CommandListSpawns extends CommandJasBase {
      * <spawnEntry2>
      */
     @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
+    public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         if (stringArgs.length >= 4) {
             throw new WrongUsageException("commands.jaslistspawns.usage", new Object[0]);
         }
@@ -50,11 +53,11 @@ public class CommandListSpawns extends CommandJasBase {
         String entityCategName;
         boolean expandedEntries = stringArgs.length == 3 ? stringArgs[2].equalsIgnoreCase("true") : false;
         if (stringArgs.length == 0) {
-            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
+            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getName());
             targetBiomeStructure = getTargetAtPlayer(targetPlayer);
             entityCategName = "*";
         } else if (stringArgs.length == 1) {
-            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
+            EntityPlayerMP targetPlayer = getPlayer(commandSender, commandSender.getName());
             targetBiomeStructure = getTargetAtPlayer(targetPlayer);
             entityCategName = stringArgs[0];
         } else {
@@ -94,7 +97,7 @@ public class CommandListSpawns extends CommandJasBase {
                 return target;
             }
         }
-        return BiomeHelper.getPackageName(player.worldObj.getBiomeGenForCoords((int) player.posX, (int) player.posZ));
+        return BiomeHelper.getPackageName(VanillaHelper.getBiomeForCoords(player.worldObj, (int) player.posX, (int) player.posZ));
     }
 
     private boolean isBiomeName(String arg) {
@@ -112,7 +115,7 @@ public class CommandListSpawns extends CommandJasBase {
         return false;
     }
 
-    private String getBiomeSpawnList(String biomeStructureName, String entityCategName, boolean expandedEntries) {
+    private String getBiomeSpawnList(String biomeStructureName, String entityCategName, boolean expandedEntries) throws CommandException {
         StringBuilder biomeContents = new StringBuilder();
         biomeContents.append("Biome ");
         biomeContents.append(biomeStructureName);
@@ -179,7 +182,7 @@ public class CommandListSpawns extends CommandJasBase {
         return false;
     }
 
-    private String getStructureSpawnList(String structureName, String entityCateg, boolean expandedEntries) {
+    private String getStructureSpawnList(String structureName, String entityCateg, boolean expandedEntries) throws CommandException {
         StringBuilder biomeContents = new StringBuilder();
         biomeContents.append("Structure ");
         biomeContents.append(structureName);
@@ -237,7 +240,7 @@ public class CommandListSpawns extends CommandJasBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         stringArgs = correctedParseArgs(stringArgs, false);
         List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {

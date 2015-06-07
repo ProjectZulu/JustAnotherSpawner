@@ -1,6 +1,7 @@
 package jas.spawner.modern.command;
 
 import jas.common.JustAnotherSpawner;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.CustomSpawner;
@@ -14,11 +15,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.NumberInvalidException;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
@@ -51,7 +54,7 @@ public class CommandCountCap extends CommandJasBase {
 	 * /jascountcap <EntityType> --OUTPUT--> New Line for Each Dimension of <EntityType> is <XX> out of <EntityTypeCap>
 	 */
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length >= 3) {
 			throw new WrongUsageException("commands.jascountcap.usage", new Object[0]);
 		}
@@ -62,7 +65,7 @@ public class CommandCountCap extends CommandJasBase {
 		}
 
 		if (targetWorld == null) {
-			targetWorld = getPlayer(commandSender, commandSender.getCommandSenderName()).worldObj;
+			targetWorld = getPlayer(commandSender, commandSender.getName()).worldObj;
 		}
 
 		String typeName = stringArgs.length == 0 ? "*" : stringArgs[stringArgs.length == 1 ? 0 : 1];
@@ -80,7 +83,7 @@ public class CommandCountCap extends CommandJasBase {
 			worldTypeContents.append("Results World (");
 			worldTypeContents.append(world.provider.getDimensionName());
 			worldTypeContents.append("|");
-			worldTypeContents.append(world.provider.dimensionId);
+			worldTypeContents.append(VanillaHelper.getDimensionID(world));
 			worldTypeContents.append(")");
 
 			boolean foundMatch = false;
@@ -121,7 +124,7 @@ public class CommandCountCap extends CommandJasBase {
 		try {
 			int targetDim = parseInt(commandSender, arg);
 			for (WorldServer world : MinecraftServer.getServer().worldServers) {
-				if (targetDim == world.provider.dimensionId) {
+				if (targetDim == VanillaHelper.getDimensionID(world)) {
 					return world;
 				}
 			}
@@ -135,7 +138,7 @@ public class CommandCountCap extends CommandJasBase {
 	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		List<String> tabCompletions = new ArrayList<String>();
 		if (stringArgs.length == 1) {

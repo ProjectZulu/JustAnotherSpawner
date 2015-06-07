@@ -5,6 +5,7 @@ import jas.common.JustAnotherSpawner;
 import jas.common.global.ImportedSpawnList;
 import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
@@ -177,7 +178,7 @@ public final class BiomeSpawnListRegistry {
                     : null;
         }
         ImmutableCollection<String> groupIDList = biomeGroupRegistry.packgNameToGroupIDs().get(
-                BiomeHelper.getPackageName(world.getBiomeGenForCoords(xCoord, zCoord)));
+                BiomeHelper.getPackageName(VanillaHelper.getBiomeForCoords(world, xCoord, zCoord)));
         return getRandomValidEntry(world.rand, groupIDList, creatureType.typeID);
     }
 

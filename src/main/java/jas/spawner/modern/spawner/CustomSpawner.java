@@ -2,6 +2,7 @@ package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
 import jas.common.global.BiomeBlacklist;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.Counter.SpawnCounter;
@@ -20,17 +21,14 @@ import java.util.Random;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import org.apache.logging.log4j.Level;
-
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CustomSpawner {
 	public static SpawnCounter spawnCounter = new SpawnCounter();
@@ -50,7 +48,7 @@ public class CustomSpawner {
 		if (globalEntityTypeCount > entityTypeCap) {
 			return;
 		}
-		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
+		BlockPos serverOriginPoint = worldServer.getSpawnPoint();
 		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
 				countInfo.eligibleChunkLocations());
 		Collections.shuffle(eligibleChunksForSpawning);
@@ -62,7 +60,7 @@ public class CustomSpawner {
 			countInfo.resetEntitiesSpawnedThisLoop();
 			for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
-				ChunkPosition startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
+				BlockPos startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
 						chunkCoord.chunkXPos, chunkCoord.chunkZPos);
 				
 				SpawnListEntry spawnlistentry = null;
@@ -78,18 +76,18 @@ public class CustomSpawner {
 					// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
 					final int horVar = 6;
 					final int verVar = 1;
-					ChunkPosition spawningPoint = new ChunkPosition(
-						startSpawningPoint.chunkPosX + worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar),
-						startSpawningPoint.chunkPosY + worldServer.rand.nextInt(verVar) - worldServer.rand.nextInt(verVar),
-						startSpawningPoint.chunkPosZ + worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar));
+					BlockPos spawningPoint = new BlockPos(
+						startSpawningPoint.getX() + worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar),
+						startSpawningPoint.getY() + worldServer.rand.nextInt(verVar) - worldServer.rand.nextInt(verVar),
+						startSpawningPoint.getZ() + worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar));
 					// Biome BlackList
-					if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
-							spawningPoint.chunkPosY))) {
+					if (blacklist.isBlacklisted(VanillaHelper.getBiomeForCoords(worldServer, spawningPoint.getX(),
+							spawningPoint.getY()))) {
 						break;
 					}
 
-					if (isNearPlayerOrOrigin(worldServer, serverOriginPoint, spawningPoint.chunkPosX,
-							spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
+					if (isNearPlayerOrOrigin(worldServer, serverOriginPoint, spawningPoint.getX(),
+							spawningPoint.getY(), spawningPoint.getZ())) {
 						continue;
 					}
 
@@ -98,13 +96,13 @@ public class CustomSpawner {
 					// (regsitry.getSpawnListEntryToSpawn is not cheap)
 					if (spawnlistentry == null) {
 						spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer, creatureType,
-								startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
-								startSpawningPoint.chunkPosZ);
+								startSpawningPoint.getX(), startSpawningPoint.getY(),
+								startSpawningPoint.getZ());
 						if (spawnlistentry == null) {
 							break;
 						}
-						Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
-								startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
+						Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.getX(),
+								startSpawningPoint.getY(), startSpawningPoint.getZ());
 						livingToSpawn = livingHandlerRegistry.getRandomEntity(spawnlistentry.livingGroupID,
 								worldServer.rand, tags);
 						if (livingToSpawn == null) {
@@ -125,9 +123,9 @@ public class CustomSpawner {
 					}
 
 					/* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
-					float spawnX = spawningPoint.chunkPosX + 0.5F;
-					float spawnY = spawningPoint.chunkPosY;
-					float spawnZ = spawningPoint.chunkPosZ + 0.5F;
+					float spawnX = spawningPoint.getX() + 0.5F;
+					float spawnY = spawningPoint.getY();
+					float spawnZ = spawningPoint.getZ() + 0.5F;
 					EntityLiving entityliving;
 					try {
 						entityliving = livingToSpawn.getConstructor(new Class[] { World.class }).newInstance(
@@ -142,7 +140,8 @@ public class CustomSpawner {
 					if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
-							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+							entitylivingdata = entityliving.func_180482_a(
+									worldServer.getDifficultyForLocation(new BlockPos(entityliving)), entitylivingdata);
 						}
 						JASLog.log().logSpawn(
 								false,
@@ -151,7 +150,7 @@ public class CustomSpawner {
 								(int) entityliving.posX,
 								(int) entityliving.posY,
 								(int) entityliving.posZ,
-								BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+								BiomeHelper.getPackageName(VanillaHelper.getBiomeForCoords(entityliving.worldObj, 
 										(int) entityliving.posX, (int) entityliving.posZ)));
 						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry, countInfo);
 						countInfo.countSpawn(entityliving, creatureType.typeID);
@@ -166,12 +165,12 @@ public class CustomSpawner {
 		}
 	}
 
-	private static boolean isNearPlayerOrOrigin(World world, ChunkCoordinates serverSpawnPoint, int originX,
+	private static boolean isNearPlayerOrOrigin(World world, BlockPos serverSpawnPoint, int originX,
 			int originY, int originZ) {
 		if (world.getClosestPlayer(originX, originY, originZ, 24.0D) == null) {
-			float xOffset = originX - serverSpawnPoint.posX;
-			float yOffset = originY - serverSpawnPoint.posY;
-			float zOffset = originZ - serverSpawnPoint.posZ;
+			float xOffset = originX - serverSpawnPoint.getX();
+			float yOffset = originY - serverSpawnPoint.getY();
+			float zOffset = originZ - serverSpawnPoint.getZ();
 			float sqOffset = xOffset * xOffset + yOffset * yOffset + zOffset * zOffset;
 
 			if (sqOffset < 576.0F) {
@@ -191,9 +190,9 @@ public class CustomSpawner {
 		if (random.nextFloat() < creatureType.chunkSpawnChance) {
 			int j1 = par2 + random.nextInt(par4);
 			int k1 = par3 + random.nextInt(par5);
-			int l1 = j1;
-			int i2 = k1;
-			int topHeight = world.getTopSolidOrLiquidBlock(j1, k1);
+			int topHeight = VanillaHelper.getTopSolidOrLiquidBlock(world, j1, k1).getY();
+			int l1 = j1; //xHolder - startX
+			int i2 = k1; //zHolder - startZ
 			BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings().biomeSpawnListRegistry();
 			SpawnListEntry spawnListEntry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(world, creatureType, j1,
 					topHeight, k1);
@@ -218,7 +217,7 @@ public class CustomSpawner {
 					continue;
 				}
 				for (int k2 = 0; !flag && k2 < 4; ++k2) {
-					int l2 = world.getTopSolidOrLiquidBlock(j1, k1);
+					int l2 = VanillaHelper.getTopSolidOrLiquidBlock(world, j1, k1).getY();
 					if (creatureType.canSpawnAtLocation(world, new Tags(world, countInfo, j1, l2, k1), j1, l2, k1)) {
 						float f = j1 + 0.5F;
 						float f1 = l2;
@@ -241,11 +240,12 @@ public class CustomSpawner {
 									(int) entityliving.posX,
 									(int) entityliving.posY,
 									(int) entityliving.posZ,
-									BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+									BiomeHelper.getPackageName(VanillaHelper.getBiomeForCoords(entityliving.worldObj, 
 											(int) entityliving.posX, (int) entityliving.posZ)));
 							world.spawnEntityInWorld(entityliving);
 							if (!ForgeEventFactory.doSpecialSpawn(entityliving, world, f, f1, f2)) {
-								entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
+								entitylivingdata = entityliving.func_180482_a(
+										world.getDifficultyForLocation(new BlockPos(entityliving)), entitylivingdata);
 							}
 							spawnListEntry.getLivingHandler().postSpawnEntity(entityliving, spawnListEntry, countInfo);
 							countInfo.countSpawn(entityliving, creatureType.typeID);

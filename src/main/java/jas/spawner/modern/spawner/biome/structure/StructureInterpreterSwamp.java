@@ -2,13 +2,14 @@ package jas.spawner.modern.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
 import jas.common.helper.ReflectionHelper;
+import jas.common.helper.VanillaHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import net.minecraft.entity.monster.EntityWitch;
 import net.minecraft.world.World;
@@ -46,11 +47,11 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 
 	@Override
 	public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-		MapGenStructure mapGenScatteredFeature = getOrDefault(world.provider.dimensionId).get();
+		MapGenStructure mapGenScatteredFeature = getOrDefault(VanillaHelper.getDimensionID(world)).get();
 		if (mapGenScatteredFeature == null) {
-			BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
+			BiomeGenBase biome = VanillaHelper.getBiomeForCoords(world, xCoord, zCoord);
 			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
-			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
+			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.serverChunkGenerator instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.serverChunkGenerator
 					: null;
 			if (chunkProviderGenerate == null || !(biome instanceof BiomeGenSwamp)
 					|| !areMapFeaturesEnabled(chunkProviderGenerate)) {
@@ -63,9 +64,9 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 				mapGenScatteredFeature = ReflectionHelper.getFieldFromReflection("scatteredFeatureGenerator",
 						chunkProviderGenerate, MapGenScatteredFeature.class);
 			}
-			structureRefs.put(world.provider.dimensionId, new WeakReference(mapGenScatteredFeature));
+			structureRefs.put(VanillaHelper.getDimensionID(world), new WeakReference(mapGenScatteredFeature));
 		}
-		
+
 		if (mapGenScatteredFeature == null) {
 			return null;
 		}
@@ -78,12 +79,12 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 					mapGenScatteredFeature, World.class);
 		}
 
-		if (structureWorld != null && mapGenScatteredFeature.hasStructureAt(xCoord, yCoord, zCoord)) {
+		if (VanillaHelper.isStructureAt(mapGenScatteredFeature, xCoord, yCoord, zCoord)) {
 			return "WitchHut";
 		}
 		return null;
 	}
-	
+
 	private boolean areMapFeaturesEnabled(ChunkProviderGenerate chunkProviderGenerate) {
 		Boolean areMapFeaturesEnabled = false;
 		if (chunkProviderGenerate != null) {
@@ -115,6 +116,6 @@ public class StructureInterpreterSwamp implements StructureInterpreter {
 	@SubscribeEvent
 	/** Clearout appropriate dimension cache when World is unloaded */
 	public void worldLoad(WorldEvent.Unload event) {
-		structureRefs.remove(event.world.provider.dimensionId);
+		structureRefs.remove(VanillaHelper.getDimensionID(event.world));
 	}
 }

@@ -8,9 +8,11 @@ import jas.spawner.modern.modification.ModLoadConfig;
 import java.io.File;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public class CommandLoadConfig extends CommandJasBase {
     public String getCommandName() {
@@ -30,7 +32,7 @@ public class CommandLoadConfig extends CommandJasBase {
     }
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length > 0) {
 			throw new WrongUsageException("commands.jasloadconfig.usage", new Object[0]);
 		}
@@ -44,7 +46,7 @@ public class CommandLoadConfig extends CommandJasBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         return null;
     }
 }

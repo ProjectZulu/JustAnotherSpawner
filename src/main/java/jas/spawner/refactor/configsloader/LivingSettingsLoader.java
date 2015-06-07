@@ -11,9 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-
 import com.google.common.base.Optional;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;

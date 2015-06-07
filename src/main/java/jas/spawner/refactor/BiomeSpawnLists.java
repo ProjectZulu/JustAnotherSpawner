@@ -1,6 +1,7 @@
 package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.SpawnSettings.BiomeSettings;
 import jas.spawner.refactor.SpawnSettings.LivingSettings;
@@ -133,7 +134,7 @@ public class BiomeSpawnLists {
 
 	public Collection<String> livingTypesForEntity(World world, Entity entity, LivingSettings livingSettings,
 			BiomeSettings biomeSettings) {
-		BiomeGenBase biome = world.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
+		BiomeGenBase biome = VanillaHelper.getBiomeForCoords(world, (int) entity.posX, (int) entity.posZ);
 		String pckgeName = BiomeHelper.getPackageName(biome);
 		String jasBiomeName = biomeSettings.biomeMappings().keyToMapping().get(pckgeName);
 

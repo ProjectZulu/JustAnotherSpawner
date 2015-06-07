@@ -10,8 +10,8 @@ import jas.spawner.refactor.WorldSettings;
 import java.io.File;
 
 import net.minecraft.world.World;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Spawner where Mappings specify a 'Card' (similar to LivingHanlder which specifies where the entity can spawn,

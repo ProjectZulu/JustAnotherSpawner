@@ -1,5 +1,6 @@
 package jas.client.gui.elements;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import net.minecraft.client.Minecraft;
@@ -60,7 +61,7 @@ public abstract class GuiPanel extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) {
+    protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
         for (GuiPanel childPanel : children.values()) {
             if (childPanel.enabled) {
@@ -70,7 +71,7 @@ public abstract class GuiPanel extends GuiScreen {
     }
 
     @Override
-    protected void keyTyped(char keyChar, int keyID) {
+    protected void keyTyped(char keyChar, int keyID) throws IOException {
         super.keyTyped(keyChar, keyID);
         for (GuiPanel childPanel : children.values()) {
             if (childPanel.enabled) {
@@ -80,7 +81,7 @@ public abstract class GuiPanel extends GuiScreen {
     }
 
     @Override
-    protected void mouseClicked(int clickedX, int clickedY, int mouseState) {
+    protected void mouseClicked(int clickedX, int clickedY, int mouseState) throws IOException {
         super.mouseClicked(clickedX, clickedY, mouseState);
         for (GuiPanel childPanel : children.values()) {
             if (childPanel.enabled) {

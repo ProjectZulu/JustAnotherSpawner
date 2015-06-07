@@ -20,7 +20,7 @@ public class LivingDeathContext extends CommonContext {
 	}
 
 	public String livingName() {
-		return event.entityLiving.getCommandSenderName();
+		return event.entityLiving.getName();
 	}
 
 	public boolean isDamageSource(String desiredDamageSource) {

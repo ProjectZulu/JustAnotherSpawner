@@ -2,7 +2,7 @@ package jas.common.helper.sort;
 
 import java.util.Set;
 
-import cpw.mods.fml.common.toposort.ModSortingException;
+import net.minecraftforge.fml.common.toposort.ModSortingException;
 
 public class TopologicalSortingException extends ModSortingException {
 

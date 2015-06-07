@@ -1,6 +1,5 @@
 package jas.spawner.refactor.structs;
 
-import akka.actor.dsl.Inbox.Get;
 
 public interface Getter<T> {
 	public T get();

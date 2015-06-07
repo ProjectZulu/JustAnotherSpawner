@@ -1,8 +1,8 @@
 package jas.spawner.card;
 
-import java.util.Set;
-
 import jas.spawner.refactor.entities.Group;
+
+import java.util.Set;
 
 public class Card implements Group {
 

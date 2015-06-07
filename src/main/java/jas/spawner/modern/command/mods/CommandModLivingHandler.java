@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.util.BlockPos;
 
 public class CommandModLivingHandler extends CommandJasBase {
 
@@ -58,7 +60,7 @@ public class CommandModLivingHandler extends CommandJasBase {
 	}
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length <= 1) {
 			throw new WrongUsageException("commands.modlivinghandler.usage", new Object[0]);
 		}
@@ -89,7 +91,7 @@ public class CommandModLivingHandler extends CommandJasBase {
 	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		List<String> tabCompletions = new ArrayList<String>();
 		if (stringArgs.length == 1) {

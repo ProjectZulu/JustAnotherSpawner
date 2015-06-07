@@ -1,10 +1,11 @@
 package jas.spawner.refactor.biome.list;
 
-import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.BlockPos;
+
 
 public class EntitySpawn {
 	private String entityToSpawn;
-	private ChunkCoordinates spawnPosition;
+	private BlockPos spawnPosition;
 
 	public void setEntity(String entityToSpawn) {
 		this.entityToSpawn = entityToSpawn;
@@ -14,11 +15,11 @@ public class EntitySpawn {
 		return entityToSpawn;
 	}
 
-	public void setPos(ChunkCoordinates spawnPosition) {
+	public void setPos(BlockPos spawnPosition) {
 		this.spawnPosition = spawnPosition;
 	}
 
-	public ChunkCoordinates getPos() {
+	public BlockPos getPos() {
 		return spawnPosition;
 	}
 }

@@ -2,13 +2,14 @@ package jas.spawner.modern.spawner;
 
 import jas.api.ITameable;
 import jas.common.JASLog;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.TagsUtility.Conditional;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.modern.spawner.creature.handler.parsing.NBTWriter;
-import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.LegacyFunctions;
 import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
 import jas.spawner.modern.spawner.tags.TimeFunctions;
@@ -16,15 +17,18 @@ import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import jas.spawner.modern.spawner.tags.WorldFunctions;
 
 import java.util.IllegalFormatException;
+import java.util.Map.Entry;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMultimap;
@@ -112,10 +116,11 @@ public class Tags implements BaseFunctions {
 
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
+				BlockPos pos = VanillaHelper.convert(xCoord, yCoord, zCoord);
 				for (String blockKey : blockKeys) {
 					for (Integer metaValue : metas) {
 						if (Block.getBlockFromName(blockKey) == wrld.blockAt(xCoord, yCoord, zCoord)
-								&& metaValue.equals(world.getBlockMetadata(xCoord, yCoord, zCoord))) {
+								&& metaValue.equals(VanillaHelper.getBlockMeta(world, pos))) {
 							return true;
 						}
 					}
@@ -126,11 +131,11 @@ public class Tags implements BaseFunctions {
 	}
 
 	public boolean blockFoot(String[] blockKeys) {
-		Block blockID = wrld.blockAt(posX, posY - 1, posZ);
+		Block blockFoot = wrld.blockAt(posX, posY - 1, posZ);
 		for (String blockKey : blockKeys) {
-			Block searchBlock = Block.getBlockFromName(blockKey);
-			if (searchBlock != null) {
-				if (blockID == searchBlock) {
+			Block blockDesired = Block.getBlockFromName(blockKey);
+			if (blockDesired != null) {
+				if (blockFoot == blockDesired) {
 					return true;
 				}
 			}
@@ -139,13 +144,13 @@ public class Tags implements BaseFunctions {
 	}
 
 	public boolean blockFoot(String[] blockKeys, Integer[] metas) {
-		Block blockID = wrld.blockAt(posX, posY - 1, posZ);
-		int meta = world.getBlockMetadata(posX, posY - 1, posZ);
+		Block blockAtFoot = wrld.blockAt(posX, posY - 1, posZ);
+		int meta = VanillaHelper.getBlockMeta(world, posX, posY - 1, posZ);
 		for (String blockKey : blockKeys) {
-			Block searchBlock = Block.getBlockFromName(blockKey);
-			if (searchBlock != null) {
+			Block blockDesired = Block.getBlockFromName(blockKey);
+			if (blockDesired != null) {
 				for (Integer metaValue : metas) {
-					if (blockID == searchBlock && metaValue.equals(meta)) {
+					if (blockAtFoot == blockDesired && metaValue.equals(meta)) {
 						return true;
 					}
 				}
@@ -158,7 +163,7 @@ public class Tags implements BaseFunctions {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
-				return wrld.blockAt(xCoord, yCoord, zCoord).isNormalCube();
+				return VanillaHelper.isNormal(wrld.blockAt(xCoord, yCoord, zCoord));
 			}
 		}, searchRange, searchOffsets);
 	}
@@ -167,7 +172,7 @@ public class Tags implements BaseFunctions {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
-				return wrld.blockAt(xCoord, yCoord, zCoord).getMaterial().isLiquid();
+				return VanillaHelper.isLiquid(wrld.blockAt(xCoord, yCoord, zCoord));
 			}
 		}, searchRange, searchOffsets);
 
@@ -181,11 +186,10 @@ public class Tags implements BaseFunctions {
 				this.side = side;
 				return this;
 			}
-			
+
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
-				return wrld.blockAt(xCoord, yCoord, zCoord).isSideSolid(world, xCoord, yCoord, zCoord,
-						ForgeDirection.getOrientation(side));
+				return VanillaHelper.isSolidSide(world, xCoord, yCoord, zCoord, EnumFacing.getFront(side));
 			}
 		}.init(side), searchRange, searchOffsets);
 	}
@@ -194,7 +198,7 @@ public class Tags implements BaseFunctions {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
-				return wrld.blockAt(xCoord, yCoord, zCoord).getMaterial().isOpaque();
+				return VanillaHelper.isOpaque(wrld.blockAt(xCoord, yCoord, zCoord));
 			}
 		}, searchRange, searchOffsets);
 
@@ -334,7 +338,7 @@ public class Tags implements BaseFunctions {
 	public CountFunctions count() {
 		return count;
 	}
-	
+
 	@Override
 	public TimeFunctions time() {
 		return time;

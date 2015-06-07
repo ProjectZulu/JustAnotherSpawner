@@ -1,6 +1,5 @@
 package jas.spawner.refactor.entities;
 
-import jas.spawner.legacy.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.spawner.modern.math.SetAlgebra;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.biome.BiomeMappings;

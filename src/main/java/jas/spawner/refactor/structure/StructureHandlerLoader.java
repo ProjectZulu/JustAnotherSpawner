@@ -3,7 +3,6 @@ package jas.spawner.refactor.structure;
 import jas.common.helper.GsonHelper;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
-import jas.spawner.refactor.configsloader.BiomeSpawnListLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
 import jas.spawner.refactor.structure.StructureHandlerBuilder.StructureHandler;
 
@@ -11,11 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -24,8 +21,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-
-import cpw.mods.fml.common.Loader;
 
 /**
  * @param sortCreatureByBiome Determines order of entity headings

@@ -1,5 +1,6 @@
 package jas.spawner.modern.spawner.creature.handler.parsing.keys;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.spawner.creature.handler.parsing.ParsingHelper;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.world.World;
@@ -17,7 +18,7 @@ public class KeyParserDimension extends KeyParserIntArray {
 
     @Override
     public boolean isValid(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord, int[] args) {
-        return world.provider.dimensionId == args[0];
+        return VanillaHelper.getDimensionID(world) == args[0];
     }
     
 

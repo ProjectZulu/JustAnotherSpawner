@@ -16,29 +16,23 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.world.GameRules;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
+import net.minecraft.world.GameRules.ValueType;
 import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.Mod.Instance;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-import com.google.common.collect.ArrayTable;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 import com.google.gson.Gson;
-
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.Mod.EventHandler;
-import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 @Mod(modid = DefaultProps.MODID, name = DefaultProps.MODNAME, dependencies = "after:*", useMetadata = true)
 public class JustAnotherSpawner {
@@ -149,13 +143,13 @@ public class JustAnotherSpawner {
 		GameRules gameRule = event.world.getGameRules();
 		if (gameRule != null && globalSettings.turnGameruleSpawningOff) {
 			JASLog.log().info("Setting GameRule doMobSpawning for %s-%s to false",
-					event.world.getWorldInfo().getWorldName(), event.world.provider.dimensionId);
+					event.world.getWorldInfo().getWorldName(), event.world.provider.getDimensionId());
 			gameRule.setOrCreateGameRule("doMobSpawning", "false");
 		}
 
 		String ruleName = "doCustomMobSpawning";
 		if (!gameRule.hasRule(ruleName)) {
-			gameRule.addGameRule(ruleName, "true");
+			gameRule.addGameRule(ruleName, "true", ValueType.BOOLEAN_VALUE);
 		}
 	}
 }

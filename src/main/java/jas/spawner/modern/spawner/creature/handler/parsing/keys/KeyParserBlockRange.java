@@ -12,22 +12,22 @@ import net.minecraft.world.World;
 
 public class KeyParserBlockRange extends KeyParserBase {
 
-    public KeyParserBlockRange(Key key) {
-        super(key, false, KeyType.VALUE);
-    }
+	public KeyParserBlockRange(Key key) {
+		super(key, false, KeyType.VALUE);
+	}
 
-    @Override
-    public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
-            ArrayList<Operand> operandvalue) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public boolean parseChainable(String parseable, ArrayList<TypeValuePair> parsedChainable,
+			ArrayList<Operand> operandvalue) {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
-        String[] pieces = parseable.split(",");
-        OptionalParser.parseBlockRange(pieces, valueCache);
-        return true;
-    }
+	@Override
+	public boolean parseValue(String parseable, HashMap<String, Object> valueCache) {
+		String[] pieces = parseable.split(",");
+		OptionalParser.parseBlockRange(pieces, valueCache);
+		return true;
+	}
 
 	@Override
 	public boolean isValidLocation(World world, EntityLiving entity, int xCoord, int yCoord, int zCoord,
@@ -37,6 +37,6 @@ public class KeyParserBlockRange extends KeyParserBase {
 
 	@Override
 	public String toExpression(String parseable) {
-        throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException();
 	}
 }

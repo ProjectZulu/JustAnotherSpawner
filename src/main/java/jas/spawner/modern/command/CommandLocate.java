@@ -11,12 +11,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 
 public class CommandLocate extends CommandJasBase {
@@ -37,7 +39,7 @@ public class CommandLocate extends CommandJasBase {
     }
 
     @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
+    public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         if (stringArgs.length >= 3) {
             throw new WrongUsageException("commands.jaslocate.usage", new Object[0]);
         }
@@ -46,7 +48,7 @@ public class CommandLocate extends CommandJasBase {
         if (stringArgs.length == 2) {
             targetPlayer = getPlayer(commandSender, stringArgs[0]);
         } else {
-            targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
+            targetPlayer = getPlayer(commandSender, commandSender.getName());
         }
 
         String entityTarget = stringArgs.length == 0 ? "*" : stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
@@ -93,7 +95,7 @@ public class CommandLocate extends CommandJasBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         stringArgs = correctedParseArgs(stringArgs, false);
         List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {

@@ -162,7 +162,7 @@ public class SpawnerLogic {
 	public static void despawnEntity(EntityLiving entity, Tags tags, DespawnRule despawnRule) {
 		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		if (entityplayer != null) {
@@ -230,7 +230,7 @@ public class SpawnerLogic {
 
 				if (dieOfAge) {
 					JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s",
-							entity.getCommandSenderName(), entityProps.getAge(), rate);
+							entity.getName(), entityProps.getAge(), rate);
 					entity.setDead();
 				} else if (resetAge) {
 					entityProps.resetAge();
@@ -242,7 +242,7 @@ public class SpawnerLogic {
 	public static boolean willEntityDespawn(EntityLiving entity, Tags tags, DespawnRule despawnRule) {
 		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		if (entityplayer != null) {

@@ -34,7 +34,7 @@ public class WorldSettings {
 		if (dimSpawnOverrides.isEmpty()) {
 			return defaultSpawnSettings;
 		} else {
-			SpawnSettings dimSpawnSettings = dimSpawnOverrides.get(world.provider.dimensionId);
+			SpawnSettings dimSpawnSettings = dimSpawnOverrides.get(VanillaHelper.getDimensionID(world));
 			return dimSpawnSettings != null ? dimSpawnSettings : defaultSpawnSettings;
 		}
 	}

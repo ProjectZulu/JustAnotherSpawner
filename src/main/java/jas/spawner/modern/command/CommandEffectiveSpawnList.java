@@ -2,11 +2,12 @@ package jas.spawner.modern.command;
 
 import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo;
+import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.EntityCounter;
 import jas.spawner.modern.spawner.Tags;
-import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.spawner.modern.spawner.creature.entry.SpawnListEntry;
 import jas.spawner.modern.spawner.creature.handler.LivingHandler;
@@ -20,19 +21,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import net.minecraftforge.event.ForgeEventFactory;
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class CommandEffectiveSpawnList extends CommandJasBase {
 
@@ -59,7 +58,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 	}
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		// /jas effectivespawnlist [0]<Player=CommanderSender> [1]<CreatureType=*> [2]<ChunkDistance=8> [3]<cycles=100>
 		// /jas effectivespawnlist [0]<CreatureType> [1]<ChunkDistance> [2]<cycles>
 		// /jas effectivespawnlist [0]<CreatureType> [1]<ChunkDistance>
@@ -85,7 +84,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 		case 1:
 			desiredCreatureType = stringArgs[0];
 		case 0:
-			targetPlayer = getPlayer(commandSender, commandSender.getCommandSenderName());
+			targetPlayer = getPlayer(commandSender, commandSender.getName());
 			break;
 		default:
 			throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
@@ -157,7 +156,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 	private void attemptSpawnCreaturesInChunks(int maxCycles, World worldServer,
 			LivingHandlerRegistry livingHandlerRegistry, BiomeSpawnListRegistry biomeSpawnListRegistry,
 			CreatureType creatureType, BiomeBlacklist blacklist, CountInfo countInfo, CountInfo reportCount) {
-		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
+		BlockPos serverOriginPoint = worldServer.getSpawnPoint();
 		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
 				countInfo.eligibleChunkLocations());
 		for (int cycle = 0; cycle < maxCycles; cycle++) {
@@ -172,7 +171,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 				final int entityTypeCap = creatureType.maxNumberOfCreature * eligibleChunksForSpawning.size() / 256;
 				for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 					IEntityLivingData entitylivingdata = null;
-					ChunkPosition startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
+					BlockPos startSpawningPoint = creatureType.getRandomSpawningPointInChunk(worldServer,
 							chunkCoord.chunkXPos, chunkCoord.chunkZPos);
 
 					SpawnListEntry spawnlistentry = null;
@@ -188,26 +187,26 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
 						final int horVar = 6;
 						final int verVar = 1;
-						ChunkPosition spawningPoint = new ChunkPosition(startSpawningPoint.chunkPosX
+						BlockPos spawningPoint = new BlockPos(startSpawningPoint.getX()
 								+ worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar),
-								startSpawningPoint.chunkPosY + worldServer.rand.nextInt(verVar)
-										- worldServer.rand.nextInt(verVar), startSpawningPoint.chunkPosZ
+								startSpawningPoint.getY() + worldServer.rand.nextInt(verVar)
+										- worldServer.rand.nextInt(verVar), startSpawningPoint.getZ()
 										+ worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar));
 						// Biome BlackList
-						if (blacklist.isBlacklisted(worldServer.getBiomeGenForCoords(spawningPoint.chunkPosX,
-								spawningPoint.chunkPosY))) {
+						if (blacklist.isBlacklisted(VanillaHelper.getBiomeForCoords(worldServer,
+								spawningPoint.getX(), spawningPoint.getY()))) {
 							continue;
 						}
 						
 						if (spawnlistentry == null) {
 							spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer, creatureType,
-									startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
-									startSpawningPoint.chunkPosZ);
+									startSpawningPoint.getX(), startSpawningPoint.getY(),
+									startSpawningPoint.getZ());
 							if (spawnlistentry == null) {
 								break;
 							}
-							Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
-									startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
+							Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.getX(),
+									startSpawningPoint.getY(), startSpawningPoint.getZ());
 							livingToSpawn = livingHandlerRegistry.getRandomEntity(spawnlistentry.livingGroupID,
 									worldServer.rand, tags);
 							if (livingToSpawn == null) {
@@ -228,9 +227,9 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						}
 
 						/* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
-						float spawnX = spawningPoint.chunkPosX + 0.5F;
-						float spawnY = spawningPoint.chunkPosY;
-						float spawnZ = spawningPoint.chunkPosZ + 0.5F;
+						float spawnX = spawningPoint.getX() + 0.5F;
+						float spawnY = spawningPoint.getY();
+						float spawnZ = spawningPoint.getZ() + 0.5F;
 						EntityLiving entityliving;
 						try {
 							entityliving = livingToSpawn.getConstructor(new Class[] { World.class }).newInstance(
@@ -259,7 +258,7 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		List<String> tabCompletions = new ArrayList<String>();
 		if (stringArgs.length == 1) {

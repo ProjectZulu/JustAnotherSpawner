@@ -21,8 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.minecraft.world.World;
-
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableListMultimap.Builder;
 import com.google.common.collect.ImmutableMap;

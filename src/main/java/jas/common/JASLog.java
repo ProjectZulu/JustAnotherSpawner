@@ -4,8 +4,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-
 public class JASLog {
     private static Logger myLog;
     private static JASLog jasLog;

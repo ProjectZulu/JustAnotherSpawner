@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.TreeMap;
 
 import net.minecraft.entity.EnumCreatureType;
@@ -20,8 +19,6 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Table;
-import com.google.common.collect.TreeBasedTable;
 import com.google.gson.Gson;
 
 /**

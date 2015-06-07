@@ -1,7 +1,6 @@
 package jas.spawner.modern.spawner.creature.handler;
 
 import jas.common.JASLog;
-import jas.common.JustAnotherSpawner;
 import jas.common.helper.MVELHelper;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.EntityProperties;
@@ -19,6 +18,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
 
 import org.apache.logging.log4j.Level;
 import org.mvel2.MVEL;
@@ -26,8 +26,6 @@ import org.mvel2.MVEL;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
-import cpw.mods.fml.common.eventhandler.Event.Result;
 
 public class LivingHandler {
 
@@ -136,7 +134,7 @@ public class LivingHandler {
 		}
 		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		if (entityplayer != null) {
@@ -168,7 +166,7 @@ public class LivingHandler {
 	public final void despawnEntity(EntityLiving entity, CountInfo info) {
 		EntityPlayer entityplayer = entity.worldObj.getClosestPlayerToEntity(entity, -1.0D);
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		if (entityplayer != null) {
@@ -212,7 +210,7 @@ public class LivingHandler {
 				int rate = despawnRate.isPresent() ? despawnRate.get() : 40;
 				if (isOfAge && entity.worldObj.rand.nextInt(1 + rate / 3) == 0 && validDistance) {
 					JASLog.log().debug(Level.INFO, "Entity %s is DEAD At Age %s rate %s",
-							entity.getCommandSenderName(), entityProps.getAge(), rate);
+							entity.getName(), entityProps.getAge(), rate);
 					entity.setDead();
 				} else if (!validDistance) {
 					entityProps.resetAge();
@@ -237,14 +235,14 @@ public class LivingHandler {
 			return isValidLocation(entity);
 		}
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canLivingSpawn = !MVELHelper.executeExpression(compSpawnExpression.get(), tags,
 				"Error processing compiled spawn expression for " + livingID + ": " + spawnExpression);
 
-		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
-				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+		return canLivingSpawn && entity.worldObj.checkNoEntityCollision(entity.getEntityBoundingBox())
+				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty();
 	}
 
 	public final boolean isValidSpawnList(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
@@ -253,21 +251,21 @@ public class LivingHandler {
 		}
 
 		int xCoord = MathHelper.floor_double(entity.posX);
-		int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+		int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 		int zCoord = MathHelper.floor_double(entity.posZ);
 
 		Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
 		boolean canSpawnListSpawn = !MVELHelper.executeExpression(spawnListEntry.getOptionalSpawning().get(), tags,
 				"Error processing compiled spawnListSpawn expression for " + livingID + ": " + spawnListEntry.spawnExpression);
 
-		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.boundingBox)
-				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.boundingBox).isEmpty();
+		return canSpawnListSpawn && entity.worldObj.checkNoEntityCollision(entity.getEntityBoundingBox())
+				&& entity.worldObj.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty();
 	}
 
 	public final void postSpawnEntity(EntityLiving entity, SpawnListEntry spawnListEntry, CountInfo info) {
 		if (compPostSpawnExpression.isPresent()) {
 			int xCoord = MathHelper.floor_double(entity.posX);
-			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+			int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);
@@ -278,7 +276,7 @@ public class LivingHandler {
 
 		if (spawnListEntry.getOptionalPostSpawning().isPresent()) {
 			int xCoord = MathHelper.floor_double(entity.posX);
-			int yCoord = MathHelper.floor_double(entity.boundingBox.minY);
+			int yCoord = MathHelper.floor_double(entity.getEntityBoundingBox().minY);
 			int zCoord = MathHelper.floor_double(entity.posZ);
 
 			Tags tags = new Tags(entity.worldObj, info, xCoord, yCoord, zCoord, entity);

@@ -3,7 +3,6 @@ package jas.spawner.refactor;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.Tags;
 import jas.spawner.refactor.mvel.MVELExpression;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public class LivingTypeBuilder {
@@ -61,9 +60,9 @@ public class LivingTypeBuilder {
 			this.iterationsPerPack = builder.getIterationsPerPack();
 		}
 
-		public boolean canSpawnAtLocation(World worldServer, CountInfo countInfo, ChunkPosition spawningPoint) {
-			Tags tags = new Tags(worldServer, countInfo, spawningPoint.chunkPosX, spawningPoint.chunkPosY,
-					spawningPoint.chunkPosZ);
+		public boolean canSpawnAtLocation(World worldServer, CountInfo countInfo, BlockPos spawningPoint) {
+			Tags tags = new Tags(worldServer, countInfo, spawningPoint.getX(), spawningPoint.getY(),
+					spawningPoint.getZ());
 			return canSpawn.evaluate(tags, "Error processing spawnExpression compiled expression for " + livingTypeID
 					+ ": " + canSpawn.expression);
 		}

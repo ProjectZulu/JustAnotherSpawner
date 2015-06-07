@@ -11,8 +11,8 @@ import java.io.File;
 
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * Experimental Profile. SpawnListEntry is the center spawning object, each entry specifies the corresponding

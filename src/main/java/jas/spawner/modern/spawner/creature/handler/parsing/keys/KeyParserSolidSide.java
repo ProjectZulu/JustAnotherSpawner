@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 
@@ -102,7 +103,7 @@ public class KeyParserSolidSide extends KeyParserBase {
                     for (int j = -rangeY; j <= rangeY; j++) {
                         boolean isSolid = world.getBlock(xCoord + offsetX + i, yCoord + offsetY + j,
                                 zCoord + offsetZ + k).isSideSolid(world, xCoord + offsetX + i, yCoord + offsetY + j,
-                                zCoord + offsetZ + k, ForgeDirection.getOrientation(side));
+                                zCoord + offsetZ + k, EnumFacing.getFront(side));
                         if (!isInverted && isSolid || isInverted && !isSolid) {
                             return false;
                         }

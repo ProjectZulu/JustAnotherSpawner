@@ -1,8 +1,8 @@
 package jas.spawner.modern.spawner.biome.structure;
 
 import jas.api.StructureInterpreter;
-import jas.common.JASLog;
 import jas.common.helper.ReflectionHelper;
+import jas.common.helper.VanillaHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -13,14 +13,13 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.gen.ChunkProviderGenerate;
-import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraftforge.event.world.WorldEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class StructureInterpreterOverworldStructures implements StructureInterpreter {
 
@@ -46,7 +45,7 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 		MapGenStructure mineshaftGen = mineshaftRef.get();
 		if (strongholdGen == null || mineshaftGen == null) {
 			ChunkProviderServer chunkprovider = (ChunkProviderServer) world.getChunkProvider();
-			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.currentChunkProvider instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.currentChunkProvider
+			ChunkProviderGenerate chunkProviderGenerate = chunkprovider.serverChunkGenerator instanceof ChunkProviderGenerate ? (ChunkProviderGenerate) chunkprovider.serverChunkGenerator
 					: null;
 			if (chunkProviderGenerate == null || !areMapFeaturesEnabled(chunkProviderGenerate)) {
 				return null;
@@ -126,7 +125,7 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 					World.class);
 		}
 
-		if (structureWorld != null && structure.hasStructureAt(xCoord, yCoord, zCoord)) {
+		if (VanillaHelper.isStructureAt(structure, xCoord, yCoord, zCoord)) {
 			return structureKey;
 		} else {
 			return null;
@@ -135,13 +134,13 @@ public class StructureInterpreterOverworldStructures implements StructureInterpr
 
 	@Override
 	public boolean shouldUseHandler(World world, BiomeGenBase biomeGenBase) {
-		return world.provider.dimensionId == 0;
+		return VanillaHelper.getDimensionID(world) == 0;
 	}
 
 	@SubscribeEvent
 	/** Overworld is unloaded, reset references */
 	public void worldLoad(WorldEvent.Unload event) {
-		if (event.world.provider.dimensionId == 0) {
+		if (VanillaHelper.getDimensionID(event.world) == 0) {
 			strongholdRef = new WeakReference(null);
 			mineshaftRef = new WeakReference(null);
 		}

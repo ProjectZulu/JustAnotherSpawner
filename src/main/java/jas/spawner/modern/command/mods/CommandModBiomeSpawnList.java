@@ -12,8 +12,10 @@ import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.util.BlockPos;
 
 public class CommandModBiomeSpawnList extends CommandJasBase {
 
@@ -56,7 +58,7 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 	}
 
 	@Override
-	public void process(ICommandSender commandSender, String[] stringArgs) {
+	public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
 		if (stringArgs.length <= 1) {
 			throw new WrongUsageException("commands.modbiomespawnlist.usage", new Object[0]);
 		}
@@ -92,7 +94,7 @@ public class CommandModBiomeSpawnList extends CommandJasBase {
 	 * Adds the strings available in this command to the given list of tab completion options.
 	 */
 	@Override
-	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+	public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
 		stringArgs = correctedParseArgs(stringArgs, false);
 		// Format /jas modbiomespawnlist <add/Upd/Rmv> <BiomeID><LivingID><Weight><Pack><Min><Max><Tags>
 		List<String> tabCompletions = new ArrayList<String>();

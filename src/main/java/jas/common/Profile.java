@@ -3,9 +3,7 @@ package jas.common;
 import java.io.File;
 
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-
-import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 /**
  * Configurable World Settings - Each Profile supports a unique configuration file layout

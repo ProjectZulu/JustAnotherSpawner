@@ -8,25 +8,27 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
 
 public abstract class CommandJasBase extends CommandBase {
 
     @Override
-    public final void processCommand(ICommandSender commandSender, String[] stringArgs) {
+    public final void processCommand(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         process(commandSender, correctedParseArgs(stringArgs, true));
     }
 
-    public abstract void process(ICommandSender commandSender, String[] stringArgs);
+    public abstract void process(ICommandSender commandSender, String[] stringArgs) throws CommandException;
 
     @Override
     @SuppressWarnings("rawtypes")
-    public final List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs) {
-        return getTabCompletions(commandSender, correctedParseArgs(stringArgs, false));
+    public final List addTabCompletionOptions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
+        return getTabCompletions(commandSender, correctedParseArgs(stringArgs, false), blockPos);
     }
 
-    public abstract List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs);
+    public abstract List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos);
 
     protected String[] correctedParseArgs(String[] stringArgs, boolean removeQuotations) {
         ArrayList<String> endArgs = new ArrayList<String>();

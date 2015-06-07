@@ -1,7 +1,6 @@
 package jas.spawner.refactor.despawn;
 
 import jas.common.global.ImportedSpawnList;
-import jas.spawner.refactor.SpawnSettings;
 import jas.spawner.refactor.SpawnSettings.LivingSettings;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.LoadedFile;
@@ -12,8 +11,6 @@ import jas.spawner.refactor.entities.ImmutableMapGroupsBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import net.minecraft.world.World;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;

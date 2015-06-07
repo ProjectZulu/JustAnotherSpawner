@@ -2,7 +2,6 @@ package jas.spawner.refactor.configsloader;
 
 import jas.common.helper.GsonHelper;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder;
-import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
 import jas.spawner.refactor.configsloader.ConfigLoader.VersionedFile;
 
 import java.lang.reflect.Type;
@@ -12,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-import com.google.common.collect.Table;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;

@@ -2,7 +2,6 @@ package jas.spawner.refactor;
 
 import jas.spawner.modern.EntityProperties;
 import jas.spawner.modern.spawner.CountInfo;
-import jas.spawner.modern.spawner.CustomSpawner;
 import jas.spawner.modern.spawner.Tags;
 import jas.spawner.refactor.despawn.DespawnRuleBuilder.DespawnRule;
 import jas.spawner.refactor.despawn.DespawnRules;
@@ -17,8 +16,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.AllowDespawn;
-import cpw.mods.fml.common.eventhandler.Event.Result;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class EntityDespawner {
 
@@ -42,7 +40,7 @@ public class EntityDespawner {
 			for (String despawnRuleID : despawnRulesForEntity) {
 				DespawnRule despawnRule = despawnRules.iDToGroup().get(despawnRuleID);
 				int xCoord = MathHelper.floor_double(event.entityLiving.posX);
-				int yCoord = MathHelper.floor_double(event.entityLiving.boundingBox.minY);
+				int yCoord = MathHelper.floor_double(event.entityLiving.getEntityBoundingBox().minY);
 				int zCoord = MathHelper.floor_double(event.entityLiving.posZ);
 				CountInfo countInfo = SpawnerLogic.counter.countEntities(event.entityLiving.worldObj);
 				Tags tags = new Tags(event.entityLiving.worldObj, countInfo, xCoord, yCoord, zCoord,

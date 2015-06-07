@@ -1,5 +1,6 @@
 package jas.spawner.modern.command;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.CustomSpawner;
@@ -19,11 +20,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -58,13 +61,13 @@ public class CommandCanSpawnHere extends CommandJasBase {
     }
 
     @Override
-    public void process(ICommandSender commandSender, String[] stringArgs) {
+    public void process(ICommandSender commandSender, String[] stringArgs) throws CommandException {
         if (stringArgs.length == 0 || stringArgs.length > 2) {
             throw new WrongUsageException("commands.jascanspawnhere.usage", new Object[0]);
         }
 
         EntityPlayer targetPlayer = stringArgs.length == 1 ? getPlayer(commandSender,
-                commandSender.getCommandSenderName()) : getPlayer(commandSender, stringArgs[0]);
+                commandSender.getName()) : getPlayer(commandSender, stringArgs[0]);
         String entityName = stringArgs.length == 1 ? stringArgs[0] : stringArgs[1];
         if (!isValidEntityName(entityName)) {
             throw new WrongUsageException("commands.jascanspawnhere.entitynotfound", new Object[0]);
@@ -157,7 +160,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 		return false;
 	}
 
-    private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) {
+    private EntityLiving getTargetEntity(String entityName, EntityPlayer targetPlayer) throws CommandException {
         EntityLiving entity;
         try {
         	LivingGroupRegistry livingGroupRegistry = MVELProfile.worldSettings().livingGroupRegistry();
@@ -198,7 +201,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
     private String getMatchingBiomeSpawnListEntries(String livingGroupID, Entity entity, CreatureType livingType,
             Collection<SpawnListEntry> matchingSpawnListEntries) {
-        BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
+        BiomeGenBase biome = VanillaHelper.getBiomeForCoords(entity.worldObj, (int) entity.posX, (int) entity.posZ);
         String packageBiome = BiomeHelper.getPackageName(biome);
 
         BiomeSpawnListRegistry biomeSpawnListRegistry = MVELProfile.worldSettings().biomeSpawnListRegistry();
@@ -219,7 +222,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
             boolean tempSpawning = targetPlayer.preventEntitySpawning;
             targetPlayer.preventEntitySpawning = false;
     		Tags tags = new Tags(entity.worldObj, countInfo, MathHelper.floor_double(entity.posX),
-    				MathHelper.floor_double(entity.boundingBox.minY), MathHelper.floor_double(entity.posZ));
+    				MathHelper.floor_double(entity.getEntityBoundingBox().minY), MathHelper.floor_double(entity.posZ));
 
 			boolean canTypeSpawn = livingType.canSpawnAtLocation(entity.worldObj, tags, (int) entity.posX, (int) entity.posY,
 					(int) entity.posZ);
@@ -253,7 +256,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
 
     private String canEntityTypeSpawnHere(EntityPlayer targetPlayer, EntityLiving entity, CreatureType livingType, CountInfo countInfo) {
 		Tags tags = new Tags(entity.worldObj, countInfo, MathHelper.floor_double(entity.posX),
-				MathHelper.floor_double(entity.boundingBox.minY), MathHelper.floor_double(entity.posZ));
+				MathHelper.floor_double(entity.getEntityBoundingBox().minY), MathHelper.floor_double(entity.posZ));
 
         boolean tempSpawning = targetPlayer.preventEntitySpawning;
         targetPlayer.preventEntitySpawning = false;
@@ -361,7 +364,7 @@ public class CommandCanSpawnHere extends CommandJasBase {
      * Adds the strings available in this command to the given list of tab completion options.
      */
     @Override
-    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs) {
+    public List<String> getTabCompletions(ICommandSender commandSender, String[] stringArgs, BlockPos blockPos) {
         stringArgs = correctedParseArgs(stringArgs, false);
         List<String> tabCompletions = new ArrayList<String>();
         if (stringArgs.length == 1) {

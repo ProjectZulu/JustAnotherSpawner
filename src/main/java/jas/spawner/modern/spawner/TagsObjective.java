@@ -1,5 +1,6 @@
 package jas.spawner.modern.spawner;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
 import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
@@ -42,11 +43,11 @@ public class TagsObjective implements ObjectiveFunctions {
 	}
 
 	public String material() {
-		return parent.util().material(world.getBlock(parent.posX(), parent.posY(), parent.posZ()).getMaterial());
+		return parent.util().material(parent.wrld().blockAt(parent.posX(), parent.posY(), parent.posZ()).getMaterial());
 	}
 
 	public int difficulty() {
-		switch (world.difficultySetting) {
+		switch (world.getDifficulty()) {
 		case PEACEFUL:
 			return 0;
 		case EASY:
@@ -65,7 +66,7 @@ public class TagsObjective implements ObjectiveFunctions {
 	public int highestResistentBlock() {
 		int par1 = parent.posX();
 		int par2 = parent.posZ();
-		Chunk chunk = world.getChunkFromBlockCoords(par1, par2);
+		Chunk chunk = VanillaHelper.getChunkFromBlockCoord(world, par1, par2);
 		int k = chunk.getTopFilledSegment() + 15;
 		par1 &= 15;
 		for (par2 &= 15; k > 0; --k) {
@@ -73,7 +74,7 @@ public class TagsObjective implements ObjectiveFunctions {
 
 			if (block != null && block.getMaterial().blocksMovement() && block.getMaterial() != Material.leaves
 					&& block.getMaterial() != Material.wood && block.getMaterial() != Material.glass
-					&& !block.isFoliage(world, par1, k, par2)) {
+					&& !VanillaHelper.isFoliage(block, world, par1, k, par2)) {
 				return k + 1;
 			}
 		}

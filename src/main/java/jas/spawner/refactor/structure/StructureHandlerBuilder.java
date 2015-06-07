@@ -2,6 +2,7 @@ package jas.spawner.refactor.structure;
 
 import jas.api.StructureInterpreter;
 import jas.common.JASLog;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
 
 import java.util.Collection;
@@ -12,7 +13,6 @@ import java.util.Set;
 import net.minecraft.world.World;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
@@ -77,7 +77,7 @@ public class StructureHandlerBuilder {
 		}
 
 		public boolean doesHandlerApply(World world, int xCoord, int yCoord, int zCoord) {
-			return interpreter.shouldUseHandler(world, world.getBiomeGenForCoords(xCoord, zCoord));
+			return interpreter.shouldUseHandler(world, VanillaHelper.getBiomeForCoords(world, xCoord, zCoord));
 		}
 
 		public Set<String> getStructureKeys() {

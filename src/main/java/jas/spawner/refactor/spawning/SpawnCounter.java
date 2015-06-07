@@ -2,12 +2,10 @@ package jas.spawner.refactor.spawning;
 
 import jas.common.JustAnotherSpawner;
 import jas.spawner.modern.spawner.CountInfo;
-import jas.spawner.modern.spawner.EntityCounter;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.Counter;
+import jas.spawner.modern.spawner.EntityCounter;
 import jas.spawner.refactor.BiomeSpawnLists;
-import jas.spawner.refactor.ExperimentalProfile;
-import jas.spawner.refactor.LivingHandlers;
 import jas.spawner.refactor.entities.LivingHandlerBuilder.LivingHandler;
 
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
