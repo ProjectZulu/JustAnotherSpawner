@@ -1,7 +1,5 @@
 package jas.spawner.modern.world;
 
-import jas.spawner.modern.DefaultProps;
-
 import java.io.File;
 
 import com.google.gson.annotations.SerializedName;

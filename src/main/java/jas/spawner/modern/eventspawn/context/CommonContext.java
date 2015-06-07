@@ -1,31 +1,10 @@
 package jas.spawner.modern.eventspawn.context;
 
-import com.google.common.collect.ImmutableBiMap;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.chunk.Chunk;
-import jas.common.JASLog;
-import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.eventspawn.SpawnBuilder;
-import jas.spawner.modern.spawner.CountAccessor;
-import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.LegacyTags;
 import jas.spawner.modern.spawner.TagsObjective;
 import jas.spawner.modern.spawner.TagsUtility;
 import jas.spawner.modern.spawner.TimeHelper;
 import jas.spawner.modern.spawner.WorldAccessor;
-import jas.spawner.modern.spawner.TagsUtility.Conditional;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
 import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.LegacyFunctions;
@@ -33,6 +12,7 @@ import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
 import jas.spawner.modern.spawner.tags.TimeFunctions;
 import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import jas.spawner.modern.spawner.tags.WorldFunctions;
+import net.minecraft.world.World;
 
 public abstract class CommonContext implements Context, BaseFunctions {
 	private World world;

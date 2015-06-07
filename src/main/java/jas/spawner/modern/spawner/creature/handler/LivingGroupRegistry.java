@@ -4,8 +4,8 @@ import jas.common.JASLog;
 import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;
 import jas.common.helper.sort.TopologicalSort;
-import jas.common.helper.sort.TopologicalSortingException;
 import jas.common.helper.sort.TopologicalSort.DirectedGraph;
+import jas.common.helper.sort.TopologicalSortingException;
 import jas.spawner.modern.math.SetAlgebra;
 import jas.spawner.modern.math.SetAlgebra.OPERATION;
 import jas.spawner.modern.spawner.creature.handler.LivingGroupSaveObject.LivingGroupSaveObjectSerializer;
@@ -26,6 +26,7 @@ import java.util.TreeMap;
 
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraftforge.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 import org.apache.logging.log4j.Level;
 
@@ -35,8 +36,6 @@ import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-
-import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 public class LivingGroupRegistry {
 

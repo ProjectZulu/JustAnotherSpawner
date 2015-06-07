@@ -17,10 +17,8 @@ import jas.spawner.modern.spawner.tags.UtilityFunctions;
 import jas.spawner.modern.spawner.tags.WorldFunctions;
 
 import java.util.IllegalFormatException;
-import java.util.Map.Entry;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityTameable;

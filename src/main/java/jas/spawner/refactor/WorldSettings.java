@@ -1,6 +1,7 @@
 package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
+import jas.common.helper.VanillaHelper;
 
 import java.io.File;
 import java.util.HashMap;

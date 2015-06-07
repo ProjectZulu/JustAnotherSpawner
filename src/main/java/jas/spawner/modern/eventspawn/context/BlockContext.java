@@ -1,5 +1,6 @@
 package jas.spawner.modern.eventspawn.context;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
 import jas.spawner.modern.eventspawn.SpawnBuilder;
 
@@ -13,16 +14,16 @@ public class BlockContext extends CommonContext {
 	private BlockEvent event;
 
 	public BlockContext(BlockEvent event) {
-		super(event.world, event.x, event.y, event.z);
+		super(event.world, event.pos.getX(), event.pos.getY(), event.pos.getZ());
 		this.event = event;
 	}
-	
+
 	public String blockName() {
-		return Block.blockRegistry.getNameForObject(event.block);
+		return VanillaHelper.getNameForBlock(event.world, VanillaHelper.getBlock(event.state));
 	}
 
 	public int blockMeta() {
-		return event.blockMetadata;
+		return VanillaHelper.getBlockMeta(event.state);
 	}
 
 	public boolean isMaterial(String materialName) {
@@ -30,7 +31,8 @@ public class BlockContext extends CommonContext {
 	}
 
 	public String material() {
-		return material(event.world.getBlock(event.x, event.y, event.z).getMaterial());
+		return material(VanillaHelper.getBlockMaterial(event.world, event.pos.getX(), event.pos.getY(),
+				event.pos.getZ()));
 	}
 
 	public String material(Material material) {
@@ -112,10 +114,10 @@ public class BlockContext extends CommonContext {
 	}
 
 	public boolean isBlock(String blockName, int blockMeta) {
-		return blockMeta == event.blockMetadata && blockName().equals(blockName);
+		return blockMeta == VanillaHelper.getBlockMeta(event.state) && blockName().equals(blockName);
 	}
 
 	public SpawnBuilder spawn(String entityMapping) {
-		return new SingleSpawnBuilder(entityMapping, event.x + 0.5D, event.y, event.z + 0.5D);
+		return new SingleSpawnBuilder(entityMapping, event.pos.getX() + 0.5D, event.pos.getY(), event.pos.getZ() + 0.5D);
 	}
 }

@@ -1,7 +1,6 @@
 package jas.spawner.refactor.configsloader;
 
 import jas.common.helper.GsonHelper;
-import jas.spawner.modern.spawner.TagConverter;
 import jas.spawner.refactor.LivingTypeBuilder;
 import jas.spawner.refactor.LivingTypeBuilder.LivingType;
 import jas.spawner.refactor.LivingTypes;
@@ -132,9 +131,8 @@ public class LivingTypeLoader implements VersionedFile {
 						String medium = GsonHelper.getMemberOrDefault(builderObject, SPAWN_MEDIUM_KEY, "air");
 						String spawnExpression;
 						if (fileVersion.equals("1.0")) {
-							TagConverter tag = new TagConverter(
-									GsonHelper.getMemberOrDefault(builderObject, "Tags", ""));
-							spawnExpression = tag.expression;
+							throw new IllegalArgumentException(
+									"Detected LivingType FileFormat of 1.0. Format no longer autoconverted.");
 						} else {
 							spawnExpression = GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY, "");
 						}

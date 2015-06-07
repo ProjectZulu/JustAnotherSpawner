@@ -1,9 +1,12 @@
 package jas.common.helper;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -83,7 +86,15 @@ public class VanillaHelper {
 
 	public static int getBlockMeta(World world, BlockPos blockPos) {
 		IBlockState blockState = getState(world, blockPos);
-		return getBlock(blockState).getMetaFromState(blockState);
+		return getBlockMeta(getBlock(blockState), blockState);
+	}
+
+	public static int getBlockMeta(IBlockState blockState) {
+		return getBlockMeta(getBlock(blockState), blockState);
+	}
+
+	public static int getBlockMeta(Block block, IBlockState blockState) {
+		return block.getMetaFromState(blockState);
 	}
 
 	public static boolean canBlockSeeSky(World world, int posX, int posY, int posZ) {
@@ -185,7 +196,7 @@ public class VanillaHelper {
 	public static Chunk getChunkFromBlockCoord(World world, BlockPos pos) {
 		return world.getChunkFromBlockCoords(pos);
 	}
-	
+
 	public static boolean isFoliage(World world, BlockPos pos) {
 		return isFoliage(getBlock(world, pos), world, pos);
 	}
@@ -196,5 +207,41 @@ public class VanillaHelper {
 
 	public static boolean isFoliage(Block block, World world, BlockPos pos) {
 		return block.isFoliage(world, pos);
+	}
+
+	public static boolean isWood(World world, BlockPos pos) {
+		return isWood(getBlock(world, pos), world, pos);
+	}
+
+	public static boolean isWood(Block block, World world, int posX, int posY, int posZ) {
+		return isWood(block, world, convert(posX, posY, posZ));
+	}
+
+	public static boolean isWood(Block block, World world, BlockPos pos) {
+		return block.isWood(world, pos);
+	}
+
+	public static AxisAlignedBB getBoundingBox(double x1, double y1, double z1, double x2, double y2, double z2) {
+		return AxisAlignedBB.fromBounds(x1, y1, z1, x2, y2, z2);
+	}
+
+	public static String getNameForBlock(World world, int posX, int posY, int posZ) {
+		return getNameForBlock(world, getBlock(world, posX, posY, posZ));
+	}
+
+	public static String getNameForBlock(World world, Block block) {
+		return ((ResourceLocation) Block.blockRegistry.getNameForObject(block)).toString();
+	}
+
+	public static Material getBlockMaterial(World world, int posX, int posY, int posZ) {
+		return getBlockMaterial(world, convert(posX, posY, posZ));
+	}
+
+	public static Material getBlockMaterial(World world, BlockPos pos) {
+		return getBlockMaterial(getBlock(world, pos));
+	}
+
+	public static Material getBlockMaterial(Block block) {
+		return block.getMaterial();
 	}
 }

@@ -1,25 +1,14 @@
 package jas.spawner.modern.serializer;
 
-import jas.common.JASLog;
 import jas.common.helper.GsonHelper;
-import jas.spawner.modern.spawner.TagConverter;
-import jas.spawner.modern.spawner.creature.handler.parsing.OptionalParser;
-import jas.spawner.modern.spawner.creature.handler.parsing.ParsingHelper;
-import jas.spawner.modern.spawner.creature.handler.parsing.keys.Key;
-import jas.spawner.modern.spawner.creature.handler.parsing.keys.KeyParser.KeyType;
-import jas.spawner.modern.spawner.creature.handler.parsing.settings.OptionalSettingsBase;
-import jas.spawner.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 import jas.spawner.modern.spawner.creature.type.CreatureType;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeBuilder;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeRegistry;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import com.google.common.base.Optional;
 import com.google.gson.JsonDeserializationContext;
@@ -27,7 +16,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
@@ -116,12 +104,11 @@ public class CreatureTypeSaveObject {
                     builder.setIterationsPerChunk(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_CHUNK, 3));
                     builder.setIterationsPerPack(GsonHelper.getMemberOrDefault(builderObject, ITER_PER_PACK, 4));
 					if (fileVersion.equals("1.0")) {
-						TagConverter tag = new TagConverter(GsonHelper.getMemberOrDefault(builderObject, "Tags", ""));
-						builder.withSpawnExpression(tag.expression);
-
+						throw new IllegalArgumentException(
+								"Detected LivingType FileFormat of 1.0. Format no longer autoconverted.");
 					} else {
-						builder.withSpawnExpression(GsonHelper.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY,
-								""));
+						builder.withSpawnExpression(GsonHelper
+								.getMemberOrDefault(builderObject, OPTIONAL_PARAM_KEY, ""));
 					}
                     builder.withDefaultBiomeCap(GsonHelper.getMemberOrDefault(builderObject, DEFAULT_BIOME_CAP_KEY, -1));
                     JsonObject caps = GsonHelper.getMemberOrDefault(builderObject, MAPPING_TO_CAP, new JsonObject());

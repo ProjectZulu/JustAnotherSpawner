@@ -148,7 +148,7 @@ public class LivingHandlerBuilder {
 	public String getDespawnExpression() {
 		return despawnExpression;
 	}
-	
+
 	public LivingHandlerBuilder setInstantDespawnExpression(String optionalParameters) {
 		if (optionalParameters == null) {
 			optionalParameters = "";
@@ -160,7 +160,7 @@ public class LivingHandlerBuilder {
 	public String getInstantDespawnExpression() {
 		return instantdespawnExpression;
 	}
-	
+
 	public LivingHandlerBuilder setPostSpawnExpression(String optionalParameters) {
 		if (optionalParameters == null) {
 			optionalParameters = "";
@@ -172,7 +172,7 @@ public class LivingHandlerBuilder {
 	public String getPostSpawnExpression() {
 		return postspawnExpression;
 	}
-	
+
 	public LivingHandlerBuilder setEntityExpression(String entityExpression) {
 		if (entityExpression == null) {
 			entityExpression = "";
@@ -185,7 +185,7 @@ public class LivingHandlerBuilder {
 	public String getEntityExpression() {
 		return entityExpression;
 	}
-	
+
 	public LivingHandler build(CreatureTypeRegistry creatureTypeRegistry, LivingGroupRegistry livingGroupRegistry) {
 		if (handlerId == null) {
 			throw new IllegalArgumentException("Cannot build CreatureType instance with null name");

@@ -1,13 +1,7 @@
 package jas.spawner.modern.modification;
 
-import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
-import jas.spawner.modern.spawner.creature.type.CreatureType;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeBuilder;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeRegistry;
-
-import java.util.ArrayList;
-
-import com.google.common.base.Optional;
 
 public class ModAddCreatureType extends BaseModification {
 

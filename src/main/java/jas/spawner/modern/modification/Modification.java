@@ -1,7 +1,5 @@
 package jas.spawner.modern.modification;
 
-import java.util.EnumSet;
-
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.structure.StructureHandlerRegistry;
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;

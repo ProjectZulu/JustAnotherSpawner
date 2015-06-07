@@ -3,6 +3,7 @@ package jas.spawner.refactor;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.Tags;
 import jas.spawner.refactor.mvel.MVELExpression;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
 public class LivingTypeBuilder {

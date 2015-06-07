@@ -4,8 +4,6 @@ import jas.spawner.modern.world.WorldSettings;
 
 import java.io.File;
 
-import org.apache.logging.log4j.core.config.BaseConfiguration;
-
 import net.minecraft.world.World;
 
 public class ModSaveConfig extends BaseModification {

@@ -2,8 +2,6 @@ package jas.spawner.modern.spawner.creature.handler;
 
 import jas.common.JASLog;
 import jas.common.helper.GsonHelper;
-import jas.spawner.modern.spawner.TagConverter;
-import jas.spawner.modern.spawner.creature.handler.parsing.keys.Key;
 import jas.spawner.modern.spawner.creature.handler.parsing.settings.OptionalSettings.Operand;
 
 import java.lang.reflect.Type;
@@ -88,7 +86,7 @@ public class LivingHandlerSaveObject {
 				if (!"".equals(builder.getEntityExpression())) {
 					handler.addProperty(ENTITY_EXP_KEY, builder.getEntityExpression());
 				}
-				
+
 				if (!"".equals(builder.getSpawnExpression())) {
 					handler.addProperty(SPAWN_TAG_KEY, builder.getSpawnExpression());
 				}
@@ -100,7 +98,7 @@ public class LivingHandlerSaveObject {
 				if (!"".equals(builder.getInstantDespawnExpression())) {
 					handler.addProperty(INSTANT_DESPAWN_KEY, builder.getInstantDespawnExpression());
 				}
-				
+
 				if (!"".equals(builder.getPostSpawnExpression())) {
 					handler.addProperty(POSTSPAWN_KEY, builder.getPostSpawnExpression());
 				}
@@ -124,7 +122,7 @@ public class LivingHandlerSaveObject {
 				if (builder.getDespawnRate().isPresent()) {
 					handler.addProperty(DESPAWN_RATE_KEY, builder.getDespawnRate().get());
 				}
-				
+
 				JsonArray contents = new JsonArray();
 				for (String content : builder.contents) {
 					contents.add(new JsonPrimitive(content));
@@ -169,46 +167,9 @@ public class LivingHandlerSaveObject {
 			LivingHandlerBuilder builder = new LivingHandlerBuilder(handlerId, creatureTypeId)
 					.setShouldSpawn(shouldSpawn);
 			if (currentVersion.equals("1.0")) {
-				final String optionalParameters = GsonHelper.getMemberOrDefault(handler, TAGS_KEY, "");
-				String[] parts = optionalParameters.split("\\{");
-				for (String string : optionalParameters.split("\\{")) {
-					String parsed = string.replace("}", "");
-					String titletag = parsed.split("\\:", 2)[0].toLowerCase();
-					TagConverter conv = null;
-					if (Key.spawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed);
-						if (!conv.expression.trim().equals("")) {
-							builder.setSpawnExpression(conv.expression, Optional.of(conv.operand));
-						}
-					} else if (Key.despawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed);
-						if (!conv.expression.trim().equals("")) {
-							builder.setDespawnExpression(conv.expression);
-						}
-					} else if (Key.postspawn.keyParser.isMatch(titletag)) {
-						conv = new TagConverter(parsed);
-						if (!conv.expression.trim().equals("")) {
-							builder.setPostSpawnExpression(conv.expression);
-						}
-					}
-					if (conv != null) {
-						if (conv.despawnAge.isPresent()) {
-							builder.setDespawnAge(conv.despawnAge.get());
-						}
-						if (conv.entityCap.isPresent()) {
-							builder.setEntityCap(conv.entityCap.get());
-						}
-						if (conv.maxSpawnRange.isPresent()) {
-							builder.setMaxDespawnRange(conv.maxSpawnRange.get());
-						}
-						if (conv.minDespawnRage.isPresent()) {
-							builder.setMinDespawnRange(conv.minDespawnRage.get());
-						}
-						if (conv.despawnRate.isPresent()) {
-							builder.setDespawnRate(conv.despawnRate.get());
-						}
-					}
-				}
+				// No Longer Autoconverted
+				throw new IllegalArgumentException(
+						"Detected LivingHandler FileFormat of 1.0. Format no longer autoconverted.");
 			} else {
 				String spawnTag = GsonHelper.getMemberOrDefault(handler, SPAWN_TAG_KEY, "");
 				String spawnOperand = GsonHelper.getMemberOrDefault(handler, SPAWN_OPERAND_KEY, "");
@@ -233,7 +194,7 @@ public class LivingHandlerSaveObject {
 				builder.setDespawnRate(despawnRate);
 			}
 			builder.setEntityExpression(GsonHelper.getMemberOrDefault(handler, ENTITY_EXP_KEY, ""));
-			
+
 			JsonArray contents = GsonHelper.getMemberOrDefault(handler, CONTENTS_KEY, getDefaultArray(handlerId));
 			for (JsonElement jsonElement : contents) {
 				String content = GsonHelper.getAsOrDefault(jsonElement, "");

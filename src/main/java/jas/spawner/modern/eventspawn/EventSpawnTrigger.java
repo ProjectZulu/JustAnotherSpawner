@@ -1,6 +1,7 @@
 package jas.spawner.modern.eventspawn;
 
 import jas.common.helper.MVELHelper;
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.eventspawn.EventSpawnRegistry.EventSpawn;
 import jas.spawner.modern.eventspawn.context.BlockContext;
@@ -47,7 +48,7 @@ public class EventSpawnTrigger {
 	@SubscribeEvent
 	public void onBlockBreak(BreakEvent event) {
 		if (!event.world.isRemote) {
-			if (ContextHelper.isBlockCrop(event.block, event.blockMetadata)) {
+			if (ContextHelper.isBlockCrop(VanillaHelper.getBlock(event.state))) {
 				List<EventSpawn> list = profile.worldSettings().eventSpawnRegistry()
 						.getEventsForTrigger(EventTrigger.BREAK_CROP);
 				if (!list.isEmpty()) {
@@ -60,7 +61,7 @@ public class EventSpawnTrigger {
 					}
 				}
 			} else if (ContextHelper.isBlockTree(event.world, event.pos.getX(), event.pos.getY(), event.pos.getZ(),
-					event.block, event.blockMetadata)) {
+					VanillaHelper.getBlock(event.state))) {
 				List<EventSpawn> list = profile.worldSettings().eventSpawnRegistry()
 						.getEventsForTrigger(EventTrigger.BREAK_TREE);
 				if (!list.isEmpty()) {
@@ -104,7 +105,7 @@ public class EventSpawnTrigger {
 			}
 		}
 	}
-	
+
 	// Move to Passive Spawn --> make helper expressions; users could then create 'lunar' entity types
 	// @SubscribeEvent
 	// public void lunarCycle(WorldTickEvent event) {

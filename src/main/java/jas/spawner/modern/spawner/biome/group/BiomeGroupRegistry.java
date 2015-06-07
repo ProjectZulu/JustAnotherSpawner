@@ -4,8 +4,8 @@ import jas.common.JASLog;
 import jas.common.helper.FileUtilities;
 import jas.common.helper.GsonHelper;
 import jas.common.helper.sort.TopologicalSort;
-import jas.common.helper.sort.TopologicalSortingException;
 import jas.common.helper.sort.TopologicalSort.DirectedGraph;
+import jas.common.helper.sort.TopologicalSortingException;
 import jas.spawner.modern.math.SetAlgebra;
 import jas.spawner.modern.math.SetAlgebra.OPERATION;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupSaveObject.BiomeGroupSaveObjectSerializer;
@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.common.BiomeDictionary.Type;
+import net.minecraftforge.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;
@@ -37,8 +38,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
-
-import cpw.mods.fml.common.toposort.ModSortingException.SortingExceptionData;
 
 public class BiomeGroupRegistry {
 	private ImmutableMap<String, BiomeGroup> iDToGroup;

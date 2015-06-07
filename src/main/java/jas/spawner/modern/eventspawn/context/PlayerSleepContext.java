@@ -1,5 +1,6 @@
 package jas.spawner.modern.eventspawn.context;
 
+import jas.common.helper.VanillaHelper;
 import jas.spawner.modern.eventspawn.SingleSpawnBuilder;
 import jas.spawner.modern.eventspawn.SpawnBuilder;
 
@@ -16,7 +17,7 @@ public class PlayerSleepContext extends CommonContext {
 	private PlayerSleepInBedEvent event;
 
 	public PlayerSleepContext(PlayerSleepInBedEvent event) {
-		super(event.entity.worldObj, event.x, event.y, event.z);
+		super(event.entity.worldObj, event.pos.getX(), event.pos.getY(), event.pos.getZ());
 		this.event = event;
 	}
 
@@ -52,25 +53,25 @@ public class PlayerSleepContext extends CommonContext {
 				return EntityPlayer.EnumStatus.NOT_POSSIBLE_NOW;
 			}
 
-			if (Math.abs(player.posX - (double) event.x) > 3.0D
-					|| Math.abs(player.posY - (double) event.y) > 2.0D
-					|| Math.abs(player.posZ - (double)  event.z) > 3.0D) {
+			if (Math.abs(player.posX - (double) event.pos.getX()) > 3.0D
+					|| Math.abs(player.posY - (double) event.pos.getY()) > 2.0D
+					|| Math.abs(player.posZ - (double) event.pos.getZ()) > 3.0D) {
 				return EntityPlayer.EnumStatus.TOO_FAR_AWAY;
 			}
 			double horD = 8.0D;
 			double verD = 5.0D;
-			List list = worldObj.getEntitiesWithinAABB(EntityMob.class, AxisAlignedBB.getBoundingBox(
-					(double) event.x - horD, (double) event.y - verD, (double)  event.z - horD,
-					(double) event.x + horD, (double) event.y + verD, (double)  event.z + horD));
+			AxisAlignedBB boundingBox = VanillaHelper.getBoundingBox((double) event.pos.getX() - horD,
+					(double) event.pos.getY() - verD, (double) event.pos.getZ() - horD, (double) event.pos.getX()
+							+ horD, (double) event.pos.getY() + verD, (double) event.pos.getZ() + horD);
+			List list = worldObj.getEntitiesWithinAABB(EntityMob.class, boundingBox);
 			if (!list.isEmpty()) {
 				return EntityPlayer.EnumStatus.NOT_SAFE;
 			}
 		}
 		return EntityPlayer.EnumStatus.OK;
 	}
-	
+
 	public SpawnBuilder spawn(String entityMapping) {
 		return new SingleSpawnBuilder(entityMapping, event.entity.posX, event.entity.posY, event.entity.posZ);
 	}
 }
-

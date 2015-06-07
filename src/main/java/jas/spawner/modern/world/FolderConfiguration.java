@@ -1,7 +1,6 @@
 package jas.spawner.modern.world;
 
 import jas.common.JustAnotherSpawner;
-import jas.spawner.modern.DefaultProps;
 
 import java.io.File;
 import java.util.HashMap;

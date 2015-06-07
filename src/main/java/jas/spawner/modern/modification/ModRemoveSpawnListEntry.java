@@ -1,7 +1,6 @@
 package jas.spawner.modern.modification;
 
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;
-import jas.spawner.modern.spawner.creature.entry.SpawnListEntryBuilder;
 
 public class ModRemoveSpawnListEntry extends BaseModification {
 

@@ -2,8 +2,8 @@ package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
 import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.spawner.tags.CountFunctions;
 import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.CountFunctions;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;

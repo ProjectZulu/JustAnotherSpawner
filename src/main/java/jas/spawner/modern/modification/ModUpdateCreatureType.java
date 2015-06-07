@@ -1,7 +1,5 @@
 package jas.spawner.modern.modification;
 
-import java.util.HashMap;
-
 import jas.spawner.modern.spawner.creature.type.CreatureTypeBuilder;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeRegistry;
 

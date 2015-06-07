@@ -1,12 +1,7 @@
 package jas.spawner.modern.modification;
 
-import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.creature.entry.BiomeSpawnListRegistry;
 import jas.spawner.modern.spawner.creature.entry.SpawnListEntryBuilder;
-
-import java.util.ArrayList;
-
-import com.google.common.base.Optional;
 
 public class ModAddSpawnListEntry extends BaseModification {
 

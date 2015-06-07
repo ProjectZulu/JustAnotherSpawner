@@ -30,7 +30,7 @@ public class WorldAccessor implements WorldFunctions {
 	}
 
 	public String blockNameAt(Integer offsetX, Integer offsetY, Integer offsetZ) {
-		return ((ResourceLocation) Block.blockRegistry.getNameForObject(blockAt(offsetX, offsetY, offsetZ))).toString();
+		return VanillaHelper.getNameForBlock(world, offsetX, offsetY, offsetZ);
 	}
 
 	public Block blockAt(int coordX, int coordY, int coordZ) {

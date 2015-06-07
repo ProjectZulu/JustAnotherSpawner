@@ -1,8 +1,6 @@
 package jas.spawner.modern.modification;
 
-import jas.spawner.modern.spawner.creature.handler.LivingHandlerBuilder;
 import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
-import jas.spawner.modern.spawner.creature.type.CreatureTypeRegistry;
 
 public class ModRemoveLivingHandler extends BaseModification {
 

@@ -122,7 +122,7 @@ public class CommandCountCap extends CommandJasBase {
 		}
 
 		try {
-			int targetDim = parseInt(commandSender, arg);
+			int targetDim = parseInt(arg);
 			for (WorldServer world : MinecraftServer.getServer().worldServers) {
 				if (targetDim == VanillaHelper.getDimensionID(world)) {
 					return world;

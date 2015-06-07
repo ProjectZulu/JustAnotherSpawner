@@ -5,7 +5,6 @@ import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.eventspawn.EventSpawnRegistry;
-import jas.spawner.modern.modification.ModLoadConfig;
 import jas.spawner.modern.modification.Modification;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.structure.StructureHandlerRegistry;
@@ -15,7 +14,6 @@ import jas.spawner.modern.spawner.creature.handler.LivingHandlerRegistry;
 import jas.spawner.modern.spawner.creature.type.CreatureTypeRegistry;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
