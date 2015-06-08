@@ -22,7 +22,7 @@ apply plugin: 'curseforge'
 version = "0.17.0"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
-def rType = "release"
+def rType = "beta"
 
 curse {
     projectId = '228952'
@@ -56,7 +56,8 @@ dependencies {
 minecraft {
 	version = "1.8-11.14.2.1435" // "1.7.10-10.13.2.1291" //"1.7.10-10.13.0.1180"
     runDir = "eclipse" //assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
-	
+    mappings = 'stable_16'
+
 	// replacing version information
     replace "@MC_VERSION@", project.minecraft.version
     replace "@VERSION@", project.version

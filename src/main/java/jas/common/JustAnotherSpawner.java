@@ -122,13 +122,14 @@ public class JustAnotherSpawner {
 				try {
 					genNetherBridge = ReflectionHelper.getCatchableFieldFromReflection("field_73172_c",
 							chunkProviderHell, MapGenNetherBridge.class);
-					netherSpawnList = ReflectionHelper.getCatchableFieldFromReflection("field_75060_e",
-							genNetherBridge, List.class);
+					// netherSpawnList = ReflectionHelper.getCatchableFieldFromReflection("field_75060_e",
+					// genNetherBridge, List.class);
 				} catch (NoSuchFieldException e) {
 					genNetherBridge = ReflectionHelper.getFieldFromReflection("genNetherBridge", chunkProviderHell,
 							MapGenNetherBridge.class);
-					netherSpawnList = ReflectionHelper.getFieldFromReflection("spawnList", genNetherBridge, List.class);
+					// netherSpawnList=ReflectionHelper.getFieldFromReflection("spawnList",genNetherBridge, List.class);
 				}
+				netherSpawnList = genNetherBridge.getSpawnList();
 				Iterator<?> spawnIterator = netherSpawnList.iterator();
 				while (spawnIterator.hasNext()) {
 					Object spawn = spawnIterator.next();

@@ -15,7 +15,7 @@ public class StructureInterpreterHelper {
             currentChunkProvider = ReflectionHelper.getCatchableFieldFromReflection("field_73246_d", chunkprovider,
                     IChunkProvider.class);
         } catch (NoSuchFieldException e) {
-            currentChunkProvider = ReflectionHelper.getFieldFromReflection("currentChunkProvider", chunkprovider,
+            currentChunkProvider = ReflectionHelper.getFieldFromReflection("serverChunkGenerator", chunkprovider,
                     IChunkProvider.class);
         }
         return chunkClass.isAssignableFrom(currentChunkProvider.getClass()) ? (T) currentChunkProvider : null;
