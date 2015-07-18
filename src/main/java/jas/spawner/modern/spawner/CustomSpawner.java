@@ -69,15 +69,13 @@ public class CustomSpawner {
 				Class<? extends EntityLiving> livingToSpawn = null;
 				LivingHandler handler = null;
 				countInfo.resetEntitiesPackCount();
-				
-				// CreatureType
 				if (!creatureType.canSpawnHere(worldServer, countInfo, startSpawningPoint)) {
 					continue;
 				}
 				for (int numEntAttempts = 0; numEntAttempts < creatureType.iterationsPerPack; ++numEntAttempts) {
 					// Randomized on Each Attempt, but horizontally to allow a 'Pack' to spawn near each other
-					final int horVar = 6;
-					final int verVar = 1;
+					final int horVar = 10;
+					final int verVar = 3;
 					ChunkPosition spawningPoint = new ChunkPosition(
 						startSpawningPoint.chunkPosX + worldServer.rand.nextInt(horVar) - worldServer.rand.nextInt(horVar),
 						startSpawningPoint.chunkPosY + worldServer.rand.nextInt(verVar) - worldServer.rand.nextInt(verVar),
@@ -98,13 +96,13 @@ public class CustomSpawner {
 					// (regsitry.getSpawnListEntryToSpawn is not cheap)
 					if (spawnlistentry == null) {
 						spawnlistentry = biomeSpawnListRegistry.getSpawnListEntryToSpawn(worldServer, creatureType,
-								startSpawningPoint.chunkPosX, startSpawningPoint.chunkPosY,
-								startSpawningPoint.chunkPosZ);
+								spawningPoint.chunkPosX, spawningPoint.chunkPosY,
+								spawningPoint.chunkPosZ);
 						if (spawnlistentry == null) {
 							break;
 						}
-						Tags tags = new Tags(worldServer, countInfo, startSpawningPoint.chunkPosX,
-								startSpawningPoint.chunkPosY, startSpawningPoint.chunkPosZ);
+						Tags tags = new Tags(worldServer, countInfo, spawningPoint.chunkPosX,
+								spawningPoint.chunkPosY, spawningPoint.chunkPosZ);
 						livingToSpawn = livingHandlerRegistry.getRandomEntity(spawnlistentry.livingGroupID,
 								worldServer.rand, tags);
 						if (livingToSpawn == null) {
