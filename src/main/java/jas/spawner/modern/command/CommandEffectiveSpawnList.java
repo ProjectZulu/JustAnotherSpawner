@@ -95,10 +95,10 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 
 		Iterator<CreatureType> typeIterator = MVELProfile.worldSettings().creatureTypeRegistry()
 				.getCreatureTypes();
-		CountInfo reportCount = new CountInfo(eligibleChunksForSpawning, new EntityCounter(), new EntityCounter());
 		StringBuilder resultMessage = new StringBuilder();
 		resultMessage.append("SpawnList after ").append("\u00A7b").append(cycles).append(" cycles").append("\u00A7r");
 		while (typeIterator.hasNext()) {
+			CountInfo reportCount = new CountInfo(eligibleChunksForSpawning, new EntityCounter(), new EntityCounter());
 			CreatureType creatureType = typeIterator.next();
 			if (!desiredCreatureType.equals("*") && !desiredCreatureType.equals(creatureType.typeID)) {
 				continue;
