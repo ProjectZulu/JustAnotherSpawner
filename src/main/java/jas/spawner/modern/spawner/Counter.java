@@ -64,7 +64,7 @@ public interface Counter {
 			EntityCounter creatureTypeCount = new EntityCounter();
 			EntityCounter creatureCount = new EntityCounter();
 
-			for (Object object : world.loadedEntityList) {
+			for (Object object : new ArrayList(world.loadedEntityList)) {
 				Entity entity = (Entity) object;
 				EntityPlayer player = world.getClosestPlayerToEntity(entity, countChunkDistance * 16);
 				if (isPlayerClose(world, entity, countChunkDistance * 16)) {
