@@ -89,19 +89,25 @@ public class SpawnListEntryBuilder {
         return minChunkPack;
     }
 
-    public SpawnListEntryBuilder setMinChunkPack(int minChunkPack) {
-        this.minChunkPack = minChunkPack;
-        return this;
-    }
+	public SpawnListEntryBuilder setMinChunkPack(int minChunkPack) {
+		this.minChunkPack = minChunkPack;
+		if (this.maxChunkPack < this.minChunkPack) {
+			this.maxChunkPack = this.minChunkPack;
+		}
+		return this;
+	}
 
-    public int getMaxChunkPack() {
-        return maxChunkPack;
-    }
+	public int getMaxChunkPack() {
+		return maxChunkPack;
+	}
 
-    public SpawnListEntryBuilder setMaxChunkPack(int maxChunkPack) {
-        this.maxChunkPack = maxChunkPack;
-        return this;
-    }
+	public SpawnListEntryBuilder setMaxChunkPack(int maxChunkPack) {
+		this.maxChunkPack = maxChunkPack;
+		if (this.maxChunkPack < this.minChunkPack) {
+			this.minChunkPack = this.maxChunkPack;
+		}
+		return this;
+	}
     
 	public SpawnListEntryBuilder setSpawnExpression(String optionalParameters, Optional<Operand> spawnOperand) {
 		if (optionalParameters == null || optionalParameters.trim().equals("")) {

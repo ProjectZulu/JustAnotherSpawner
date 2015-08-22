@@ -235,11 +235,16 @@ public class BiomeSpawnsSaveObject {
                     .append("-").append(maxChunk).toString();
         }
 
-        private void getSetStats(SpawnListEntryBuilder builder, JsonObject creatureNameObject) {
-            JsonElement element = creatureNameObject.get(ENTITY_STAT_KEY);
-            int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
-            builder.setWeight(stats[0]).setPackSize(stats[1]).setMinChunkPack(stats[2]).setMaxChunkPack(stats[3]);
-        }
+		private void getSetStats(SpawnListEntryBuilder builder, JsonObject creatureNameObject) {
+			JsonElement element = creatureNameObject.get(ENTITY_STAT_KEY);
+			int[] stats = element != null ? stringToStats(element.getAsString()) : stringToStats("");
+
+			if (stats[2] < stats[3]) {
+				builder.setWeight(stats[0]).setPackSize(stats[1]).setMinChunkPack(stats[2]).setMaxChunkPack(stats[3]);
+			} else {
+				builder.setWeight(stats[0]).setPackSize(stats[1]).setMinChunkPack(stats[3]).setMaxChunkPack(stats[2]);
+			}
+		}
 
         private int[] stringToStats(String stats) {
             String[] parts = stats.split("-");
