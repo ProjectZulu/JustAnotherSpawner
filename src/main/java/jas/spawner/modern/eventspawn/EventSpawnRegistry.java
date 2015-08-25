@@ -45,14 +45,14 @@ public class EventSpawnRegistry {
 		public EventSpawn() {
 			trigger = EventTrigger.LIVING_DEATH;
 			expression = "";
-			fileName = "default";
+			fileName = "default.cfg";
 		}
 
 		public EventSpawn(EventTrigger trigger, String expression) {
 			this.trigger = trigger;
 			this.expression = expression;
 			this.compiled = MVEL.compileExpression(expression);
-			this.fileName = "default";
+			this.fileName = "default.cfg";
 		}
 
 		public Serializable expression() {
