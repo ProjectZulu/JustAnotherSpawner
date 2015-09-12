@@ -3,19 +3,24 @@ package jas.spawner.modern.spawner;
 import jas.api.ITameable;
 import jas.common.JASLog;
 import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.spawner.TagsUtility.Conditional;
+import jas.spawner.modern.eventspawn.SpawnBuilder;
+import jas.spawner.modern.eventspawn.context.CommonContext;
+import jas.spawner.modern.spawner.FunctionsUtility.Conditional;
+import jas.spawner.modern.spawner.TagsEntity.FunctionsEntity;
+import jas.spawner.modern.spawner.TagsNBT.FunctionsNBT;
 import jas.spawner.modern.spawner.biome.group.BiomeGroupRegistry;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.modern.spawner.creature.handler.parsing.NBTWriter;
-import jas.spawner.modern.spawner.tags.CountFunctions;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.LegacyFunctions;
-import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
-import jas.spawner.modern.spawner.tags.TimeFunctions;
-import jas.spawner.modern.spawner.tags.UtilityFunctions;
-import jas.spawner.modern.spawner.tags.WorldFunctions;
+import jas.spawner.modern.spawner.tags.TagsCount;
+import jas.spawner.modern.spawner.tags.TagsLegacy;
+import jas.spawner.modern.spawner.tags.TagsObjective;
+import jas.spawner.modern.spawner.tags.TagsTime;
+import jas.spawner.modern.spawner.tags.TagsUtility;
+import jas.spawner.modern.spawner.tags.TagsWorld;
 
 import java.util.IllegalFormatException;
+
+import javax.annotation.Nonnull;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLiving;
@@ -32,52 +37,34 @@ import com.google.common.collect.ImmutableMultimap;
 /**
  * Passed to MVEL to be evaluated
  */
-public class Tags implements BaseFunctions {
-	private World world;
+public class Tags extends CommonContext {
 	public Optional<EntityLiving> entity;
-	public final int posX;
-	public final int posY;
-	public final int posZ;
-
-	public final TagsObjective obj;
-	public final LegacyTags lgcy;
-	public final TagsUtility util;
-	public final WorldAccessor wrld;
 	public final CountAccessor count;
-	public final TimeHelper time;
+	public final TagsEntity ent; // Only Valid if Entity is present
+	public final TagsNBT nbt; // Only Valid if Entity is present
 
 	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ) {
-		this.world = world;
-		this.posX = posX;
-		this.posY = posY;
-		this.posZ = posZ;
-		obj = new TagsObjective(world, this);
-		lgcy = new LegacyTags(world, this);
-		util = new TagsUtility(world, this);
-		wrld = new WorldAccessor(world);
-		count = new CountAccessor(countInfo, this);
-		time = new TimeHelper(world);
+		super(world, posX, posY, posZ);
 		entity = Optional.absent();
-	}
-
-	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ, EntityLiving entity) {
-		this.world = world;
-		this.posX = posX;
-		this.posY = posY;
-		this.posZ = posZ;
-		obj = new TagsObjective(world, this);
-		lgcy = new LegacyTags(world, this);
-		util = new TagsUtility(world, this);
-		wrld = new WorldAccessor(world);
 		count = new CountAccessor(countInfo, this);
-		time = new TimeHelper(world);
-		this.entity = Optional.of(entity);
+		ent = entity.isPresent() ? new FunctionsEntity(this, entity.get()) : null;
+		nbt = entity.isPresent() ? new FunctionsNBT(this, world, entity.get()) : null;
 	}
 
+	public Tags(World world, CountInfo countInfo, int posX, int posY, int posZ, @Nonnull EntityLiving entity) {
+		super(world, posX, posY, posZ);
+		this.entity = Optional.of(entity);
+		count = new CountAccessor(countInfo, this);
+		ent = this.entity.isPresent() ? new FunctionsEntity(this, this.entity.get()) : null;
+		nbt = this.entity.isPresent() ? new FunctionsNBT(this, world, this.entity.get()) : null;
+	}
+
+	@Deprecated
 	public boolean sky() {
 		return wrld.skyVisibleAt(posX, posY, posZ);
 	}
 
+	@Deprecated
 	public boolean block(String[] blockKeys, Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			private String[] blockKeys;
@@ -99,6 +86,7 @@ public class Tags implements BaseFunctions {
 		}.init(blockKeys), searchRange, searchOffsets);
 	}
 
+	@Deprecated
 	public boolean block(String[] blockKeys, Integer[] metas, Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			private String[] blockKeys;
@@ -125,6 +113,7 @@ public class Tags implements BaseFunctions {
 		}.init(blockKeys, metas), searchRange, searchOffsets);
 	}
 
+	@Deprecated
 	public boolean blockFoot(String[] blockKeys) {
 		Block blockID = wrld.blockAt(posX, posY - 1, posZ);
 		for (String blockKey : blockKeys) {
@@ -138,6 +127,7 @@ public class Tags implements BaseFunctions {
 		return false;
 	}
 
+	@Deprecated
 	public boolean blockFoot(String[] blockKeys, Integer[] metas) {
 		Block blockID = wrld.blockAt(posX, posY - 1, posZ);
 		int meta = world.getBlockMetadata(posX, posY - 1, posZ);
@@ -154,6 +144,7 @@ public class Tags implements BaseFunctions {
 		return false;
 	}
 
+	@Deprecated
 	public boolean normal(Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
@@ -163,6 +154,7 @@ public class Tags implements BaseFunctions {
 		}, searchRange, searchOffsets);
 	}
 
+	@Deprecated
 	public boolean liquid(Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
@@ -173,6 +165,7 @@ public class Tags implements BaseFunctions {
 
 	}
 
+	@Deprecated
 	public boolean solidside(int side, Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			private int side;
@@ -181,7 +174,7 @@ public class Tags implements BaseFunctions {
 				this.side = side;
 				return this;
 			}
-			
+
 			@Override
 			public boolean isMatch(World world, int xCoord, int yCoord, int zCoord) {
 				return wrld.blockAt(xCoord, yCoord, zCoord).isSideSolid(world, xCoord, yCoord, zCoord,
@@ -190,6 +183,7 @@ public class Tags implements BaseFunctions {
 		}.init(side), searchRange, searchOffsets);
 	}
 
+	@Deprecated
 	public boolean opaque(Integer[] searchRange, Integer[] searchOffsets) {
 		return util.searchAndEvaluateBlock(new Conditional() {
 			@Override
@@ -200,21 +194,25 @@ public class Tags implements BaseFunctions {
 
 	}
 
+	@Deprecated
 	public boolean ground() {
 		int blockHeight = obj.highestResistentBlock();
 		return blockHeight < 0 || blockHeight <= posY;
 	}
 
 	/* True if [0, range - 1] + offset <= maxValue */
+	@Deprecated
 	public boolean random(int range, int offset, int maxValue) {
 		return util.rand(range) + offset <= maxValue;
 	}
 
 	/** Entity Tags */
+	@Deprecated
 	public boolean modspawn() {
 		return entity.get().getCanSpawnHere();
 	}
 
+	@Deprecated
 	public boolean isTamed() {
 		if (entity.get() instanceof ITameable) {
 			return ((ITameable) entity.get()).isTamed();
@@ -226,6 +224,7 @@ public class Tags implements BaseFunctions {
 		return false;
 	}
 
+	@Deprecated
 	public boolean isTameable() {
 		if (entity.get() instanceof ITameable) {
 			return ((ITameable) entity.get()).isTameable();
@@ -235,6 +234,7 @@ public class Tags implements BaseFunctions {
 		return false;
 	}
 
+	@Deprecated
 	public boolean biome(String biomeName, int[] range, int[] offset) {
 		int rangeX = offset.length == 2 ? range[0] : range[0];
 		int rangeZ = offset.length == 2 ? range[1] : range[0];
@@ -280,6 +280,7 @@ public class Tags implements BaseFunctions {
 		}.init(biomeName), new Integer[] { rangeX, 0, rangeZ }, new Integer[] { offsetX, 0, offsetZ });
 	}
 
+	@Deprecated
 	public boolean writenbt(String[] nbtOperations) {
 		try {
 			NBTTagCompound entityNBT = new NBTTagCompound();
@@ -295,48 +296,15 @@ public class Tags implements BaseFunctions {
 		return false;
 	}
 
-	@Override
-	public int posX() {
-		return posX;
-	}
-
-	@Override
-	public int posY() {
-		return posY;
-	}
-
-	@Override
-	public int posZ() {
-		return posZ;
-	}
-
-	@Override
-	public ObjectiveFunctions obj() {
-		return obj;
-	}
-
-	@Override
-	public UtilityFunctions util() {
-		return util;
-	}
-
-	@Override
-	public LegacyFunctions lgcy() {
-		return lgcy;
-	}
-
-	@Override
-	public WorldFunctions wrld() {
-		return wrld;
-	}
-
-	@Override
-	public CountFunctions count() {
+	public TagsCount count() {
 		return count;
 	}
-	
-	@Override
-	public TimeFunctions time() {
-		return time;
+
+	public TagsNBT nbt() {
+		return nbt;
+	}
+
+	public TagsEntity ent() {
+		return ent;
 	}
 }

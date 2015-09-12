@@ -1,13 +1,13 @@
 package jas.spawner.modern.spawner;
 
-import jas.spawner.modern.spawner.tags.TimeFunctions;
+import jas.spawner.modern.spawner.tags.TagsTime;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 
-public class TimeHelper implements TimeFunctions {
+public class FunctionsTime implements TagsTime {
 	private World world;
 
-	public TimeHelper(World world) {
+	public FunctionsTime(World world) {
 		this.world = world;
 	}
 

@@ -1,6 +1,6 @@
 package jas.spawner.modern.spawner.tags;
 
-public interface LegacyFunctions {
+public interface TagsLegacy {
 	public boolean height(int minHeight, int maxHeight);
 
 	public boolean light(int minLight, int maxLight);
@@ -21,5 +21,7 @@ public interface LegacyFunctions {
 
 	public boolean entities(String[] searchNames, int[] searchRange, int[] minMaxBounds);
 
+	public boolean random(int range, int offset, int maxValue);
+	
 	public boolean difficulty(int desiredDifficulty);
 }

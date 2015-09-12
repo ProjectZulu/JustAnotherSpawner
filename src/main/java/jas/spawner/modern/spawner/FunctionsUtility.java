@@ -1,23 +1,24 @@
 package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.UtilityFunctions;
+import jas.spawner.modern.spawner.tags.Context;
+import jas.spawner.modern.spawner.tags.TagsUtility;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.World;
 
 /**
  * Tags that serve no purpose but as intermediate methods for calculations
  */
-public class TagsUtility implements UtilityFunctions {
+public class FunctionsUtility implements TagsUtility {
 	private World world;
-	private BaseFunctions parent;
+	private Context parent;
 
 	public static abstract class Conditional {
 		public abstract boolean isMatch(World world, int xCoord, int yCoord, int zCoord);
 	}
 
-	public TagsUtility(World world, BaseFunctions parent) {
+	public FunctionsUtility(World world, Context parent) {
 		this.world = world;
 		this.parent = parent;
 	}
@@ -131,7 +132,36 @@ public class TagsUtility implements UtilityFunctions {
 	public int rand(int value) {
 		return world.rand.nextInt(value);
 	}
+	
+	public boolean blockFoot(String[] blockKeys) {
+		Block blockID = parent.wrld().blockAt(parent.posX(), parent.posY() - 1, parent.posZ());
+		for (String blockKey : blockKeys) {
+			Block searchBlock = Block.getBlockFromName(blockKey);
+			if (searchBlock != null) {
+				if (blockID == searchBlock) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
+	public boolean blockFoot(String[] blockKeys, Integer[] metas) {
+		Block blockID = parent.wrld().blockAt(parent.posX(), parent.posY() - 1, parent.posZ());
+		int meta = world.getBlockMetadata(parent.posX(), parent.posY() - 1, parent.posZ());
+		for (String blockKey : blockKeys) {
+			Block searchBlock = Block.getBlockFromName(blockKey);
+			if (searchBlock != null) {
+				for (Integer metaValue : metas) {
+					if (blockID == searchBlock && metaValue.equals(meta)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
 	public void log(String string) {
 		JASLog.log().info("[TAG_LOG]".concat(string));
 	}

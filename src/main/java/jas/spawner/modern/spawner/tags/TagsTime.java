@@ -2,7 +2,7 @@ package jas.spawner.modern.spawner.tags;
 
 import net.minecraft.util.MathHelper;
 
-public interface TimeFunctions {
+public interface TagsTime {
 
 	public int worldTime();
 

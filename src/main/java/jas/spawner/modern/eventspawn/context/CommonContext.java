@@ -1,62 +1,46 @@
 package jas.spawner.modern.eventspawn.context;
 
-import com.google.common.collect.ImmutableBiMap;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.chunk.Chunk;
-import jas.common.JASLog;
-import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.eventspawn.SpawnBuilder;
-import jas.spawner.modern.spawner.CountAccessor;
-import jas.spawner.modern.spawner.CountInfo;
-import jas.spawner.modern.spawner.LegacyTags;
-import jas.spawner.modern.spawner.TagsObjective;
-import jas.spawner.modern.spawner.TagsUtility;
-import jas.spawner.modern.spawner.TimeHelper;
+import jas.spawner.modern.spawner.FunctionsObjective;
+import jas.spawner.modern.spawner.FunctionsTime;
+import jas.spawner.modern.spawner.FunctionsLegacy;
+import jas.spawner.modern.spawner.TagsSearch;
+import jas.spawner.modern.spawner.TagsSearch.FunctionsSearch;
+import jas.spawner.modern.spawner.FunctionsUtility;
 import jas.spawner.modern.spawner.WorldAccessor;
-import jas.spawner.modern.spawner.TagsUtility.Conditional;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.CountFunctions;
-import jas.spawner.modern.spawner.tags.LegacyFunctions;
-import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
-import jas.spawner.modern.spawner.tags.TimeFunctions;
-import jas.spawner.modern.spawner.tags.UtilityFunctions;
-import jas.spawner.modern.spawner.tags.WorldFunctions;
+import jas.spawner.modern.spawner.tags.Context;
+import jas.spawner.modern.spawner.tags.TagsCount;
+import jas.spawner.modern.spawner.tags.TagsLegacy;
+import jas.spawner.modern.spawner.tags.TagsObjective;
+import jas.spawner.modern.spawner.tags.TagsTime;
+import jas.spawner.modern.spawner.tags.TagsUtility;
+import jas.spawner.modern.spawner.tags.TagsWorld;
+import net.minecraft.world.World;
 
-public abstract class CommonContext implements Context, BaseFunctions {
-	private World world;
+public abstract class CommonContext implements Context {
+	protected World world;
 
 	public final int posX;
 	public final int posY;
 	public final int posZ;
 
-	public final TagsObjective obj;
-	public final LegacyTags lgcy;
-	public final TagsUtility util;
+	public final FunctionsObjective obj;
+	public final FunctionsLegacy lgcy;
+	public final FunctionsUtility util;
 	public final WorldAccessor wrld;
-	public final TimeFunctions time;
+	public final TagsTime time;
+	public final TagsSearch search;
 
 	public CommonContext(World world, int posX, int posY, int posZ) {
 		this.world = world;
 		this.posX = posX;
 		this.posY = posY;
 		this.posZ = posZ;
-		obj = new TagsObjective(world, this);
-		lgcy = new LegacyTags(world, this);
-		util = new TagsUtility(world, this);
+		obj = new FunctionsObjective(world, this);
+		lgcy = new FunctionsLegacy(world, this);
+		util = new FunctionsUtility(world, this);
 		wrld = new WorldAccessor(world);
-		time = new TimeHelper(world);
+		time = new FunctionsTime(world);
+		search = new FunctionsSearch(world, this);
 	}
 
 	@Override
@@ -75,32 +59,32 @@ public abstract class CommonContext implements Context, BaseFunctions {
 	}
 
 	@Override
-	public ObjectiveFunctions obj() {
+	public TagsObjective obj() {
 		return obj;
 	}
 
 	@Override
-	public UtilityFunctions util() {
+	public TagsUtility util() {
 		return util;
 	}
 
 	@Override
-	public LegacyFunctions lgcy() {
+	public TagsLegacy lgcy() {
 		return lgcy;
 	}
 
 	@Override
-	public WorldFunctions wrld() {
+	public TagsWorld wrld() {
 		return wrld;
 	}
 
 	@Override
-	public CountFunctions count() {
-		throw new UnsupportedOperationException("Count Functions are not supported for SpawnEvent objects");
+	public TagsTime time() {
+		return time;
 	}
 
 	@Override
-	public TimeFunctions time() {
-		return time;
+	public TagsSearch search() {
+		return search;
 	}
 }

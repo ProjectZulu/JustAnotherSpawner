@@ -1,6 +1,6 @@
 package jas.spawner.modern.spawner.tags;
 
-public interface CountFunctions {
+public interface TagsCount {
 	public int getLocalEntityTypeCount(String entityType);
 
 	public int getLocalEntityClassCount(String entityJasName);

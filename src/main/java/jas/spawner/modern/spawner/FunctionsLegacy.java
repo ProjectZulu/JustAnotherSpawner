@@ -1,17 +1,17 @@
 package jas.spawner.modern.spawner;
 
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.LegacyFunctions;
+import jas.spawner.modern.spawner.tags.Context;
+import jas.spawner.modern.spawner.tags.TagsLegacy;
 import net.minecraft.world.World;
 
 /**
  * Tags styled in the old manner. Simple functions that could be easily done in MVEL but are provided for familiarity
  */
-public class LegacyTags implements LegacyFunctions {
+public class FunctionsLegacy implements TagsLegacy {
 	private World world;
-	public BaseFunctions parent;
+	public Context parent;
 
-	public LegacyTags(World world, BaseFunctions parent) {
+	public FunctionsLegacy(World world, Context parent) {
 		this.world = world;
 		this.parent = parent;
 	}
@@ -64,5 +64,10 @@ public class LegacyTags implements LegacyFunctions {
 
 	public boolean difficulty(int desiredDifficulty) {
 		return desiredDifficulty == parent.obj().difficulty();
+	}
+	
+	/* True if [0, range - 1] + offset <= maxValue */
+	public boolean random(int range, int offset, int maxValue) {
+		return parent.util().rand(range) + offset <= maxValue;
 	}
 }

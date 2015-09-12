@@ -5,7 +5,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.world.biome.BiomeGenBase;
 
-public interface WorldFunctions {
+public interface TagsWorld {
 	public int lightAt(int coordX, int coordY, int coordZ);
 
 	public int torchlightAt(int coordX, int coordY, int coordZ);

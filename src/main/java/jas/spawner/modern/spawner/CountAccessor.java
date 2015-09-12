@@ -2,8 +2,8 @@ package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
 import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.spawner.tags.CountFunctions;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
+import jas.spawner.modern.spawner.tags.TagsCount;
+import jas.spawner.modern.spawner.tags.Context;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -14,11 +14,11 @@ import com.google.common.collect.ImmutableBiMap;
  * Accessor to public expose the World object for users to provide them as unchanging interface as possible. As a bonus
  * this provides stability to other tagas that utilize for calls instead of accessing count directly.
  */
-public class CountAccessor implements CountFunctions {
+public class CountAccessor implements TagsCount {
 	private CountInfo info;
-	private BaseFunctions parent;
+	private Context parent;
 
-	public CountAccessor(CountInfo info, BaseFunctions parent) {
+	public CountAccessor(CountInfo info, Context parent) {
 		this.info = info;
 		this.parent = parent;
 	}

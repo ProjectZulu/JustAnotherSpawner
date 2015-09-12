@@ -1,8 +1,8 @@
 package jas.spawner.modern.spawner;
 
 import jas.spawner.modern.MVELProfile;
-import jas.spawner.modern.spawner.tags.BaseFunctions;
-import jas.spawner.modern.spawner.tags.ObjectiveFunctions;
+import jas.spawner.modern.spawner.tags.Context;
+import jas.spawner.modern.spawner.tags.TagsObjective;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -15,12 +15,12 @@ import net.minecraft.world.chunk.Chunk;
  * This is for tags that return a concrete value to be used in checks. Many could be determined by using WorldAccessor
  * but are provided for brevity and less advanced users.
  */
-public class TagsObjective implements ObjectiveFunctions {
+public class FunctionsObjective implements TagsObjective {
 	private World world;
 	// TagObject where usual working parameters such as pos are found
-	public BaseFunctions parent;
+	public Context parent;
 
-	public TagsObjective(World world, BaseFunctions parent) {
+	public FunctionsObjective(World world, Context parent) {
 		this.parent = parent;
 		this.world = world;
 	}
@@ -37,6 +37,15 @@ public class TagsObjective implements ObjectiveFunctions {
 		return parent.wrld().torchlightAt(parent.posX(), parent.posY(), parent.posZ());
 	}
 
+	public boolean sky() {
+		return parent.wrld().skyVisibleAt(parent.posX(), parent.posY(), parent.posZ());
+	}
+	
+	public boolean ground() {
+		int blockHeight = parent.obj().highestResistentBlock();
+		return blockHeight < 0 || blockHeight <= parent.posY();
+	}
+	
 	public int origin() {
 		return parent.wrld().originDis(parent.posX(), parent.posY(), parent.posZ());
 	}

@@ -1,6 +1,6 @@
 package jas.spawner.modern.spawner;
 
-import jas.spawner.modern.spawner.tags.WorldFunctions;
+import jas.spawner.modern.spawner.tags.TagsWorld;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.util.ChunkCoordinates;
@@ -12,7 +12,7 @@ import net.minecraft.world.biome.BiomeGenBase;
  * Accessor to public expose the World object for users to provide them as unchanging interface as possible. As a bonus
  * this provides stability to other tagas that utilize for calls instead of accessing world directly.
  */
-public class WorldAccessor implements WorldFunctions {
+public class WorldAccessor implements TagsWorld {
 	private World world;
 
 	public WorldAccessor(World world) {

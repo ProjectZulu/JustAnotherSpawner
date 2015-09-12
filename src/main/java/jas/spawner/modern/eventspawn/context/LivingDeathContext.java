@@ -6,7 +6,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
-public class LivingDeathContext extends CommonContext {
+public class LivingDeathContext extends EventContext {
 	private LivingDeathEvent event;
 
 	public LivingDeathContext(LivingDeathEvent event) {

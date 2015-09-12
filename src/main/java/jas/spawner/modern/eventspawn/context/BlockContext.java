@@ -9,7 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.event.world.BlockEvent;
 
-public class BlockContext extends CommonContext {
+public class BlockContext extends EventContext {
 	private BlockEvent event;
 
 	public BlockContext(BlockEvent event) {
