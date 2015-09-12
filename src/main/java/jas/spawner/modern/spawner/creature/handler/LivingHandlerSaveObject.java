@@ -49,13 +49,14 @@ public class LivingHandlerSaveObject {
 		// Hack to provide backwards compatability: read contents from LivingGroups and move them to LivingHandler
 		public static HashMap<String, List<String>> livingGroupContents = new HashMap<String, List<String>>();
 
-		public final String FILE_VERSION = "2.0";
+		public final String FILE_VERSION = "3.0";
 		public final String FILE_VERSION_KEY = "FILE_VERSION";
 		public final String HANDLERS_KEY = "LIVING_HANDLERS";
 		public final String STATS_KEY = "Type-Enabled";
 		@Deprecated
 		final String TAGS_KEY = "Tags";
 		public final String SPAWN_TAG_KEY = "Spawn Tag";
+		public final String CHUNK_SPAWN_TAG_KEY = "Chunk Spawn Tag";
 		public final String DESPAWN_KEY = "Despawn Tags";
 		public final String INSTANT_DESPAWN_KEY = "InstantDespawn Tags";
 		public final String POSTSPAWN_KEY = "PostSpawn Tags";
@@ -231,6 +232,14 @@ public class LivingHandlerSaveObject {
 				builder.setDespawnAge(despawnAge);
 				int despawnRate = GsonHelper.getMemberOrDefault(handler, DESPAWN_RATE_KEY, -1);
 				builder.setDespawnRate(despawnRate);
+
+				if (currentVersion.equals("2.0")) {
+					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, spawnTag);
+					builder.setChunkSpawnExpression(chunkSpawnTag);
+				} else {
+					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, "");
+					builder.setChunkSpawnExpression(chunkSpawnTag);
+				}
 			}
 			builder.setEntityExpression(GsonHelper.getMemberOrDefault(handler, ENTITY_EXP_KEY, ""));
 			

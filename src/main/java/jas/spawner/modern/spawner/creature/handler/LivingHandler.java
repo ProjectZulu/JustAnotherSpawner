@@ -37,6 +37,7 @@ public class LivingHandler {
 	public final CreatureTypeRegistry creatureTypeRegistry;
 
 	public final String spawnExpression;
+	public final String chunkSpawnExpression;
 	public final String despawnExpression;
 	public final String instantdespawnExpression;
 	public final String postspawnExpression;
@@ -49,6 +50,7 @@ public class LivingHandler {
 	public final Optional<Integer> despawnRate;
 	public final Optional<Operand> spawnOperand;
 	private Optional<Serializable> compSpawnExpression;
+	private Optional<Serializable> compChunkSpawnExpression;
 	private Optional<Serializable> compDespawnExpression;
 	private Optional<Serializable> compInstantDespawnExpression;
 	private Optional<Serializable> compPostSpawnExpression;
@@ -71,6 +73,7 @@ public class LivingHandler {
 		this.contents = ImmutableList.<String> builder().addAll(builder.contents).build();
 		this.namedJASSpawnables = ImmutableSet.<String> builder().addAll(builder.getNamedJASSpawnables()).build();
 		this.spawnExpression = builder.getSpawnExpression();
+		this.chunkSpawnExpression = builder.getChunkSpawnExpression();
 		this.despawnExpression = builder.getDespawnExpression();
 		this.instantdespawnExpression = builder.getInstantDespawnExpression();
 		this.postspawnExpression = builder.getPostSpawnExpression();

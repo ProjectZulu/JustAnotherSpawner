@@ -22,6 +22,7 @@ public class LivingHandlerBuilder {
 	private String creatureTypeId;
 	private boolean shouldSpawn;
 	private String spawnExpression;
+	private String chunkSpawnExpression;
 	private String despawnExpression;
 	private String instantdespawnExpression;
 	private String postspawnExpression;
@@ -54,6 +55,7 @@ public class LivingHandlerBuilder {
 		setCreatureTypeId(creatureTypeId);
 		setShouldSpawn(true);
 		setSpawnExpression("", Optional.<Operand> absent());
+		setChunkSpawnExpression("");
 		setDespawnExpression("");
 		setInstantDespawnExpression("");
 		setPostSpawnExpression("");
@@ -72,6 +74,7 @@ public class LivingHandlerBuilder {
 		this.creatureTypeId = handler.creatureTypeID;
 		this.shouldSpawn = handler.shouldSpawn;
 		setSpawnExpression(handler.spawnExpression, handler.spawnOperand);
+		setChunkSpawnExpression(handler.chunkSpawnExpression);
 		setDespawnExpression(handler.despawnExpression);
 		setInstantDespawnExpression(handler.instantdespawnExpression);
 		setPostSpawnExpression(handler.postspawnExpression);
@@ -131,6 +134,19 @@ public class LivingHandlerBuilder {
 
 	public String getSpawnExpression() {
 		return spawnExpression;
+	}
+	
+	public LivingHandlerBuilder setChunkSpawnExpression(String optionalParameters) {
+		if (optionalParameters == null || optionalParameters.trim().equals("")) {
+			this.chunkSpawnExpression = "";
+		} else {
+			this.chunkSpawnExpression = optionalParameters;
+		}
+		return this;
+	}
+
+	public String getChunkSpawnExpression() {
+		return chunkSpawnExpression;
 	}
 
 	public Optional<Operand> getSpawnOperand() {
