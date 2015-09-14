@@ -86,6 +86,8 @@ public class LivingHandler {
 		this.spawnOperand = builder.getSpawnOperand();
 		this.compSpawnExpression = !spawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(spawnExpression)) : Optional.<Serializable> absent();
+		this.compChunkSpawnExpression = !chunkSpawnExpression.trim().equals("") ? Optional.of(MVEL
+				.compileExpression(chunkSpawnExpression)) : Optional.<Serializable> absent();
 		this.compDespawnExpression = !despawnExpression.trim().equals("") ? Optional.of(MVEL
 				.compileExpression(despawnExpression)) : Optional.<Serializable> absent();
 		this.compInstantDespawnExpression = !instantdespawnExpression.trim().equals("") ? Optional.of(MVEL

@@ -56,6 +56,7 @@ public class LivingHandlerSaveObject {
 		@Deprecated
 		final String TAGS_KEY = "Tags";
 		public final String SPAWN_TAG_KEY = "Spawn Tag";
+		@Deprecated //No longer needed
 		public final String CHUNK_SPAWN_TAG_KEY = "Chunk Spawn Tag";
 		public final String DESPAWN_KEY = "Despawn Tags";
 		public final String INSTANT_DESPAWN_KEY = "InstantDespawn Tags";
@@ -94,6 +95,10 @@ public class LivingHandlerSaveObject {
 					handler.addProperty(SPAWN_TAG_KEY, builder.getSpawnExpression());
 				}
 
+//				if (!"".equals(builder.getChunkSpawnExpression())) {
+//					handler.addProperty(CHUNK_SPAWN_TAG_KEY, builder.getChunkSpawnExpression());
+//				}
+				
 				if (!"".equals(builder.getDespawnExpression())) {
 					handler.addProperty(DESPAWN_KEY, builder.getDespawnExpression());
 				}
@@ -233,13 +238,13 @@ public class LivingHandlerSaveObject {
 				int despawnRate = GsonHelper.getMemberOrDefault(handler, DESPAWN_RATE_KEY, -1);
 				builder.setDespawnRate(despawnRate);
 
-				if (currentVersion.equals("2.0")) {
-					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, spawnTag);
-					builder.setChunkSpawnExpression(chunkSpawnTag);
-				} else {
-					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, "");
-					builder.setChunkSpawnExpression(chunkSpawnTag);
-				}
+//				if (currentVersion.equals("2.0")) {
+//					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, spawnTag);
+//					builder.setChunkSpawnExpression(chunkSpawnTag);
+//				} else {
+//					String chunkSpawnTag = GsonHelper.getMemberOrDefault(handler, CHUNK_SPAWN_TAG_KEY, "");
+//					builder.setChunkSpawnExpression(chunkSpawnTag);
+//				}
 			}
 			builder.setEntityExpression(GsonHelper.getMemberOrDefault(handler, ENTITY_EXP_KEY, ""));
 			
