@@ -3,30 +3,40 @@ package jas.spawner.refactor;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.Tags;
 import jas.spawner.refactor.mvel.MVELExpression;
+
+import java.util.List;
+
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public class LivingTypeBuilder {
 	public final String livingTypeID;
-	private String canSpawn;
 	private String isReadyToPssve;
-	private String isReadyToCnk;
+	private String canSpawn;
+	private String quickCheck;
 	private int iterationsPerChunk;
 	private int iterationsPerPack;
+	private List<LivingTypeSpawnTriggerBuilder> triggers;
+	
+	@Deprecated
+	private String isReadyToCnk;
 
 	public LivingTypeBuilder(String livingTypeID, int maxSpawnable, int spawnRate, float chunkSpawnChance,
 			String spawnMedium, String additionalCanSpawn) {
 		this.livingTypeID = livingTypeID;
+		this.quickCheck = "(count.globalType('" + livingTypeID + "') * 256 / count.chunks >= " + maxSpawnable;
 		this.canSpawn = "(count.globalType('" + livingTypeID + "') * 256 / count.chunks >= " + maxSpawnable
 				+ " || !isSpawnMedium('" + spawnMedium + "'))" + additionalCanSpawn;
 		this.isReadyToPssve = "world.totalTime() % " + spawnRate + " == 0";
 		this.isReadyToCnk = "util.nextFloat() < " + chunkSpawnChance;
 		this.iterationsPerChunk = 3;
 		this.iterationsPerPack = 4;
+		LivingTypeSpawnTriggerBuilder builder = new LivingTypeSpawnTriggerBuilder(livingTypeID);
 	}
 
-	public LivingTypeBuilder(String livingTypeID, String isReadyToPssve, String canSpawn) {
+	public LivingTypeBuilder(String livingTypeID, String isReadyToPssve, String quickCheck, String canSpawn) {
 		this.livingTypeID = livingTypeID;
+		this.quickCheck = quickCheck;
 		this.canSpawn = canSpawn; // count.getGlobalEntityTypeCount('Creature') < 60 * #Players / 256 &&
 									// isSpawnMedium('water')
 		this.isReadyToPssve = isReadyToPssve;
@@ -38,6 +48,7 @@ public class LivingTypeBuilder {
 	public LivingTypeBuilder(LivingType type) {
 		this.livingTypeID = type.livingTypeID;
 		this.canSpawn = type.canSpawn.expression;
+		this.quickCheck = type.quickCheck.expression;
 		this.isReadyToPssve = type.isReadyToPssve.expression;
 		this.isReadyToCnk = type.isReadyToChnk.expression;
 		this.iterationsPerChunk = type.iterationsPerChunk;
@@ -46,8 +57,12 @@ public class LivingTypeBuilder {
 
 	public static class LivingType {
 		public final String livingTypeID;
-		public final MVELExpression<Boolean> canSpawn;
 		public final MVELExpression<Boolean> isReadyToPssve;
+		public final MVELExpression<Boolean> quickCheck;
+		public final MVELExpression<Boolean> canSpawn;
+
+		@Deprecated
+		// Needs to be removed; ChunkSpawn is just going to be a separate Trigger. Types can select Passive,
 		public final MVELExpression<Boolean> isReadyToChnk;
 		public final int iterationsPerChunk;
 		public final int iterationsPerPack;
@@ -55,6 +70,7 @@ public class LivingTypeBuilder {
 		public LivingType(LivingTypeBuilder builder) {
 			this.livingTypeID = builder.livingTypeID;
 			this.canSpawn = new MVELExpression<Boolean>(builder.canSpawn);
+			this.quickCheck = new MVELExpression<Boolean>(builder.quickCheck);
 			this.isReadyToPssve = new MVELExpression<Boolean>(builder.getIsReadyToPssve());
 			this.isReadyToChnk = new MVELExpression<Boolean>(builder.getIsReadyToCnk());
 			this.iterationsPerChunk = builder.getIterationsPerChunk();
@@ -75,6 +91,14 @@ public class LivingTypeBuilder {
 
 	public void setSpawnExpression(String canSpawn) {
 		this.canSpawn = canSpawn;
+	}
+
+	public String getQuickCheckExpression() {
+		return quickCheck;
+	}
+
+	public void setQuickCheckExpression(String quickCheck) {
+		this.quickCheck = quickCheck;
 	}
 
 	public String getIsReadyToPssve() {

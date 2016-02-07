@@ -10,6 +10,7 @@ import jas.spawner.modern.DefaultProps;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.proxy.CommonProxy;
 import jas.spawner.modern.spawner.biome.structure.StructureInterpreterHelper;
+import jas.spawner.refactor.ExperimentalProfile;
 
 import java.io.File;
 import java.util.Iterator;
@@ -107,6 +108,7 @@ public class JustAnotherSpawner {
 //			currentProfile = new TAGProfile(biomeBlacklist, importedSpawnList);
 //		} else if (globalSettings.spawningProfile.trim().equalsIgnoreCase(GlobalSettings.profileMVEL)) {
 			currentProfile = new MVELProfile(biomeBlacklist, importedSpawnList);
+//			currentProfile = new ExperimentalProfile(biomeBlacklist, importedSpawnList);
 //		} else {
 //			throw new IllegalArgumentException(String.format(
 //					"Unknown Spawning Profile [%s]. Current modes are %s or %s", globalSettings.spawningProfile,

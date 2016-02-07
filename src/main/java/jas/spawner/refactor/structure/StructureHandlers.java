@@ -72,14 +72,14 @@ public class StructureHandlers {
 					}
 				}
 				for (SpawnListEntryBuilder spawnBuilder : spawnList) {
-					if (!spawnBuilder.getLivingTypeID().equals(LivingTypes.NONE)) {
+					if (!spawnBuilder.getLivingTypeIDs().contains(LivingTypes.NONE)) {
 						SpawnListEntry spawnEntry = spawnBuilder.build();
 						structureHandlerBuilder.addSpawnList(structureKey, spawnEntry);
 					} else {
 						// Reminder: We ignore the NONE type for any spawnlist (structure or biome)
 						JASLog.log().debug(Level.INFO,
 								"Not Generating Structure %s SpawnList entries for %s. CreatureTypeID: %s",
-								structureKey, spawnBuilder.getEntContent(), spawnBuilder.getLivingTypeID());
+								structureKey, spawnBuilder.getEntContent(), spawnBuilder.getLivingTypeIDs());
 					}
 				}
 			}

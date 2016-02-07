@@ -2,6 +2,7 @@ package jas.spawner.refactor;
 
 import jas.common.global.ImportedSpawnList;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
+import jas.spawner.refactor.LivingTypeBuilder.LivingType;
 import jas.spawner.refactor.SpawnSettings.BiomeSettings;
 import jas.spawner.refactor.SpawnSettings.LivingSettings;
 import jas.spawner.refactor.biome.BiomeGroupBuilder.BiomeGroup;
@@ -12,6 +13,7 @@ import jas.spawner.refactor.biome.list.SpawnListEntryBuilder.SpawnListEntry;
 import jas.spawner.refactor.configsloader.BiomeSpawnListLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.LoadedFile;
+import jas.spawner.refactor.entities.Group.Parser.ContextBase;
 import jas.spawner.refactor.entities.Group.Parser.LivingContext;
 import jas.spawner.refactor.entities.Group.Parser.LocationContext;
 import jas.spawner.refactor.entities.Group.Parser.ResultsBuilder;
@@ -30,14 +32,20 @@ import net.minecraft.world.biome.BiomeGenBase;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 
+// BiomeSpawnLists is container for BiomeSpawnList
+// BiomeSpawnLists: Interface to outside - where file is saved, multiple files. i.e. LivingHandlerRegistry
+// BiomeSpawnList: Actual 'spawnlist' used during spawning. Responsible for organization of data in-memory/in-game. i.e.
+// LivingHandler
 public class BiomeSpawnLists {
 	private BiomeSpawnList spawnList;
-
-	public BiomeSpawnList getSpawnList() {
-		return spawnList;
+	
+	public ImmutableCollection<SpawnListEntry> getSpawnList(World world, BiomeSettings biomeSettings,
+			BiomeGenBase biome, LivingType livingType) {
+		return spawnList.getSpawnList(world, biomeSettings, biome, livingType);
 	}
 
 	public BiomeSpawnLists(World world, ConfigLoader loader, WorldProperties worldProperties,
@@ -95,6 +103,8 @@ public class BiomeSpawnLists {
 				biomeSettings.dictionaryGroups(), biomeSettings.biomeAttributes(), biomeSettings.biomeGroups());
 		LivingContext livingContext = new LivingContext(livingsettings.livingMappings(), null,
 				livingsettings.livingAttributes(), livingsettings.livingHandlers());
+		ContextBase livingTypeContext = new ContextBase(null);
+
 		ImmutableSet.Builder<SpawnListEntry> mappingBuilder = ImmutableSet.<SpawnListEntry> builder();
 		for (SpawnListEntryBuilder builder : mapsBuilder) {
 			// Parse SpawnableLocations
@@ -106,6 +116,12 @@ public class BiomeSpawnLists {
 					livingContext, "");
 			builder.setEntResults(entResult.resultMappings);
 			mappingBuilder.add(builder.build());
+			// Parse LivingTypes
+			ResultsBuilder livingTypesResult = new MVELExpression<ResultsBuilder>(builder.getLivingTypeContent())
+					.evaluate(livingTypeContext, "");
+			builder.setEntResults(livingTypesResult.resultMappings);
+
+			// TODO Validate that created SpawnListEntry is VALID i.e. result biome/entity/types are valid
 		}
 		spawnList = new BiomeSpawnList(mappingBuilder.build());
 	}
@@ -131,19 +147,12 @@ public class BiomeSpawnLists {
 		}
 	}
 
-	public Collection<String> livingTypesForEntity(World world, Entity entity, LivingSettings livingSettings,
-			BiomeSettings biomeSettings) {
-		BiomeGenBase biome = world.getBiomeGenForCoords((int) entity.posX, (int) entity.posZ);
-		String pckgeName = BiomeHelper.getPackageName(biome);
-		String jasBiomeName = biomeSettings.biomeMappings().keyToMapping().get(pckgeName);
-
+	public Collection<String> livingTypesForEntity(World world, Entity entity, LivingSettings livingSettings) {
 		String jasLivingMapping = livingSettings.livingMappings().keyToMapping().get(entity.getClass());
-
 		Set<String> livingTypes = new HashSet<String>();
-		for (SpawnListEntry spawnEntry : spawnList.locMappingToSLE().get(jasBiomeName)) {
-			if (spawnEntry.entityMappings.contains(jasLivingMapping)) {
-				livingTypes.add(spawnEntry.livingTypeID);
-			}
+
+		for (SpawnListEntry spawnEntry : spawnList.spawnLookupByEntity().get(jasLivingMapping)) {
+			livingTypes.addAll(spawnEntry.livingTypeIDs);
 		}
 		return livingTypes;
 	}

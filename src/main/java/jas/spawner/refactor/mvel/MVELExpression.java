@@ -32,4 +32,19 @@ public class MVELExpression<T> {
 	public boolean isPresent() {
 		return compiled.isPresent();
 	}
+
+	public static <T> Optional<T> execute(MVELExpression<T> expression, Object contextObject, String... errorMessage) {
+		if (expression.isPresent()) {
+			try {
+				Object value = MVEL.executeExpression(expression.compiled.get(), contextObject);
+				return value != null ? Optional.of((T) value) : Optional.<T> absent();
+			} catch (RuntimeException e) {
+				for (String error : errorMessage) {
+					JASLog.log().severe(error);
+				}
+				throw e;
+			}
+		}
+		return Optional.<T> absent();
+	}
 }

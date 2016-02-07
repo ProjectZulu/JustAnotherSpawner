@@ -1,6 +1,5 @@
 package jas.spawner.refactor.entities;
 
-import jas.spawner.legacy.spawner.biome.group.BiomeGroupRegistry.BiomeGroup;
 import jas.spawner.modern.math.SetAlgebra;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
 import jas.spawner.refactor.biome.BiomeMappings;
@@ -22,6 +21,7 @@ import com.google.common.collect.Multimap;
  * Note: Generics of Group is kinda fucked. results explicitly used String return type for results whereas Mappings
  * allows and type to be used. Group as well as subclasses and Groups should reflect this.
  */
+//TODO: needs to be replaced with jas.spawner.refactor.entities.GenericGroup<ID, CONTENT, RESULT>
 public interface Group {
 	public String iD();
 
@@ -50,12 +50,13 @@ public interface Group {
 
 	public static class Parser {
 
-		public interface Context<T> {
-			public ResultsBuilder Builder();
+		public interface Context {
+			public ResultsBuilder builder();
 		}
 
-		public static class LocationContext<L extends Group> extends ContextBase<String> {
+		public static class LocationContext<L extends Group> extends ContextBase {
 			private ArrayListMultimap<String, Integer> pckgNameToBiomeID;
+			protected Mappings<String, String> mappings;
 
 			public LocationContext(BiomeMappings mappings) {
 				this(mappings, null, null);
@@ -70,7 +71,8 @@ public interface Group {
 			}
 
 			public LocationContext(BiomeMappings mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
-				super(mappings, dGroups, aGroups, gGroups);
+				super(dGroups, aGroups, gGroups);
+				this.mappings = mappings;
 				pckgNameToBiomeID = ArrayListMultimap.create();
 				for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
 					if (biome != null) {
@@ -86,7 +88,8 @@ public interface Group {
 			}
 		}
 
-		public static class LivingContext extends ContextBase<String> {
+		public static class LivingContext extends ContextBase {
+			private LivingMappings mappings;
 			public LivingContext(LivingMappings mappings) {
 				this(mappings, null, null);
 			}
@@ -100,30 +103,29 @@ public interface Group {
 			}
 
 			public LivingContext(LivingMappings mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
-				super(mappings, dGroups, aGroups, gGroups);
+				super(dGroups, aGroups, gGroups);
+				this.mappings = mappings;
 			}
 		}
 
-		public static class ContextBase</* K, */T> implements Context<T> {
+		public static class ContextBase implements Context {
 			public Map<String, Collection<String>> A;
 			public Map<String, Collection<String>> G;
 			public Map<String, Collection<String>> D;
-			protected Mappings<String, T> mappings;
 
-			public ContextBase(Mappings<String, T> mappings) {
-				this(mappings, null, null);
+			public ContextBase() {
+				this(null, null, null);
 			}
 
-			public ContextBase(Mappings<String, T> mappings, Groups dGroups) {
-				this(mappings, dGroups, null, null);
+			public ContextBase(Groups dGroups) {
+				this(dGroups, null, null);
 			}
 
-			public ContextBase(Mappings<String, T> mappings, Groups dGroups, Groups aGroups) {
-				this(mappings, dGroups, aGroups, null);
+			public ContextBase(Groups dGroups, Groups aGroups) {
+				this(dGroups, aGroups, null);
 			}
 
-			public ContextBase(Mappings<String, T> mappings, Groups dGroups, Groups aGroups, Groups gGroups) {
-				this.mappings = mappings;
+			public ContextBase(Groups dGroups, Groups aGroups, Groups gGroups) {
 				A = aGroups != null ? convert(aGroups) : new HashMap<String, Collection<String>>();
 				G = gGroups != null ? convert(gGroups) : new HashMap<String, Collection<String>>();
 				D = dGroups != null ? convert(dGroups) : new HashMap<String, Collection<String>>();
@@ -137,9 +139,26 @@ public interface Group {
 				return map;
 			}
 
+			//TODO: Add alias builder S and start, startwith, with
 			@Override
-			public ResultsBuilder Builder() {
+			public ResultsBuilder builder() {
 				return new ResultsBuilder();
+			}
+			
+			public ResultsBuilder sw() {
+				return builder();
+			}
+			
+			public ResultsBuilder startwith() {
+				return builder();
+			}
+			
+			public ResultsBuilder with() {
+				return builder();
+			}
+			
+			public ResultsBuilder w() {
+				return builder();
 			}
 		}
 

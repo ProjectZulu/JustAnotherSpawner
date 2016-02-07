@@ -1,13 +1,15 @@
 package jas.spawner.refactor.biome.list;
 
 import jas.spawner.refactor.LivingTypes;
-import jas.spawner.refactor.entities.Group.MutableContentGroup;
+import jas.spawner.refactor.entities.GenericParser.ResultsBuilder;
 import jas.spawner.refactor.mvel.MVELExpression;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class SpawnListEntryBuilder {
@@ -17,7 +19,9 @@ public class SpawnListEntryBuilder {
 	private String modID;
 
 	/** LivingType associated with this SLE */
-	private String livingTypeID;
+	private HashSet<String> livingTypeIDs;
+	/** Expression used to determine applicable LivingTypes i.e. {desert,A|Forest,glacier} */
+	private String livingTypeContents;
 
 	/** Expression that determines if Entity can spawn */
 	private Optional<String> canSpawn;
@@ -47,7 +51,7 @@ public class SpawnListEntryBuilder {
 	public SpawnListEntryBuilder() {
 		this.setModID(defaultFileName);
 		this.setLivingHandlerID(null);
-		this.setLivingTypeID(null);
+		this.setLivingTypeIDs(null);
 		this.setWeight(0);
 		this.setPassivePackSize("3");
 		this.setChunkPackSize("0 + util.rand(1 + 4 - 0)");
@@ -63,7 +67,9 @@ public class SpawnListEntryBuilder {
 	@Deprecated
 	public SpawnListEntryBuilder(String fileName, String livingHandlerID, String livingTypeID, String locExpression) {
 		this.setModID(fileName);
-		this.setLivingTypeID(livingTypeID);
+		HashSet<String> livingTypeIDs = new HashSet<String>();
+		livingTypeIDs.add(livingTypeID);
+		this.setLivingTypeIDs(livingTypeIDs);
 		this.setLivingHandlerID(livingHandlerID);
 		this.setWeight(0);
 		this.setPassivePackSize("3");
@@ -77,12 +83,13 @@ public class SpawnListEntryBuilder {
 		this.setEntContents("");
 		this.setEntResults(new HashSet<String>());
 	}
-	
+
 	// Commonly used constructor - should be a helper instead as it doesn't pertain to the class in a generic way
-	public SpawnListEntryBuilder(String fileName, String livingHandlerID, String livingTypeID, String locExpression,
+	public SpawnListEntryBuilder(String fileName, String livingHandlerID, String livingTypeExpression, String locExpression,
 			String livExp) {
 		this.setModID(fileName);
-		this.setLivingTypeID(livingTypeID);
+		this.setLivingTypeContents(livingTypeExpression);
+		this.setLivingTypeIDs(new HashSet<String>());
 		this.setLivingHandlerID(livingHandlerID);
 		this.setWeight(0);
 		this.setPassivePackSize("3");
@@ -99,7 +106,7 @@ public class SpawnListEntryBuilder {
 
 	public SpawnListEntryBuilder(SpawnListEntry entry) {
 		this.setModID(entry.modID);
-		this.setLivingTypeID(entry.livingTypeID);
+		this.setLivingTypeIDs(new HashSet<String>(entry.livingTypeIDs));
 		this.setLivingHandlerID(entry.livingHandlerID.isPresent() ? entry.livingHandlerID.get() : null);
 		this.setWeight(entry.weight);
 		this.setPassivePackSize(entry.passivePackSize.expression);
@@ -111,13 +118,16 @@ public class SpawnListEntryBuilder {
 		this.setLocContents(entry.locContents);
 		this.setLocResults(entry.locMappings);
 		this.setEntContents(entry.entityContents);
-		this.setEntResults(entry.entityMappings);
+		this.setEntResults(new HashSet<String>(entry.entityMappings));
 	}
 
 	public static class SpawnListEntry {
 		public final String modID;
-		public final String livingTypeID;
 		public final Optional<String> livingHandlerID;
+
+		public final ImmutableSet<String> livingTypeIDs;
+		public final transient String livingTypeContents;
+		// public final transient MVELExpression<ResultsBuilder<String>> livingTypeContents;
 
 		public final int weight;
 		public final MVELExpression<Integer> passivePackSize;
@@ -131,13 +141,15 @@ public class SpawnListEntryBuilder {
 		public final transient String locContents;
 
 		/** Entity Mappings this SpawnListEntry builder applies to */
-		public final transient ImmutableSet<String> entityMappings;
+		// Entries must be unique; List is for quick random access during spawn cycles
+		public final transient ImmutableList<String> entityMappings;
 		/** Expression used to determine applicable locations i.e. {desert,A|Forest,glacier} */
 		public final transient String entityContents;
 
 		private SpawnListEntry(SpawnListEntryBuilder builder) {
 			this.modID = builder.modID;
-			this.livingTypeID = builder.livingTypeID;
+			this.livingTypeContents = builder.livingTypeContents;
+			this.livingTypeIDs = ImmutableSet.<String> builder().addAll(builder.livingTypeIDs).build();
 			this.livingHandlerID = builder.livingHandlerID;
 			this.weight = builder.getWeight();
 			this.passivePackSize = new MVELExpression<Integer>(builder.getPassivePackSize());
@@ -156,7 +168,7 @@ public class SpawnListEntryBuilder {
 			this.locMappings = ImmutableSet.<String> builder().addAll(builder.getLocResults()).build();
 			this.locContents = builder.getLocContent();
 
-			this.entityMappings = ImmutableSet.<String> builder().addAll(builder.getEntResults()).build();
+			this.entityMappings = ImmutableList.<String> builder().addAll(builder.getEntResults()).build();
 			this.entityContents = builder.getEntContent();
 		}
 
@@ -165,7 +177,7 @@ public class SpawnListEntryBuilder {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + ((entityContents == null) ? 0 : entityContents.hashCode());
-			result = prime * result + ((livingTypeID == null) ? 0 : livingTypeID.hashCode());
+			result = prime * result + ((livingTypeIDs == null) ? 0 : livingTypeIDs.hashCode());
 			result = prime * result + ((locContents == null) ? 0 : locContents.hashCode());
 			return result;
 		}
@@ -184,10 +196,10 @@ public class SpawnListEntryBuilder {
 					return false;
 			} else if (!entityContents.equals(other.entityContents))
 				return false;
-			if (livingTypeID == null) {
-				if (other.livingTypeID != null)
+			if (livingTypeIDs == null) {
+				if (other.livingTypeIDs != null)
 					return false;
-			} else if (!livingTypeID.equals(other.livingTypeID))
+			} else if (!livingTypeIDs.equals(other.livingTypeIDs))
 				return false;
 			if (locContents == null) {
 				if (other.locContents != null)
@@ -228,17 +240,25 @@ public class SpawnListEntryBuilder {
 		return this;
 	}
 
-	public String getLivingTypeID() {
-		return livingTypeID;
+	public Set<String> getLivingTypeIDs() {
+		return livingTypeIDs;
 	}
 
-	public SpawnListEntryBuilder setLivingTypeID(String livingTypeID) {
-		if (livingTypeID == null) {
-			this.livingTypeID = LivingTypes.NONE;
+	public SpawnListEntryBuilder setLivingTypeIDs(HashSet livingTypeIDs) {
+		if (livingTypeIDs == null) {
+			this.livingTypeIDs = new HashSet<String>();
 		} else {
-			this.livingTypeID = livingTypeID;
+			this.livingTypeIDs = livingTypeIDs;
 		}
 		return this;
+	}
+
+	public String getLivingTypeContent() {
+		return livingTypeContents;
+	}
+
+	public void setLivingTypeContents(String contents) {
+		this.livingTypeContents = contents;
 	}
 
 	public int getWeight() {
@@ -331,7 +351,7 @@ public class SpawnListEntryBuilder {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((entityContents == null) ? 0 : entityContents.hashCode());
-		result = prime * result + ((livingTypeID == null) ? 0 : livingTypeID.hashCode());
+		result = prime * result + ((livingTypeIDs == null) ? 0 : livingTypeIDs.hashCode());
 		result = prime * result + ((locContents == null) ? 0 : locContents.hashCode());
 		return result;
 	}
@@ -350,10 +370,10 @@ public class SpawnListEntryBuilder {
 				return false;
 		} else if (!entityContents.equals(other.entityContents))
 			return false;
-		if (livingTypeID == null) {
-			if (other.livingTypeID != null)
+		if (livingTypeIDs == null) {
+			if (other.livingTypeIDs != null)
 				return false;
-		} else if (!livingTypeID.equals(other.livingTypeID))
+		} else if (!livingTypeIDs.equals(other.livingTypeIDs))
 			return false;
 		if (locContents == null) {
 			if (other.locContents != null)

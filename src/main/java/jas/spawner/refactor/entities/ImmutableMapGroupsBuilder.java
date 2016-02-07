@@ -29,6 +29,10 @@ public class ImmutableMapGroupsBuilder<T extends Group> implements Groups {
 		iDToGroup.clear();
 	}
 
+	public void removeGroup(T group) {
+		iDToGroup.remove(group.iD());
+	}
+	
 	public void addGroup(T group) {
 		iDToGroup.put(group.iD(), group);
 	}

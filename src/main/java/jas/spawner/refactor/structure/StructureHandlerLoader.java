@@ -40,8 +40,8 @@ public class StructureHandlerLoader implements VersionedFile {
 	private String version;
 	private boolean sortCreatureByBiome;
 
-	// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT), <LivingExpression, SpawnListEntry>>>
-	// !SortByBiome:<CreatureType(MONSTER/AMBIENT), <LivingExpression, <LocationExp, SpawnListEntry>>>
+	// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT)Expression, <LivingExpression, SpawnListEntry>>>
+	// !SortByBiome:<CreatureType(MONSTER/AMBIENT)Expression, <LivingExpression, <LocationExp, SpawnListEntry>>>
 	private final TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> primToSecToTertToEntry;
 
 	public StructureHandlerLoader(boolean sortCreatureByBiome) {
@@ -222,14 +222,14 @@ public class StructureHandlerLoader implements VersionedFile {
 						JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
 						String locExp = loader.getLocationExpFromKey(primKey, secKey, tertKey);
 						String livExp = loader.getLivingExpFromKey(primKey, secKey, tertKey);
-						String livingType = loader.getLivingTypeFromKey(primKey, secKey, tertKey);
+						String livingTypeExpression = loader.getLivingTypeFromKey(primKey, secKey, tertKey);
 						String modID = GsonHelper.getMemberOrDefault(entityValueObject, MODID_KEY,
 								SpawnListEntryBuilder.defaultFileName);
 						String livingHandlerID = GsonHelper.getMemberOrDefault(entityValueObject, LIVING_HANDLER_KEY,
 								"");
 
-						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(modID, livingHandlerID, livingType,
-								locExp, livExp);
+						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(modID, livingHandlerID,
+								livingTypeExpression, locExp, livExp);
 
 						int weight = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_WEIGHT, 0);
 						String chunkPackSize = GsonHelper.getMemberOrDefault(entityValueObject, CHUNK_PACKSIZE_KEY,
@@ -254,11 +254,11 @@ public class StructureHandlerLoader implements VersionedFile {
 	}
 
 	private String getPrimaryKey(SpawnListEntryBuilder builder) {
-		return sortCreatureByBiome ? builder.getLocContent() : builder.getLivingTypeID();
+		return sortCreatureByBiome ? builder.getLocContent() : builder.getLivingTypeContent();
 	}
 
 	private String getSecondaryKey(SpawnListEntryBuilder builder) {
-		return sortCreatureByBiome ? builder.getLivingTypeID() : builder.getEntContent();
+		return sortCreatureByBiome ? builder.getLivingTypeContent() : builder.getEntContent();
 	}
 
 	private String getTertiaryKey(SpawnListEntryBuilder builder) {

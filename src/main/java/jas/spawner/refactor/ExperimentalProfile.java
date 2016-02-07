@@ -28,6 +28,12 @@ public class ExperimentalProfile implements Profile {
 	private static ImportedSpawnList importedSpawnList;
 	public static final String PROFILE_FOLDER = "EXPERIMENTAL/";
 
+	public ExperimentalProfile(BiomeBlacklist biomeBlacklist, ImportedSpawnList importedSpawnList) {
+		this.biomeBlacklist = biomeBlacklist;
+		this.importedSpawnList = importedSpawnList;
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+	
 	@Override
 	public void init() {
 		MinecraftForge.EVENT_BUS.register(new EntityDespawner(this));

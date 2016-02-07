@@ -110,7 +110,7 @@ public class StructureHandlerBuilder {
 	public StructureHandlerBuilder addSpawnList(String structureKey, SpawnListEntry spawnListEntry) {
 		if (spawnListEntry.weight > 0) {
 			JASLog.log().logSpawnListEntry(spawnListEntry.entityContents, "Structure: " + structureKey, true,
-					"of type " + spawnListEntry.livingTypeID);
+					"of type " + spawnListEntry.livingTypeIDs);
 			structureKeysToSpawnList.put(structureKey, spawnListEntry);
 		} else {
 			JASLog.log().logSpawnListEntry(spawnListEntry.entityContents, "Structure: " + structureKey, false,

@@ -24,8 +24,8 @@ import com.google.gson.JsonSerializer;
 public class BiomeSpawnListLoader implements VersionedFile {
 	private String version;
 
-	// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT), <LivingExpression, SpawnListEntry>>>
-	// !SortByBiome:<CreatureType(MONSTER/AMBIENT), <LivingExpression, <LocationExp, SpawnListEntry>>>
+	// SortByBiome: <LocationExp, <CreatureType(MONSTER/AMBIENT)Expression, <LivingExpression, SpawnListEntry>>>
+	// !SortByBiome:<CreatureType(MONSTER/AMBIENT)Expression, <LivingExpression, <LocationExp, SpawnListEntry>>>
 	private TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>> biomeToTypeToCreature;
 	private boolean sortCreatureByBiome;
 
@@ -43,7 +43,7 @@ public class BiomeSpawnListLoader implements VersionedFile {
 		biomeToTypeToCreature = new TreeMap<String, TreeMap<String, TreeMap<String, SpawnListEntryBuilder>>>();
 
 		for (SpawnListEntryBuilder spawnListEntry : spawnListEntries) {
-			putEntry(spawnListEntry.getLocContent(), spawnListEntry.getLivingTypeID(), spawnListEntry.getEntContent(),
+			putEntry(spawnListEntry.getLocContent(), spawnListEntry.getLivingTypeContent(), spawnListEntry.getEntContent(),
 					spawnListEntry, biomeToTypeToCreature);
 		}
 	}
@@ -199,14 +199,14 @@ public class BiomeSpawnListLoader implements VersionedFile {
 						JsonObject entityValueObject = GsonHelper.getAsJsonObject(tertEntries.getValue());
 						String locExp = saveObject.sortCreatureByBiome ? primKey : tertKey;
 						String livExp = saveObject.sortCreatureByBiome ? tertKey : secKey;
-						String livingType = saveObject.sortCreatureByBiome ? secKey : primKey;
+						String livingTypeExp = saveObject.sortCreatureByBiome ? secKey : primKey;
 						String modID = GsonHelper.getMemberOrDefault(entityValueObject, MODID_KEY,
 								SpawnListEntryBuilder.defaultFileName);
 						String livingHandlerID = GsonHelper.getMemberOrDefault(entityValueObject, LIVING_HANDLER_KEY,
 								"");
 
-						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(modID, livingHandlerID, livingType,
-								locExp, livExp);
+						SpawnListEntryBuilder builder = new SpawnListEntryBuilder(modID, livingHandlerID,
+								livingTypeExp, locExp, livExp);
 
 						int weight = GsonHelper.getMemberOrDefault(entityValueObject, SPAWN_WEIGHT, 0);
 						String chunkPackSize = GsonHelper.getMemberOrDefault(entityValueObject, CHUNK_PACKSIZE_KEY,

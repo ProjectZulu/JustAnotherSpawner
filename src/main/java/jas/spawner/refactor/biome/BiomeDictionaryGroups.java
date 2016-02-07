@@ -60,11 +60,11 @@ public class BiomeDictionaryGroups implements Groups {
 		ListMultimap<String, String> mappingToGroupIDBuilder = ArrayListMultimap.create();
 		LocationContext context = new LocationContext(biomeMappings);
 		ImmutableMapGroupsBuilder<BiomeGroup> attributeBuilder = new ImmutableMapGroupsBuilder<BiomeGroup>("D|");
-		for (BiomeGroupBuilder biomeGroup : attributeGroups.iDToGroup().values()) {
-			Group.Parser.parseGroupContents(biomeGroup, context);
-			attributeBuilder.addGroup(biomeGroup.build());
-			for (String pckgName : biomeGroup.results()) {
-				mappingToGroupIDBuilder.get(pckgName).add(biomeGroup.iD());
+		for (BiomeGroupBuilder dictionaryGroup : attributeGroups.iDToGroup().values()) {
+			Group.Parser.parseGroupContents(dictionaryGroup, context);
+			attributeBuilder.addGroup(dictionaryGroup.build());
+			for (String mapping : dictionaryGroup.results()) {
+				mappingToGroupIDBuilder.get(mapping).add(dictionaryGroup.iD());
 			}
 		}
 

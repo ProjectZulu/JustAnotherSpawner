@@ -1,17 +1,23 @@
 package jas.spawner.refactor;
 
 import jas.spawner.refactor.LivingTypeBuilder.LivingType;
+import jas.spawner.refactor.LivingTypeSpawnTriggerBuilder.LivingTypeSpawnTrigger;
+import jas.spawner.refactor.LivingTypeSpawnTriggerBuilder.TRIGGER;
 import jas.spawner.refactor.configsloader.ConfigLoader;
 import jas.spawner.refactor.configsloader.ConfigLoader.LoadedFile;
 import jas.spawner.refactor.configsloader.LivingTypeLoader;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.ImmutableTable;
 
 public class LivingTypes {
 	/* DEFAULT Types */
@@ -24,6 +30,7 @@ public class LivingTypes {
 	public static final String OPENSKY = "OPENSKY";
 
 	public static final ImmutableSet<String> defaultTypes;
+
 	static {
 		Builder<String> builder = ImmutableSet.<String> builder();
 		builder.add(NONE).add(CREATURE).add(MONSTER).add(AMBIENT).add(WATERCREATURE).add(UNDERGROUND).add(OPENSKY);
@@ -31,6 +38,11 @@ public class LivingTypes {
 	}
 
 	private ImmutableMap<String, LivingType> types;
+	private ImmutableTable<TRIGGER, String, ImmutableList<LivingTypeSpawnTrigger>> triggers;
+
+	public Set<Entry<String, ImmutableList<LivingTypeSpawnTrigger>>> getTriggerableTypes(TRIGGER livingTypeTrigger) {
+		return triggers.rowMap().get(livingTypeTrigger).entrySet();
+	}
 
 	public ImmutableMap<String, LivingType> types() {
 		return types;
@@ -71,7 +83,6 @@ public class LivingTypes {
 			LivingTypeBuilder creature = new LivingTypeBuilder(CREATURE, 10, 400, 0.1f, "AIR",
 					"||!solidside(1,{0,0,0},{0,-1,0})&&liquid({0,0,0},{0,0,0})&&normal({0,0,0},{0,0,0})"
 							+ "&&normal({0,0,0},{0,1,0})&&!opaque({0,0,0},{0,-1,0})&&!sky()");
-
 			readTypes.put(monster.livingTypeID, monster);
 			readTypes.put(ambient.livingTypeID, ambient);
 			readTypes.put(opensky.livingTypeID, opensky);
