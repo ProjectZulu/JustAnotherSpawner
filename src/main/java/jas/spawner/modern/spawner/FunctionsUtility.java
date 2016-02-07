@@ -125,7 +125,8 @@ public class FunctionsUtility implements TagsUtility {
 		} else if (material == Material.piston) {
 			return "piston";
 		} else {
-			throw new IllegalArgumentException(String.format("Unknown material type %s", material));
+			return material.getClass().getSimpleName();
+//			throw new IllegalArgumentException(String.format("Unknown material type %s", material));
 		}
 	}
 
