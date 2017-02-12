@@ -91,6 +91,10 @@ public class CustomSpawner {
 						continue;
 					}
 					
+                    if (!creatureType.canSpawnHere(worldServer, countInfo, spawningPoint)) {
+                        continue;
+                    }
+
 					// Set SpawnList Specific attributes, set only for outer loop (when SpawnListEntry == null), is done
 					// in inner loop after creatureType.canSpawnHere for performance reasons
 					// (regsitry.getSpawnListEntryToSpawn is not cheap)
