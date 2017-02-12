@@ -90,7 +90,7 @@ public class CustomSpawner {
 							spawningPoint.chunkPosY, spawningPoint.chunkPosZ)) {
 						continue;
 					}
-
+					
 					// Set SpawnList Specific attributes, set only for outer loop (when SpawnListEntry == null), is done
 					// in inner loop after creatureType.canSpawnHere for performance reasons
 					// (regsitry.getSpawnListEntryToSpawn is not cheap)
@@ -122,6 +122,8 @@ public class CustomSpawner {
 						}
 					}
 
+
+					
 					/* Spawn is Centered Version of blockSpawn such that entity is not placed in Corner */
 					float spawnX = spawningPoint.chunkPosX + 0.5F;
 					float spawnY = spawningPoint.chunkPosY;
@@ -136,21 +138,58 @@ public class CustomSpawner {
 					}
 					entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServer.rand.nextFloat() * 360.0F,
 							0.0F);
-
+					
 					if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
 						}
-						JASLog.log().logSpawn(
-								false,
-								(String) EntityList.classToStringMapping.get(entityliving.getClass()),
-								spawnlistentry.getLivingHandler().creatureTypeID,
-								(int) entityliving.posX,
-								(int) entityliving.posY,
-								(int) entityliving.posZ,
-								BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
-										(int) entityliving.posX, (int) entityliving.posZ)));
+						
+						if(JASLog.log().isLogNearbyBlocksEnabled()) {
+							int[] horRange = {0, 1, -1}; // Order determines log order
+							int[] verRange = {0, 1, -1}; // Order determines log order
+							int totalBlocksCounted = (horRange.length*2+1) * (verRange.length*2+1);
+							ArrayList<Integer> nearbyX = new ArrayList<Integer>(totalBlocksCounted);
+							ArrayList<Integer> nearbyY = new ArrayList<Integer>(totalBlocksCounted);
+							ArrayList<Integer> nearbyZ = new ArrayList<Integer>(totalBlocksCounted);
+							ArrayList<String> nearbyNames = new ArrayList<String>(totalBlocksCounted);
+
+                            for (Integer x : horRange) {
+                                for (Integer z : horRange) {
+                                    for (Integer y : verRange) {
+                                        nearbyNames.add(entityliving.worldObj
+                                                .getBlock((int) spawnX + x, (int) spawnY + y, (int) spawnZ + z)
+                                                .getLocalizedName());
+                                        nearbyX.add(x);
+                                        nearbyY.add(y);
+                                        nearbyZ.add(z);
+                                    }
+                                }
+                            }
+							
+							JASLog.log().logSpawn(
+									false,
+									(String) EntityList.classToStringMapping.get(entityliving.getClass()),
+									spawnlistentry.getLivingHandler().creatureTypeID,
+									(int) entityliving.posX,
+									(int) entityliving.posY,
+									(int) entityliving.posZ,
+									BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+											(int) entityliving.posX, (int) entityliving.posZ)), nearbyX, nearbyY, nearbyZ, nearbyNames);
+
+						} else {
+							JASLog.log().logSpawn(
+									false,
+									(String) EntityList.classToStringMapping.get(entityliving.getClass()),
+									spawnlistentry.getLivingHandler().creatureTypeID,
+									(int) entityliving.posX,
+									(int) entityliving.posY,
+									(int) entityliving.posZ,
+									BiomeHelper.getPackageName(entityliving.worldObj.getBiomeGenForCoords(
+											(int) entityliving.posX, (int) entityliving.posZ)));
+
+						}
+						
 						spawnlistentry.getLivingHandler().postSpawnEntity(entityliving, spawnlistentry, countInfo);
 						countInfo.countSpawn(entityliving, creatureType.typeID);
 						
