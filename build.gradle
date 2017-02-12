@@ -19,7 +19,7 @@ apply plugin: 'java'
 apply plugin: 'forge'
 apply plugin: 'curseforge'
 
-version = "0.17.7"
+version = "0.17.8"
 group = "com.tarion.jas"
 archivesBaseName = "JustAnotherSpawner"
 def rType = "release"
