@@ -1,1 +1,1 @@
-sh --login -i -c "GEN-CHANGELOG.sh"
+sh GEN-CHANGELOG.sh
