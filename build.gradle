@@ -54,8 +54,11 @@ dependencies {
 }
 
 minecraft {
-	version = "1.7.10-10.13.2.1291" //"1.7.10-10.13.0.1180"
-    runDir = "eclipse" //assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
+    version = "1.7.10-10.13.4.1614-1.7.10"
+    runDir = "eclipse"
+
+	//version = "1.7.10-10.13.2.1291" //"1.7.10-10.13.0.1180"
+    //runDir = "eclipse" //assetDir = "eclipse/assets" //Needs to be changed to runDir, eventually
 	
 	// replacing version information
     replace "@MC_VERSION@", project.minecraft.version
