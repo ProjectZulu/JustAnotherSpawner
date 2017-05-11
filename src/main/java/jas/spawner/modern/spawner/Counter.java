@@ -56,7 +56,7 @@ public interface Counter {
 						ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
 						ChunkStat chunkStat = new ChunkStat(flag3);
 						// fire event and check for cancellation before committing chunk eligibility
-						AddEligibleChunkForSpawning event = new AddEligibleChunkForSpawning(chunkcoordintpair, chunkStat);
+						AddEligibleChunkForSpawning event = new AddEligibleChunkForSpawning(world, chunkcoordintpair, chunkStat);
 						MinecraftForge.EVENT_BUS.post(event);
 						if (!event.isCanceled())
 							eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);

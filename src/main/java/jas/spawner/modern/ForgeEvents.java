@@ -5,6 +5,7 @@ import cpw.mods.fml.common.eventhandler.Event;
 import cpw.mods.fml.common.eventhandler.Event.HasResult;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.World;
 
 public class ForgeEvents extends Event {
 	/**
@@ -23,10 +24,12 @@ public class ForgeEvents extends Event {
 	 **/
 	@Cancelable
 	public static class AddEligibleChunkForSpawning extends ForgeEvents {
+		public final World world;
 		public final ChunkCoordIntPair chunkCoordIntPair;
 		public final ChunkStat chunkStat;
 		
-		public AddEligibleChunkForSpawning(ChunkCoordIntPair chunkCoordIntPair, ChunkStat chunkStat) {
+		public AddEligibleChunkForSpawning(World world, ChunkCoordIntPair chunkCoordIntPair, ChunkStat chunkStat) {
+			this.world = world;
 			this.chunkCoordIntPair = chunkCoordIntPair;
 			this.chunkStat = chunkStat;
 		}
