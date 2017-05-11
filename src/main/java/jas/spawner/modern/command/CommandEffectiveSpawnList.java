@@ -3,6 +3,7 @@ package jas.spawner.modern.command;
 import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
+import jas.spawner.modern.ForgeEvents.AddEligibleChunkForSpawning;
 import jas.spawner.modern.spawner.CountInfo;
 import jas.spawner.modern.spawner.EntityCounter;
 import jas.spawner.modern.spawner.Tags;
@@ -31,6 +32,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 import cpw.mods.fml.common.eventhandler.Event.Result;
 
@@ -141,7 +143,11 @@ public class CommandEffectiveSpawnList extends CommandJasBase {
 						|| zOffset == chunkDistance;
 				ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
 				ChunkStat chunkStat = new ChunkStat(flag3);
-				eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);
+				// fire event and check for cancellation before committing chunk eligibility
+				AddEligibleChunkForSpawning event = new AddEligibleChunkForSpawning(chunkcoordintpair, chunkStat);
+				MinecraftForge.EVENT_BUS.post(event);
+				if (!event.isCanceled())
+					eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);
 			}
 		}
 		return eligibleChunksForSpawning;
