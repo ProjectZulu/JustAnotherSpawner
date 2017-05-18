@@ -40,6 +40,8 @@ public class GlobalSettings {
     public boolean enableEventAddEligibleChunkForSpawning;
     @SerializedName("Enable 'StartSpawnCreaturesInChunks' Event")
     public boolean enableEventStartSpawnCreaturesInChunks;
+    SerializedName("Add a 'IS_JAS_SPAWNED' boolean NBT tag on all entites spawned with JAS")
+    public boolean enableIsJasSpawnedEntityDataTag;
     
     
     public GlobalSettings() {
@@ -53,6 +55,7 @@ public class GlobalSettings {
         chunkCountDistance = 8;
         enableEventAddEligibleChunkForSpawning = false;
         enableEventStartSpawnCreaturesInChunks = false;
+        enableIsJasSpawnedEntityDataTag = false;
 //        spawningProfile = profileMVEL;
     }
 }

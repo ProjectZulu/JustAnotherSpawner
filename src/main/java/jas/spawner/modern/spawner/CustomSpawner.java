@@ -157,6 +157,9 @@ public class CustomSpawner {
 							0.0F);
 					
 					if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
+						if (JustAnotherSpawner.globalSettings().enableIsJasSpawnedEntityDataTag) {
+							entityliving.getEntityData().setBoolean("IS_JAS_SPAWNED", true);
+						}
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);
