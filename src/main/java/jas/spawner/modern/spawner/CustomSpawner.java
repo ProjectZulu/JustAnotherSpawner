@@ -1,8 +1,10 @@
 package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
+import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
+import jas.spawner.modern.ForgeEvents.StartSpawnCreaturesInChunks;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.Counter.SpawnCounter;
 import jas.spawner.modern.spawner.biome.group.BiomeHelper;
@@ -26,6 +28,7 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import org.apache.logging.log4j.Level;
@@ -50,6 +53,7 @@ public class CustomSpawner {
 		if (globalEntityTypeCount > entityTypeCap) {
 			return;
 		}
+		
 		ChunkCoordinates serverOriginPoint = worldServer.getSpawnPoint();
 		List<ChunkCoordIntPair> eligibleChunksForSpawning = new ArrayList<ChunkCoordIntPair>(
 				countInfo.eligibleChunkLocations());
@@ -59,6 +63,15 @@ public class CustomSpawner {
 			if (chunkStat.isEdge) {
 				continue;
 			}
+
+			if (JustAnotherSpawner.globalSettings().enableEventStartSpawnCreaturesInChunks) {
+				// fire an early event for external mods to skip creatureType spawning in this chunk if desired
+				StartSpawnCreaturesInChunks event = new StartSpawnCreaturesInChunks(worldServer, creatureType, chunkCoord);
+				MinecraftForge.EVENT_BUS.post(event);
+				if (event.isCanceled())
+					continue;
+			}
+
 			countInfo.resetEntitiesSpawnedThisLoop();
 			for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
@@ -144,6 +157,9 @@ public class CustomSpawner {
 							0.0F);
 					
 					if (spawnlistentry.getLivingHandler().getCanSpawnHere(entityliving, spawnlistentry, countInfo)) {
+						if (JustAnotherSpawner.globalSettings().enableIsJasSpawnedEntityDataTag) {
+							entityliving.getEntityData().setBoolean("IS_JAS_SPAWNED", true);
+						}
 						worldServer.spawnEntityInWorld(entityliving);
 						if (!ForgeEventFactory.doSpecialSpawn(entityliving, worldServer, spawnX, spawnY, spawnZ)) {
 							entitylivingdata = entityliving.onSpawnWithEgg(entitylivingdata);

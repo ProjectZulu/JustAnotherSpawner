@@ -33,6 +33,17 @@ public class GlobalSettings {
     public int chunkCountDistance = 8;
     @SerializedName("Generate Zero-Weight Spawn Entries")
     public boolean shouldGenerateZeroSpawnEntries;
+    
+    @SerializedName("___IMC SETTINGS___")
+    public final String IMC_COMMENT = "These options are for enabling inter-mod communications. You only need to enable these if another mod instructs you to do so.";
+    @SerializedName("Enable 'AddEligibleChunkForSpawning' Event")
+    public boolean enableEventAddEligibleChunkForSpawning;
+    @SerializedName("Enable 'StartSpawnCreaturesInChunks' Event")
+    public boolean enableEventStartSpawnCreaturesInChunks;
+    @SerializedName("Add a 'IS_JAS_SPAWNED' boolean NBT tag on all entites spawned with JAS")
+    public boolean enableIsJasSpawnedEntityDataTag;
+    
+    
     public GlobalSettings() {
         spawnerTickSpacing = 0;
         globalSortCreatureByBiome = true;
@@ -42,6 +53,9 @@ public class GlobalSettings {
         disabledVanillaChunkSpawning = true;
         chunkSpawnDistance = 8;
         chunkCountDistance = 8;
+        enableEventAddEligibleChunkForSpawning = false;
+        enableEventStartSpawnCreaturesInChunks = false;
+        enableIsJasSpawnedEntityDataTag = false;
 //        spawningProfile = profileMVEL;
     }
 }

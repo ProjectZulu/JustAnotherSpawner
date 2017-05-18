@@ -2,6 +2,7 @@ package jas.spawner.modern.spawner;
 
 import jas.common.JustAnotherSpawner;
 import jas.spawner.modern.MVELProfile;
+import jas.spawner.modern.ForgeEvents.AddEligibleChunkForSpawning;
 import jas.spawner.modern.spawner.CountInfo.ChunkStat;
 import jas.spawner.modern.spawner.creature.handler.LivingHandler;
 
@@ -18,6 +19,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public interface Counter {
 
@@ -52,7 +54,17 @@ public interface Counter {
 						boolean flag3 = xOffset == -chunkDistance || xOffset == chunkDistance
 								|| zOffset == -chunkDistance || zOffset == chunkDistance;
 						ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(xOffset + posX, zOffset + posZ);
-						eligibleChunksForSpawning.put(chunkcoordintpair, new ChunkStat(flag3));
+						ChunkStat chunkStat = new ChunkStat(flag3);
+
+						if (JustAnotherSpawner.globalSettings().enableEventAddEligibleChunkForSpawning) {
+							// fire event and check for cancellation before committing chunk eligibility
+							AddEligibleChunkForSpawning event = new AddEligibleChunkForSpawning(world, chunkcoordintpair, chunkStat);
+							MinecraftForge.EVENT_BUS.post(event);
+							if (event.isCanceled())
+								continue;
+						}
+
+						eligibleChunksForSpawning.put(chunkcoordintpair, chunkStat);
 					}
 				}
 			}
