@@ -1,6 +1,7 @@
 package jas.spawner.modern.spawner;
 
 import jas.common.JASLog;
+import jas.common.JustAnotherSpawner;
 import jas.common.global.BiomeBlacklist;
 import jas.spawner.modern.MVELProfile;
 import jas.spawner.modern.ForgeEvents.StartSpawnCreaturesInChunks;
@@ -62,13 +63,15 @@ public class CustomSpawner {
 			if (chunkStat.isEdge) {
 				continue;
 			}
-			
-			// fire an early event for external mods to skip creatureType spawning in this chunk if desired
-			StartSpawnCreaturesInChunks event = new StartSpawnCreaturesInChunks(worldServer, creatureType, chunkCoord);
-			MinecraftForge.EVENT_BUS.post(event);
-			if (event.isCanceled())
-				continue;
-			
+
+			if (JustAnotherSpawner.globalSettings().enableEventStartSpawnCreaturesInChunks) {
+				// fire an early event for external mods to skip creatureType spawning in this chunk if desired
+				StartSpawnCreaturesInChunks event = new StartSpawnCreaturesInChunks(worldServer, creatureType, chunkCoord);
+				MinecraftForge.EVENT_BUS.post(event);
+				if (event.isCanceled())
+					continue;
+			}
+
 			countInfo.resetEntitiesSpawnedThisLoop();
 			for (int numLocAttempts = 0; numLocAttempts < creatureType.iterationsPerChunk; ++numLocAttempts) {
 				IEntityLivingData entitylivingdata = null;
