@@ -40,7 +40,7 @@ public class GlobalSettings {
     public boolean enableEventAddEligibleChunkForSpawning;
     @SerializedName("Enable 'StartSpawnCreaturesInChunks' Event")
     public boolean enableEventStartSpawnCreaturesInChunks;
-    SerializedName("Add a 'IS_JAS_SPAWNED' boolean NBT tag on all entites spawned with JAS")
+    @SerializedName("Add a 'IS_JAS_SPAWNED' boolean NBT tag on all entites spawned with JAS")
     public boolean enableIsJasSpawnedEntityDataTag;
     
     
